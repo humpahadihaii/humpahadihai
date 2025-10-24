@@ -1,0 +1,179 @@
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Mountain, UtensilsCrossed, Camera, Palmtree, Instagram } from "lucide-react";
+import heroImage from "@/assets/hero-mountains.jpg";
+import cultureImage from "@/assets/folk-dance.jpg";
+import foodImage from "@/assets/pahadi-food.jpg";
+import aipanPattern from "@/assets/aipan-pattern.jpg";
+
+const HomePage = () => {
+  const features = [
+    {
+      icon: Mountain,
+      title: "Culture & Traditions",
+      description: "Explore the vibrant festivals, folk music, and traditional crafts of Garhwal and Kumaon regions.",
+      link: "/culture",
+      color: "text-primary"
+    },
+    {
+      icon: UtensilsCrossed,
+      title: "Food Trails",
+      description: "Discover authentic Pahadi cuisine, from Kafuli to Bal Mithai, and traditional cooking methods.",
+      link: "/food",
+      color: "text-secondary"
+    },
+    {
+      icon: Palmtree,
+      title: "Travel & Nature",
+      description: "Journey through Char Dham, hidden valleys, breathtaking treks, and pristine mountain landscapes.",
+      link: "/travel",
+      color: "text-accent"
+    },
+    {
+      icon: Camera,
+      title: "Photo Gallery",
+      description: "Experience Uttarakhand through stunning photography of festivals, people, nature, and heritage.",
+      link: "/gallery",
+      color: "text-secondary"
+    },
+  ];
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative h-[70vh] md:h-[85vh] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/50 to-background/95"></div>
+        </div>
+        
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+            Hum Pahadi Haii
+          </h1>
+          <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto drop-shadow">
+            Celebrating Uttarakhand's Culture, Tradition & Heritage
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" asChild className="bg-secondary hover:bg-secondary/90 text-white shadow-lg">
+              <Link to="/culture">Explore Culture</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild className="bg-white/90 hover:bg-white border-white text-primary shadow-lg">
+              <Link to="/gallery">View Gallery</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Introduction */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+            Welcome to Our Pahadi World
+          </h2>
+          <p className="text-lg text-foreground/80 leading-relaxed">
+            Hum Pahadi Haii is your digital gateway to the heart of Uttarakhand. We preserve and share the timeless 
+            traditions, rich culture, authentic cuisine, and stunning natural beauty of the Garhwal and Kumaon regions. 
+            Join us in celebrating the warmth and heritage of the Himalayas.
+          </p>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
+                <CardContent className="p-8">
+                  <feature.icon className={`h-12 w-12 ${feature.color} mb-4`} />
+                  <h3 className="text-2xl font-bold text-primary mb-3">{feature.title}</h3>
+                  <p className="text-foreground/70 mb-6 leading-relaxed">{feature.description}</p>
+                  <Button asChild variant="outline" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <Link to={feature.link}>Learn More</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Content */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12">
+            Featured Highlights
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Culture Card */}
+            <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
+              <img src={cultureImage} alt="Pahadi Folk Dance" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent">
+                <div className="absolute bottom-0 p-6 text-white">
+                  <h3 className="text-2xl font-bold mb-2">Vibrant Traditions</h3>
+                  <p className="mb-4 opacity-90">Experience the colorful folk dances and festivals of Uttarakhand</p>
+                  <Button asChild variant="outline" className="bg-white/90 text-primary hover:bg-white">
+                    <Link to="/culture">Discover More</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Food Card */}
+            <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
+              <img src={foodImage} alt="Traditional Pahadi Thali" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/60 to-transparent">
+                <div className="absolute bottom-0 p-6 text-white">
+                  <h3 className="text-2xl font-bold mb-2">Authentic Flavors</h3>
+                  <p className="mb-4 opacity-90">Taste the traditional cuisine passed down through generations</p>
+                  <Button asChild variant="outline" className="bg-white/90 text-secondary hover:bg-white">
+                    <Link to="/food">Explore Dishes</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Instagram CTA */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto max-w-3xl text-center">
+          <div 
+            className="rounded-2xl p-12 shadow-xl relative overflow-hidden"
+            style={{ 
+              backgroundImage: `url(${aipanPattern})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div className="absolute inset-0 bg-white/85"></div>
+            <div className="relative z-10">
+              <Instagram className="h-16 w-16 text-secondary mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-primary mb-4">Follow Our Journey</h2>
+              <p className="text-lg text-foreground/80 mb-6">
+                Join our Instagram community for daily stories, authentic recipes, and stunning Pahadi landscapes
+              </p>
+              <Button 
+                size="lg" 
+                asChild 
+                className="bg-secondary hover:bg-secondary/90 text-white shadow-lg"
+              >
+                <a href="https://instagram.com/hum_pahadi_haii" target="_blank" rel="noopener noreferrer">
+                  @hum_pahadi_haii
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default HomePage;
