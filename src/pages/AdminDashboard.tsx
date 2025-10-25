@@ -78,11 +78,25 @@ const AdminDashboard = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>User Submissions</CardTitle>
-              <CardDescription>Review and moderate user content</CardDescription>
+              <CardTitle>Thoughts Moderation</CardTitle>
+              <CardDescription>Approve, reject, or feature community thoughts</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">View Submissions</Button>
+              <Button className="w-full" onClick={() => navigate("/admin/thoughts")}>
+                Manage Thoughts
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Submissions</CardTitle>
+              <CardDescription>Review and respond to contact form messages</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate("/admin/submissions")}>
+                View Submissions
+              </Button>
             </CardContent>
           </Card>
 

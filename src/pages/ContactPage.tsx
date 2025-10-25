@@ -26,6 +26,13 @@ const contactSchema = z.object({
     .trim()
     .min(1, "Message is required")
     .max(2000, "Message must be less than 2000 characters"),
+  reason: z.string()
+    .trim()
+    .min(1, "Please select a reason"),
+  location: z.string()
+    .trim()
+    .max(100, "Location must be less than 100 characters")
+    .optional(),
 });
 
 const ContactPage = () => {
@@ -33,7 +40,9 @@ const ContactPage = () => {
     name: "",
     email: "",
     subject: "",
-    message: ""
+    message: "",
+    reason: "",
+    location: ""
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,9 +56,10 @@ const ContactPage = () => {
         .insert({
           name: validatedData.name,
           email: validatedData.email,
-          message: validatedData.subject 
-            ? `${validatedData.subject}\n\n${validatedData.message}` 
-            : validatedData.message,
+          subject: validatedData.subject,
+          message: validatedData.message,
+          reason: validatedData.reason,
+          location: validatedData.location,
         });
 
       if (error) throw error;
@@ -61,6 +71,8 @@ const ContactPage = () => {
         email: "",
         subject: "",
         message: "",
+        reason: "",
+        location: "",
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -75,11 +87,22 @@ const ContactPage = () => {
     <div className="min-h-screen">
       {/* Hero */}
       <section className="py-20 px-4 bg-gradient-to-b from-primary/5 to-background">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6">Get in Touch</h1>
-          <p className="text-xl text-foreground/80">
-            We'd love to hear from you. Share your stories, suggestions, or collaborations.
-          </p>
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div>
+              <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6">Get in Touch</h1>
+              <p className="text-xl text-foreground/80">
+                We'd love to hear from you. Share your stories, suggestions, or collaborations.
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <img 
+                src="/placeholder.svg" 
+                alt="Uttarakhand Map" 
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -121,6 +144,23 @@ const ContactPage = () => {
                     </div>
 
                     <div>
+                      <Label htmlFor="reason">Reason for Contact *</Label>
+                      <select
+                        id="reason"
+                        value={formData.reason}
+                        onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring mt-2"
+                        required
+                      >
+                        <option value="">Select a reason</option>
+                        <option value="collaboration">Collaboration</option>
+                        <option value="media">Media Inquiry</option>
+                        <option value="cultural">Cultural Contribution</option>
+                        <option value="general">General Inquiry</option>
+                      </select>
+                    </div>
+
+                    <div>
                       <Label htmlFor="subject">Subject</Label>
                       <Input
                         id="subject"
@@ -128,6 +168,18 @@ const ContactPage = () => {
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                         placeholder="What's this about?"
+                        className="mt-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="location">Location (Optional)</Label>
+                      <Input
+                        id="location"
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        placeholder="Where are you from?"
                         className="mt-2"
                       />
                     </div>
@@ -145,8 +197,14 @@ const ContactPage = () => {
                       />
                     </div>
 
+                    <div className="bg-muted p-4 rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Note:</strong> We typically respond within 48 hours. For urgent matters, please reach out on Instagram.
+                      </p>
+                    </div>
+
                     <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90">
-                      Send Message
+                      Send Message - सुक्रिया!
                     </Button>
                   </form>
                 </CardContent>

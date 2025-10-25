@@ -188,6 +188,137 @@ export type Database = {
         }
         Relationships: []
       }
+      thought_likes: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          thought_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          thought_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          thought_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thought_likes_thought_id_fkey"
+            columns: ["thought_id"]
+            isOneToOne: false
+            referencedRelation: "thoughts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thought_tag_relations: {
+        Row: {
+          tag_id: string
+          thought_id: string
+        }
+        Insert: {
+          tag_id: string
+          thought_id: string
+        }
+        Update: {
+          tag_id?: string
+          thought_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thought_tag_relations_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "thought_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thought_tag_relations_thought_id_fkey"
+            columns: ["thought_id"]
+            isOneToOne: false
+            referencedRelation: "thoughts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thought_tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      thoughts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          likes_count: number
+          location: string
+          name: string
+          photo_url: string | null
+          sentiment: string | null
+          status: string
+          thought: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          likes_count?: number
+          location: string
+          name: string
+          photo_url?: string | null
+          sentiment?: string | null
+          status?: string
+          thought: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          likes_count?: number
+          location?: string
+          name?: string
+          photo_url?: string | null
+          sentiment?: string | null
+          status?: string
+          thought?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -211,28 +342,46 @@ export type Database = {
       }
       user_submissions: {
         Row: {
+          archived_at: string | null
           created_at: string
           email: string
+          file_url: string | null
           id: string
+          location: string | null
           message: string
           name: string
+          reason: string | null
+          replied_at: string | null
           status: string
+          subject: string | null
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           email: string
+          file_url?: string | null
           id?: string
+          location?: string | null
           message: string
           name: string
+          reason?: string | null
+          replied_at?: string | null
           status?: string
+          subject?: string | null
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           email?: string
+          file_url?: string | null
           id?: string
+          location?: string | null
           message?: string
           name?: string
+          reason?: string | null
+          replied_at?: string | null
           status?: string
+          subject?: string | null
         }
         Relationships: []
       }
