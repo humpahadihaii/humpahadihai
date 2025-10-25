@@ -4,11 +4,31 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Mail, Instagram, Facebook, Youtube } from "lucide-react";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+
+const contactSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(1, "Name is required")
+    .max(100, "Name must be less than 100 characters"),
+  email: z.string()
+    .trim()
+    .email("Invalid email address")
+    .max(255, "Email must be less than 255 characters"),
+  subject: z.string()
+    .trim()
+    .max(200, "Subject must be less than 200 characters")
+    .optional(),
+  message: z.string()
+    .trim()
+    .min(1, "Message is required")
+    .max(2000, "Message must be less than 2000 characters"),
+});
 
 const ContactPage = () => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,32 +36,39 @@ const ContactPage = () => {
     message: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
+    try {
+      const validatedData = contactSchema.parse(formData);
+      
+      const { error } = await supabase
+        .from('user_submissions')
+        .insert({
+          name: validatedData.name,
+          email: validatedData.email,
+          message: validatedData.subject 
+            ? `${validatedData.subject}\n\n${validatedData.message}` 
+            : validatedData.message,
+        });
+
+      if (error) throw error;
+      
+      toast.success("Message sent successfully! We'll get back to you soon.");
+      
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
       });
-      return;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
     }
-
-    // In production, this would send to a backend API
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for reaching out. We'll get back to you soon.",
-    });
-
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: ""
-    });
   };
 
   return (

@@ -12,6 +12,9 @@ import TravelPage from "./pages/TravelPage";
 import GalleryPage from "./pages/GalleryPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import AuthPage from "./pages/AuthPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +36,8 @@ const App = () => (
               <Route path="/gallery" element={<GalleryPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
