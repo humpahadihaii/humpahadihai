@@ -44,6 +44,7 @@ const Navigation = () => {
     { name: "Gallery", path: "/gallery" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
+    ...(isAdmin ? [{ name: "Admin", path: "/admin" }] : []),
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -76,18 +77,6 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  isActive("/admin")
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground hover:bg-muted"
-                }`}
-              >
-                Admin
-              </Link>
-            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -119,19 +108,6 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                    isActive("/admin")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Admin
-                </Link>
-              )}
             </div>
           </div>
         )}
