@@ -59,6 +59,83 @@ export type Database = {
         }
         Relationships: []
       }
+      district_highlights: {
+        Row: {
+          created_at: string
+          description: string | null
+          district_id: string
+          id: string
+          image_url: string | null
+          name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          district_id: string
+          id?: string
+          image_url?: string | null
+          name: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          district_id?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "district_highlights_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      districts: {
+        Row: {
+          created_at: string
+          geography: string | null
+          highlights: string | null
+          id: string
+          image_url: string | null
+          name: string
+          overview: string
+          population: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          geography?: string | null
+          highlights?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          overview: string
+          population?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          geography?: string | null
+          highlights?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          overview?: string
+          population?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       festivals: {
         Row: {
           created_at: string
@@ -384,6 +461,77 @@ export type Database = {
           subject?: string | null
         }
         Relationships: []
+      }
+      villages: {
+        Row: {
+          artisans: string | null
+          created_at: string
+          district_id: string
+          festivals: string | null
+          foods: string | null
+          gallery_images: string[] | null
+          handicrafts: string | null
+          history: string | null
+          id: string
+          introduction: string
+          name: string
+          recipes: string | null
+          slug: string
+          stories: string | null
+          thumbnail_url: string | null
+          traditions: string | null
+          travel_tips: string | null
+          updated_at: string
+        }
+        Insert: {
+          artisans?: string | null
+          created_at?: string
+          district_id: string
+          festivals?: string | null
+          foods?: string | null
+          gallery_images?: string[] | null
+          handicrafts?: string | null
+          history?: string | null
+          id?: string
+          introduction: string
+          name: string
+          recipes?: string | null
+          slug: string
+          stories?: string | null
+          thumbnail_url?: string | null
+          traditions?: string | null
+          travel_tips?: string | null
+          updated_at?: string
+        }
+        Update: {
+          artisans?: string | null
+          created_at?: string
+          district_id?: string
+          festivals?: string | null
+          foods?: string | null
+          gallery_images?: string[] | null
+          handicrafts?: string | null
+          history?: string | null
+          id?: string
+          introduction?: string
+          name?: string
+          recipes?: string | null
+          slug?: string
+          stories?: string | null
+          thumbnail_url?: string | null
+          traditions?: string | null
+          travel_tips?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "villages_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

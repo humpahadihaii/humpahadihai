@@ -9,6 +9,9 @@ import HomePage from "./pages/HomePage";
 import CulturePage from "./pages/CulturePage";
 import FoodPage from "./pages/FoodPage";
 import TravelPage from "./pages/TravelPage";
+import DistrictsPage from "./pages/DistrictsPage";
+import DistrictDetailPage from "./pages/DistrictDetailPage";
+import VillageDetailPage from "./pages/VillageDetailPage";
 import GalleryPage from "./pages/GalleryPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -37,6 +40,9 @@ const App = () => (
               <Route path="/culture" element={<CulturePage />} />
               <Route path="/food" element={<FoodPage />} />
               <Route path="/travel" element={<TravelPage />} />
+              <Route path="/districts" element={<DistrictsPage />} />
+              <Route path="/districts/:slug" element={<DistrictDetailPage />} />
+              <Route path="/villages/:slug" element={<VillageDetailPage />} />
               <Route path="/gallery" element={<GalleryPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
