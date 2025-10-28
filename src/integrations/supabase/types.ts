@@ -97,13 +97,65 @@ export type Database = {
           },
         ]
       }
+      district_hotels: {
+        Row: {
+          category: string
+          contact_info: string | null
+          created_at: string
+          description: string | null
+          district_id: string
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          contact_info?: string | null
+          created_at?: string
+          description?: string | null
+          district_id: string
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          contact_info?: string | null
+          created_at?: string
+          description?: string | null
+          district_id?: string
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "district_hotels_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       districts: {
         Row: {
+          best_time_to_visit: string | null
+          connectivity: string | null
           created_at: string
+          cultural_identity: string | null
+          famous_specialties: string | null
           geography: string | null
           highlights: string | null
           id: string
           image_url: string | null
+          local_languages: string | null
           name: string
           overview: string
           population: string | null
@@ -111,11 +163,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          best_time_to_visit?: string | null
+          connectivity?: string | null
           created_at?: string
+          cultural_identity?: string | null
+          famous_specialties?: string | null
           geography?: string | null
           highlights?: string | null
           id?: string
           image_url?: string | null
+          local_languages?: string | null
           name: string
           overview: string
           population?: string | null
@@ -123,11 +180,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          best_time_to_visit?: string | null
+          connectivity?: string | null
           created_at?: string
+          cultural_identity?: string | null
+          famous_specialties?: string | null
           geography?: string | null
           highlights?: string | null
           id?: string
           image_url?: string | null
+          local_languages?: string | null
           name?: string
           overview?: string
           population?: string | null
