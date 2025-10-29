@@ -22,6 +22,10 @@ import ThoughtsPage from "./pages/ThoughtsPage";
 import SubmitThoughtPage from "./pages/SubmitThoughtPage";
 import AdminThoughtsPage from "./pages/AdminThoughtsPage";
 import AdminSubmissionsPage from "./pages/AdminSubmissionsPage";
+import AdminDistrictsPage from "./pages/admin/AdminDistrictsPage";
+import AdminVillagesPage from "./pages/admin/AdminVillagesPage";
+import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
+import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,8 +54,12 @@ const App = () => (
               <Route path="/submit-thought" element={<SubmitThoughtPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
+              <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
+              <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
               <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
               <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
+              <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

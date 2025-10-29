@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string
@@ -59,6 +86,39 @@ export type Database = {
         }
         Relationships: []
       }
+      content_versions: {
+        Row: {
+          change_description: string | null
+          content_data: Json
+          content_id: string
+          content_type: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          version_number: number
+        }
+        Insert: {
+          change_description?: string | null
+          content_data: Json
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          version_number: number
+        }
+        Update: {
+          change_description?: string | null
+          content_data?: Json
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
       district_highlights: {
         Row: {
           created_at: string
@@ -67,6 +127,8 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          status: string | null
+          tags: string[] | null
           type: string
         }
         Insert: {
@@ -76,6 +138,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          status?: string | null
+          tags?: string[] | null
           type: string
         }
         Update: {
@@ -85,6 +149,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          status?: string | null
+          tags?: string[] | null
           type?: string
         }
         Relationships: [
@@ -106,9 +172,15 @@ export type Database = {
           district_id: string
           id: string
           image_url: string | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string
+          price_range: string | null
+          rating: number | null
+          status: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           category: string
@@ -118,9 +190,15 @@ export type Database = {
           district_id: string
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name: string
+          price_range?: string | null
+          rating?: number | null
+          status?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           category?: string
@@ -130,9 +208,15 @@ export type Database = {
           district_id?: string
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string
+          price_range?: string | null
+          rating?: number | null
+          status?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -146,6 +230,7 @@ export type Database = {
       }
       districts: {
         Row: {
+          banner_image: string | null
           best_time_to_visit: string | null
           connectivity: string | null
           created_at: string
@@ -155,14 +240,18 @@ export type Database = {
           highlights: string | null
           id: string
           image_url: string | null
+          latitude: number | null
           local_languages: string | null
+          longitude: number | null
           name: string
           overview: string
           population: string | null
           slug: string
+          status: string | null
           updated_at: string
         }
         Insert: {
+          banner_image?: string | null
           best_time_to_visit?: string | null
           connectivity?: string | null
           created_at?: string
@@ -172,14 +261,18 @@ export type Database = {
           highlights?: string | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
           local_languages?: string | null
+          longitude?: number | null
           name: string
           overview: string
           population?: string | null
           slug: string
+          status?: string | null
           updated_at?: string
         }
         Update: {
+          banner_image?: string | null
           best_time_to_visit?: string | null
           connectivity?: string | null
           created_at?: string
@@ -189,11 +282,14 @@ export type Database = {
           highlights?: string | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
           local_languages?: string | null
+          longitude?: number | null
           name?: string
           overview?: string
           population?: string | null
           slug?: string
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -258,6 +354,45 @@ export type Database = {
           image_url?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      media_library: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          file_size: number | null
+          file_type: string
+          file_url: string
+          filename: string
+          id: string
+          tags: string[] | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          file_type: string
+          file_url: string
+          filename: string
+          id?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          filename?: string
+          id?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          uploaded_by?: string | null
         }
         Relationships: []
       }
@@ -536,9 +671,13 @@ export type Database = {
           history: string | null
           id: string
           introduction: string
+          latitude: number | null
+          longitude: number | null
           name: string
+          population: number | null
           recipes: string | null
           slug: string
+          status: string | null
           stories: string | null
           thumbnail_url: string | null
           traditions: string | null
@@ -556,9 +695,13 @@ export type Database = {
           history?: string | null
           id?: string
           introduction: string
+          latitude?: number | null
+          longitude?: number | null
           name: string
+          population?: number | null
           recipes?: string | null
           slug: string
+          status?: string | null
           stories?: string | null
           thumbnail_url?: string | null
           traditions?: string | null
@@ -576,9 +719,13 @@ export type Database = {
           history?: string | null
           id?: string
           introduction?: string
+          latitude?: number | null
+          longitude?: number | null
           name?: string
+          population?: number | null
           recipes?: string | null
           slug?: string
+          status?: string | null
           stories?: string | null
           thumbnail_url?: string | null
           traditions?: string | null

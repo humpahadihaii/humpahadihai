@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -22,54 +22,55 @@ const AdminDashboard = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
-      toast.success("Signed out successfully");
-      navigate("/");
-    }
-  };
-
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground mt-2">Welcome, {user?.email}</p>
-          </div>
-          <Button onClick={handleSignOut} variant="outline">
-            Sign Out
-          </Button>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome Back!</h1>
+          <p className="text-muted-foreground mt-1">{user?.email}</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle>Blog Posts</CardTitle>
-              <CardDescription>Manage cultural stories and blog content</CardDescription>
+              <CardTitle>Districts</CardTitle>
+              <CardDescription>Manage all 13 districts of Uttarakhand</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Manage Posts</Button>
+              <Button className="w-full" onClick={() => navigate("/admin/districts")}>
+                Manage Districts
+              </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Festivals</CardTitle>
-              <CardDescription>Update festival calendar entries</CardDescription>
+              <CardTitle>Villages</CardTitle>
+              <CardDescription>Manage villages across districts</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Manage Festivals</Button>
+              <Button className="w-full" onClick={() => navigate("/admin/villages")}>
+                Manage Villages
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Hotels & Stays</CardTitle>
+              <CardDescription>Manage accommodation listings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate("/admin/hotels")}>
+                Manage Hotels
+              </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Gallery</CardTitle>
-              <CardDescription>Upload and organize images and videos</CardDescription>
+              <CardDescription>Upload and organize images</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full">Manage Gallery</Button>
@@ -79,7 +80,7 @@ const AdminDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle>Thoughts Moderation</CardTitle>
-              <CardDescription>Approve, reject, or feature community thoughts</CardDescription>
+              <CardDescription>Approve community thoughts</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full" onClick={() => navigate("/admin/thoughts")}>
@@ -91,7 +92,7 @@ const AdminDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle>Contact Submissions</CardTitle>
-              <CardDescription>Review and respond to contact form messages</CardDescription>
+              <CardDescription>Review contact messages</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full" onClick={() => navigate("/admin/submissions")}>
@@ -102,26 +103,18 @@ const AdminDashboard = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Newsletter</CardTitle>
-              <CardDescription>Manage subscribers and campaigns</CardDescription>
+              <CardTitle>Analytics</CardTitle>
+              <CardDescription>View performance metrics</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Manage Newsletter</Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Site Settings</CardTitle>
-              <CardDescription>Configure site-wide settings and SEO</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full">Edit Settings</Button>
+              <Button className="w-full" onClick={() => navigate("/admin/analytics")}>
+                View Analytics
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
