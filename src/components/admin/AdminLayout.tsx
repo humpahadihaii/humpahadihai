@@ -32,13 +32,13 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Districts", href: "/admin/districts", icon: Map },
   { name: "Villages", href: "/admin/villages", icon: Home },
-  { name: "Cultural Data", href: "/admin/cultural-data", icon: Calendar },
-  { name: "Hotels & Stays", href: "/admin/hotels", icon: Hotel },
+  { name: "Highlights", href: "/admin/highlights", icon: Calendar },
+  { name: "Hotels", href: "/admin/hotels", icon: Hotel },
+  { name: "Festivals", href: "/admin/festivals", icon: Calendar },
   { name: "Gallery", href: "/admin/gallery", icon: Image },
   { name: "Thoughts", href: "/admin/thoughts", icon: MessageSquare },
   { name: "Submissions", href: "/admin/submissions", icon: Mail },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {

@@ -22,10 +22,13 @@ import ThoughtsPage from "./pages/ThoughtsPage";
 import SubmitThoughtPage from "./pages/SubmitThoughtPage";
 import AdminThoughtsPage from "./pages/AdminThoughtsPage";
 import AdminSubmissionsPage from "./pages/AdminSubmissionsPage";
-import AdminDistrictsPage from "./pages/admin/AdminDistrictsPage";
-import AdminVillagesPage from "./pages/admin/AdminVillagesPage";
-import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
+import AdminDistrictsPage from "./pages/admin/AdminDistrictsPage";
+import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
+import AdminVillagesPage from "./pages/admin/AdminVillagesPage";
+import AdminFestivalsPage from "./pages/admin/AdminFestivalsPage";
+import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
+import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +60,9 @@ const App = () => (
               <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
               <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
               <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
+              <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
+              <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
+              <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
               <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
               <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
               <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
