@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
+import { AdminToolbar } from "./components/AdminToolbar";
 import HomePage from "./pages/HomePage";
 import CulturePage from "./pages/CulturePage";
 import FoodPage from "./pages/FoodPage";
@@ -39,6 +40,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AdminToolbar />
         <div className="flex flex-col min-h-screen">
           <Navigation />
           <main className="flex-grow">
