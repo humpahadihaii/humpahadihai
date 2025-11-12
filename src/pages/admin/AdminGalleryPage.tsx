@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const gallerySchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -189,10 +190,12 @@ export default function AdminGalleryPage() {
                     name="image_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Image URL *</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <ImageUpload
+                          label="Gallery Image *"
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          id="gallery-image"
+                        />
                         <FormMessage />
                       </FormItem>
                     )}

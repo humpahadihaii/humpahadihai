@@ -46,7 +46,7 @@ const AuthPage = () => {
     try {
       const validatedData = authSchema.parse(loginData);
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: validatedData.email,
         password: validatedData.password,
       });
@@ -58,6 +58,34 @@ const AuthPage = () => {
           toast.error(error.message);
         }
         return;
+      }
+
+      // Check if user has admin or moderator role
+      if (data.user) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id);
+
+        if (!roles || roles.length === 0) {
+          // Check if there's a pending request
+          const { data: request } = await supabase
+            .from("admin_requests")
+            .select("status")
+            .eq("user_id", data.user.id)
+            .single();
+
+          await supabase.auth.signOut();
+          
+          if (request?.status === "pending") {
+            toast.error("Your admin request is pending approval. Please wait for the main admin to approve your request.");
+          } else if (request?.status === "rejected") {
+            toast.error("Your admin request has been rejected.");
+          } else {
+            toast.error("You don't have permission to access the admin panel.");
+          }
+          return;
+        }
       }
 
       toast.success("Welcome back!");
@@ -141,8 +169,11 @@ const AuthPage = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Hum Pahadi Haii</CardTitle>
           <CardDescription className="text-center">
-            Sign in to access the admin panel
+            Admin and Moderator Access Only
           </CardDescription>
+          <p className="text-sm text-muted-foreground text-center mt-2">
+            Note: New signups require approval from the main administrator (joshihj2580@gmail.com) before gaining access.
+          </p>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">

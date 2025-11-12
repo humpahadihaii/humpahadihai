@@ -16,7 +16,8 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
-  BarChart3
+  BarChart3,
+  UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,7 @@ const navigation = [
   { name: "Gallery", href: "/admin/gallery", icon: Image },
   { name: "Thoughts", href: "/admin/thoughts", icon: MessageSquare },
   { name: "Submissions", href: "/admin/submissions", icon: Mail },
+  { name: "Approvals", href: "/admin/approvals", icon: UserCheck },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ];
 
