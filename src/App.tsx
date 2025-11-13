@@ -29,6 +29,7 @@ import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
 import AdminVillagesPage from "./pages/admin/AdminVillagesPage";
 import AdminFestivalsPage from "./pages/admin/AdminFestivalsPage";
 import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
+import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
 import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
 import NotFound from "./pages/NotFound";
@@ -64,7 +65,8 @@ const App = () => (
               <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
               <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
               <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
-              <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
+          <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
+          <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
               <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
               <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
               <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />

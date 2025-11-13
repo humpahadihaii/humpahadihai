@@ -2,12 +2,20 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mountain, UtensilsCrossed, Camera, Palmtree, Instagram } from "lucide-react";
-import heroImage from "@/assets/hero-mountains.jpg";
-import cultureImage from "@/assets/folk-dance.jpg";
-import foodImage from "@/assets/pahadi-food.jpg";
-import aipanPattern from "@/assets/aipan-pattern.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import heroImageFallback from "@/assets/hero-mountains.jpg";
+import cultureImageFallback from "@/assets/folk-dance.jpg";
+import foodImageFallback from "@/assets/pahadi-food.jpg";
+import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
 
 const HomePage = () => {
+  const { getImage, loading } = useSiteImages();
+  
+  const heroImage = getImage('hero-mountains', heroImageFallback);
+  const cultureImage = getImage('folk-dance', cultureImageFallback);
+  const foodImage = getImage('pahadi-food', foodImageFallback);
+  const aipanPattern = getImage('aipan-pattern', aipanPatternFallback);
+
   const features = [
     {
       icon: Mountain,

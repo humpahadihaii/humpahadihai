@@ -37,6 +37,7 @@ const navigation = [
   { name: "Hotels", href: "/admin/hotels", icon: Hotel },
   { name: "Festivals", href: "/admin/festivals", icon: Calendar },
   { name: "Gallery", href: "/admin/gallery", icon: Image },
+  { name: "Site Images", href: "/admin/site-images", icon: Image },
   { name: "Thoughts", href: "/admin/thoughts", icon: MessageSquare },
   { name: "Submissions", href: "/admin/submissions", icon: Mail },
   { name: "Approvals", href: "/admin/approvals", icon: UserCheck },
