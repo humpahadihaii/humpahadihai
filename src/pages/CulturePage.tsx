@@ -1,9 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import folkDanceImage from "@/assets/folk-dance.jpg";
-import aipanPattern from "@/assets/aipan-pattern.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import folkDanceImageFallback from "@/assets/folk-dance.jpg";
+import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
 
 const CulturePage = () => {
+  const { getImage } = useSiteImages();
+  const folkDanceImage = getImage('folk-dance', folkDanceImageFallback);
+  const aipanPattern = getImage('aipan-pattern', aipanPatternFallback);
+
   const festivals = [
     {
       name: "Harela",

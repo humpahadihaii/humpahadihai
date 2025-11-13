@@ -1,9 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mountain, TreePine, Footprints } from "lucide-react";
-import heroImage from "@/assets/hero-mountains.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import heroImageFallback from "@/assets/hero-mountains.jpg";
 
 const TravelPage = () => {
+  const { getImage } = useSiteImages();
+  const heroImage = getImage('hero-mountains', heroImageFallback);
+
   const charDham = [
     {
       name: "Kedarnath",

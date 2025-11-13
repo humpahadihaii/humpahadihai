@@ -3,13 +3,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import folkDanceImage from "@/assets/folk-dance.jpg";
-import foodImage from "@/assets/pahadi-food.jpg";
-import mountainImage from "@/assets/hero-mountains.jpg";
-import aipanImage from "@/assets/aipan-pattern.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import folkDanceImageFallback from "@/assets/folk-dance.jpg";
+import foodImageFallback from "@/assets/pahadi-food.jpg";
+import mountainImageFallback from "@/assets/hero-mountains.jpg";
+import aipanImageFallback from "@/assets/aipan-pattern.jpg";
 
 const GalleryPage = () => {
   const [activeTab, setActiveTab] = useState("all");
+  const { getImage } = useSiteImages();
+  
+  const folkDanceImage = getImage('folk-dance', folkDanceImageFallback);
+  const foodImage = getImage('pahadi-food', foodImageFallback);
+  const mountainImage = getImage('hero-mountains', mountainImageFallback);
+  const aipanImage = getImage('aipan-pattern', aipanImageFallback);
 
   // Placeholder gallery items - in production, these would be fetched from Instagram or a CMS
   const galleryItems = [

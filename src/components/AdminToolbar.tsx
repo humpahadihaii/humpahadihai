@@ -20,7 +20,24 @@ export const AdminToolbar = () => {
         setIsAdmin(data || false);
       }
     };
+    
     checkAdmin();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'admin'
+        }).then(({ data }) => {
+          setIsAdmin(data || false);
+        });
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (!isAdmin || location.pathname.startsWith('/admin')) return null;
