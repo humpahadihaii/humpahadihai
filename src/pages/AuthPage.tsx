@@ -89,8 +89,6 @@ const AuthPage = () => {
       }
 
       toast.success("Welcome back!");
-      // Force page reload to ensure AdminToolbar picks up the session
-      window.location.href = "/";
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
@@ -129,11 +127,7 @@ const AuthPage = () => {
         return;
       }
 
-      toast.success("Account created! Redirecting...");
-      // Force page reload after signup to ensure session is properly loaded
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1500);
+      toast.success("Account created! You'll be redirected shortly.");
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
