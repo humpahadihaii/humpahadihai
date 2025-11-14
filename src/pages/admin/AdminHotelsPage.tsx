@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Pencil, Trash2, Plus, Search, Star } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const hotelSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -396,10 +397,12 @@ export default function AdminHotelsPage() {
                       name="image_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Image URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
+                          <ImageUpload
+                            label="Hotel Image"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            id="hotel-image"
+                          />
                           <FormMessage />
                         </FormItem>
                       )}
