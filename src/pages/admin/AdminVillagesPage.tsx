@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const villageSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -398,10 +399,12 @@ export default function AdminVillagesPage() {
                       name="thumbnail_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Thumbnail URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
+                          <ImageUpload
+                            label="Village Thumbnail"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            id="village-thumbnail"
+                          />
                           <FormMessage />
                         </FormItem>
                       )}

@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const districtSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -374,34 +375,37 @@ export default function AdminDistrictsPage() {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="image_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Thumbnail Image URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="https://..." />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="banner_image"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Banner Image URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="https://..." />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="image_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <ImageUpload
+                          label="Thumbnail Image"
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          id="district-thumbnail"
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="banner_image"
+                    render={({ field }) => (
+                      <FormItem>
+                        <ImageUpload
+                          label="Banner Image"
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          id="district-banner"
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}

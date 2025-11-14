@@ -11,26 +11,34 @@ export const AdminToolbar = () => {
   const location = useLocation();
 
   useEffect(() => {
+    let mounted = true;
+    
     const checkAdmin = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         console.log('AdminToolbar: Session check', session?.user?.email);
         
-        if (session?.user) {
+        if (session?.user && mounted) {
           const { data, error } = await supabase.rpc('has_role', {
             _user_id: session.user.id,
             _role: 'admin'
           });
           console.log('AdminToolbar: Admin check result', data, error);
-          setIsAdmin(data || false);
-        } else {
+          if (mounted) {
+            setIsAdmin(data || false);
+          }
+        } else if (mounted) {
           setIsAdmin(false);
         }
       } catch (error) {
         console.error('AdminToolbar: Error checking admin status', error);
-        setIsAdmin(false);
+        if (mounted) {
+          setIsAdmin(false);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
     
@@ -57,7 +65,10 @@ export const AdminToolbar = () => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Don't show on admin pages or while loading
