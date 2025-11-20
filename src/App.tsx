@@ -32,6 +32,7 @@ import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
 import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
 import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
+import PendingApprovalPage from "./pages/PendingApprovalPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/thoughts" element={<ThoughtsPage />} />
               <Route path="/submit-thought" element={<SubmitThoughtPage />} />
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/pending-approval" element={<PendingApprovalPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
               <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />

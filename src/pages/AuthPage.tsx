@@ -38,20 +38,34 @@ const AuthPage = () => {
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
 
   useEffect(() => {
+    const checkUserStatus = async (userId: string) => {
+      // Check if user has admin role
+      const { data: hasAdminRole } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin'
+      });
+
+      if (hasAdminRole) {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/pending-approval", { replace: true });
+      }
+    };
+
     // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/", { replace: true });
+      if (session?.user) {
+        await checkUserStatus(session.user.id);
       }
     };
 
     checkSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate("/", { replace: true });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        await checkUserStatus(session.user.id);
       }
     });
 
@@ -126,16 +140,18 @@ const AuthPage = () => {
         return;
       }
 
-      // Check if email confirmation is required
-      if (data?.user && !data.session) {
-        toast.success("Account created! Please check your email to verify your account.");
-      } else {
-        toast.success("Account created successfully! Welcome!");
-        // Navigation handled by onAuthStateChange
-      }
+      // Sign out the user immediately to prevent auto-login
+      await supabase.auth.signOut();
 
+      toast.success("Account created! Your request is pending admin approval.");
+      
       // Clear form
       setSignupData({ email: "", password: "", fullName: "" });
+      
+      // Redirect to pending approval page
+      setTimeout(() => {
+        navigate("/pending-approval");
+      }, 1500);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
