@@ -73,7 +73,9 @@ const AdminDashboard = () => {
               <CardDescription>Upload and organize images</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Manage Gallery</Button>
+              <Button className="w-full" onClick={() => navigate("/admin/gallery")}>
+                Manage Gallery
+              </Button>
             </CardContent>
           </Card>
 

@@ -58,22 +58,29 @@ const AdminApprovalsPage = () => {
         })
         .eq("id", request.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw new Error(`Failed to update request: ${updateError.message}`);
+      }
 
       // Grant the role
       const { error: roleError } = await supabase
         .from("user_roles")
-        .insert([{
+        .insert({
           user_id: request.user_id,
           role: request.requested_role as "admin" | "moderator" | "editor" | "user",
-        }]);
+        });
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error("Role error:", roleError);
+        throw new Error(`Failed to grant role: ${roleError.message}`);
+      }
 
       toast.success("Admin request approved successfully");
-      fetchRequests();
+      await fetchRequests();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Approve error:", error);
+      toast.error(error.message || "Failed to approve request");
     } finally {
       setProcessing(null);
     }
@@ -94,12 +101,16 @@ const AdminApprovalsPage = () => {
         })
         .eq("id", request.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Reject error:", error);
+        throw new Error(`Failed to reject request: ${error.message}`);
+      }
 
       toast.success("Admin request rejected");
-      fetchRequests();
+      await fetchRequests();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Reject error:", error);
+      toast.error(error.message || "Failed to reject request");
     } finally {
       setProcessing(null);
     }
