@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import logo from "@/assets/hum-pahadi-logo.jpg";
+import logoOptimized from "@/assets/hum-pahadi-logo-optimized.webp";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -68,7 +69,10 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src={logo} alt="Hum Pahadi Haii Logo" className="h-14 w-14 rounded-full object-cover" />
+            <picture>
+              <source srcSet={logoOptimized} type="image/webp" />
+              <img src={logo} alt="Hum Pahadi Haii Logo" width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
+            </picture>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-primary">Hum Pahadi Haii</h1>
               <p className="text-xs text-muted-foreground">Uttarakhand Heritage</p>
