@@ -35,16 +35,33 @@ export const ImageUpload = ({ label, value, onChange, id }: ImageUploadProps) =>
 
     setIsUploading(true);
     try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to upload images");
+        return;
+      }
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
+      console.log("Uploading file:", fileName);
       const { error: uploadError, data } = await supabase.storage
         .from("images")
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        if (uploadError.message.includes("row-level security")) {
+          toast.error("Permission denied. You need admin or editor role to upload images.");
+        } else {
+          toast.error(uploadError.message || "Failed to upload image");
+        }
+        return;
+      }
 
+      console.log("Upload successful:", data);
       const { data: { publicUrl } } = supabase.storage
         .from("images")
         .getPublicUrl(filePath);
@@ -52,6 +69,7 @@ export const ImageUpload = ({ label, value, onChange, id }: ImageUploadProps) =>
       onChange(publicUrl);
       toast.success("Image uploaded successfully");
     } catch (error: any) {
+      console.error("Unexpected upload error:", error);
       toast.error(error.message || "Failed to upload image");
     } finally {
       setIsUploading(false);
