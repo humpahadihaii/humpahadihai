@@ -5,9 +5,12 @@ import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import folkDanceImageFallback from "@/assets/folk-dance.jpg";
+import folkDanceImageOptimized from "@/assets/folk-dance-optimized.webp";
 import foodImageFallback from "@/assets/pahadi-food.jpg";
+import foodImageOptimized from "@/assets/pahadi-food-optimized.webp";
 import mountainImageFallback from "@/assets/hero-mountains.jpg";
 import aipanImageFallback from "@/assets/aipan-pattern.jpg";
+import aipanImageOptimized from "@/assets/aipan-pattern-optimized.webp";
 
 const GalleryPage = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -20,14 +23,14 @@ const GalleryPage = () => {
 
   // Placeholder gallery items - in production, these would be fetched from Instagram or a CMS
   const galleryItems = [
-    { id: 1, category: "festivals", image: folkDanceImage, title: "Traditional Jhora Dance" },
-    { id: 2, category: "food", image: foodImage, title: "Authentic Pahadi Thali" },
-    { id: 3, category: "nature", image: mountainImage, title: "Himalayan Sunrise" },
-    { id: 4, category: "handicrafts", image: aipanImage, title: "Traditional Aipan Art" },
-    { id: 5, category: "festivals", image: folkDanceImage, title: "Festival Celebration" },
-    { id: 6, category: "food", image: foodImage, title: "Local Delicacies" },
-    { id: 7, category: "nature", image: mountainImage, title: "Mountain Valley" },
-    { id: 8, category: "handicrafts", image: aipanImage, title: "Ringaal Craft" },
+    { id: 1, category: "festivals", image: folkDanceImage, imageOptimized: folkDanceImageOptimized, title: "Traditional Jhora Dance" },
+    { id: 2, category: "food", image: foodImage, imageOptimized: foodImageOptimized, title: "Authentic Pahadi Thali" },
+    { id: 3, category: "nature", image: mountainImage, imageOptimized: mountainImage, title: "Himalayan Sunrise" },
+    { id: 4, category: "handicrafts", image: aipanImage, imageOptimized: aipanImageOptimized, title: "Traditional Aipan Art" },
+    { id: 5, category: "festivals", image: folkDanceImage, imageOptimized: folkDanceImageOptimized, title: "Festival Celebration" },
+    { id: 6, category: "food", image: foodImage, imageOptimized: foodImageOptimized, title: "Local Delicacies" },
+    { id: 7, category: "nature", image: mountainImage, imageOptimized: mountainImage, title: "Mountain Valley" },
+    { id: 8, category: "handicrafts", image: aipanImage, imageOptimized: aipanImageOptimized, title: "Ringaal Craft" },
   ];
 
   const filteredItems = activeTab === "all" 
@@ -72,11 +75,17 @@ const GalleryPage = () => {
                     className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300"
                   >
                     <div className="relative aspect-square overflow-hidden">
-                      <img 
-                        src={item.image} 
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                      <picture>
+                        <source srcSet={item.imageOptimized} type="image/webp" />
+                        <img 
+                          src={item.image} 
+                          alt={item.title}
+                          loading="lazy"
+                          width="400"
+                          height="400"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </picture>
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                         <p className="text-white font-medium">{item.title}</p>
                       </div>

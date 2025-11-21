@@ -5,8 +5,11 @@ import { Mountain, UtensilsCrossed, Camera, Palmtree, Instagram } from "lucide-r
 import { useSiteImages } from "@/hooks/useSiteImages";
 import heroImageFallback from "@/assets/hero-mountains.jpg";
 import cultureImageFallback from "@/assets/folk-dance.jpg";
+import cultureImageOptimized from "@/assets/folk-dance-optimized.webp";
 import foodImageFallback from "@/assets/pahadi-food.jpg";
+import foodImageOptimized from "@/assets/pahadi-food-optimized.webp";
 import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
+import aipanPatternOptimized from "@/assets/aipan-pattern-optimized.webp";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -120,7 +123,10 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Culture Card */}
             <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
-              <img src={cultureImage} alt="Pahadi Folk Dance" loading="lazy" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <picture>
+                <source srcSet={cultureImageOptimized} type="image/webp" />
+                <img src={cultureImage} alt="Pahadi Folk Dance" loading="lazy" width="496" height="320" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent">
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="text-2xl font-bold mb-2">Vibrant Traditions</h3>
@@ -134,7 +140,10 @@ const HomePage = () => {
 
             {/* Food Card */}
             <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
-              <img src={foodImage} alt="Traditional Pahadi Thali" loading="lazy" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <picture>
+                <source srcSet={foodImageOptimized} type="image/webp" />
+                <img src={foodImage} alt="Traditional Pahadi Thali" loading="lazy" width="496" height="320" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/60 to-transparent">
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="text-2xl font-bold mb-2">Authentic Flavors</h3>
@@ -155,7 +164,7 @@ const HomePage = () => {
           <div 
             className="rounded-2xl p-12 shadow-xl relative overflow-hidden"
             style={{ 
-              backgroundImage: `url(${aipanPattern})`,
+              backgroundImage: `url(${aipanPatternOptimized}), url(${aipanPattern})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
