@@ -9,7 +9,7 @@ import foodImageFallback from "@/assets/pahadi-food.jpg";
 import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
 
 const HomePage = () => {
-  const { getImage, loading } = useSiteImages();
+  const { getImage } = useSiteImages();
   
   const heroImage = getImage('hero-mountains', heroImageFallback);
   const cultureImage = getImage('folk-dance', cultureImageFallback);
@@ -120,7 +120,7 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Culture Card */}
             <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
-              <img src={cultureImage} alt="Pahadi Folk Dance" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <img src={cultureImage} alt="Pahadi Folk Dance" loading="lazy" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent">
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="text-2xl font-bold mb-2">Vibrant Traditions</h3>
@@ -134,7 +134,7 @@ const HomePage = () => {
 
             {/* Food Card */}
             <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
-              <img src={foodImage} alt="Traditional Pahadi Thali" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <img src={foodImage} alt="Traditional Pahadi Thali" loading="lazy" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/60 to-transparent">
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="text-2xl font-bold mb-2">Authentic Flavors</h3>
