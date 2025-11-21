@@ -16,27 +16,23 @@ export const AdminToolbar = () => {
     const checkAdmin = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('AdminToolbar: Session check', session?.user?.email);
         
         if (session?.user && mounted) {
-          const { data, error } = await supabase.rpc('has_role', {
+          const { data } = await supabase.rpc('has_role', {
             _user_id: session.user.id,
             _role: 'admin'
           });
-          console.log('AdminToolbar: Admin check result', data, error);
           if (mounted) {
             setIsAdmin(data || false);
+            setLoading(false);
           }
         } else if (mounted) {
           setIsAdmin(false);
+          setLoading(false);
         }
       } catch (error) {
-        console.error('AdminToolbar: Error checking admin status', error);
         if (mounted) {
           setIsAdmin(false);
-        }
-      } finally {
-        if (mounted) {
           setLoading(false);
         }
       }
@@ -44,21 +40,15 @@ export const AdminToolbar = () => {
     
     checkAdmin();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AdminToolbar: Auth state changed', event, session?.user?.email);
+      if (!mounted) return;
       
       if (session?.user) {
-        try {
-          const { data } = await supabase.rpc('has_role', {
-            _user_id: session.user.id,
-            _role: 'admin'
-          });
-          setIsAdmin(data || false);
-        } catch (error) {
-          console.error('AdminToolbar: Error in auth state change', error);
-          setIsAdmin(false);
-        }
+        const { data } = await supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'admin'
+        });
+        setIsAdmin(data || false);
       } else {
         setIsAdmin(false);
       }
