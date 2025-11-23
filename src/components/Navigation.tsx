@@ -4,8 +4,8 @@ import { Menu, X, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { useSiteImages } from "@/hooks/useSiteImages";
 import logo from "@/assets/hum-pahadi-logo.jpg";
-import logoOptimized from "@/assets/hum-pahadi-logo-optimized.webp";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +13,10 @@ const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { getImage } = useSiteImages();
+  
+  const logoOptimized = getImage('hum-pahadi-logo-optimized');
+  const logoFallback = getImage('hum-pahadi-logo', logo);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -71,7 +75,7 @@ const Navigation = () => {
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <picture>
               <source srcSet={logoOptimized} type="image/webp" />
-              <img src={logo} alt="Hum Pahadi Haii Logo" width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
+              <img src={logoFallback} alt="Hum Pahadi Haii Logo" width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
             </picture>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-primary">Hum Pahadi Haii</h1>
