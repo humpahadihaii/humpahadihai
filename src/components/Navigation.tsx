@@ -108,7 +108,7 @@ const Navigation = () => {
                 className="gap-2"
               >
                 <LogIn className="h-4 w-4" />
-                Login
+                Login as Admin
               </Button>
             )}
           </div>
@@ -164,7 +164,7 @@ const Navigation = () => {
                   className="justify-start gap-2 px-4"
                 >
                   <LogIn className="h-4 w-4" />
-                  Login
+                  Login as Admin
                 </Button>
               )}
             </div>
