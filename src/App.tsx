@@ -34,6 +34,7 @@ import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
 import AdminDistrictContentPage from "./pages/admin/AdminDistrictContentPage";
 import AdminFeaturedHighlightsPage from "./pages/admin/AdminFeaturedHighlightsPage";
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
+import AdminRoleManagementPage from "./pages/admin/AdminRoleManagementPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import NotFound from "./pages/NotFound";
 
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
               <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
               <Route path="/admin/approvals" element={<AdminRoute><AdminApprovalsPage /></AdminRoute>} />
+              <Route path="/admin/roles" element={<AdminRoute><AdminRoleManagementPage /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
