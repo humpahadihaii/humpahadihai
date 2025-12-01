@@ -14,16 +14,18 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
 
   useEffect(() => {
     const checkAdminStatus = async (userId: string) => {
-      const { data, error } = await supabase.rpc('has_role', {
+      // Check for both admin and super_admin roles
+      const { data: isAdmin } = await supabase.rpc('has_role', {
         _user_id: userId,
         _role: 'admin'
       });
       
-      if (!error && data !== null) {
-        setIsAdmin(data);
-      } else {
-        setIsAdmin(false);
-      }
+      const { data: isSuperAdmin } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'super_admin'
+      });
+      
+      setIsAdmin(isAdmin || isSuperAdmin || false);
       setLoading(false);
     };
 

@@ -23,13 +23,18 @@ const PendingApprovalPage = () => {
 
       setUserEmail(session.user.email || "");
 
-      // Check if user has admin role
+      // Check if user has admin or super_admin role
       const { data: hasAdminRole } = await supabase.rpc('has_role', {
         _user_id: session.user.id,
         _role: 'admin'
       });
 
-      if (hasAdminRole) {
+      const { data: hasSuperAdminRole } = await supabase.rpc('has_role', {
+        _user_id: session.user.id,
+        _role: 'super_admin'
+      });
+
+      if (hasAdminRole || hasSuperAdminRole) {
         navigate("/admin");
         return;
       }
