@@ -31,6 +31,7 @@ import AdminFestivalsPage from "./pages/admin/AdminFestivalsPage";
 import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
 import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
 import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
+import AdminFeaturedHighlightsPage from "./pages/admin/AdminFeaturedHighlightsPage";
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import NotFound from "./pages/NotFound";
@@ -70,6 +71,7 @@ const App = () => (
           <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
           <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
               <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
+              <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
               <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
               <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
               <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />

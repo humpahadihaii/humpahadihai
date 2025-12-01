@@ -3,11 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mountain, UtensilsCrossed, Camera, Palmtree, Instagram } from "lucide-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import heroImageFallback from "@/assets/hero-mountains.jpg";
-import cultureImageFallback from "@/assets/folk-dance.jpg";
-import cultureImageOptimized from "@/assets/folk-dance-optimized.webp";
-import foodImageFallback from "@/assets/pahadi-food.jpg";
-import foodImageOptimized from "@/assets/pahadi-food-optimized.webp";
 import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
 import aipanPatternOptimized from "@/assets/aipan-pattern-optimized.webp";
 
@@ -15,9 +13,21 @@ const HomePage = () => {
   const { getImage } = useSiteImages();
   
   const heroImage = getImage('hero-mountains', heroImageFallback);
-  const cultureImage = getImage('folk-dance', cultureImageFallback);
-  const foodImage = getImage('pahadi-food', foodImageFallback);
   const aipanPattern = getImage('aipan-pattern', aipanPatternFallback);
+
+  const { data: highlights = [] } = useQuery({
+    queryKey: ["featured-highlights"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("featured_highlights")
+        .select("*")
+        .eq("status", "published")
+        .order("order_position", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const features = [
     {
@@ -121,39 +131,29 @@ const HomePage = () => {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Culture Card */}
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
-              <picture>
-                <source srcSet={cultureImageOptimized} type="image/webp" />
-                <img src={cultureImage} alt="Pahadi Folk Dance" loading="lazy" width="496" height="320" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
-              </picture>
-              <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent">
-                <div className="absolute bottom-0 p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Vibrant Traditions</h3>
-                  <p className="mb-4 opacity-90">Experience the colorful folk dances and festivals of Uttarakhand</p>
-                  <Button asChild variant="outline" className="bg-white/90 text-primary hover:bg-white">
-                    <Link to="/culture">Discover More</Link>
-                  </Button>
+            {highlights.map((highlight) => (
+              <div key={highlight.id} className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
+                {highlight.image_url && (
+                  <img 
+                    src={highlight.image_url} 
+                    alt={highlight.title} 
+                    loading="lazy" 
+                    width="496" 
+                    height="320" 
+                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
+                )}
+                <div className={`absolute inset-0 bg-gradient-to-t ${highlight.gradient_color} to-transparent`}>
+                  <div className="absolute bottom-0 p-6 text-white">
+                    <h3 className="text-2xl font-bold mb-2">{highlight.title}</h3>
+                    <p className="mb-4 opacity-90">{highlight.description}</p>
+                    <Button asChild variant="outline" className="bg-white/90 text-primary hover:bg-white">
+                      <Link to={highlight.button_link}>{highlight.button_text}</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Food Card */}
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
-              <picture>
-                <source srcSet={foodImageOptimized} type="image/webp" />
-                <img src={foodImage} alt="Traditional Pahadi Thali" loading="lazy" width="496" height="320" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
-              </picture>
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/60 to-transparent">
-                <div className="absolute bottom-0 p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Authentic Flavors</h3>
-                  <p className="mb-4 opacity-90">Taste the traditional cuisine passed down through generations</p>
-                  <Button asChild variant="outline" className="bg-white/90 text-secondary hover:bg-white">
-                    <Link to="/food">Explore Dishes</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
