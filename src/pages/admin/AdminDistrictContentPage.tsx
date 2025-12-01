@@ -21,13 +21,17 @@ import type { Database } from "@/integrations/supabase/types";
 type District = Database["public"]["Tables"]["districts"]["Row"];
 type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
 
-const contentSchema = z.object({
-  district_id: z.string().min(1, "Please select a district"),
-  category: z.enum(["Festival", "Food", "Place", "Culture"]),
+const itemSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   image_url: z.string().optional(),
   google_map_link: z.string().optional(),
+});
+
+const contentSchema = z.object({
+  district_id: z.string().min(1, "Please select a district"),
+  category: z.enum(["Festival", "Food", "Place", "Culture"]),
+  items: z.array(itemSchema).min(1, "At least one item is required"),
 });
 
 type ContentFormData = z.infer<typeof contentSchema>;
@@ -45,10 +49,7 @@ export default function AdminDistrictContentPage() {
     defaultValues: {
       district_id: "",
       category: "Place",
-      title: "",
-      description: "",
-      image_url: "",
-      google_map_link: "",
+      items: [{ title: "", description: "", image_url: "", google_map_link: "" }],
     },
   });
 
@@ -95,16 +96,17 @@ export default function AdminDistrictContentPage() {
   };
 
   const onSubmit = async (data: ContentFormData) => {
-    const insertData = {
-      district_id: data.district_id,
-      category: data.category,
-      title: data.title,
-      description: data.description,
-      image_url: data.image_url || null,
-      google_map_link: data.google_map_link || null,
-    };
-
     if (editingContent) {
+      // Single item update
+      const insertData = {
+        district_id: data.district_id,
+        category: data.category,
+        title: data.items[0].title,
+        description: data.items[0].description,
+        image_url: data.items[0].image_url || null,
+        google_map_link: data.items[0].google_map_link || null,
+      };
+
       const { error } = await supabase
         .from("district_content")
         .update(insertData)
@@ -120,14 +122,25 @@ export default function AdminDistrictContentPage() {
         form.reset();
       }
     } else {
+      // Bulk insert
+      const insertData = data.items.map(item => ({
+        district_id: data.district_id,
+        category: data.category,
+        title: item.title,
+        description: item.description,
+        image_url: item.image_url || null,
+        google_map_link: item.google_map_link || null,
+      }));
+
       const { error } = await supabase
         .from("district_content")
-        .insert([insertData]);
+        .insert(insertData);
 
       if (error) {
         toast.error("Failed to create content");
       } else {
-        toast.success("Content created successfully");
+        const districtName = districts.find(d => d.id === data.district_id)?.name || "district";
+        toast.success(`Successfully added ${data.items.length} item${data.items.length > 1 ? 's' : ''} to ${districtName}!`);
         fetchContents();
         setDialogOpen(false);
         form.reset();
@@ -140,12 +153,26 @@ export default function AdminDistrictContentPage() {
     form.reset({
       district_id: content.district_id,
       category: content.category as "Festival" | "Food" | "Place" | "Culture",
-      title: content.title,
-      description: content.description,
-      image_url: content.image_url || "",
-      google_map_link: content.google_map_link || "",
+      items: [{
+        title: content.title,
+        description: content.description,
+        image_url: content.image_url || "",
+        google_map_link: content.google_map_link || "",
+      }],
     });
     setDialogOpen(true);
+  };
+
+  const addNewItem = () => {
+    const currentItems = form.getValues("items");
+    form.setValue("items", [...currentItems, { title: "", description: "", image_url: "", google_map_link: "" }]);
+  };
+
+  const removeItem = (index: number) => {
+    const currentItems = form.getValues("items");
+    if (currentItems.length > 1) {
+      form.setValue("items", currentItems.filter((_, i) => i !== index));
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -213,113 +240,145 @@ export default function AdminDistrictContentPage() {
                       form.reset({
                         district_id: selectedDistrictId,
                         category: "Place",
-                        title: "",
-                        description: "",
-                        image_url: "",
-                        google_map_link: "",
+                        items: [{ title: "", description: "", image_url: "", google_map_link: "" }],
                       }); 
                     }}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Item
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                     <DialogHeader>
-                      <DialogTitle>{editingContent ? "Edit Content" : "Add New Content"}</DialogTitle>
+                      <DialogTitle>{editingContent ? "Edit Content" : "Add New Content (Bulk Entry)"}</DialogTitle>
                     </DialogHeader>
                     <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="category"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Category *</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select category" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Festival">Festival</SelectItem>
-                                  <SelectItem value="Food">Food</SelectItem>
-                                  <SelectItem value="Place">Place</SelectItem>
-                                  <SelectItem value="Culture">Culture</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+                        {/* Top Section: District & Category */}
+                        <div className="space-y-4 pb-4 border-b">
+                          <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Category (applies to all items) *</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="Festival">Festival</SelectItem>
+                                    <SelectItem value="Food">Food</SelectItem>
+                                    <SelectItem value="Place">Place</SelectItem>
+                                    <SelectItem value="Culture">Culture</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
 
-                        <FormField
-                          control={form.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Title *</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="e.g., Jageshwar Temple" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        {/* Middle Section: Scrollable Item Cards */}
+                        <div className="flex-1 overflow-y-auto py-4 space-y-6">
+                          {form.watch("items").map((_, index) => (
+                            <div key={index} className="p-4 border rounded-lg bg-muted/30 space-y-4 relative">
+                              <div className="flex justify-between items-center mb-2">
+                                <h4 className="font-semibold">Item {index + 1}</h4>
+                                {form.watch("items").length > 1 && !editingContent && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeItem(index)}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
 
-                        <FormField
-                          control={form.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description *</FormLabel>
-                              <FormControl>
-                                <Textarea {...field} rows={4} placeholder="Detailed description..." />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="image_url"
-                          render={({ field }) => (
-                            <FormItem>
-                              <ImageUpload
-                                label="Image"
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                                id="content-image"
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.title`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Title *</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="e.g., Jageshwar Temple" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
                               />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
 
-                        <FormField
-                          control={form.control}
-                          name="google_map_link"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Google Maps Link</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="https://maps.google.com/..." />
-                              </FormControl>
-                              <p className="text-xs text-muted-foreground">
-                                Paste the full Google Maps URL for places
-                              </p>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.description`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Description *</FormLabel>
+                                    <FormControl>
+                                      <Textarea {...field} rows={3} placeholder="Detailed description..." />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                        <div className="flex justify-end gap-2">
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.image_url`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <ImageUpload
+                                      label="Image"
+                                      value={field.value || ""}
+                                      onChange={field.onChange}
+                                      id={`content-image-${index}`}
+                                    />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.google_map_link`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Google Maps Link</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="https://maps.google.com/..." />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          ))}
+
+                          {!editingContent && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={addNewItem}
+                              className="w-full"
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Another Item
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Bottom Section: Actions */}
+                        <div className="flex justify-end gap-2 pt-4 border-t">
                           <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                             Cancel
                           </Button>
                           <Button type="submit">
-                            {editingContent ? "Update" : "Create"}
+                            {editingContent ? "Update" : `Save All Items (${form.watch("items").length})`}
                           </Button>
                         </div>
                       </form>
