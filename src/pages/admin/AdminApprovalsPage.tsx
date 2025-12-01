@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Check, X } from "lucide-react";
 
@@ -21,6 +23,7 @@ const AdminApprovalsPage = () => {
   const [requests, setRequests] = useState<AdminRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<Record<string, Database["public"]["Enums"]["app_role"]>>({});
 
   const fetchRequests = async () => {
     try {
@@ -48,6 +51,9 @@ const AdminApprovalsPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Get the selected role or default to moderator
+      const roleToGrant: Database["public"]["Enums"]["app_role"] = selectedRoles[request.id] || 'moderator';
+
       // Update request status
       const { error: updateError } = await supabase
         .from("admin_requests")
@@ -55,6 +61,7 @@ const AdminApprovalsPage = () => {
           status: "approved",
           approved_by: user.id,
           approved_at: new Date().toISOString(),
+          requested_role: roleToGrant,
         })
         .eq("id", request.id);
 
@@ -68,7 +75,7 @@ const AdminApprovalsPage = () => {
         .from("user_roles")
         .insert({
           user_id: request.user_id,
-          role: request.requested_role as "admin" | "moderator" | "editor" | "user",
+          role: roleToGrant,
         });
 
       if (roleError) {
@@ -76,7 +83,7 @@ const AdminApprovalsPage = () => {
         throw new Error(`Failed to grant role: ${roleError.message}`);
       }
 
-      toast.success("Admin request approved successfully");
+      toast.success(`Admin request approved as ${roleToGrant.replace('_', ' ')}`);
       await fetchRequests();
     } catch (error: any) {
       console.error("Approve error:", error);
@@ -153,7 +160,31 @@ const AdminApprovalsPage = () => {
                   <TableRow key={request.id}>
                     <TableCell>{request.full_name || "N/A"}</TableCell>
                     <TableCell>{request.email}</TableCell>
-                    <TableCell className="capitalize">{request.requested_role}</TableCell>
+                    <TableCell>
+                      {request.status === "pending" ? (
+                        <Select
+                          value={selectedRoles[request.id] || 'moderator'}
+                          onValueChange={(value) => 
+                            setSelectedRoles(prev => ({ 
+                              ...prev, 
+                              [request.id]: value as Database["public"]["Enums"]["app_role"]
+                            }))
+                          }
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="moderator">Moderator</SelectItem>
+                            <SelectItem value="content_editor">Content Editor</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="super_admin">Super Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="capitalize">{request.requested_role.replace('_', ' ')}</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         variant={
