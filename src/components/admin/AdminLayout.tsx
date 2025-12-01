@@ -34,6 +34,7 @@ const navigation = [
   { name: "Districts", href: "/admin/districts", icon: Map },
   { name: "Villages", href: "/admin/villages", icon: Home },
   { name: "Highlights", href: "/admin/highlights", icon: Calendar },
+  { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },
   { name: "Hotels", href: "/admin/hotels", icon: Hotel },
   { name: "Festivals", href: "/admin/festivals", icon: Calendar },
   { name: "Gallery", href: "/admin/gallery", icon: Image },

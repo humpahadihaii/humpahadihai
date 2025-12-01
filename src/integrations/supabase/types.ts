@@ -330,6 +330,48 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_highlights: {
+        Row: {
+          button_link: string
+          button_text: string
+          created_at: string
+          description: string
+          gradient_color: string
+          id: string
+          image_url: string
+          order_position: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          button_link: string
+          button_text: string
+          created_at?: string
+          description: string
+          gradient_color: string
+          id?: string
+          image_url: string
+          order_position: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          button_link?: string
+          button_text?: string
+          created_at?: string
+          description?: string
+          gradient_color?: string
+          id?: string
+          image_url?: string
+          order_position?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       festivals: {
         Row: {
           created_at: string
