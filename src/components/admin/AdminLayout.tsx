@@ -32,6 +32,7 @@ interface AdminLayoutProps {
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Districts", href: "/admin/districts", icon: Map },
+  { name: "District Content", href: "/admin/district-content", icon: Calendar },
   { name: "Villages", href: "/admin/villages", icon: Home },
   { name: "Highlights", href: "/admin/highlights", icon: Calendar },
   { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },

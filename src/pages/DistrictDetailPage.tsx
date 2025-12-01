@@ -5,7 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
 import { useState } from "react";
+import type { Database } from "@/integrations/supabase/types";
+
+type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
 
 const DistrictDetailPage = () => {
   const { slug } = useParams();
@@ -53,6 +59,21 @@ const DistrictDetailPage = () => {
     enabled: !!district?.id,
   });
 
+  const { data: districtContent, isLoading: contentLoading } = useQuery({
+    queryKey: ["district-content", district?.id],
+    queryFn: async () => {
+      if (!district?.id) return [];
+      const { data, error } = await supabase
+        .from("district_content")
+        .select("*")
+        .eq("district_id", district.id)
+        .order("title");
+      if (error) throw error;
+      return data as DistrictContent[];
+    },
+    enabled: !!district?.id,
+  });
+
   const filteredVillages = villages?.filter((village) =>
     village.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -62,6 +83,11 @@ const DistrictDetailPage = () => {
     acc[highlight.type].push(highlight);
     return acc;
   }, {} as Record<string, typeof highlights>);
+
+  const festivals = districtContent?.filter((c) => c.category === "Festival") || [];
+  const foods = districtContent?.filter((c) => c.category === "Food") || [];
+  const places = districtContent?.filter((c) => c.category === "Place") || [];
+  const culture = districtContent?.filter((c) => c.category === "Culture") || [];
 
   if (districtLoading) {
     return (
@@ -174,6 +200,189 @@ const DistrictDetailPage = () => {
               </div>
             )
           )}
+
+          {/* Tabbed Content Section */}
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold mb-6">Explore {district?.name}</h2>
+            <Tabs defaultValue="festivals" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+                <TabsTrigger value="festivals">Festivals</TabsTrigger>
+                <TabsTrigger value="food">Food</TabsTrigger>
+                <TabsTrigger value="places">Places</TabsTrigger>
+                <TabsTrigger value="culture">Culture</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="festivals" className="mt-6">
+                {contentLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-64" />
+                    ))}
+                  </div>
+                ) : festivals.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      No festivals information available yet.
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {festivals.map((item) => (
+                      <Card key={item.id} className="overflow-hidden">
+                        {item.image_url && (
+                          <div className="h-48 overflow-hidden">
+                            <img
+                              src={item.image_url}
+                              alt={item.title}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="food" className="mt-6">
+                {contentLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-64" />
+                    ))}
+                  </div>
+                ) : foods.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      No food information available yet.
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {foods.map((item) => (
+                      <Card key={item.id} className="overflow-hidden">
+                        {item.image_url && (
+                          <div className="h-48 overflow-hidden">
+                            <img
+                              src={item.image_url}
+                              alt={item.title}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="places" className="mt-6">
+                {contentLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-64" />
+                    ))}
+                  </div>
+                ) : places.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      No places information available yet.
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {places.map((item) => (
+                      <Card key={item.id} className="overflow-hidden">
+                        {item.image_url && (
+                          <div className="h-48 overflow-hidden">
+                            <img
+                              src={item.image_url}
+                              alt={item.title}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <CardTitle className="text-lg">{item.title}</CardTitle>
+                            {item.google_map_link && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                asChild
+                              >
+                                <a
+                                  href={item.google_map_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <MapPin className="h-4 w-4 mr-1" />
+                                  Map
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="culture" className="mt-6">
+                {contentLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-64" />
+                    ))}
+                  </div>
+                ) : culture.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      No culture information available yet.
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {culture.map((item) => (
+                      <Card key={item.id} className="overflow-hidden">
+                        {item.image_url && (
+                          <div className="h-48 overflow-hidden">
+                            <img
+                              src={item.image_url}
+                              alt={item.title}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
 
           {/* Villages Directory */}
           <div className="mt-16">

@@ -31,6 +31,7 @@ import AdminFestivalsPage from "./pages/admin/AdminFestivalsPage";
 import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
 import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
 import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
+import AdminDistrictContentPage from "./pages/admin/AdminDistrictContentPage";
 import AdminFeaturedHighlightsPage from "./pages/admin/AdminFeaturedHighlightsPage";
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/pending-approval" element={<PendingApprovalPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
+              <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
               <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
               <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
               <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />

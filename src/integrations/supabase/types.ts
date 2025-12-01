@@ -155,6 +155,50 @@ export type Database = {
         }
         Relationships: []
       }
+      district_content: {
+        Row: {
+          category: Database["public"]["Enums"]["district_content_category"]
+          created_at: string
+          description: string
+          district_id: string
+          google_map_link: string | null
+          id: string
+          image_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["district_content_category"]
+          created_at?: string
+          description: string
+          district_id: string
+          google_map_link?: string | null
+          id?: string
+          image_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["district_content_category"]
+          created_at?: string
+          description?: string
+          district_id?: string
+          google_map_link?: string | null
+          id?: string
+          image_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "district_content_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       district_highlights: {
         Row: {
           created_at: string
@@ -868,6 +912,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor" | "moderator" | "user"
+      district_content_category: "Festival" | "Food" | "Place" | "Culture"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -996,6 +1041,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "moderator", "user"],
+      district_content_category: ["Festival", "Food", "Place", "Culture"],
     },
   },
 } as const
