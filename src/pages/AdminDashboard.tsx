@@ -10,6 +10,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -17,11 +18,16 @@ const AdminDashboard = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const { data } = await supabase.rpc('has_role', {
+        const { data: superAdminData } = await supabase.rpc('has_role', {
           _user_id: session.user.id,
           _role: 'super_admin'
         });
-        setIsSuperAdmin(data || false);
+        const { data: adminData } = await supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'admin'
+        });
+        setIsSuperAdmin(superAdminData || false);
+        setIsAdmin(adminData || false);
       }
     };
 
@@ -33,6 +39,7 @@ const AdminDashboard = () => {
         checkSession();
       } else {
         setIsSuperAdmin(false);
+        setIsAdmin(false);
       }
     });
 
@@ -48,7 +55,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {isSuperAdmin && (
+          {(isSuperAdmin || isAdmin) && (
             <Card className="border-primary">
               <CardHeader>
                 <CardTitle>User Management</CardTitle>

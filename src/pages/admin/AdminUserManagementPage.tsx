@@ -38,7 +38,8 @@ import {
   Loader2, 
   RefreshCw,
   UserX,
-  Clock
+  Clock,
+  Key
 } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -51,7 +52,7 @@ interface UserProfile {
   last_active_at: string | null;
   role: Database["public"]["Enums"]["app_role"] | null;
   role_id: string | null;
-  status: "active" | "pending" | "rejected";
+  status: "active" | "pending" | "rejected" | "disabled";
   admin_request_id: string | null;
   requested_role: Database["public"]["Enums"]["app_role"] | null;
 }
@@ -61,46 +62,55 @@ const AdminUserManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [revokeUser, setRevokeUser] = useState<UserProfile | null>(null);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
-    checkSuperAdmin();
+    checkAdminAccess();
   }, []);
 
-  const checkSuperAdmin = async () => {
+  const checkAdminAccess = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsSuperAdmin(false);
+        setIsAdmin(false);
         toast.error("You must be logged in");
         return;
       }
 
       setCurrentUserId(user.id);
 
-      const { data, error } = await supabase.rpc('has_role', {
+      const { data: superAdminCheck } = await supabase.rpc('has_role', {
         _user_id: user.id,
         _role: 'super_admin'
       });
 
-      if (error) throw error;
+      const { data: adminCheck } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      });
       
-      if (!data) {
-        toast.error("Access Denied: Super Admin role required");
-        setIsSuperAdmin(false);
+      setIsSuperAdmin(superAdminCheck || false);
+      setIsAdmin(adminCheck || false);
+
+      if (!superAdminCheck && !adminCheck) {
+        toast.error("Access Denied: Admin or Super Admin role required");
         return;
       }
 
-      setIsSuperAdmin(true);
       await fetchAllUsers();
     } catch (error: any) {
-      console.error("Error checking super admin:", error);
+      console.error("Error checking admin access:", error);
       setIsSuperAdmin(false);
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
@@ -137,8 +147,11 @@ const AdminUserManagementPage = () => {
           .filter(r => r.user_id === profile.id)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
 
-        let status: "active" | "pending" | "rejected" = "active";
-        if (adminRequest) {
+        // Use profile status if exists, otherwise derive from admin_requests
+        let status: "active" | "pending" | "rejected" | "disabled" = "active";
+        if (profile.status) {
+          status = profile.status as "active" | "pending" | "rejected" | "disabled";
+        } else if (adminRequest) {
           if (adminRequest.status === "pending") status = "pending";
           else if (adminRequest.status === "rejected") status = "rejected";
         }
@@ -287,11 +300,64 @@ const AdminUserManagementPage = () => {
     }
   };
 
+  const updateStatus = async (userId: string, newStatus: "active" | "disabled") => {
+    setUpdatingStatus(userId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ status: newStatus })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast.success(`User ${newStatus === "active" ? "activated" : "disabled"} successfully`);
+      await fetchAllUsers();
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      toast.error(error.message || "Failed to update status");
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const handlePasswordReset = async (userId: string, userEmail: string, isSuperAdmin: boolean) => {
+    setResettingPassword(userId);
+    try {
+      // Use Supabase password reset email
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+      
+      toast.success(`Password reset email sent to ${userEmail}`);
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      toast.error(error.message || "Failed to send password reset email");
+    } finally {
+      setResettingPassword(null);
+    }
+  };
+
+  const getRoleLabel = (role: string | null): string => {
+    if (!role) return "No Role";
+    const roleMap: Record<string, string> = {
+      'super_admin': 'Super Admin',
+      'admin': 'Admin',
+      'content_editor': 'Content Manager',
+      'content_manager': 'Content Manager',
+      'moderator': 'Moderator',
+      'user': 'User'
+    };
+    return roleMap[role] || role.replace('_', ' ');
+  };
+
   const getRoleBadgeVariant = (role: string | null): "default" | "destructive" | "secondary" | "outline" => {
     switch (role) {
       case 'super_admin': return 'destructive';
       case 'admin': return 'default';
-      case 'content_editor': return 'secondary';
+      case 'content_editor':
+      case 'content_manager': return 'secondary';
       case 'moderator': return 'outline';
       default: return 'outline';
     }
@@ -301,7 +367,8 @@ const AdminUserManagementPage = () => {
     switch (status) {
       case 'active': return 'default';
       case 'pending': return 'secondary';
-      case 'rejected': return 'destructive';
+      case 'rejected': 
+      case 'disabled': return 'destructive';
       default: return 'secondary';
     }
   };
@@ -335,7 +402,7 @@ const AdminUserManagementPage = () => {
     );
   }
 
-  if (!isSuperAdmin) {
+  if (!isSuperAdmin && !isAdmin) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -482,9 +549,25 @@ const AdminUserManagementPage = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={getStatusBadgeVariant(user.status)}>
-                              {user.status}
-                            </Badge>
+                            {user.status === "pending" || user.status === "rejected" ? (
+                              <Badge variant={getStatusBadgeVariant(user.status)}>
+                                {user.status}
+                              </Badge>
+                            ) : (
+                              <Select
+                                value={user.status}
+                                onValueChange={(value) => updateStatus(user.id, value as "active" | "disabled")}
+                                disabled={isSelf || updatingStatus === user.id}
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-background z-50">
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="disabled">Disabled</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
                           </TableCell>
                           <TableCell>
                             {user.status === "pending" ? (
@@ -500,9 +583,10 @@ const AdminUserManagementPage = () => {
                                 </SelectTrigger>
                                 <SelectContent className="bg-background z-50">
                                   <SelectItem value="moderator">Approve as Moderator</SelectItem>
-                                  <SelectItem value="content_editor">Approve as Content Editor</SelectItem>
+                                  <SelectItem value="content_editor">Approve as Content Manager</SelectItem>
+                                  <SelectItem value="content_manager">Approve as Content Manager</SelectItem>
                                   <SelectItem value="admin">Approve as Admin</SelectItem>
-                                  <SelectItem value="super_admin">Approve as Super Admin</SelectItem>
+                                  {isSuperAdmin && <SelectItem value="super_admin">Approve as Super Admin</SelectItem>}
                                 </SelectContent>
                               </Select>
                             ) : (
@@ -521,10 +605,12 @@ const AdminUserManagementPage = () => {
                                   </SelectTrigger>
                                   <SelectContent className="bg-background z-50">
                                     <SelectItem value="none" disabled>Select role</SelectItem>
+                                    <SelectItem value="user">User</SelectItem>
                                     <SelectItem value="moderator">Moderator</SelectItem>
-                                    <SelectItem value="content_editor">Content Editor</SelectItem>
+                                    <SelectItem value="content_editor">Content Manager</SelectItem>
+                                    <SelectItem value="content_manager">Content Manager</SelectItem>
                                     <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                                    {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
                                   </SelectContent>
                                 </Select>
                                 {isUpdating && (
@@ -552,6 +638,17 @@ const AdminUserManagementPage = () => {
                                   title="Reject request"
                                 >
                                   <X className="h-4 w-4 text-destructive" />
+                                </Button>
+                              )}
+                              {user.status === "active" && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handlePasswordReset(user.id, user.email, user.role === 'super_admin')}
+                                  disabled={resettingPassword === user.id || (user.role === 'super_admin' && !isSuperAdmin)}
+                                  title={user.role === 'super_admin' && !isSuperAdmin ? "Only Super Admins can reset Super Admin passwords" : "Reset password"}
+                                >
+                                  <Key className="h-4 w-4" />
                                 </Button>
                               )}
                               <Button
@@ -611,7 +708,7 @@ const AdminUserManagementPage = () => {
                           <p className="text-sm text-muted-foreground">{user.email}</p>
                           {user.role && (
                             <Badge variant={getRoleBadgeVariant(user.role)} className="mt-2">
-                              {user.role.replace('_', ' ')}
+                              {getRoleLabel(user.role)}
                             </Badge>
                           )}
                         </div>
@@ -631,9 +728,10 @@ const AdminUserManagementPage = () => {
                               </SelectTrigger>
                               <SelectContent className="bg-background z-50">
                                 <SelectItem value="moderator">Moderator</SelectItem>
-                                <SelectItem value="content_editor">Content Editor</SelectItem>
+                                <SelectItem value="content_editor">Content Manager</SelectItem>
+                                <SelectItem value="content_manager">Content Manager</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
-                                <SelectItem value="super_admin">Super Admin</SelectItem>
+                                {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
                               </SelectContent>
                             </Select>
                             <Button
@@ -665,10 +763,12 @@ const AdminUserManagementPage = () => {
                                 </SelectTrigger>
                                 <SelectContent className="bg-background z-50">
                                   <SelectItem value="none" disabled>Select role</SelectItem>
+                                  <SelectItem value="user">User</SelectItem>
                                   <SelectItem value="moderator">Moderator</SelectItem>
-                                  <SelectItem value="content_editor">Content Editor</SelectItem>
+                                  <SelectItem value="content_editor">Content Manager</SelectItem>
+                                  <SelectItem value="content_manager">Content Manager</SelectItem>
                                   <SelectItem value="admin">Admin</SelectItem>
-                                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                                  {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
                                 </SelectContent>
                               </Select>
                               {isUpdating && (
@@ -679,6 +779,17 @@ const AdminUserManagementPage = () => {
                         )}
 
                         <div className="flex gap-2">
+                          {user.status === "active" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handlePasswordReset(user.id, user.email, user.role === 'super_admin')}
+                              disabled={resettingPassword === user.id || (user.role === 'super_admin' && !isSuperAdmin)}
+                            >
+                              <Key className="h-4 w-4 mr-2" />
+                              Reset Password
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -686,7 +797,7 @@ const AdminUserManagementPage = () => {
                             onClick={() => setSelectedUser(user)}
                           >
                             <Eye className="h-4 w-4 mr-2" />
-                            View Details
+                            View
                           </Button>
                           {user.role && !isSelf && (
                             <Button
@@ -744,7 +855,7 @@ const AdminUserManagementPage = () => {
                   <div className="mt-1">
                     {selectedUser.role ? (
                       <Badge variant={getRoleBadgeVariant(selectedUser.role)}>
-                        {selectedUser.role.replace('_', ' ')}
+                        {getRoleLabel(selectedUser.role)}
                       </Badge>
                     ) : (
                       <span className="text-sm">No role assigned</span>

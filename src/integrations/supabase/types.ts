@@ -546,6 +546,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_active_at: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -554,6 +555,7 @@ export type Database = {
           full_name?: string | null
           id: string
           last_active_at?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -562,6 +564,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_active_at?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -905,6 +908,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_reset_user_password: {
+        Args: { target_user_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -921,6 +928,7 @@ export type Database = {
         | "user"
         | "super_admin"
         | "content_editor"
+        | "content_manager"
       district_content_category: "Festival" | "Food" | "Place" | "Culture"
     }
     CompositeTypes: {
@@ -1056,6 +1064,7 @@ export const Constants = {
         "user",
         "super_admin",
         "content_editor",
+        "content_manager",
       ],
       district_content_category: ["Festival", "Food", "Place", "Culture"],
     },
