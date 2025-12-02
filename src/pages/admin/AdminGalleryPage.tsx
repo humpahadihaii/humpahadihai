@@ -85,7 +85,10 @@ export default function AdminGalleryPage() {
         .eq("id", editingItem.id);
 
       if (error) {
-        toast.error("Failed to update item");
+        console.error("Gallery update error:", error);
+        toast.error(`Failed to update: ${error.message || 'Unknown error'}`, {
+          description: error.details || error.hint,
+        });
       } else {
         toast.success("Item updated successfully");
         fetchItems();
@@ -97,7 +100,10 @@ export default function AdminGalleryPage() {
       const { error } = await supabase.from("gallery_items").insert([galleryData]);
 
       if (error) {
-        toast.error("Failed to create item");
+        console.error("Gallery insert error:", error);
+        toast.error(`Failed to create: ${error.message || 'Unknown error'}`, {
+          description: error.details || error.hint,
+        });
       } else {
         toast.success("Item created successfully");
         fetchItems();

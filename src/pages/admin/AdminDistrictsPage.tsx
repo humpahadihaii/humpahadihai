@@ -127,7 +127,10 @@ export default function AdminDistrictsPage() {
         .eq("id", editingDistrict.id);
 
       if (error) {
-        toast.error("Failed to update district");
+        console.error("District update error:", error);
+        toast.error(`Failed to update: ${error.message || 'Unknown error'}`, {
+          description: error.details || error.hint,
+        });
       } else {
         toast.success("District updated successfully");
         fetchDistricts();
@@ -139,7 +142,10 @@ export default function AdminDistrictsPage() {
       const { error } = await supabase.from("districts").insert(districtData);
 
       if (error) {
-        toast.error("Failed to create district");
+        console.error("District insert error:", error);
+        toast.error(`Failed to create: ${error.message || 'Unknown error'}`, {
+          description: error.details || error.hint,
+        });
       } else {
         toast.success("District created successfully");
         fetchDistricts();
@@ -166,7 +172,10 @@ export default function AdminDistrictsPage() {
     const { error } = await supabase.from("districts").delete().eq("id", id);
 
     if (error) {
-      toast.error("Failed to delete district");
+      console.error("District delete error:", error);
+      toast.error(`Failed to delete: ${error.message || 'Unknown error'}`, {
+        description: error.details || error.hint,
+      });
     } else {
       toast.success("District deleted successfully");
       fetchDistricts();
