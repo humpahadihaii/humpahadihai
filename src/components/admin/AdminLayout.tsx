@@ -35,11 +35,12 @@ interface NavigationItem {
   href: string;
   icon: any;
   superAdminOnly?: boolean;
+  adminOnly?: boolean;
 }
 
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "User Management", href: "/admin/users", icon: Shield, superAdminOnly: true },
+  { name: "User Management", href: "/admin/users", icon: Shield, adminOnly: true },
   { name: "Districts", href: "/admin/districts", icon: Map },
   { name: "District Content", href: "/admin/district-content", icon: Calendar },
   { name: "Villages", href: "/admin/villages", icon: Home },
@@ -60,24 +61,31 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    checkSuperAdmin();
+    checkAdminRoles();
   }, []);
 
-  const checkSuperAdmin = async () => {
+  const checkAdminRoles = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase.rpc('has_role', {
+      const { data: superAdminData } = await supabase.rpc('has_role', {
         _user_id: user.id,
         _role: 'super_admin'
       });
       
-      setIsSuperAdmin(data || false);
+      const { data: adminData } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      });
+      
+      setIsSuperAdmin(superAdminData || false);
+      setIsAdmin(adminData || false);
     } catch (error) {
-      console.error("Error checking super admin:", error);
+      console.error("Error checking admin roles:", error);
     }
   };
 
@@ -104,7 +112,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
           {navigation
-            .filter(item => !item.superAdminOnly || isSuperAdmin)
+            .filter(item => {
+              if (item.superAdminOnly) return isSuperAdmin;
+              if (item.adminOnly) return isSuperAdmin || isAdmin;
+              return true;
+            })
             .map((item) => {
               const isActive = location.pathname === item.href;
               return (
