@@ -18,7 +18,9 @@ import {
   Menu,
   BarChart3,
   UserCheck,
-  Shield
+  Shield,
+  FileText,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,16 +43,16 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "User Management", href: "/admin/users", icon: Shield, adminOnly: true },
+  { name: "Culture", href: "/admin/content/culture", icon: FileText },
+  { name: "Food", href: "/admin/content/food", icon: FileText },
+  { name: "Travel", href: "/admin/content/travel", icon: FileText },
+  { name: "Thoughts", href: "/admin/content/thoughts", icon: MessageSquare },
   { name: "Districts", href: "/admin/districts", icon: Map },
   { name: "District Content", href: "/admin/district-content", icon: Calendar },
   { name: "Villages", href: "/admin/villages", icon: Home },
-  { name: "Highlights", href: "/admin/highlights", icon: Calendar },
-  { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },
-  { name: "Hotels", href: "/admin/hotels", icon: Hotel },
-  { name: "Festivals", href: "/admin/festivals", icon: Calendar },
   { name: "Gallery", href: "/admin/gallery", icon: Image },
-  { name: "Site Images", href: "/admin/site-images", icon: Image },
-  { name: "Thoughts", href: "/admin/thoughts", icon: MessageSquare },
+  { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },
+  { name: "Community Submissions", href: "/admin/community-submissions", icon: Users },
   { name: "Submissions", href: "/admin/submissions", icon: Mail },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ];
