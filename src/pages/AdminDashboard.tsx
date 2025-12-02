@@ -9,14 +9,31 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-    });
+      
+      if (session?.user) {
+        const { data } = await supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'super_admin'
+        });
+        setIsSuperAdmin(data || false);
+      }
+    };
+
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkSession();
+      } else {
+        setIsSuperAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -31,6 +48,20 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {isSuperAdmin && (
+            <Card className="border-primary">
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>Manage all users, roles, and permissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => navigate("/admin/users")}>
+                  Manage Users
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Districts</CardTitle>
