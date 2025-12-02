@@ -4,7 +4,8 @@ import { Menu, X, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import logo from "@/assets/hum-pahadi-logo-new.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,9 @@ const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { getImage } = useSiteImages();
+  
+  const logo = getImage('site_logo', logoFallback);
 
   useEffect(() => {
     const checkAdminStatus = async () => {

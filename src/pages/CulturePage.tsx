@@ -8,8 +8,8 @@ import aipanPatternOptimized from "@/assets/aipan-pattern-optimized.webp";
 
 const CulturePage = () => {
   const { getImage } = useSiteImages();
-  const folkDanceImage = getImage('folk-dance', folkDanceImageFallback);
-  const aipanPattern = getImage('aipan-pattern', aipanPatternFallback);
+  const cultureSectionImage = getImage('culture_section_image', folkDanceImageFallback);
+  const festivalSectionImage = getImage('festival_section_image', aipanPatternFallback);
 
   const festivals = [
     {
@@ -66,7 +66,7 @@ const CulturePage = () => {
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${folkDanceImageOptimized}), url(${folkDanceImage})` }}
+          style={{ backgroundImage: `url(${cultureSectionImage})` }}
         >
           <div className="absolute inset-0 bg-primary/70"></div>
         </div>
@@ -193,17 +193,14 @@ const CulturePage = () => {
 
           {/* Aipan Showcase */}
           <div className="mt-16 rounded-2xl overflow-hidden shadow-xl">
-            <picture>
-              <source srcSet={aipanPatternOptimized} type="image/webp" />
-              <img 
-                src={aipanPattern} 
-                alt="Traditional Aipan Art Pattern" 
-                loading="lazy"
-                width="1200"
-                height="256"
-                className="w-full h-64 object-cover"
-              />
-            </picture>
+            <img 
+              src={festivalSectionImage} 
+              alt="Traditional Festival Art Pattern" 
+              loading="lazy"
+              width="1200"
+              height="256"
+              className="w-full h-64 object-cover"
+            />
             <div className="bg-card p-8">
               <h3 className="text-2xl font-bold text-primary mb-4">The Art of Aipan</h3>
               <p className="text-foreground/80 leading-relaxed">

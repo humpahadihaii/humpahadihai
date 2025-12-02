@@ -1,8 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Users, Mountain } from "lucide-react";
-import logo from "@/assets/hum-pahadi-logo.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import logoFallback from "@/assets/hum-pahadi-logo.jpg";
 
 const AboutPage = () => {
+  const { getImage } = useSiteImages();
+  const logo = getImage('about_section_image', logoFallback);
+  
   return (
     <div className="min-h-screen">
       {/* Hero */}

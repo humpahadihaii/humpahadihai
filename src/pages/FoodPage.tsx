@@ -1,8 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import foodImage from "@/assets/pahadi-food.jpg";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import foodImageFallback from "@/assets/pahadi-food.jpg";
 
 const FoodPage = () => {
+  const { getImage } = useSiteImages();
+  const foodImage = getImage('food_section_image', foodImageFallback);
+  
   const stapleDishes = [
     {
       name: "Kafuli",

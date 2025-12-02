@@ -12,8 +12,8 @@ import aipanPatternOptimized from "@/assets/aipan-pattern-optimized.webp";
 const HomePage = () => {
   const { getImage } = useSiteImages();
   
-  const heroImage = getImage('hero-mountains', heroImageFallback);
-  const aipanPattern = getImage('aipan-pattern', aipanPatternFallback);
+  const heroImage = getImage('hero_banner', heroImageFallback);
+  const instagramBackground = getImage('instagram_cta_background', aipanPatternFallback);
 
   const { data: highlights = [] } = useQuery({
     queryKey: ["featured-highlights"],
@@ -164,7 +164,7 @@ const HomePage = () => {
           <div 
             className="rounded-2xl p-12 shadow-xl relative overflow-hidden"
             style={{ 
-              backgroundImage: `url(${aipanPatternOptimized}), url(${aipanPattern})`,
+              backgroundImage: `url(${instagramBackground})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
