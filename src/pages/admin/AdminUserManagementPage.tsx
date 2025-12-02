@@ -51,7 +51,6 @@ interface UserProfile {
   created_at: string;
   last_active_at: string | null;
   role: Database["public"]["Enums"]["app_role"] | null;
-  role_id: string | null;
   status: "active" | "pending" | "rejected" | "disabled";
   admin_request_id: string | null;
   requested_role: Database["public"]["Enums"]["app_role"] | null;
@@ -120,7 +119,7 @@ const AdminUserManagementPage = () => {
     try {
       console.log('[UserManagement] Fetching all users...');
       
-      // Fetch all profiles
+      // Fetch all profiles (role is now in profiles table)
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -132,18 +131,6 @@ const AdminUserManagementPage = () => {
       }
 
       console.log('[UserManagement] Fetched profiles:', profiles?.length || 0);
-
-      // Fetch all roles
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
-
-      if (rolesError) {
-        console.error('[UserManagement] Roles fetch error:', rolesError);
-        throw new Error(`Failed to fetch roles: ${rolesError.message}`);
-      }
-
-      console.log('[UserManagement] Fetched roles:', roles?.length || 0);
 
       // Fetch all admin requests
       const { data: requests, error: requestsError } = await supabase
@@ -159,7 +146,6 @@ const AdminUserManagementPage = () => {
 
       // Combine all data
       const allUsers: UserProfile[] = profiles.map(profile => {
-        const userRole = roles.find(r => r.user_id === profile.id);
         const adminRequest = requests
           .filter(r => r.user_id === profile.id)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
@@ -174,9 +160,12 @@ const AdminUserManagementPage = () => {
         }
 
         return {
-          ...profile,
-          role: userRole?.role || null,
-          role_id: userRole?.id || null,
+          id: profile.id,
+          email: profile.email,
+          full_name: profile.full_name,
+          created_at: profile.created_at,
+          last_active_at: profile.last_active_at,
+          role: profile.role || null,
           status,
           admin_request_id: adminRequest?.id || null,
           requested_role: adminRequest?.requested_role || null
@@ -212,21 +201,31 @@ const AdminUserManagementPage = () => {
         if (updateError) throw updateError;
       }
 
-      // Grant or update the role
-      if (user.role_id) {
+      // Grant or update the role in user_roles (trigger will sync to profiles)
+      if (user.role) {
+        // Update existing role
         const { error } = await supabase
           .from("user_roles")
           .update({ role: roleToGrant })
-          .eq("id", user.role_id);
+          .eq("user_id", user.id);
 
         if (error) throw error;
       } else {
+        // Insert new role
         const { error } = await supabase
           .from("user_roles")
           .insert({ user_id: user.id, role: roleToGrant });
 
         if (error) throw error;
       }
+
+      // Also update profile status to active
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ status: "active" })
+        .eq("id", user.id);
+
+      if (profileError) throw profileError;
 
       toast.success(`User approved as ${roleToGrant.replace('_', ' ')}`);
       await fetchAllUsers();
@@ -267,17 +266,19 @@ const AdminUserManagementPage = () => {
     }
   };
 
-  const updateRole = async (userId: string, roleId: string | null, newRole: Database["public"]["Enums"]["app_role"]) => {
+  const updateRole = async (userId: string, hasRole: boolean, newRole: Database["public"]["Enums"]["app_role"]) => {
     setUpdatingRole(userId);
     try {
-      if (roleId) {
+      if (hasRole) {
+        // Update existing role
         const { error } = await supabase
           .from("user_roles")
           .update({ role: newRole })
-          .eq("id", roleId);
+          .eq("user_id", userId);
 
         if (error) throw error;
       } else {
+        // Insert new role
         const { error } = await supabase
           .from("user_roles")
           .insert({ user_id: userId, role: newRole });
@@ -296,14 +297,15 @@ const AdminUserManagementPage = () => {
   };
 
   const handleRevokeRole = async () => {
-    if (!revokeUser?.role_id) return;
+    if (!revokeUser?.role) return;
 
     setProcessing(revokeUser.id);
     try {
+      // Delete from user_roles (trigger will sync to profiles)
       const { error } = await supabase
         .from("user_roles")
         .delete()
-        .eq("id", revokeUser.role_id);
+        .eq("user_id", revokeUser.id);
 
       if (error) throw error;
       
@@ -613,7 +615,7 @@ const AdminUserManagementPage = () => {
                                   value={user.role || "none"}
                                   onValueChange={(value) => {
                                     if (value !== "none") {
-                                      updateRole(user.id, user.role_id, value as Database["public"]["Enums"]["app_role"]);
+                                      updateRole(user.id, !!user.role, value as Database["public"]["Enums"]["app_role"]);
                                     }
                                   }}
                                   disabled={isSelf || isProcessing || isUpdating}
@@ -771,7 +773,7 @@ const AdminUserManagementPage = () => {
                                 value={user.role || "none"}
                                 onValueChange={(value) => {
                                   if (value !== "none") {
-                                    updateRole(user.id, user.role_id, value as Database["public"]["Enums"]["app_role"]);
+                                    updateRole(user.id, !!user.role, value as Database["public"]["Enums"]["app_role"]);
                                   }
                                 }}
                                 disabled={isSelf || isProcessing || isUpdating}

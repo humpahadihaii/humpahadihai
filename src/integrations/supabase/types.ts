@@ -546,6 +546,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_active_at: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
           status: string | null
           updated_at: string
         }
@@ -555,6 +556,7 @@ export type Database = {
           full_name?: string | null
           id: string
           last_active_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           status?: string | null
           updated_at?: string
         }
@@ -564,6 +566,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_active_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           status?: string | null
           updated_at?: string
         }
@@ -912,7 +915,18 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: Json
       }
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      user_has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
