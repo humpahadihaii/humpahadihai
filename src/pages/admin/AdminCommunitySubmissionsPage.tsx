@@ -72,7 +72,9 @@ export default function AdminCommunitySubmissionsPage() {
 
     if (error) {
       console.error("Update error:", error);
-      toast.error("Failed to update submission");
+      toast.error(`Failed to update: ${error.message || 'Unknown error'}`, {
+        description: error.details || error.hint,
+      });
     } else {
       toast.success(`Submission ${newStatus}`);
       fetchSubmissions();

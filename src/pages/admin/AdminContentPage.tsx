@@ -94,6 +94,17 @@ export default function AdminContentPage({ contentType, title, description }: Ad
       return;
     }
 
+    // Validate and parse meta_json
+    let parsedMetaJson = {};
+    if (data.meta_json) {
+      try {
+        parsedMetaJson = JSON.parse(data.meta_json);
+      } catch (e) {
+        toast.error("Invalid JSON in meta fields");
+        return;
+      }
+    }
+
     const contentData: any = {
       type: contentType,
       title: data.title,
@@ -103,7 +114,7 @@ export default function AdminContentPage({ contentType, title, description }: Ad
       main_image_url: data.main_image_url || null,
       status: data.status,
       author_id: user.id,
-      meta_json: data.meta_json ? JSON.parse(data.meta_json) : {},
+      meta_json: parsedMetaJson,
       published_at: data.status === "published" ? new Date().toISOString() : null,
     };
 
@@ -115,7 +126,10 @@ export default function AdminContentPage({ contentType, title, description }: Ad
 
       if (error) {
         console.error("Update error:", error);
-        toast.error("Failed to update content");
+        // Show detailed error to admin users
+        toast.error(`Failed to update: ${error.message || error.code || 'Unknown error'}`, {
+          description: error.details || error.hint,
+        });
       } else {
         toast.success("Content updated successfully");
         fetchItems();
@@ -128,7 +142,10 @@ export default function AdminContentPage({ contentType, title, description }: Ad
 
       if (error) {
         console.error("Insert error:", error);
-        toast.error("Failed to create content");
+        // Show detailed error to admin users
+        toast.error(`Failed to create: ${error.message || error.code || 'Unknown error'}`, {
+          description: error.details || error.hint,
+        });
       } else {
         toast.success("Content created successfully");
         fetchItems();
