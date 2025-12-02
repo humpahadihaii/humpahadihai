@@ -1,41 +1,35 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSiteImages } from "@/hooks/useSiteImages";
-import folkDanceImageFallback from "@/assets/folk-dance.jpg";
-import folkDanceImageOptimized from "@/assets/folk-dance-optimized.webp";
-import foodImageFallback from "@/assets/pahadi-food.jpg";
-import foodImageOptimized from "@/assets/pahadi-food-optimized.webp";
-import mountainImageFallback from "@/assets/hero-mountains.jpg";
-import aipanImageFallback from "@/assets/aipan-pattern.jpg";
-import aipanImageOptimized from "@/assets/aipan-pattern-optimized.webp";
+import type { Database } from "@/integrations/supabase/types";
+
+type GalleryItem = Database["public"]["Tables"]["gallery_items"]["Row"];
 
 const GalleryPage = () => {
   const [activeTab, setActiveTab] = useState("all");
-  const { getImage } = useSiteImages();
-  
-  const folkDanceImage = getImage('folk-dance', folkDanceImageFallback);
-  const foodImage = getImage('pahadi-food', foodImageFallback);
-  const mountainImage = getImage('hero-mountains', mountainImageFallback);
-  const aipanImage = getImage('aipan-pattern', aipanImageFallback);
 
-  // Placeholder gallery items - in production, these would be fetched from Instagram or a CMS
-  const galleryItems = [
-    { id: 1, category: "festivals", image: folkDanceImage, imageOptimized: folkDanceImageOptimized, title: "Traditional Jhora Dance" },
-    { id: 2, category: "food", image: foodImage, imageOptimized: foodImageOptimized, title: "Authentic Pahadi Thali" },
-    { id: 3, category: "nature", image: mountainImage, imageOptimized: mountainImage, title: "Himalayan Sunrise" },
-    { id: 4, category: "handicrafts", image: aipanImage, imageOptimized: aipanImageOptimized, title: "Traditional Aipan Art" },
-    { id: 5, category: "festivals", image: folkDanceImage, imageOptimized: folkDanceImageOptimized, title: "Festival Celebration" },
-    { id: 6, category: "food", image: foodImage, imageOptimized: foodImageOptimized, title: "Local Delicacies" },
-    { id: 7, category: "nature", image: mountainImage, imageOptimized: mountainImage, title: "Mountain Valley" },
-    { id: 8, category: "handicrafts", image: aipanImage, imageOptimized: aipanImageOptimized, title: "Ringaal Craft" },
-  ];
+  const { data: galleryItems, isLoading } = useQuery({
+    queryKey: ["gallery-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_items")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as GalleryItem[];
+    },
+  });
+
+  const categories = Array.from(new Set(galleryItems?.map(item => item.category.toLowerCase()) || []));
 
   const filteredItems = activeTab === "all" 
     ? galleryItems 
-    : galleryItems.filter(item => item.category === activeTab);
+    : galleryItems?.filter(item => item.category.toLowerCase() === activeTab);
 
   return (
     <div className="min-h-screen">
@@ -59,45 +53,47 @@ const GalleryPage = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-7xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-5 mb-12">
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-auto mb-12 overflow-x-auto">
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="festivals">Festivals</TabsTrigger>
-              <TabsTrigger value="food">Food</TabsTrigger>
-              <TabsTrigger value="nature">Nature</TabsTrigger>
-              <TabsTrigger value="handicrafts">Crafts</TabsTrigger>
+              {categories.map((cat) => (
+                <TabsTrigger key={cat} value={cat} className="capitalize">
+                  {cat}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredItems.map((item) => (
-                  <Card 
-                    key={item.id} 
-                    className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300"
-                  >
-                    <div className="relative aspect-square overflow-hidden">
-                      <picture>
-                        <source srcSet={item.imageOptimized} type="image/webp" />
-                        <img 
-                          src={item.image} 
-                          alt={item.title}
-                          loading="lazy"
-                          width="400"
-                          height="400"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </picture>
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                        <p className="text-white font-medium">{item.title}</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              {filteredItems.length === 0 && (
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <Skeleton key={i} className="aspect-square" />
+                  ))}
+                </div>
+              ) : filteredItems && filteredItems.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <p className="text-lg">No images in this category yet.</p>
                   <p className="text-sm mt-2">Check back soon or follow us on Instagram for updates!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredItems?.map((item) => (
+                    <Card 
+                      key={item.id} 
+                      className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300"
+                    >
+                      <div className="relative aspect-square overflow-hidden">
+                        <img 
+                          src={item.image_url} 
+                          alt={item.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                          <p className="text-white font-medium">{item.title}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
               )}
             </TabsContent>

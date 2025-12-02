@@ -21,8 +21,16 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminRoute from "./components/AdminRoute";
 import ThoughtsPage from "./pages/ThoughtsPage";
 import SubmitThoughtPage from "./pages/SubmitThoughtPage";
+import SubmitStoryPage from "./pages/SubmitStoryPage";
+import MySubmissionsPage from "./pages/MySubmissionsPage";
+import ContentDetailPage from "./pages/ContentDetailPage";
 import AdminThoughtsPage from "./pages/AdminThoughtsPage";
 import AdminSubmissionsPage from "./pages/AdminSubmissionsPage";
+import AdminCommunitySubmissionsPage from "./pages/admin/AdminCommunitySubmissionsPage";
+import AdminCulturePage from "./pages/admin/AdminCulturePage";
+import AdminFoodContentPage from "./pages/admin/AdminFoodContentPage";
+import AdminTravelContentPage from "./pages/admin/AdminTravelContentPage";
+import AdminThoughtsContentPage from "./pages/admin/AdminThoughtsContentPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import AdminDistrictsPage from "./pages/admin/AdminDistrictsPage";
 import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
@@ -54,8 +62,11 @@ const App = () => (
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/culture" element={<CulturePage />} />
+              <Route path="/culture/:slug" element={<ContentDetailPage contentType="culture" />} />
               <Route path="/food" element={<FoodPage />} />
+              <Route path="/food/:slug" element={<ContentDetailPage contentType="food" />} />
               <Route path="/travel" element={<TravelPage />} />
+              <Route path="/travel/:slug" element={<ContentDetailPage contentType="travel" />} />
               <Route path="/districts" element={<DistrictsPage />} />
               <Route path="/districts/:slug" element={<DistrictDetailPage />} />
               <Route path="/villages/:slug" element={<VillageDetailPage />} />
@@ -63,17 +74,25 @@ const App = () => (
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/thoughts" element={<ThoughtsPage />} />
+              <Route path="/thoughts/:slug" element={<ContentDetailPage contentType="thought" />} />
               <Route path="/submit-thought" element={<SubmitThoughtPage />} />
+              <Route path="/submit-story" element={<SubmitStoryPage />} />
+              <Route path="/my-submissions" element={<MySubmissionsPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/pending-approval" element={<PendingApprovalPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
+              <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
+              <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />
+              <Route path="/admin/content/thoughts" element={<AdminRoute><AdminThoughtsContentPage /></AdminRoute>} />
+              <Route path="/admin/community-submissions" element={<AdminRoute><AdminCommunitySubmissionsPage /></AdminRoute>} />
               <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
               <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
               <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
               <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
               <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
-          <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
-          <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
+              <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
+              <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
               <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
               <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
               <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
