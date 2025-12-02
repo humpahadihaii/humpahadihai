@@ -122,6 +122,120 @@ export type Database = {
         }
         Relationships: []
       }
+      community_submissions: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          linked_content_item_id: string | null
+          linked_gallery_item_id: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          status: string
+          target_section: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          linked_content_item_id?: string | null
+          linked_gallery_item_id?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          target_section: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          linked_content_item_id?: string | null
+          linked_gallery_item_id?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          target_section?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_submissions_linked_content_item_id_fkey"
+            columns: ["linked_content_item_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_submissions_linked_gallery_item_id_fkey"
+            columns: ["linked_gallery_item_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_items: {
+        Row: {
+          author_id: string | null
+          body: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          main_image_url: string | null
+          meta_json: Json | null
+          published_at: string | null
+          slug: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          body?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          main_image_url?: string | null
+          meta_json?: Json | null
+          published_at?: string | null
+          slug: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          main_image_url?: string | null
+          meta_json?: Json | null
+          published_at?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       content_versions: {
         Row: {
           change_description: string | null
