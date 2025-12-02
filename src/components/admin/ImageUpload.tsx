@@ -60,7 +60,7 @@ export const ImageUpload = ({ label, value, onChange, id }: ImageUploadProps) =>
       if (uploadError) {
         console.error("Upload error:", uploadError);
         if (uploadError.message.includes("row-level security") || uploadError.message.includes("permission")) {
-          toast.error("Permission denied. You need admin or editor role to upload images.");
+          toast.error("You do not have permission to upload images.");
         } else if (uploadError.message.includes("already exists")) {
           toast.error("File already exists. Please try again.");
         } else {
