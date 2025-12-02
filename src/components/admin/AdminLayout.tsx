@@ -62,6 +62,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isContentManager, setIsContentManager] = useState(false);
 
   useEffect(() => {
     checkAdminRoles();
@@ -72,18 +73,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: superAdminData } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'super_admin'
-      });
+      const [superAdminCheck, adminCheck, contentManagerCheck, contentEditorCheck] = await Promise.all([
+        supabase.rpc('has_role', { _user_id: user.id, _role: 'super_admin' }),
+        supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
+        supabase.rpc('has_role', { _user_id: user.id, _role: 'content_manager' }),
+        supabase.rpc('has_role', { _user_id: user.id, _role: 'content_editor' })
+      ]);
       
-      const { data: adminData } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin'
-      });
-      
-      setIsSuperAdmin(superAdminData || false);
-      setIsAdmin(adminData || false);
+      setIsSuperAdmin(superAdminCheck.data || false);
+      setIsAdmin(adminCheck.data || false);
+      setIsContentManager(contentManagerCheck.data || contentEditorCheck.data || false);
     } catch (error) {
       console.error("Error checking admin roles:", error);
     }
@@ -115,6 +114,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             .filter(item => {
               if (item.superAdminOnly) return isSuperAdmin;
               if (item.adminOnly) return isSuperAdmin || isAdmin;
+              // Content managers can access all content-related pages
               return true;
             })
             .map((item) => {

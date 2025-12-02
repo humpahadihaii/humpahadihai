@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isContentManager, setIsContentManager] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -18,16 +19,15 @@ const AdminDashboard = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const { data: superAdminData } = await supabase.rpc('has_role', {
-          _user_id: session.user.id,
-          _role: 'super_admin'
-        });
-        const { data: adminData } = await supabase.rpc('has_role', {
-          _user_id: session.user.id,
-          _role: 'admin'
-        });
-        setIsSuperAdmin(superAdminData || false);
-        setIsAdmin(adminData || false);
+        const [superAdminCheck, adminCheck, contentManagerCheck, contentEditorCheck] = await Promise.all([
+          supabase.rpc('has_role', { _user_id: session.user.id, _role: 'super_admin' }),
+          supabase.rpc('has_role', { _user_id: session.user.id, _role: 'admin' }),
+          supabase.rpc('has_role', { _user_id: session.user.id, _role: 'content_manager' }),
+          supabase.rpc('has_role', { _user_id: session.user.id, _role: 'content_editor' })
+        ]);
+        setIsSuperAdmin(superAdminCheck.data || false);
+        setIsAdmin(adminCheck.data || false);
+        setIsContentManager(contentManagerCheck.data || contentEditorCheck.data || false);
       }
     };
 
@@ -40,6 +40,7 @@ const AdminDashboard = () => {
       } else {
         setIsSuperAdmin(false);
         setIsAdmin(false);
+        setIsContentManager(false);
       }
     });
 
@@ -116,6 +117,20 @@ const AdminDashboard = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {(isSuperAdmin || isAdmin || isContentManager) && (
+            <Card className="border-primary/30">
+              <CardHeader>
+                <CardTitle>Featured Highlights</CardTitle>
+                <CardDescription>Manage homepage featured cards with drag-and-drop</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => navigate("/admin/featured-highlights")}>
+                  Manage Featured
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
