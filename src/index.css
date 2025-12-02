@@ -2,6 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Quill Rich Text Editor Styles */
+.ql-toolbar {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.ql-container {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border)) !important;
+  border-top: none !important;
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-size: 0.875rem;
+  min-height: 200px;
+}
+
+.ql-editor {
+  min-height: 200px;
+  color: hsl(var(--foreground));
+}
+
+.ql-editor.ql-blank::before {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.ql-snow .ql-stroke {
+  stroke: hsl(var(--foreground)) !important;
+}
+
+.ql-snow .ql-fill {
+  fill: hsl(var(--foreground)) !important;
+}
+
+.ql-snow .ql-picker-label {
+  color: hsl(var(--foreground)) !important;
+}
+
+.ql-toolbar button:hover,
+.ql-toolbar button.ql-active {
+  background: hsl(var(--accent));
+}
+
+.rich-text-editor {
+  margin-top: 0.5rem;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
