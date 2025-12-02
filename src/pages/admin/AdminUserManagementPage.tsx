@@ -118,27 +118,44 @@ const AdminUserManagementPage = () => {
 
   const fetchAllUsers = async () => {
     try {
+      console.log('[UserManagement] Fetching all users...');
+      
       // Fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('[UserManagement] Profiles fetch error:', profilesError);
+        throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
+      }
+
+      console.log('[UserManagement] Fetched profiles:', profiles?.length || 0);
 
       // Fetch all roles
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("*");
 
-      if (rolesError) throw rolesError;
+      if (rolesError) {
+        console.error('[UserManagement] Roles fetch error:', rolesError);
+        throw new Error(`Failed to fetch roles: ${rolesError.message}`);
+      }
+
+      console.log('[UserManagement] Fetched roles:', roles?.length || 0);
 
       // Fetch all admin requests
       const { data: requests, error: requestsError } = await supabase
         .from("admin_requests")
         .select("*");
 
-      if (requestsError) throw requestsError;
+      if (requestsError) {
+        console.error('[UserManagement] Admin requests fetch error:', requestsError);
+        throw new Error(`Failed to fetch admin requests: ${requestsError.message}`);
+      }
+
+      console.log('[UserManagement] Fetched admin requests:', requests?.length || 0);
 
       // Combine all data
       const allUsers: UserProfile[] = profiles.map(profile => {
@@ -166,10 +183,11 @@ const AdminUserManagementPage = () => {
         };
       });
 
+      console.log('[UserManagement] Combined users:', allUsers.length);
       setUsers(allUsers);
     } catch (error: any) {
-      console.error("Error fetching users:", error);
-      toast.error("Failed to load users");
+      console.error('[UserManagement] Fatal error fetching users:', error);
+      toast.error(error.message || "Failed to load users. Check console for details.");
     }
   };
 
