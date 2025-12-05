@@ -957,6 +957,7 @@ export type Database = {
           slug: string
           status: string | null
           stories: string | null
+          tehsil: string | null
           thumbnail_url: string | null
           traditions: string | null
           travel_tips: string | null
@@ -981,6 +982,7 @@ export type Database = {
           slug: string
           status?: string | null
           stories?: string | null
+          tehsil?: string | null
           thumbnail_url?: string | null
           traditions?: string | null
           travel_tips?: string | null
@@ -1005,6 +1007,7 @@ export type Database = {
           slug?: string
           status?: string | null
           stories?: string | null
+          tehsil?: string | null
           thumbnail_url?: string | null
           traditions?: string | null
           travel_tips?: string | null
