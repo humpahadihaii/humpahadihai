@@ -193,6 +193,7 @@ export type Database = {
           author_id: string | null
           body: string | null
           created_at: string
+          district_id: string | null
           excerpt: string | null
           id: string
           main_image_url: string | null
@@ -208,6 +209,7 @@ export type Database = {
           author_id?: string | null
           body?: string | null
           created_at?: string
+          district_id?: string | null
           excerpt?: string | null
           id?: string
           main_image_url?: string | null
@@ -223,6 +225,7 @@ export type Database = {
           author_id?: string | null
           body?: string | null
           created_at?: string
+          district_id?: string | null
           excerpt?: string | null
           id?: string
           main_image_url?: string | null
@@ -234,7 +237,15 @@ export type Database = {
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "content_items_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_versions: {
         Row: {
