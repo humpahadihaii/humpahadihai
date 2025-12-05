@@ -4,10 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Calendar, MapPin } from "lucide-react";
+import DOMPurify from "dompurify";
 import type { Database } from "@/integrations/supabase/types";
 
-type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
+type ContentItem = Database["public"]["Tables"]["content_items"]["Row"] & {
+  districts?: { name: string; slug: string } | null;
+};
 
 interface ContentDetailPageProps {
   contentType: "culture" | "food" | "travel" | "thought";
@@ -21,7 +25,7 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("content_items")
-        .select("*")
+        .select("*, districts(name, slug)")
         .eq("type", contentType)
         .eq("slug", slug)
         .eq("status", "published")
@@ -29,6 +33,25 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
       if (error) throw error;
       return data as ContentItem | null;
     },
+  });
+
+  // Fetch related content from the same district
+  const { data: relatedItems } = useQuery({
+    queryKey: ["related-content", contentType, item?.district_id],
+    queryFn: async () => {
+      if (!item?.district_id) return [];
+      const { data, error } = await supabase
+        .from("content_items")
+        .select("id, title, slug, main_image_url")
+        .eq("district_id", item.district_id)
+        .eq("type", contentType)
+        .eq("status", "published")
+        .neq("id", item.id)
+        .limit(3);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!item?.district_id,
   });
 
   if (isLoading) {
@@ -62,6 +85,12 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
     );
   }
 
+  // Sanitize HTML content to prevent XSS
+  const sanitizedBody = DOMPurify.sanitize(item.body || "", {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'img'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel'],
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       {/* Hero Image */}
@@ -90,6 +119,19 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
             {item.title}
           </h1>
 
+          {/* District Badge */}
+          {item.districts && (
+            <Link to={`/districts/${item.districts.slug}`}>
+              <Badge 
+                variant="outline" 
+                className="mb-4 hover:bg-secondary transition-colors cursor-pointer"
+              >
+                <MapPin className="h-3 w-3 mr-1" />
+                Famous in: {item.districts.name}
+              </Badge>
+            </Link>
+          )}
+
           {item.excerpt && (
             <p className="text-xl text-muted-foreground mb-6 italic">
               {item.excerpt}
@@ -111,8 +153,37 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
 
           <div 
             className="prose prose-lg max-w-none prose-headings:text-primary prose-a:text-secondary hover:prose-a:text-secondary/80"
-            dangerouslySetInnerHTML={{ __html: item.body || "" }}
+            dangerouslySetInnerHTML={{ __html: sanitizedBody }}
           />
+
+          {/* Related Content from Same District */}
+          {relatedItems && relatedItems.length > 0 && item.districts && (
+            <div className="mt-16 pt-8 border-t">
+              <h3 className="text-2xl font-bold mb-6">
+                More from {item.districts.name}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {relatedItems.map((related) => (
+                  <Link key={related.id} to={`/${contentType}/${related.slug}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                      {related.main_image_url && (
+                        <div className="h-32 overflow-hidden">
+                          <img
+                            src={related.main_image_url}
+                            alt={related.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          />
+                        </div>
+                      )}
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold line-clamp-2">{related.title}</h4>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </article>
     </div>

@@ -12,13 +12,14 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, MapPin } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import type { Database } from "@/integrations/supabase/types";
 
 type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
+type District = Database["public"]["Tables"]["districts"]["Row"];
 
 interface AdminContentPageProps {
   contentType: "culture" | "food" | "travel" | "thought";
@@ -33,16 +34,19 @@ const contentSchema = z.object({
   body: z.string().min(10, "Content body required"),
   main_image_url: z.string().optional(),
   status: z.enum(["draft", "published"]),
+  district_id: z.string().optional(),
   meta_json: z.string().optional(),
 });
 
 type ContentFormData = z.infer<typeof contentSchema>;
 
 export default function AdminContentPage({ contentType, title, description }: AdminContentPageProps) {
-  const [items, setItems] = useState<ContentItem[]>([]);
+  const [items, setItems] = useState<(ContentItem & { districts?: { name: string } | null })[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
 
@@ -55,19 +59,34 @@ export default function AdminContentPage({ contentType, title, description }: Ad
       body: "",
       main_image_url: "",
       status: "draft",
+      district_id: "",
       meta_json: "{}",
     },
   });
 
   useEffect(() => {
     fetchItems();
+    fetchDistricts();
   }, [contentType]);
+
+  const fetchDistricts = async () => {
+    const { data, error } = await supabase
+      .from("districts")
+      .select("*")
+      .order("name");
+    
+    if (error) {
+      console.error("Error fetching districts:", error);
+    } else {
+      setDistricts(data || []);
+    }
+  };
 
   const fetchItems = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("content_items")
-      .select("*")
+      .select("*, districts(name)")
       .eq("type", contentType)
       .order("created_at", { ascending: false });
 
@@ -94,7 +113,6 @@ export default function AdminContentPage({ contentType, title, description }: Ad
       return;
     }
 
-    // Validate and parse meta_json
     let parsedMetaJson = {};
     if (data.meta_json) {
       try {
@@ -114,6 +132,7 @@ export default function AdminContentPage({ contentType, title, description }: Ad
       main_image_url: data.main_image_url || null,
       status: data.status,
       author_id: user.id,
+      district_id: data.district_id && data.district_id !== "none" ? data.district_id : null,
       meta_json: parsedMetaJson,
       published_at: data.status === "published" ? new Date().toISOString() : null,
     };
@@ -126,7 +145,6 @@ export default function AdminContentPage({ contentType, title, description }: Ad
 
       if (error) {
         console.error("Update error:", error);
-        // Show detailed error to admin users
         toast.error(`Failed to update: ${error.message || error.code || 'Unknown error'}`, {
           description: error.details || error.hint,
         });
@@ -142,7 +160,6 @@ export default function AdminContentPage({ contentType, title, description }: Ad
 
       if (error) {
         console.error("Insert error:", error);
-        // Show detailed error to admin users
         toast.error(`Failed to create: ${error.message || error.code || 'Unknown error'}`, {
           description: error.details || error.hint,
         });
@@ -164,6 +181,7 @@ export default function AdminContentPage({ contentType, title, description }: Ad
       body: item.body || "",
       main_image_url: item.main_image_url || "",
       status: item.status as "draft" | "published",
+      district_id: (item as any).district_id || "",
       meta_json: JSON.stringify(item.meta_json || {}, null, 2),
     });
     setDialogOpen(true);
@@ -186,7 +204,10 @@ export default function AdminContentPage({ contentType, title, description }: Ad
   const filteredItems = items.filter((item) => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesDistrict = districtFilter === "all" || 
+      (districtFilter === "none" && !(item as any).district_id) ||
+      (item as any).district_id === districtFilter;
+    return matchesSearch && matchesStatus && matchesDistrict;
   });
 
   return (
@@ -215,6 +236,39 @@ export default function AdminContentPage({ contentType, title, description }: Ad
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  {/* District Selector - Prominent at Top */}
+                  <FormField
+                    control={form.control}
+                    name="district_id"
+                    render={({ field }) => (
+                      <FormItem className="bg-secondary/30 p-4 rounded-lg border">
+                        <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                          <MapPin className="h-4 w-4" />
+                          Associated District
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a district (optional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">General Uttarakhand (No specific district)</SelectItem>
+                            {districts.map((district) => (
+                              <SelectItem key={district.id} value={district.id}>
+                                {district.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          Link this content to a specific district for the hub-and-spoke navigation
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -336,8 +390,8 @@ export default function AdminContentPage({ contentType, title, description }: Ad
 
         <Card>
           <CardHeader>
-            <div className="flex gap-4">
-              <div className="relative flex-1">
+            <div className="flex flex-wrap gap-4">
+              <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search content..."
@@ -347,13 +401,27 @@ export default function AdminContentPage({ contentType, title, description }: Ad
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[150px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={districtFilter} onValueChange={setDistrictFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by District" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Districts</SelectItem>
+                  <SelectItem value="none">No District</SelectItem>
+                  {districts.map((district) => (
+                    <SelectItem key={district.id} value={district.id}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -369,17 +437,27 @@ export default function AdminContentPage({ contentType, title, description }: Ad
                   <TableHeader>
                     <TableRow>
                       <TableHead>Title</TableHead>
+                      <TableHead>District</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Published</TableHead>
-                      <TableHead>Updated</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredItems.map((item) => (
                       <TableRow key={item.id}>
-                        <TableCell className="font-medium max-w-[300px] truncate">
+                        <TableCell className="font-medium max-w-[250px] truncate">
                           {item.title}
+                        </TableCell>
+                        <TableCell>
+                          {item.districts?.name ? (
+                            <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                              <MapPin className="h-3 w-3" />
+                              {item.districts.name}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">General</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Badge variant={item.status === "published" ? "default" : "secondary"}>
@@ -390,9 +468,6 @@ export default function AdminContentPage({ contentType, title, description }: Ad
                           {item.published_at
                             ? new Date(item.published_at).toLocaleDateString()
                             : "-"}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(item.updated_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
