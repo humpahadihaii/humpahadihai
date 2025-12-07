@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { useCMSSettings } from "@/hooks/useCMSSettings";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
 
 const Navigation = () => {
@@ -14,8 +15,10 @@ const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { getImage } = useSiteImages();
+  const { data: settings } = useCMSSettings();
   
-  const logo = getImage('site_logo', logoFallback);
+  const logo = settings?.logo_image || getImage('site_logo', logoFallback);
+  const siteName = settings?.site_name || "Hum Pahadi Haii";
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -72,9 +75,9 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src={logo} alt="Hum Pahadi Haii Logo" width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
+            <img src={logo} alt={`${siteName} Logo`} width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-primary">Hum Pahadi Haii</h1>
+              <h1 className="text-xl font-bold text-primary">{siteName}</h1>
               <p className="text-xs text-muted-foreground">Uttarakhand Heritage</p>
             </div>
           </Link>

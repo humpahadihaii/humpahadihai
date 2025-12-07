@@ -122,6 +122,291 @@ export type Database = {
         }
         Relationships: []
       }
+      cms_content_sections: {
+        Row: {
+          body: string | null
+          created_at: string
+          display_order: number
+          id: string
+          is_published: boolean
+          section_image: string | null
+          slug: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          section_image?: string | null
+          slug: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          section_image?: string | null
+          slug?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cms_events: {
+        Row: {
+          banner_image_url: string | null
+          created_at: string
+          description: string | null
+          event_date: string | null
+          id: string
+          is_featured: boolean
+          location: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          banner_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          is_featured?: boolean
+          location?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          banner_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          is_featured?: boolean
+          location?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cms_footer_links: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_external: boolean
+          label: string
+          page_slug: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_external?: boolean
+          label: string
+          page_slug?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_external?: boolean
+          label?: string
+          page_slug?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      cms_pages: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cms_site_settings: {
+        Row: {
+          created_at: string
+          email_admin: string | null
+          email_collabs: string | null
+          email_contact: string | null
+          email_copyright: string | null
+          email_info: string | null
+          email_post: string | null
+          email_promotions: string | null
+          email_support: string | null
+          email_team: string | null
+          facebook_url: string | null
+          hero_background_image: string | null
+          id: string
+          instagram_url: string | null
+          logo_image: string | null
+          meta_description: string
+          meta_title: string
+          primary_cta_text: string
+          primary_cta_url: string
+          secondary_cta_text: string
+          secondary_cta_url: string
+          site_name: string
+          tagline: string
+          twitter_url: string | null
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_admin?: string | null
+          email_collabs?: string | null
+          email_contact?: string | null
+          email_copyright?: string | null
+          email_info?: string | null
+          email_post?: string | null
+          email_promotions?: string | null
+          email_support?: string | null
+          email_team?: string | null
+          facebook_url?: string | null
+          hero_background_image?: string | null
+          id?: string
+          instagram_url?: string | null
+          logo_image?: string | null
+          meta_description?: string
+          meta_title?: string
+          primary_cta_text?: string
+          primary_cta_url?: string
+          secondary_cta_text?: string
+          secondary_cta_url?: string
+          site_name?: string
+          tagline?: string
+          twitter_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_admin?: string | null
+          email_collabs?: string | null
+          email_contact?: string | null
+          email_copyright?: string | null
+          email_info?: string | null
+          email_post?: string | null
+          email_promotions?: string | null
+          email_support?: string | null
+          email_team?: string | null
+          facebook_url?: string | null
+          hero_background_image?: string | null
+          id?: string
+          instagram_url?: string | null
+          logo_image?: string | null
+          meta_description?: string
+          meta_title?: string
+          primary_cta_text?: string
+          primary_cta_url?: string
+          secondary_cta_text?: string
+          secondary_cta_url?: string
+          site_name?: string
+          tagline?: string
+          twitter_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      cms_stories: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          body: string | null
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          published_at: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          body?: string | null
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          body?: string | null
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       community_submissions: {
         Row: {
           body: string | null
@@ -187,6 +472,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contact_messages: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          notes: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          notes?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       content_items: {
         Row: {
@@ -581,6 +905,10 @@ export type Database = {
           description: string | null
           id: string
           image_url: string
+          is_featured: boolean
+          location: string | null
+          tags: string[] | null
+          taken_at: string | null
           title: string
           updated_at: string
         }
@@ -590,6 +918,10 @@ export type Database = {
           description?: string | null
           id?: string
           image_url: string
+          is_featured?: boolean
+          location?: string | null
+          tags?: string[] | null
+          taken_at?: string | null
           title: string
           updated_at?: string
         }
@@ -599,6 +931,10 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string
+          is_featured?: boolean
+          location?: string | null
+          tags?: string[] | null
+          taken_at?: string | null
           title?: string
           updated_at?: string
         }
@@ -1071,6 +1407,14 @@ export type Database = {
         | "super_admin"
         | "content_editor"
         | "content_manager"
+        | "author"
+        | "reviewer"
+        | "media_manager"
+        | "seo_manager"
+        | "support_agent"
+        | "analytics_viewer"
+        | "viewer"
+        | "developer"
       district_content_category: "Festival" | "Food" | "Place" | "Culture"
     }
     CompositeTypes: {
@@ -1207,6 +1551,14 @@ export const Constants = {
         "super_admin",
         "content_editor",
         "content_manager",
+        "author",
+        "reviewer",
+        "media_manager",
+        "seo_manager",
+        "support_agent",
+        "analytics_viewer",
+        "viewer",
+        "developer",
       ],
       district_content_category: ["Festival", "Food", "Place", "Culture"],
     },
