@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCMSSettings } from "@/hooks/useCMSSettings";
+import { performLogout } from "@/lib/auth";
+import { toast } from "sonner";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
 
 const Navigation = () => {
@@ -48,10 +50,18 @@ const Navigation = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsAdmin(false);
-    navigate("/");
+    try {
+      toast.success("Signing out...");
+      // Reset local state immediately
+      setUser(null);
+      setIsAdmin(false);
+      setIsOpen(false);
+      // Perform full logout with redirect
+      await performLogout();
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Error signing out. Please try again.");
+    }
   };
 
   const navItems = [

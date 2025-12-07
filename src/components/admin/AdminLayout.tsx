@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { performLogout } from "@/lib/auth";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -97,12 +98,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
-      toast.success("Signed out successfully");
-      navigate("/");
+    try {
+      toast.success("Signing out...");
+      // Perform full logout with redirect to auth page
+      await performLogout();
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Error signing out. Please try again.");
     }
   };
 
