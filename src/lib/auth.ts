@@ -43,7 +43,7 @@ export const performLogout = async (): Promise<void> => {
   });
 
   // 5. Force redirect to auth page using window.location for a clean slate
-  window.location.href = '/auth';
+  window.location.href = '/login';
 };
 
 /**
@@ -93,10 +93,10 @@ export const handleLogoutWithNavigate = async (
     }
 
     // Navigate to auth page
-    navigate('/auth');
+    navigate('/login');
   } catch (error) {
     console.error("Logout error:", error);
     // Even if there's an error, try to redirect
-    navigate('/auth');
+    navigate('/login');
   }
 };
