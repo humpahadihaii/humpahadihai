@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
@@ -90,7 +90,8 @@ const App = () => (
               <Route path="/submit-thought" element={<SubmitThoughtPage />} />
               <Route path="/submit-story" element={<SubmitStoryPage />} />
               <Route path="/my-submissions" element={<MySubmissionsPage />} />
-              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/pending-approval" element={<PendingApprovalPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
