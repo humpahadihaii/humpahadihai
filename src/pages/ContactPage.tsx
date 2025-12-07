@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Mail, Instagram, Facebook, Youtube } from "lucide-react";
+import { Mail, Instagram, Facebook, Youtube, Send, HelpCircle, Camera, Megaphone, Handshake, Shield, Users, Settings } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -34,6 +34,72 @@ const contactSchema = z.object({
     .max(100, "Location must be less than 100 characters")
     .optional(),
 });
+
+const emailContacts = [
+  {
+    email: "contact@humpahadihaii.in",
+    label: "General Enquiries",
+    description: "For general questions and feedback about our platform",
+    icon: Mail,
+    color: "text-primary"
+  },
+  {
+    email: "support@humpahadihaii.in",
+    label: "Support & Technical Help",
+    description: "Having trouble? Our support team is here to help",
+    icon: HelpCircle,
+    color: "text-blue-500"
+  },
+  {
+    email: "info@humpahadihaii.in",
+    label: "Information & Media Requests",
+    description: "Press inquiries, interviews, and media partnerships",
+    icon: Send,
+    color: "text-emerald-500"
+  },
+  {
+    email: "post@humpahadihaii.in",
+    label: "Content Submission",
+    description: "Share your photos, videos, and stories from Uttarakhand",
+    icon: Camera,
+    color: "text-amber-500"
+  },
+  {
+    email: "promotions@humpahadihaii.in",
+    label: "Paid Promotions & Advertising",
+    description: "Promote your brand to our Pahadi community",
+    icon: Megaphone,
+    color: "text-rose-500"
+  },
+  {
+    email: "collabs@humpahadihaii.in",
+    label: "Brand & Creator Collaborations",
+    description: "Partner with us on creative projects and campaigns",
+    icon: Handshake,
+    color: "text-violet-500"
+  },
+  {
+    email: "copyright@humpahadihaii.in",
+    label: "Copyright / Credit / Removal",
+    description: "Content ownership, credit requests, or takedown notices",
+    icon: Shield,
+    color: "text-slate-500"
+  },
+  {
+    email: "team@humpahadihaii.in",
+    label: "Team Communication",
+    description: "Internal team and contributor communications",
+    icon: Users,
+    color: "text-teal-500"
+  },
+  {
+    email: "admin@humpahadihaii.in",
+    label: "Website & Admin Support",
+    description: "Technical administration and website management",
+    icon: Settings,
+    color: "text-orange-500"
+  }
+];
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -84,80 +150,136 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Hero */}
-      <section className="py-20 px-4 bg-gradient-to-b from-primary/5 to-background">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6">Get in Touch</h1>
-              <p className="text-xl text-foreground/80">
-                We'd love to hear from you. Share your stories, suggestions, or collaborations.
-              </p>
-            </div>
-            <div className="hidden lg:block">
-              <img 
-                src="/placeholder.svg" 
-                alt="Uttarakhand Map" 
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
-            </div>
+      <section className="py-16 md:py-24 px-4 bg-gradient-to-b from-primary/10 via-primary/5 to-background">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
+            Get in Touch
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            We'd love to hear from you! Whether you have questions, stories to share, 
+            or want to collaborate — reach out to the right team below.
+          </p>
+        </div>
+      </section>
+
+      {/* Email Directory */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+              Contact Directory
+            </h2>
+            <p className="text-muted-foreground">
+              Choose the right email for your query to get a faster response
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {emailContacts.map((contact) => {
+              const IconComponent = contact.icon;
+              return (
+                <a
+                  key={contact.email}
+                  href={`mailto:${contact.email}`}
+                  className="group block p-5 rounded-xl border border-border bg-card hover:bg-accent/50 hover:border-primary/30 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`p-2.5 rounded-lg bg-background border border-border group-hover:border-primary/20 ${contact.color}`}>
+                      <IconComponent className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm mb-1">
+                        {contact.label}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        {contact.description}
+                      </p>
+                      <p className="text-xs font-medium text-primary truncate group-hover:underline">
+                        {contact.email}
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="py-16 px-4">
+      {/* Contact Form & Social */}
+      <section className="py-12 md:py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Contact Form */}
-            <div>
-              <Card className="shadow-xl">
+            <div className="lg:col-span-3">
+              <Card className="shadow-lg border-border">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-primary">Send Us a Message</CardTitle>
+                  <CardTitle className="text-xl text-foreground">Send Us a Message</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    For quick queries, fill out this form and we'll respond within 48 hours.
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <Label htmlFor="name">Name *</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Your full name"
-                        className="mt-2"
-                        required
-                      />
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Name *</Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Your full name"
+                          className="mt-1.5"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="your.email@example.com"
+                          className="mt-1.5"
+                          required
+                        />
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="your.email@example.com"
-                        className="mt-2"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="reason">Reason for Contact *</Label>
-                      <select
-                        id="reason"
-                        value={formData.reason}
-                        onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring mt-2"
-                        required
-                      >
-                        <option value="">Select a reason</option>
-                        <option value="collaboration">Collaboration</option>
-                        <option value="media">Media Inquiry</option>
-                        <option value="cultural">Cultural Contribution</option>
-                        <option value="general">General Inquiry</option>
-                      </select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="reason">Reason for Contact *</Label>
+                        <select
+                          id="reason"
+                          value={formData.reason}
+                          onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring mt-1.5"
+                          required
+                        >
+                          <option value="">Select a reason</option>
+                          <option value="general">General Inquiry</option>
+                          <option value="collaboration">Collaboration</option>
+                          <option value="media">Media Inquiry</option>
+                          <option value="content">Content Submission</option>
+                          <option value="support">Technical Support</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="location">Location (Optional)</Label>
+                        <Input
+                          id="location"
+                          type="text"
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                          placeholder="Where are you from?"
+                          className="mt-1.5"
+                        />
+                      </div>
                     </div>
 
                     <div>
@@ -168,19 +290,7 @@ const ContactPage = () => {
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                         placeholder="What's this about?"
-                        className="mt-2"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="location">Location (Optional)</Label>
-                      <Input
-                        id="location"
-                        type="text"
-                        value={formData.location}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="Where are you from?"
-                        className="mt-2"
+                        className="mt-1.5"
                       />
                     </div>
 
@@ -191,117 +301,99 @@ const ContactPage = () => {
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         placeholder="Tell us what's on your mind..."
-                        rows={6}
-                        className="mt-2"
+                        rows={5}
+                        className="mt-1.5"
                         required
                       />
                     </div>
 
-                    <div className="bg-muted p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Note:</strong> We typically respond within 48 hours. For urgent matters, please reach out on Instagram.
-                      </p>
-                    </div>
-
-                    <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90">
-                      Send Message - सुक्रिया!
+                    <Button type="submit" size="lg" className="w-full">
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Message
                     </Button>
                   </form>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Contact Info & Social */}
-            <div className="space-y-8">
+            {/* Social & Info */}
+            <div className="lg:col-span-2 space-y-6">
               {/* Social Media */}
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-primary">Connect With Us</CardTitle>
+              <Card className="shadow-md border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-foreground">Follow Us</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-2">
                   <a 
                     href="https://instagram.com/hum_pahadi_haii" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted transition-colors group"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                   >
-                    <Instagram className="h-8 w-8 text-secondary group-hover:scale-110 transition-transform" />
+                    <Instagram className="h-5 w-5 text-pink-500" />
                     <div>
-                      <p className="font-bold text-foreground">Instagram</p>
-                      <p className="text-sm text-muted-foreground">@hum_pahadi_haii</p>
+                      <p className="font-medium text-foreground text-sm">@hum_pahadi_haii</p>
+                      <p className="text-xs text-muted-foreground">Instagram</p>
                     </div>
                   </a>
 
                   <a 
                     href="#"
-                    className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted transition-colors group"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                   >
-                    <Facebook className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
+                    <Facebook className="h-5 w-5 text-blue-600" />
                     <div>
-                      <p className="font-bold text-foreground">Facebook</p>
-                      <p className="text-sm text-muted-foreground">Hum Pahadi Haii</p>
+                      <p className="font-medium text-foreground text-sm">Hum Pahadi Haii</p>
+                      <p className="text-xs text-muted-foreground">Facebook</p>
                     </div>
                   </a>
 
                   <a 
                     href="#"
-                    className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted transition-colors group"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                   >
-                    <Youtube className="h-8 w-8 text-secondary group-hover:scale-110 transition-transform" />
+                    <Youtube className="h-5 w-5 text-red-600" />
                     <div>
-                      <p className="font-bold text-foreground">YouTube</p>
-                      <p className="text-sm text-muted-foreground">Hum Pahadi Haii</p>
-                    </div>
-                  </a>
-
-                  <a 
-                    href="mailto:contact@humpahadi.com"
-                    className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted transition-colors group"
-                  >
-                    <Mail className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
-                    <div>
-                      <p className="font-bold text-foreground">Email</p>
-                      <p className="text-sm text-muted-foreground">contact@humpahadi.com</p>
+                      <p className="font-medium text-foreground text-sm">Hum Pahadi Haii</p>
+                      <p className="text-xs text-muted-foreground">YouTube</p>
                     </div>
                   </a>
                 </CardContent>
               </Card>
 
-              {/* Collaboration */}
-              <Card className="shadow-lg bg-gradient-to-br from-primary/5 to-accent/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-primary">Collaborations</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-foreground/80">
-                  <p>We're open to collaborations with:</p>
-                  <ul className="list-disc list-inside space-y-2 ml-2">
-                    <li>Cultural organizations and heritage groups</li>
-                    <li>Traditional artisans and craftspeople</li>
-                    <li>Food bloggers and culinary experts</li>
-                    <li>Travel writers and photographers</li>
-                    <li>Researchers studying Himalayan culture</li>
-                    <li>Tourism boards and ethical travel companies</li>
-                  </ul>
-                  <p className="pt-2 font-medium">
-                    Have an idea? Let's work together to celebrate Uttarakhand!
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Newsletter */}
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-xl text-primary">Newsletter (Coming Soon)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground/80 mb-4">
-                    Subscribe to receive monthly updates on Pahadi culture, festivals, recipes, and travel tips.
-                  </p>
-                  <div className="flex gap-2">
-                    <Input type="email" placeholder="Enter your email" disabled />
-                    <Button disabled>Subscribe</Button>
+              {/* Quick Note */}
+              <Card className="shadow-md border-border bg-primary/5">
+                <CardContent className="pt-5">
+                  <div className="flex gap-3">
+                    <Mail className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground text-sm mb-1">Response Time</p>
+                      <p className="text-xs text-muted-foreground">
+                        We typically respond within 24-48 hours. For urgent matters, DM us on Instagram for faster assistance.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">Newsletter feature launching soon!</p>
+                </CardContent>
+              </Card>
+
+              {/* Collaboration CTA */}
+              <Card className="shadow-md border-border">
+                <CardContent className="pt-5">
+                  <div className="flex gap-3">
+                    <Handshake className="h-5 w-5 text-violet-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground text-sm mb-1">Want to Collaborate?</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        We love working with creators, artists, and brands passionate about Uttarakhand.
+                      </p>
+                      <a 
+                        href="mailto:collabs@humpahadihaii.in" 
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        collabs@humpahadihaii.in →
+                      </a>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
