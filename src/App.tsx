@@ -47,6 +47,12 @@ import AdminFeaturedHighlightsPage from "./pages/admin/AdminFeaturedHighlightsPa
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
 import AdminRoleManagementPage from "./pages/admin/AdminRoleManagementPage";
 import AdminUserManagementPage from "./pages/admin/AdminUserManagementPage";
+import AdminSiteSettingsPage from "./pages/admin/AdminSiteSettingsPage";
+import AdminStoriesPage from "./pages/admin/AdminStoriesPage";
+import AdminEventsPage from "./pages/admin/AdminEventsPage";
+import AdminPagesPage from "./pages/admin/AdminPagesPage";
+import AdminFooterLinksPage from "./pages/admin/AdminFooterLinksPage";
+import AdminContentSectionsPage from "./pages/admin/AdminContentSectionsPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import NotFound from "./pages/NotFound";
 
@@ -107,6 +113,12 @@ const App = () => (
               <Route path="/admin/approvals" element={<AdminRoute><AdminApprovalsPage /></AdminRoute>} />
               <Route path="/admin/roles" element={<AdminRoute><AdminRoleManagementPage /></AdminRoute>} />
               <Route path="/admin/users" element={<AdminRoute><AdminUserManagementPage /></AdminRoute>} />
+              <Route path="/admin/site-settings" element={<AdminRoute><AdminSiteSettingsPage /></AdminRoute>} />
+              <Route path="/admin/stories" element={<AdminRoute><AdminStoriesPage /></AdminRoute>} />
+              <Route path="/admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
+              <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
+              <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
+              <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
