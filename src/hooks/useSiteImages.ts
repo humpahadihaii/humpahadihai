@@ -9,7 +9,10 @@ const fetchSiteImages = async () => {
   if (error) throw error;
   
   return data.reduce((acc, img) => {
-    acc[img.key] = img.image_url;
+    // Only include images that are not placeholder
+    if (img.image_url && img.image_url !== '/placeholder.svg') {
+      acc[img.key] = img.image_url;
+    }
     return acc;
   }, {} as Record<string, string>);
 };

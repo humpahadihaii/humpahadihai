@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Mail, Instagram, Facebook, Youtube, Send, HelpCircle, Camera, Megaphone, Handshake, Shield, Users, Settings } from "lucide-react";
+import { Mail, Instagram, Facebook, Youtube, Send, HelpCircle, Camera, Megaphone, Handshake, Shield, Users, Settings, FileText, Scale, AlertTriangle } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -325,7 +326,7 @@ const ContactPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <a 
-                    href="https://instagram.com/hum_pahadi_haii" 
+                    href="https://www.instagram.com/hum_pahadi_haii" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
@@ -338,7 +339,9 @@ const ContactPage = () => {
                   </a>
 
                   <a 
-                    href="#"
+                    href="https://www.facebook.com/humpahadihaii"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                   >
                     <Facebook className="h-5 w-5 text-blue-600" />
@@ -349,13 +352,30 @@ const ContactPage = () => {
                   </a>
 
                   <a 
-                    href="#"
+                    href="https://www.youtube.com/channel/UCXAv369YY6a7UYdbgqkhPvw?sub_confirmation=1"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                   >
                     <Youtube className="h-5 w-5 text-red-600" />
                     <div>
                       <p className="font-medium text-foreground text-sm">Hum Pahadi Haii</p>
                       <p className="text-xs text-muted-foreground">YouTube</p>
+                    </div>
+                  </a>
+
+                  <a 
+                    href="https://x.com/HumPahadiHaii"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <div>
+                      <p className="font-medium text-foreground text-sm">@HumPahadiHaii</p>
+                      <p className="text-xs text-muted-foreground">X (Twitter)</p>
                     </div>
                   </a>
                 </CardContent>
@@ -373,6 +393,47 @@ const ContactPage = () => {
                       </p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Legal Links */}
+              <Card className="shadow-md border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-foreground">Legal Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Link 
+                    to="/privacy-policy"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                  >
+                    <FileText className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">Privacy Policy</p>
+                      <p className="text-xs text-muted-foreground">How we collect, use, and protect your data</p>
+                    </div>
+                  </Link>
+
+                  <Link 
+                    to="/terms"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                  >
+                    <Scale className="h-5 w-5 text-emerald-500" />
+                    <div>
+                      <p className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">Terms & Conditions</p>
+                      <p className="text-xs text-muted-foreground">Rules and guidelines for using our platform</p>
+                    </div>
+                  </Link>
+
+                  <Link 
+                    to="/disclaimer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                  >
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <p className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">Disclaimer</p>
+                      <p className="text-xs text-muted-foreground">Important notices about content and liability</p>
+                    </div>
+                  </Link>
                 </CardContent>
               </Card>
 
