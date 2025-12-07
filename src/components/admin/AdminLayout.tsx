@@ -43,6 +43,12 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "User Management", href: "/admin/users", icon: Shield, adminOnly: true },
+  { name: "Site Settings", href: "/admin/site-settings", icon: Settings, adminOnly: true },
+  { name: "Content Sections", href: "/admin/content-sections", icon: FileText },
+  { name: "Stories", href: "/admin/stories", icon: FileText },
+  { name: "Events", href: "/admin/events", icon: Calendar },
+  { name: "Pages", href: "/admin/pages", icon: FileText },
+  { name: "Footer Links", href: "/admin/footer-links", icon: FileText },
   { name: "Culture", href: "/admin/content/culture", icon: FileText },
   { name: "Food", href: "/admin/content/food", icon: FileText },
   { name: "Travel", href: "/admin/content/travel", icon: FileText },
