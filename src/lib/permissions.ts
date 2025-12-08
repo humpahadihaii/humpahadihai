@@ -38,8 +38,8 @@ export type PermissionKey =
 
 export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   dashboard: ["super_admin", "admin", "content_manager", "analytics_viewer", "viewer", "moderator", "editor", "content_editor"],
-  users: ["super_admin", "admin"],
-  roles: ["super_admin"],
+  users: ["super_admin", "admin"], // Single unified user management page
+  roles: ["super_admin", "admin"], // Merged into users page
   contentSections: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
   stories: ["super_admin", "admin", "content_manager", "editor", "author", "reviewer", "moderator", "content_editor"],
   events: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
@@ -69,7 +69,7 @@ export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   productCategories: ["super_admin", "admin", "content_manager"],
   products: ["super_admin", "admin", "content_manager"],
   productOrders: ["super_admin", "admin", "content_manager", "support_agent"],
-  approvals: ["super_admin", "admin"],
+  approvals: ["super_admin", "admin"], // Merged into users page
   aiTools: ["super_admin", "admin", "content_manager", "editor"],
 };
 

@@ -6,15 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -26,6 +28,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 import { 
   Users, 
@@ -36,10 +43,12 @@ import {
   Trash2, 
   Loader2, 
   RefreshCw,
-  UserX,
   Clock,
   Key,
-  UserMinus
+  Check,
+  Pencil,
+  UserCheck,
+  UserX
 } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -48,10 +57,11 @@ import {
   getAssignableRoles, 
   getRoleLabel, 
   getRoleBadgeVariant,
-  isSuperAdmin as checkIsSuperAdmin,
   UserRole 
 } from "@/lib/roles";
 import { canDeleteUsers, canResetPasswords } from "@/lib/permissions";
+
+type AppRole = Database["public"]["Enums"]["app_role"];
 
 interface UserProfile {
   id: string;
@@ -59,11 +69,18 @@ interface UserProfile {
   full_name: string | null;
   created_at: string;
   last_active_at: string | null;
-  role: Database["public"]["Enums"]["app_role"] | null;
+  roles: AppRole[];
   status: "active" | "pending" | "rejected" | "disabled";
   admin_request_id: string | null;
-  requested_role: Database["public"]["Enums"]["app_role"] | null;
+  requested_role: AppRole | null;
 }
+
+const getInitials = (name: string | null, email: string) => {
+  if (name) {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+  return email.slice(0, 2).toUpperCase();
+};
 
 const AdminUserManagementPage = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -74,13 +91,18 @@ const AdminUserManagementPage = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<UserRole | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("active");
+  
+  // Dialog states
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [revokeUser, setRevokeUser] = useState<UserProfile | null>(null);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [editingRoles, setEditingRoles] = useState<AppRole[]>([]);
   const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
-  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [approvalUser, setApprovalUser] = useState<UserProfile | null>(null);
+  const [approvalRoles, setApprovalRoles] = useState<AppRole[]>(['viewer']);
+  
+  const [updatingRoles, setUpdatingRoles] = useState<string | null>(null);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     checkAdminAccess();
@@ -136,6 +158,12 @@ const AdminUserManagementPage = () => {
 
       if (profilesError) throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
 
+      const { data: allRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+
+      if (rolesError) throw new Error(`Failed to fetch roles: ${rolesError.message}`);
+
       const { data: requests, error: requestsError } = await supabase
         .from("admin_requests")
         .select("*");
@@ -146,6 +174,10 @@ const AdminUserManagementPage = () => {
         const adminRequest = requests
           .filter(r => r.user_id === profile.id)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+
+        const userRoles = allRoles
+          .filter(r => r.user_id === profile.id)
+          .map(r => r.role);
 
         let status: "active" | "pending" | "rejected" | "disabled" = "active";
         if (profile.status) {
@@ -161,7 +193,7 @@ const AdminUserManagementPage = () => {
           full_name: profile.full_name,
           created_at: profile.created_at,
           last_active_at: profile.last_active_at,
-          role: profile.role || null,
+          roles: userRoles,
           status,
           admin_request_id: adminRequest?.id || null,
           requested_role: adminRequest?.requested_role || null
@@ -175,47 +207,47 @@ const AdminUserManagementPage = () => {
     }
   };
 
-  const handleApprove = async (user: UserProfile, roleToGrant: Database["public"]["Enums"]["app_role"]) => {
-    setProcessing(user.id);
+  const handleApprove = async () => {
+    if (!approvalUser || approvalRoles.length === 0) {
+      toast.error("Please select at least one role");
+      return;
+    }
+
+    setProcessing(approvalUser.id);
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) throw new Error("Not authenticated");
 
-      if (user.admin_request_id) {
-        const { error: updateError } = await supabase
+      // Insert all selected roles
+      for (const role of approvalRoles) {
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: approvalUser.id, role });
+        if (error && !error.message.includes('duplicate')) throw error;
+      }
+
+      // Update admin request status
+      if (approvalUser.admin_request_id) {
+        await supabase
           .from("admin_requests")
           .update({
             status: "approved",
             approved_by: currentUser.id,
             approved_at: new Date().toISOString(),
-            requested_role: roleToGrant,
+            requested_role: approvalRoles[0],
           })
-          .eq("id", user.admin_request_id);
-
-        if (updateError) throw updateError;
+          .eq("id", approvalUser.admin_request_id);
       }
 
-      if (user.role) {
-        const { error } = await supabase
-          .from("user_roles")
-          .update({ role: roleToGrant })
-          .eq("user_id", user.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: user.id, role: roleToGrant });
-        if (error) throw error;
-      }
-
-      const { error: profileError } = await supabase
+      // Update profile status
+      await supabase
         .from("profiles")
         .update({ status: "active" })
-        .eq("id", user.id);
+        .eq("id", approvalUser.id);
 
-      if (profileError) throw profileError;
-
-      toast.success(`User approved as ${getRoleLabel(roleToGrant)}`);
+      toast.success(`User approved with ${approvalRoles.length} role(s)`);
+      setApprovalUser(null);
+      setApprovalRoles(['viewer']);
       await fetchAllUsers();
     } catch (error: any) {
       console.error("Approve error:", error);
@@ -232,7 +264,7 @@ const AdminUserManagementPage = () => {
       if (!currentUser) throw new Error("Not authenticated");
 
       if (user.admin_request_id) {
-        const { error } = await supabase
+        await supabase
           .from("admin_requests")
           .update({
             status: "rejected",
@@ -240,9 +272,12 @@ const AdminUserManagementPage = () => {
             approved_at: new Date().toISOString(),
           })
           .eq("id", user.admin_request_id);
-
-        if (error) throw error;
       }
+
+      await supabase
+        .from("profiles")
+        .update({ status: "rejected" })
+        .eq("id", user.id);
 
       toast.success("User request rejected");
       await fetchAllUsers();
@@ -254,66 +289,45 @@ const AdminUserManagementPage = () => {
     }
   };
 
-  const updateRole = async (userId: string, hasRole: boolean, newRole: Database["public"]["Enums"]["app_role"]) => {
-    setUpdatingRole(userId);
+  const handleSaveRoles = async () => {
+    if (!editingUser) return;
+
+    setUpdatingRoles(editingUser.id);
     try {
-      if (hasRole) {
+      // Delete all existing roles for this user
+      await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", editingUser.id);
+
+      // Insert new roles
+      for (const role of editingRoles) {
         const { error } = await supabase
           .from("user_roles")
-          .update({ role: newRole })
-          .eq("user_id", userId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: newRole });
+          .insert({ user_id: editingUser.id, role });
         if (error) throw error;
       }
 
-      toast.success("Role updated successfully");
+      toast.success("Roles updated successfully");
+      setEditingUser(null);
       await fetchAllUsers();
     } catch (error: any) {
-      console.error("Error updating role:", error);
-      toast.error(error.message || "Failed to update role");
+      console.error("Error updating roles:", error);
+      toast.error(error.message || "Failed to update roles");
     } finally {
-      setUpdatingRole(null);
-    }
-  };
-
-  const handleRevokeRole = async () => {
-    if (!revokeUser?.role) return;
-
-    setProcessing(revokeUser.id);
-    try {
-      const { error } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", revokeUser.id);
-
-      if (error) throw error;
-      
-      toast.success(`Access revoked for ${revokeUser.full_name || revokeUser.email}`);
-      await fetchAllUsers();
-      setRevokeUser(null);
-    } catch (error: any) {
-      console.error("Error revoking role:", error);
-      toast.error(error.message || "Failed to revoke access");
-    } finally {
-      setProcessing(null);
+      setUpdatingRoles(null);
     }
   };
 
   const handleDeleteUser = async () => {
     if (!deleteUser) return;
 
-    // Prevent self-deletion
     if (deleteUser.id === currentUserId) {
       toast.error("You cannot delete your own account");
       setDeleteUser(null);
       return;
     }
 
-    // Only super admin can delete
     if (!isSuperAdmin) {
       toast.error("Only Super Admins can delete users");
       setDeleteUser(null);
@@ -322,19 +336,9 @@ const AdminUserManagementPage = () => {
 
     setProcessing(deleteUser.id);
     try {
-      // First, delete from user_roles
-      await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", deleteUser.id);
-
-      // Delete admin requests
-      await supabase
-        .from("admin_requests")
-        .delete()
-        .eq("user_id", deleteUser.id);
-
-      // Delete profile (this should cascade or be handled by DB constraints)
+      await supabase.from("user_roles").delete().eq("user_id", deleteUser.id);
+      await supabase.from("admin_requests").delete().eq("user_id", deleteUser.id);
+      
       const { error: profileError } = await supabase
         .from("profiles")
         .delete()
@@ -342,64 +346,64 @@ const AdminUserManagementPage = () => {
 
       if (profileError) throw profileError;
       
-      toast.success(`User ${deleteUser.full_name || deleteUser.email} deleted successfully`);
-      await fetchAllUsers();
+      toast.success("User deleted successfully");
       setDeleteUser(null);
+      await fetchAllUsers();
     } catch (error: any) {
       console.error("Error deleting user:", error);
-      toast.error(error.message || "Failed to delete user. The user may still exist in auth.users.");
+      toast.error(error.message || "Failed to delete user");
     } finally {
       setProcessing(null);
     }
   };
 
-  const updateStatus = async (userId: string, newStatus: "active" | "disabled") => {
-    setUpdatingStatus(userId);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ status: newStatus })
-        .eq("id", userId);
-
-      if (error) throw error;
-
-      toast.success(`User ${newStatus === "active" ? "activated" : "disabled"} successfully`);
-      await fetchAllUsers();
-    } catch (error: any) {
-      console.error("Error updating status:", error);
-      toast.error(error.message || "Failed to update status");
-    } finally {
-      setUpdatingStatus(null);
-    }
-  };
-
-  const handlePasswordReset = async (userId: string, userEmail: string, targetIsSuperAdmin: boolean) => {
-    // Only admins and super admins can reset passwords
+  const handlePasswordReset = async (user: UserProfile) => {
     if (!canResetPasswords(currentUserRole)) {
       toast.error("You don't have permission to reset passwords");
       return;
     }
 
-    // Only super admin can reset super admin passwords
-    if (targetIsSuperAdmin && !isSuperAdmin) {
+    const userIsSuperAdmin = user.roles.includes('super_admin');
+    if (userIsSuperAdmin && !isSuperAdmin) {
       toast.error("Only Super Admins can reset Super Admin passwords");
       return;
     }
 
-    setResettingPassword(userId);
+    setResettingPassword(user.id);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo: `${window.location.origin}/login`,
       });
 
       if (error) throw error;
       
-      toast.success(`Password reset email sent to ${userEmail}`);
+      toast.success(`Password reset email sent to ${user.email}`);
     } catch (error: any) {
       console.error("Error resetting password:", error);
       toast.error(error.message || "Failed to send password reset email");
     } finally {
       setResettingPassword(null);
+    }
+  };
+
+  const openEditRoles = (user: UserProfile) => {
+    setEditingUser(user);
+    setEditingRoles([...user.roles]);
+  };
+
+  const toggleRole = (role: AppRole, isApproval = false) => {
+    if (isApproval) {
+      setApprovalRoles(prev => 
+        prev.includes(role) 
+          ? prev.filter(r => r !== role)
+          : [...prev, role]
+      );
+    } else {
+      setEditingRoles(prev => 
+        prev.includes(role) 
+          ? prev.filter(r => r !== role)
+          : [...prev, role]
+      );
     }
   };
 
@@ -413,24 +417,21 @@ const AdminUserManagementPage = () => {
     }
   };
 
-  // Get roles that current user can assign
   const assignableRoles = getAssignableRoles(currentUserRole);
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
-
-    const matchesTab = 
-      activeTab === "all" ||
-      (activeTab === "active" && user.role !== null) ||
-      (activeTab === "pending" && user.status === "pending") ||
-      (activeTab === "no-role" && user.role === null && user.status !== "pending");
-
-    return matchesSearch && matchesTab;
-  });
-
   const isCurrentUser = (userId: string) => userId === currentUserId;
+
+  const activeUsers = users.filter(u => u.status === 'active' && u.roles.length > 0);
+  const pendingUsers = users.filter(u => u.status === "pending");
+
+  const filteredActiveUsers = activeUsers.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+  );
+
+  const filteredPendingUsers = pendingUsers.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+  );
 
   if (loading) {
     return (
@@ -449,536 +450,550 @@ const AdminUserManagementPage = () => {
     return <Navigate to="/admin/unauthorized" replace />;
   }
 
-  const activeUsers = users.filter(u => u.role !== null);
-  const pendingUsers = users.filter(u => u.status === "pending");
-  const noRoleUsers = users.filter(u => u.role === null && u.status !== "pending");
-
   return (
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
+            <h1 className="text-3xl font-bold flex items-center gap-2 text-[#0A4D2E]">
               <Users className="h-8 w-8" />
               User Management
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage all users, roles, and access permissions
+              Manage users, roles, and access permissions
             </p>
           </div>
-          <Button onClick={fetchAllUsers} variant="outline" size="sm">
+          <Button onClick={fetchAllUsers} variant="outline" size="sm" className="border-[#0A4D2E] text-[#0A4D2E] hover:bg-[#0A4D2E]/10">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="border-[#0A4D2E]/20">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{users.length}</p>
+                  <p className="text-2xl font-bold text-[#0A4D2E]">{users.length}</p>
                 </div>
-                <Users className="h-8 w-8 text-primary" />
+                <Users className="h-8 w-8 text-[#0A4D2E]" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#0A4D2E]/20">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Users</p>
-                  <p className="text-2xl font-bold">{activeUsers.length}</p>
+                  <p className="text-2xl font-bold text-green-600">{activeUsers.length}</p>
                 </div>
-                <Shield className="h-8 w-8 text-green-500" />
+                <Shield className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#0A4D2E]/20">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold">{pendingUsers.length}</p>
+                  <p className="text-sm text-muted-foreground">Pending Requests</p>
+                  <p className="text-2xl font-bold text-yellow-600">{pendingUsers.length}</p>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">No Role</p>
-                  <p className="text-2xl font-bold">{noRoleUsers.length}</p>
-                </div>
-                <UserX className="h-8 w-8 text-muted-foreground" />
+                <Clock className="h-8 w-8 text-yellow-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Card>
+        {/* Main Content with Tabs */}
+        <Card className="border-[#0A4D2E]/20">
           <CardHeader>
-            <CardTitle>All Users</CardTitle>
+            <CardTitle className="text-[#0A4D2E]">Manage Users</CardTitle>
             <CardDescription>View and manage all registered users</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Search */}
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by email or name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-              <TabsList>
-                <TabsTrigger value="all">All ({users.length})</TabsTrigger>
-                <TabsTrigger value="active">Active ({activeUsers.length})</TabsTrigger>
-                <TabsTrigger value="pending">Pending ({pendingUsers.length})</TabsTrigger>
-                <TabsTrigger value="no-role">No Role ({noRoleUsers.length})</TabsTrigger>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4 bg-[#0A4D2E]/10">
+                <TabsTrigger value="active" className="data-[state=active]:bg-[#0A4D2E] data-[state=active]:text-white">
+                  Active Users ({activeUsers.length})
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="data-[state=active]:bg-[#0A4D2E] data-[state=active]:text-white">
+                  Pending Requests ({pendingUsers.length})
+                </TabsTrigger>
               </TabsList>
-            </Tabs>
 
-            {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Current Role</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Last Active</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                        No users found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredUsers.map((user) => {
-                      const isSelf = isCurrentUser(user.id);
-                      const isUpdating = updatingRole === user.id;
-                      const isProcessing = processing === user.id;
-                      const userIsSuperAdmin = user.role === 'super_admin';
-                      
-                      return (
-                        <TableRow key={user.id} className={isSelf ? "bg-muted/50" : ""}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">
-                                {user.full_name || "N/A"}
-                                {isSelf && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
-                              </p>
-                              <p className="text-sm text-muted-foreground">{user.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {user.status === "pending" || user.status === "rejected" ? (
-                              <Badge variant={getStatusBadgeVariant(user.status)}>
-                                {user.status}
-                              </Badge>
-                            ) : (
-                              <Select
-                                value={user.status}
-                                onValueChange={(value) => updateStatus(user.id, value as "active" | "disabled")}
-                                disabled={isSelf || updatingStatus === user.id}
-                              >
-                                <SelectTrigger className="w-[120px]">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-background z-50">
-                                  <SelectItem value="active">Active</SelectItem>
-                                  <SelectItem value="disabled">Disabled</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {user.status === "pending" ? (
-                              <Select
-                                value={user.requested_role || "moderator"}
-                                onValueChange={(value) => 
-                                  handleApprove(user, value as Database["public"]["Enums"]["app_role"])
-                                }
-                                disabled={isProcessing}
-                              >
-                                <SelectTrigger className="w-[180px]">
-                                  <SelectValue placeholder="Select role to approve" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-background z-50">
-                                  {assignableRoles.map(role => (
-                                    <SelectItem key={role} value={role}>
-                                      Approve as {getRoleLabel(role)}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <Select
-                                  value={user.role || "none"}
-                                  onValueChange={(value) => {
-                                    if (value !== "none") {
-                                      updateRole(user.id, !!user.role, value as Database["public"]["Enums"]["app_role"]);
-                                    }
-                                  }}
-                                  disabled={isSelf || isProcessing || isUpdating || (userIsSuperAdmin && !isSuperAdmin)}
-                                >
-                                  <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="No role" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-background z-50">
-                                    <SelectItem value="none" disabled>Select role</SelectItem>
-                                    {assignableRoles.map(role => (
-                                      <SelectItem key={role} value={role}>
-                                        {getRoleLabel(role)}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                {isUpdating && (
-                                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                                )}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(user.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {user.last_active_at 
-                              ? formatDistanceToNow(new Date(user.last_active_at), { addSuffix: true })
-                              : "Never"}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              {user.status === "pending" && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleReject(user)}
-                                  disabled={isProcessing}
-                                  title="Reject request"
-                                >
-                                  <X className="h-4 w-4 text-destructive" />
-                                </Button>
-                              )}
-                              {canResetPasswords(currentUserRole) && user.status === "active" && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handlePasswordReset(user.id, user.email, userIsSuperAdmin)}
-                                  disabled={resettingPassword === user.id || (userIsSuperAdmin && !isSuperAdmin)}
-                                  title={userIsSuperAdmin && !isSuperAdmin ? "Only Super Admins can reset Super Admin passwords" : "Reset password"}
-                                >
-                                  <Key className="h-4 w-4" />
-                                </Button>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setSelectedUser(user)}
-                                title="View details"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {user.role && !isSelf && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => setRevokeUser(user)}
-                                  disabled={isProcessing || (userIsSuperAdmin && !isSuperAdmin)}
-                                  title="Revoke access"
-                                >
-                                  <UserMinus className="h-4 w-4 text-orange-500" />
-                                </Button>
-                              )}
-                              {/* Delete button - Super Admin only */}
-                              {canDeleteUsers(currentUserRole) && !isSelf && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => setDeleteUser(user)}
-                                  disabled={isProcessing}
-                                  title="Delete user permanently"
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
+              {/* Search */}
+              <div className="mb-4">
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by email or name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-[#0A4D2E]/30 focus:border-[#0A4D2E]"
+                  />
+                </div>
+              </div>
+
+              {/* Active Users Tab */}
+              <TabsContent value="active">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto rounded-lg border border-[#0A4D2E]/20">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-[#0A4D2E]/5">
+                        <TableHead>User</TableHead>
+                        <TableHead>Roles</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Active</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredActiveUsers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                            No active users found
                           </TableCell>
                         </TableRow>
+                      ) : (
+                        filteredActiveUsers.map((user) => {
+                          const isSelf = isCurrentUser(user.id);
+                          const userIsSuperAdmin = user.roles.includes('super_admin');
+                          
+                          return (
+                            <TableRow key={user.id} className={isSelf ? "bg-[#0A4D2E]/5" : ""}>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-10 w-10 bg-[#0A4D2E] text-white">
+                                    <AvatarFallback className="bg-[#0A4D2E] text-white">
+                                      {getInitials(user.full_name, user.email)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="font-medium">
+                                      {user.full_name || "N/A"}
+                                      {isSelf && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-wrap gap-1">
+                                  {user.roles.length > 0 ? (
+                                    user.roles.map(role => (
+                                      <Badge key={role} variant={getRoleBadgeVariant(role)} className="text-xs">
+                                        {getRoleLabel(role)}
+                                      </Badge>
+                                    ))
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">No roles</span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={getStatusBadgeVariant(user.status)} className="capitalize">
+                                  {user.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {user.last_active_at 
+                                  ? formatDistanceToNow(new Date(user.last_active_at), { addSuffix: true })
+                                  : "Never"}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => openEditRoles(user)}
+                                    disabled={isSelf || (userIsSuperAdmin && !isSuperAdmin)}
+                                    title="Edit roles"
+                                  >
+                                    <Pencil className="h-4 w-4 text-[#0A4D2E]" />
+                                  </Button>
+                                  {canResetPasswords(currentUserRole) && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handlePasswordReset(user)}
+                                      disabled={resettingPassword === user.id || (userIsSuperAdmin && !isSuperAdmin)}
+                                      title="Reset password"
+                                    >
+                                      {resettingPassword === user.id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <Key className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  )}
+                                  {canDeleteUsers(currentUserRole) && !isSelf && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => setDeleteUser(user)}
+                                      disabled={processing === user.id}
+                                      title="Delete user"
+                                      className="text-destructive hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {filteredActiveUsers.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">No active users found</div>
+                  ) : (
+                    filteredActiveUsers.map((user) => {
+                      const isSelf = isCurrentUser(user.id);
+                      const userIsSuperAdmin = user.roles.includes('super_admin');
+
+                      return (
+                        <Card key={user.id} className={`border-[#0A4D2E]/20 ${isSelf ? "border-[#0A4D2E]" : ""}`}>
+                          <CardContent className="pt-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-12 w-12 bg-[#0A4D2E] text-white">
+                                <AvatarFallback className="bg-[#0A4D2E] text-white">
+                                  {getInitials(user.full_name, user.email)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <p className="font-medium">
+                                  {user.full_name || "N/A"}
+                                  {isSelf && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
+                                </p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
+                              </div>
+                              <Badge variant={getStatusBadgeVariant(user.status)} className="capitalize">
+                                {user.status}
+                              </Badge>
+                            </div>
+
+                            <div className="flex flex-wrap gap-1">
+                              {user.roles.map(role => (
+                                <Badge key={role} variant={getRoleBadgeVariant(role)} className="text-xs">
+                                  {getRoleLabel(role)}
+                                </Badge>
+                              ))}
+                            </div>
+
+                            <p className="text-sm text-muted-foreground">
+                              Last active: {user.last_active_at 
+                                ? formatDistanceToNow(new Date(user.last_active_at), { addSuffix: true })
+                                : "Never"}
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditRoles(user)}
+                                disabled={isSelf || (userIsSuperAdmin && !isSuperAdmin)}
+                                className="border-[#0A4D2E] text-[#0A4D2E]"
+                              >
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Roles
+                              </Button>
+                              {canResetPasswords(currentUserRole) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePasswordReset(user)}
+                                  disabled={resettingPassword === user.id || (userIsSuperAdmin && !isSuperAdmin)}
+                                >
+                                  <Key className="h-4 w-4 mr-2" />
+                                  Reset Password
+                                </Button>
+                              )}
+                              {canDeleteUsers(currentUserRole) && !isSelf && (
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => setDeleteUser(user)}
+                                  disabled={processing === user.id}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
                       );
                     })
                   )}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">
-                  No users found
                 </div>
-              ) : (
-                filteredUsers.map((user) => {
-                  const isSelf = isCurrentUser(user.id);
-                  const isUpdating = updatingRole === user.id;
-                  const isProcessing = processing === user.id;
-                  const userIsSuperAdmin = user.role === 'super_admin';
+              </TabsContent>
 
-                  return (
-                    <Card key={user.id} className={isSelf ? "border-primary" : ""}>
-                      <CardContent className="pt-6 space-y-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <p className="font-medium">
-                              {user.full_name || "N/A"}
-                              {isSelf && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
-                            </p>
-                            <Badge variant={getStatusBadgeVariant(user.status)}>
-                              {user.status}
-                            </Badge>
+              {/* Pending Requests Tab */}
+              <TabsContent value="pending">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto rounded-lg border border-[#0A4D2E]/20">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-[#0A4D2E]/5">
+                        <TableHead>User</TableHead>
+                        <TableHead>Requested Role</TableHead>
+                        <TableHead>Date Applied</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPendingUsers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                            No pending requests
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredPendingUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10 bg-yellow-500 text-white">
+                                  <AvatarFallback className="bg-yellow-500 text-white">
+                                    {getInitials(user.full_name, user.email)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{user.full_name || "N/A"}</p>
+                                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {user.requested_role ? (
+                                <Badge variant="secondary">
+                                  {getRoleLabel(user.requested_role)}
+                                </Badge>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">Not specified</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setApprovalUser(user);
+                                    setApprovalRoles(user.requested_role ? [user.requested_role] : ['viewer']);
+                                  }}
+                                  disabled={processing === user.id}
+                                  className="bg-[#0A4D2E] hover:bg-[#0A4D2E]/90"
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleReject(user)}
+                                  disabled={processing === user.id}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  Reject
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {filteredPendingUsers.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">No pending requests</div>
+                  ) : (
+                    filteredPendingUsers.map((user) => (
+                      <Card key={user.id} className="border-yellow-400">
+                        <CardContent className="pt-6 space-y-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-12 w-12 bg-yellow-500 text-white">
+                              <AvatarFallback className="bg-yellow-500 text-white">
+                                {getInitials(user.full_name, user.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-medium">{user.full_name || "N/A"}</p>
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                          {user.role && (
-                            <Badge variant={getRoleBadgeVariant(user.role)} className="mt-2">
-                              {getRoleLabel(user.role)}
-                            </Badge>
-                          )}
-                        </div>
 
-                        {user.status === "pending" ? (
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Approve as:</label>
-                            <Select
-                              value={user.requested_role || "moderator"}
-                              onValueChange={(value) => 
-                                handleApprove(user, value as Database["public"]["Enums"]["app_role"])
-                              }
-                              disabled={isProcessing}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Requested Role</p>
+                              {user.requested_role ? (
+                                <Badge variant="secondary">
+                                  {getRoleLabel(user.requested_role)}
+                                </Badge>
+                              ) : (
+                                <span className="text-sm">Not specified</span>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">Applied</p>
+                              <p className="text-sm">{new Date(user.created_at).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Button
+                              className="flex-1 bg-[#0A4D2E] hover:bg-[#0A4D2E]/90"
+                              onClick={() => {
+                                setApprovalUser(user);
+                                setApprovalRoles(user.requested_role ? [user.requested_role] : ['viewer']);
+                              }}
+                              disabled={processing === user.id}
                             >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-background z-50">
-                                {assignableRoles.map(role => (
-                                  <SelectItem key={role} value={role}>
-                                    {getRoleLabel(role)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              <Check className="h-4 w-4 mr-2" />
+                              Approve
+                            </Button>
                             <Button
                               variant="destructive"
-                              size="sm"
-                              className="w-full"
+                              className="flex-1"
                               onClick={() => handleReject(user)}
-                              disabled={isProcessing}
+                              disabled={processing === user.id}
                             >
                               <X className="h-4 w-4 mr-2" />
                               Reject
                             </Button>
                           </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Role</label>
-                            <div className="flex items-center gap-2">
-                              <Select
-                                value={user.role || "none"}
-                                onValueChange={(value) => {
-                                  if (value !== "none") {
-                                    updateRole(user.id, !!user.role, value as Database["public"]["Enums"]["app_role"]);
-                                  }
-                                }}
-                                disabled={isSelf || isProcessing || isUpdating || (userIsSuperAdmin && !isSuperAdmin)}
-                              >
-                                <SelectTrigger className="flex-1">
-                                  <SelectValue placeholder="No role" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-background z-50">
-                                  <SelectItem value="none" disabled>Select role</SelectItem>
-                                  {assignableRoles.map(role => (
-                                    <SelectItem key={role} value={role}>
-                                      {getRoleLabel(role)}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              {isUpdating && (
-                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex flex-wrap gap-2">
-                          {canResetPasswords(currentUserRole) && user.status === "active" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePasswordReset(user.id, user.email, userIsSuperAdmin)}
-                              disabled={resettingPassword === user.id || (userIsSuperAdmin && !isSuperAdmin)}
-                            >
-                              <Key className="h-4 w-4 mr-2" />
-                              Reset Password
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedUser(user)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          {user.role && !isSelf && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setRevokeUser(user)}
-                              disabled={isProcessing || (userIsSuperAdmin && !isSuperAdmin)}
-                            >
-                              <UserMinus className="h-4 w-4 mr-2" />
-                              Revoke
-                            </Button>
-                          )}
-                          {canDeleteUsers(currentUserRole) && !isSelf && (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => setDeleteUser(user)}
-                              disabled={isProcessing}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              )}
-            </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
-        {/* User Details Dialog */}
-        <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
-          <DialogContent>
+        {/* Edit Roles Dialog */}
+        <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>User Details</DialogTitle>
+              <DialogTitle className="text-[#0A4D2E]">Edit User Roles</DialogTitle>
               <DialogDescription>
-                Complete information about this user
+                Assign multiple roles to {editingUser?.full_name || editingUser?.email}
               </DialogDescription>
             </DialogHeader>
-            {selectedUser && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Full Name</label>
-                  <p className="text-base">{selectedUser.full_name || "N/A"}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Email</label>
-                  <p className="text-base">{selectedUser.email}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">User ID</label>
-                  <p className="text-xs font-mono bg-muted p-2 rounded">{selectedUser.id}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Status</label>
-                  <div className="mt-1">
-                    <Badge variant={getStatusBadgeVariant(selectedUser.status)}>
-                      {selectedUser.status}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Current Role</label>
-                  <div className="mt-1">
-                    {selectedUser.role ? (
-                      <Badge variant={getRoleBadgeVariant(selectedUser.role)}>
-                        {getRoleLabel(selectedUser.role)}
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground">Select one or more roles:</p>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {assignableRoles.map(role => (
+                  <div key={role} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted">
+                    <Checkbox
+                      id={`role-${role}`}
+                      checked={editingRoles.includes(role)}
+                      onCheckedChange={() => toggleRole(role)}
+                    />
+                    <label htmlFor={`role-${role}`} className="flex-1 cursor-pointer">
+                      <Badge variant={getRoleBadgeVariant(role)}>
+                        {getRoleLabel(role)}
                       </Badge>
-                    ) : (
-                      <span className="text-sm">No role assigned</span>
-                    )}
+                    </label>
                   </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Joined</label>
-                  <p className="text-base">
-                    {new Date(selectedUser.created_at).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Last Active</label>
-                  <p className="text-base">
-                    {selectedUser.last_active_at 
-                      ? formatDistanceToNow(new Date(selectedUser.last_active_at), { addSuffix: true })
-                      : "Never"}
-                  </p>
-                </div>
+                ))}
               </div>
-            )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingUser(null)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveRoles} 
+                disabled={updatingRoles === editingUser?.id}
+                className="bg-[#0A4D2E] hover:bg-[#0A4D2E]/90"
+              >
+                {updatingRoles === editingUser?.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Roles"
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Revoke Access Dialog */}
-        <AlertDialog open={!!revokeUser} onOpenChange={(open) => !open && setRevokeUser(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Revoke Access</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to remove <strong>{revokeUser?.full_name || revokeUser?.email}</strong>'s access? 
-                This will remove their role and they will lose all admin panel access.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={processing === revokeUser?.id}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleRevokeRole}
-                disabled={processing === revokeUser?.id}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        {/* Approval Dialog */}
+        <Dialog open={!!approvalUser} onOpenChange={(open) => !open && setApprovalUser(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-[#0A4D2E]">Approve User</DialogTitle>
+              <DialogDescription>
+                Assign roles to {approvalUser?.full_name || approvalUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground">Select one or more roles to assign:</p>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {assignableRoles.map(role => (
+                  <div key={role} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted">
+                    <Checkbox
+                      id={`approval-role-${role}`}
+                      checked={approvalRoles.includes(role)}
+                      onCheckedChange={() => toggleRole(role, true)}
+                    />
+                    <label htmlFor={`approval-role-${role}`} className="flex-1 cursor-pointer">
+                      <Badge variant={getRoleBadgeVariant(role)}>
+                        {getRoleLabel(role)}
+                      </Badge>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setApprovalUser(null)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleApprove} 
+                disabled={processing === approvalUser?.id || approvalRoles.length === 0}
+                className="bg-[#0A4D2E] hover:bg-[#0A4D2E]/90"
               >
-                {processing === revokeUser?.id ? (
+                {processing === approvalUser?.id ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Revoking...
+                    Approving...
                   </>
                 ) : (
-                  "Revoke Access"
+                  <>
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    Approve User
+                  </>
                 )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-        {/* Delete User Dialog - Super Admin Only */}
+        {/* Delete User Dialog */}
         <AlertDialog open={!!deleteUser} onOpenChange={(open) => !open && setDeleteUser(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -988,7 +1003,7 @@ const AdminUserManagementPage = () => {
                   Are you sure you want to permanently delete <strong>{deleteUser?.full_name || deleteUser?.email}</strong>?
                 </p>
                 <p className="font-semibold text-destructive">
-                  This action cannot be undone. The user's profile and all associated data will be removed.
+                  This action cannot be undone.
                 </p>
               </AlertDialogDescription>
             </AlertDialogHeader>

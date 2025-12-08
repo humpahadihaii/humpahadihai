@@ -17,8 +17,6 @@ import {
   ChevronLeft,
   Menu,
   BarChart3,
-  UserCheck,
-  Shield,
   FileText,
   Users,
   Package,
@@ -57,10 +55,8 @@ const navigation: NavigationItem[] = [
   // AI Tools
   { name: "AI Tools", href: "/admin/ai-tools", icon: Sparkles, permission: "aiTools", section: "AI" },
   
-  // User Management
-  { name: "User Management", href: "/admin/users", icon: Shield, permission: "users", section: "Users" },
-  { name: "Role Management", href: "/admin/roles", icon: UserCheck, permission: "roles" },
-  { name: "Approvals", href: "/admin/approvals", icon: UserCheck, permission: "approvals" },
+  // User Management - Single unified page
+  { name: "User Management", href: "/admin/users", icon: Users, permission: "users", section: "Users" },
   
   // Settings
   { name: "Site Settings", href: "/admin/site-settings", icon: Settings, permission: "siteSettings", section: "Settings" },
