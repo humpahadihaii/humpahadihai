@@ -39,7 +39,17 @@ const AuthPage = () => {
 
   useEffect(() => {
     const checkUserStatus = async (userId: string) => {
-      // Check if user has admin role
+      // Check if user has any admin role (super_admin or admin)
+      const { data: hasSuperAdmin } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'super_admin'
+      });
+
+      if (hasSuperAdmin) {
+        navigate("/admin", { replace: true });
+        return;
+      }
+
       const { data: hasAdminRole } = await supabase.rpc('has_role', {
         _user_id: userId,
         _role: 'admin'
@@ -47,9 +57,29 @@ const AuthPage = () => {
 
       if (hasAdminRole) {
         navigate("/admin", { replace: true });
-      } else {
-        navigate("/pending-approval", { replace: true });
+        return;
       }
+
+      // Check for other roles that grant admin access
+      const otherAdminRoles = [
+        'content_manager', 'content_editor', 'editor', 'moderator',
+        'author', 'reviewer', 'media_manager', 'seo_manager',
+        'support_agent', 'analytics_viewer', 'developer', 'viewer'
+      ];
+
+      for (const role of otherAdminRoles) {
+        const { data: hasRole } = await supabase.rpc('has_role', {
+          _user_id: userId,
+          _role: role as any
+        });
+        if (hasRole) {
+          navigate("/admin", { replace: true });
+          return;
+        }
+      }
+
+      // No role found, go to pending approval
+      navigate("/pending-approval", { replace: true });
     };
 
     // Check if user is already logged in
