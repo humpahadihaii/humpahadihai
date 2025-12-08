@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { AIContentButtons } from "@/components/admin/AIContentButtons";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -231,7 +232,22 @@ const AdminProductsPage = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
+                <div className="flex items-center justify-between">
+                  <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
+                  <AIContentButtons
+                    type="product"
+                    currentContent={{
+                      name: form.watch("name") || "",
+                      short_description: form.watch("short_description") || "",
+                      full_description: form.watch("full_description") || "",
+                    }}
+                    onContentGenerated={(content) => {
+                      if (content.short_description) form.setValue("short_description", content.short_description);
+                      if (content.full_description) form.setValue("full_description", content.full_description);
+                      if (content.tags) form.setValue("tags", content.tags);
+                    }}
+                  />
+                </div>
               </DialogHeader>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">

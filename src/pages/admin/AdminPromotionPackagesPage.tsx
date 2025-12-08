@@ -15,6 +15,7 @@ import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { AIContentButtons } from "@/components/admin/AIContentButtons";
 
 const packageSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -179,7 +180,21 @@ const AdminPromotionPackagesPage = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingPackage ? "Edit Package" : "Add New Package"}</DialogTitle>
+                <div className="flex items-center justify-between">
+                  <DialogTitle>{editingPackage ? "Edit Package" : "Add New Package"}</DialogTitle>
+                  <AIContentButtons
+                    type="promotion"
+                    currentContent={{
+                      name: form.watch("name") || "",
+                      description: form.watch("description") || "",
+                      deliverables: form.watch("deliverables") || "",
+                    }}
+                    onContentGenerated={(content) => {
+                      if (content.description) form.setValue("description", content.description);
+                      if (content.deliverables) form.setValue("deliverables", content.deliverables);
+                    }}
+                  />
+                </div>
               </DialogHeader>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
