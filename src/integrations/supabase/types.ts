@@ -940,6 +940,107 @@ export type Database = {
         }
         Relationships: []
       }
+      local_product_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      local_products: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          full_description: string | null
+          gallery_images: string[] | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          price: number
+          price_currency: string
+          short_description: string | null
+          slug: string
+          stock_status: string
+          tags: string[] | null
+          thumbnail_image_url: string | null
+          unit_label: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          full_description?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name: string
+          price?: number
+          price_currency?: string
+          short_description?: string | null
+          slug: string
+          stock_status?: string
+          tags?: string[] | null
+          thumbnail_image_url?: string | null
+          unit_label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          full_description?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name?: string
+          price?: number
+          price_currency?: string
+          short_description?: string | null
+          slug?: string
+          stock_status?: string
+          tags?: string[] | null
+          thumbnail_image_url?: string | null
+          unit_label?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "local_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "local_product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_library: {
         Row: {
           alt_text: string | null
@@ -1000,6 +1101,65 @@ export type Database = {
         }
         Relationships: []
       }
+      product_order_requests: {
+        Row: {
+          admin_notes: string | null
+          city: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          local_product_id: string | null
+          message: string | null
+          phone: string | null
+          pincode: string | null
+          preferred_delivery: string | null
+          quantity: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          city?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          local_product_id?: string | null
+          message?: string | null
+          phone?: string | null
+          pincode?: string | null
+          preferred_delivery?: string | null
+          quantity?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          local_product_id?: string | null
+          message?: string | null
+          phone?: string | null
+          pincode?: string | null
+          preferred_delivery?: string | null
+          quantity?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_order_requests_local_product_id_fkey"
+            columns: ["local_product_id"]
+            isOneToOne: false
+            referencedRelation: "local_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1032,6 +1192,113 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      promotion_packages: {
+        Row: {
+          created_at: string
+          deliverables: string | null
+          description: string | null
+          duration_days: number | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          price_currency: string
+          slug: string
+          sort_order: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deliverables?: string | null
+          description?: string | null
+          duration_days?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          price_currency?: string
+          slug: string
+          sort_order?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deliverables?: string | null
+          description?: string | null
+          duration_days?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          price_currency?: string
+          slug?: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      promotion_requests: {
+        Row: {
+          admin_notes: string | null
+          business_name: string
+          business_type: string | null
+          city: string | null
+          contact_person: string
+          created_at: string
+          email: string
+          id: string
+          instagram_handle: string | null
+          message: string | null
+          phone: string | null
+          promotion_package_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_name: string
+          business_type?: string | null
+          city?: string | null
+          contact_person: string
+          created_at?: string
+          email: string
+          id?: string
+          instagram_handle?: string | null
+          message?: string | null
+          phone?: string | null
+          promotion_package_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          business_name?: string
+          business_type?: string | null
+          city?: string | null
+          contact_person?: string
+          created_at?: string
+          email?: string
+          id?: string
+          instagram_handle?: string | null
+          message?: string | null
+          phone?: string | null
+          promotion_package_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_requests_promotion_package_id_fkey"
+            columns: ["promotion_package_id"]
+            isOneToOne: false
+            referencedRelation: "promotion_packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_images: {
         Row: {
@@ -1215,6 +1482,143 @@ export type Database = {
           thought?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      travel_booking_requests: {
+        Row: {
+          admin_notes: string | null
+          city: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string | null
+          month_or_season: string | null
+          number_of_travellers: number | null
+          phone: string | null
+          preferred_start_date: string | null
+          status: string
+          travel_package_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          city?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message?: string | null
+          month_or_season?: string | null
+          number_of_travellers?: number | null
+          phone?: string | null
+          preferred_start_date?: string | null
+          status?: string
+          travel_package_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string | null
+          month_or_season?: string | null
+          number_of_travellers?: number | null
+          phone?: string | null
+          preferred_start_date?: string | null
+          status?: string
+          travel_package_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_booking_requests_travel_package_id_fkey"
+            columns: ["travel_package_id"]
+            isOneToOne: false
+            referencedRelation: "travel_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_packages: {
+        Row: {
+          best_season: string | null
+          created_at: string
+          destination: string | null
+          difficulty_level: string | null
+          duration_days: number | null
+          ending_point: string | null
+          exclusions: string | null
+          full_description: string | null
+          gallery_images: string[] | null
+          id: string
+          inclusions: string | null
+          is_active: boolean
+          is_featured: boolean
+          itinerary: string | null
+          price_currency: string
+          price_per_person: number
+          region: string | null
+          short_description: string | null
+          slug: string
+          starting_point: string | null
+          thumbnail_image_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          best_season?: string | null
+          created_at?: string
+          destination?: string | null
+          difficulty_level?: string | null
+          duration_days?: number | null
+          ending_point?: string | null
+          exclusions?: string | null
+          full_description?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          inclusions?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          itinerary?: string | null
+          price_currency?: string
+          price_per_person?: number
+          region?: string | null
+          short_description?: string | null
+          slug: string
+          starting_point?: string | null
+          thumbnail_image_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          best_season?: string | null
+          created_at?: string
+          destination?: string | null
+          difficulty_level?: string | null
+          duration_days?: number | null
+          ending_point?: string | null
+          exclusions?: string | null
+          full_description?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          inclusions?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          itinerary?: string | null
+          price_currency?: string
+          price_per_person?: number
+          region?: string | null
+          short_description?: string | null
+          slug?: string
+          starting_point?: string | null
+          thumbnail_image_url?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

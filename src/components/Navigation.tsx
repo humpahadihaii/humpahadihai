@@ -121,7 +121,7 @@ const Navigation = () => {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/login")}
                 className="gap-2"
               >
                 <LogIn className="h-4 w-4" />
@@ -175,7 +175,7 @@ const Navigation = () => {
                 <Button
                   variant="default"
                   onClick={() => {
-                    navigate("/auth");
+                    navigate("/login");
                     setIsOpen(false);
                   }}
                   className="justify-start gap-2 px-4"
