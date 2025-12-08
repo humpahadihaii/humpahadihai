@@ -775,7 +775,9 @@ export type Database = {
           name: string
           overview: string
           population: string | null
+          region: string | null
           slug: string
+          sort_order: number | null
           status: string | null
           updated_at: string
         }
@@ -796,7 +798,9 @@ export type Database = {
           name: string
           overview: string
           population?: string | null
+          region?: string | null
           slug: string
+          sort_order?: number | null
           status?: string | null
           updated_at?: string
         }
@@ -817,7 +821,9 @@ export type Database = {
           name?: string
           overview?: string
           population?: string | null
+          region?: string | null
           slug?: string
+          sort_order?: number | null
           status?: string | null
           updated_at?: string
         }
