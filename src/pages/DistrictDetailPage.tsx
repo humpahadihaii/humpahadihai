@@ -7,9 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Mountain, Utensils, TreePine, Landmark, ChevronRight, Search, Home, Building } from "lucide-react";
-import { useState, useMemo } from "react";
+import { MapPin, Users, Mountain, Utensils, TreePine, Landmark, ChevronRight, Search, Home, Building, Map, BookOpen } from "lucide-react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import type { Database } from "@/integrations/supabase/types";
+import PlacesToVisit from "@/components/PlacesToVisit";
+import FoodAndFestivals from "@/components/FoodAndFestivals";
+
+// Lazy load the map component
+const DistrictMap = lazy(() => import("@/components/DistrictMap"));
 
 type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
 type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
@@ -22,6 +27,7 @@ const DistrictDetailPage = () => {
   const [villageSearch, setVillageSearch] = useState("");
   const [villageTypeFilter, setVillageTypeFilter] = useState<"all" | "village" | "town" | "city">("all");
   const [showAllVillages, setShowAllVillages] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   // Fetch district data
   const { data: district, isLoading: districtLoading } = useQuery({
@@ -37,7 +43,7 @@ const DistrictDetailPage = () => {
     },
   });
 
-  // Fetch villages linked to this district
+  // Fetch villages linked to this district (preview)
   const { data: villages } = useQuery({
     queryKey: ["district-villages", district?.id],
     queryFn: async () => {
@@ -62,7 +68,7 @@ const DistrictDetailPage = () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("villages")
-        .select("id, name, slug, thumbnail_url, tehsil, population, introduction, status")
+        .select("id, name, slug, thumbnail_url, tehsil, population, introduction, status, latitude, longitude")
         .eq("district_id", district.id)
         .eq("status", "published")
         .order("name");
@@ -87,43 +93,44 @@ const DistrictDetailPage = () => {
     return filteredVillages.slice(0, INITIAL_VILLAGES_COUNT);
   }, [filteredVillages, showAllVillages]);
 
-  // Fetch food content linked to this district
-  const { data: foodItems } = useQuery({
-    queryKey: ["district-food", district?.id],
+  // Fetch district_content for places, food, festivals, culture
+  const { data: districtContent } = useQuery({
+    queryKey: ["district-content-all", district?.id],
     queryFn: async () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
-        .from("content_items")
+        .from("district_content")
         .select("*")
         .eq("district_id", district.id)
-        .eq("type", "food")
-        .eq("status", "published")
-        .limit(4);
+        .order("title");
       if (error) throw error;
-      return data as ContentItem[];
+      return data as DistrictContent[];
     },
     enabled: !!district?.id,
   });
 
-  // Fetch culture content linked to this district
-  const { data: cultureItems } = useQuery({
-    queryKey: ["district-culture", district?.id],
-    queryFn: async () => {
-      if (!district?.id) return [];
-      const { data, error } = await supabase
-        .from("content_items")
-        .select("*")
-        .eq("district_id", district.id)
-        .eq("type", "culture")
-        .eq("status", "published")
-        .limit(4);
-      if (error) throw error;
-      return data as ContentItem[];
-    },
-    enabled: !!district?.id,
-  });
+  // Separate content by category
+  const placesContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Place") || [],
+    [districtContent]
+  );
 
-  // Fetch travel content linked to this district
+  const foodContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Food") || [],
+    [districtContent]
+  );
+
+  const festivalContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Festival") || [],
+    [districtContent]
+  );
+
+  const cultureContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Culture") || [],
+    [districtContent]
+  );
+
+  // Fetch additional content_items linked to this district
   const { data: travelItems } = useQuery({
     queryKey: ["district-travel", district?.id],
     queryFn: async () => {
@@ -137,22 +144,6 @@ const DistrictDetailPage = () => {
         .limit(4);
       if (error) throw error;
       return data as ContentItem[];
-    },
-    enabled: !!district?.id,
-  });
-
-  // Fetch district_content for additional items
-  const { data: districtContent } = useQuery({
-    queryKey: ["district-content", district?.id],
-    queryFn: async () => {
-      if (!district?.id) return [];
-      const { data, error } = await supabase
-        .from("district_content")
-        .select("*")
-        .eq("district_id", district.id)
-        .order("title");
-      if (error) throw error;
-      return data as DistrictContent[];
     },
     enabled: !!district?.id,
   });
@@ -184,8 +175,25 @@ const DistrictDetailPage = () => {
     );
   }
 
-  const metaTitle = `${district.name} District, Uttarakhand - Explore Villages, Culture & Heritage`;
-  const metaDescription = district.overview?.substring(0, 155) + "..." || `Discover ${district.name} district in Uttarakhand.`;
+  const metaTitle = `${district.name} District, Uttarakhand - Villages, Places, Food & Culture | Pahadi Heritage Encyclopedia`;
+  const metaDescription = district.overview?.substring(0, 155) + "..." || `Discover ${district.name} district in Uttarakhand - explore villages, famous places, local food, festivals and rich cultural heritage.`;
+
+  // Structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "AdministrativeArea",
+    "name": `${district.name} District`,
+    "containedInPlace": {
+      "@type": "State",
+      "name": "Uttarakhand",
+      "containedInPlace": {
+        "@type": "Country",
+        "name": "India"
+      }
+    },
+    "description": district.overview,
+    "image": district.banner_image || district.image_url,
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,6 +203,10 @@ const DistrictDetailPage = () => {
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
         {district.banner_image && <meta property="og:image" content={district.banner_image} />}
+        <link rel="canonical" href={`https://humpahadihaii.in/districts/${district.slug}`} />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
       </Helmet>
 
       {/* Hero Section */}
@@ -208,7 +220,10 @@ const DistrictDetailPage = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="container mx-auto">
-            <Badge variant="secondary" className="mb-4">Uttarakhand</Badge>
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="secondary">Uttarakhand</Badge>
+              <Badge variant="outline">{district.region || "Kumaon/Garhwal"}</Badge>
+            </div>
             <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-4">
               {district.name}
             </h1>
@@ -222,7 +237,7 @@ const DistrictDetailPage = () => {
       {/* Quick Facts Bar */}
       <section className="bg-secondary/30 border-y">
         <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {district.population && (
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-primary" />
@@ -259,16 +274,59 @@ const DistrictDetailPage = () => {
                 </div>
               </div>
             )}
+            {allVillages && allVillages.length > 0 && (
+              <div className="flex items-center gap-3">
+                <Home className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Villages</p>
+                  <p className="font-semibold">{allVillages.length}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
+      {/* Encyclopedia Navigation */}
+      <section className="border-b sticky top-0 bg-background/95 backdrop-blur z-10">
+        <div className="container mx-auto px-4">
+          <nav className="flex items-center gap-2 py-3 overflow-x-auto">
+            <BookOpen className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-sm font-medium text-muted-foreground shrink-0">Jump to:</span>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#about">About</a>
+              </Button>
+              {placesContent.length > 0 && (
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="#places">Places</a>
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#heritage">Heritage</a>
+              </Button>
+              {villages && villages.length > 0 && (
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="#villages">Villages</a>
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#map">Map</a>
+              </Button>
+            </div>
+          </nav>
+        </div>
+      </section>
+
       {/* About Section */}
-      <section className="py-16 px-4">
+      <section id="about" className="py-16 px-4">
         <div className="container mx-auto">
           <Card className="border-none shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl">About {district.name}</CardTitle>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <BookOpen className="h-6 w-6 text-primary" />
+                About {district.name}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed text-lg">
@@ -280,24 +338,76 @@ const DistrictDetailPage = () => {
                   <p className="text-muted-foreground">{district.cultural_identity}</p>
                 </div>
               )}
+              {district.famous_specialties && (
+                <div className="mt-4 p-4 bg-primary/5 rounded-lg">
+                  <p className="font-semibold mb-2">Famous For</p>
+                  <p className="text-muted-foreground">{district.famous_specialties}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {/* Villages Section */}
+      {/* Places to Visit Section */}
+      <div id="places">
+        <PlacesToVisit 
+          districtName={district.name} 
+          places={placesContent.map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            image_url: p.image_url,
+            google_map_link: p.google_map_link,
+            category: p.category,
+          }))} 
+        />
+      </div>
+
+      {/* Food & Festivals Section */}
+      <div id="heritage" className="bg-secondary/10">
+        <FoodAndFestivals
+          districtName={district.name}
+          foodItems={foodContent.map(f => ({
+            id: f.id,
+            title: f.title,
+            description: f.description,
+            image_url: f.image_url,
+            category: f.category,
+          }))}
+          festivalItems={festivalContent.map(f => ({
+            id: f.id,
+            title: f.title,
+            description: f.description,
+            image_url: f.image_url,
+            category: f.category,
+          }))}
+          cultureItems={cultureContent.map(c => ({
+            id: c.id,
+            title: c.title,
+            description: c.description,
+            image_url: c.image_url,
+            category: c.category,
+          }))}
+        />
+      </div>
+
+      {/* Villages Preview Section */}
       {villages && villages.length > 0 && (
-        <section className="py-16 px-4 bg-secondary/10">
+        <section id="villages" className="py-16 px-4">
           <div className="container mx-auto">
             <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="text-3xl font-bold">Villages of {district.name}</h2>
-                <p className="text-muted-foreground mt-2">Explore the rural heritage</p>
+              <div className="flex items-center gap-3">
+                <Home className="h-8 w-8 text-primary" />
+                <div>
+                  <h2 className="text-3xl font-bold">Villages of {district.name}</h2>
+                  <p className="text-muted-foreground">Explore the rural heritage</p>
+                </div>
               </div>
               <Button variant="outline" asChild>
-                <Link to="#all-villages">
+                <a href="#all-villages">
                   View All <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
+                </a>
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -328,99 +438,67 @@ const DistrictDetailPage = () => {
         </section>
       )}
 
-      {/* Food Section */}
-      {foodItems && foodItems.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-3">
-                <Utensils className="h-8 w-8 text-primary" />
-                <div>
-                  <h2 className="text-3xl font-bold">Famous Food</h2>
-                  <p className="text-muted-foreground">Culinary delights of {district.name}</p>
-                </div>
+      {/* Map Section */}
+      <section id="map" className="py-16 px-4 bg-secondary/10">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <Map className="h-8 w-8 text-primary" />
+              <div>
+                <h2 className="text-3xl font-bold">Explore {district.name} on Map</h2>
+                <p className="text-muted-foreground">Interactive map with villages and places</p>
               </div>
-              <Button variant="outline" asChild>
-                <Link to="/food">
-                  Explore More <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
+            </div>
+            {!showMap && (
+              <Button onClick={() => setShowMap(true)}>
+                <Map className="mr-2 h-4 w-4" />
+                Load Map
               </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {foodItems.map((item) => (
-                <Link key={item.id} to={`/food/${item.slug}`}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all group h-full">
-                    {item.main_image_url && (
-                      <div className="h-40 overflow-hidden">
-                        <img
-                          src={item.main_image_url}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
-                    <CardHeader className="p-4">
-                      <Badge variant="secondary" className="w-fit mb-2">Food</Badge>
-                      <CardTitle className="text-base group-hover:text-primary transition-colors">
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+            )}
           </div>
-        </section>
-      )}
 
-      {/* Culture Section */}
-      {cultureItems && cultureItems.length > 0 && (
-        <section className="py-16 px-4 bg-secondary/10">
-          <div className="container mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-3">
-                <Landmark className="h-8 w-8 text-primary" />
-                <div>
-                  <h2 className="text-3xl font-bold">Culture & Heritage</h2>
-                  <p className="text-muted-foreground">Traditions and festivals</p>
+          {showMap && (
+            <Suspense fallback={
+              <Card className="h-[400px] flex items-center justify-center">
+                <div className="text-center">
+                  <Map className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4 animate-pulse" />
+                  <p className="text-muted-foreground">Loading map...</p>
                 </div>
-              </div>
-              <Button variant="outline" asChild>
-                <Link to="/culture">
-                  Explore More <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {cultureItems.map((item) => (
-                <Link key={item.id} to={`/culture/${item.slug}`}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all group h-full">
-                    {item.main_image_url && (
-                      <div className="h-40 overflow-hidden">
-                        <img
-                          src={item.main_image_url}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
-                    <CardHeader className="p-4">
-                      <Badge variant="secondary" className="w-fit mb-2">Culture</Badge>
-                      <CardTitle className="text-base group-hover:text-primary transition-colors">
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+              </Card>
+            }>
+              <DistrictMap
+                districtName={district.name}
+                centerLat={district.latitude || undefined}
+                centerLng={district.longitude || undefined}
+                villages={allVillages?.map(v => ({
+                  id: v.id,
+                  name: v.name,
+                  latitude: v.latitude,
+                  longitude: v.longitude,
+                  introduction: v.introduction,
+                })) || []}
+                places={placesContent.map(p => ({
+                  id: p.id,
+                  title: p.title,
+                  description: p.description,
+                  google_map_link: p.google_map_link,
+                }))}
+              />
+            </Suspense>
+          )}
 
-      {/* Travel Section */}
+          {!showMap && (
+            <Card className="h-[300px] flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/10">
+              <div className="text-center">
+                <Map className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+                <p className="text-muted-foreground mb-4">Click "Load Map" to see villages and places on an interactive map</p>
+              </div>
+            </Card>
+          )}
+        </div>
+      </section>
+
+      {/* Travel Packages Section */}
       {travelItems && travelItems.length > 0 && (
         <section className="py-16 px-4">
           <div className="container mx-auto">
@@ -428,13 +506,13 @@ const DistrictDetailPage = () => {
               <div className="flex items-center gap-3">
                 <MapPin className="h-8 w-8 text-primary" />
                 <div>
-                  <h2 className="text-3xl font-bold">Tourist Spots</h2>
-                  <p className="text-muted-foreground">Places to visit in {district.name}</p>
+                  <h2 className="text-3xl font-bold">Travel Packages</h2>
+                  <p className="text-muted-foreground">Curated trips in {district.name}</p>
                 </div>
               </div>
               <Button variant="outline" asChild>
                 <Link to="/travel">
-                  Explore More <ChevronRight className="ml-2 h-4 w-4" />
+                  View All <ChevronRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
@@ -466,55 +544,16 @@ const DistrictDetailPage = () => {
         </section>
       )}
 
-      {/* District Content Section */}
-      {districtContent && districtContent.length > 0 && (
-        <section className="py-16 px-4 bg-secondary/10">
-          <div className="container mx-auto">
-            <h2 className="text-3xl font-bold mb-8">More to Explore</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {districtContent.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  {item.image_url && (
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={item.image_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <Badge variant="outline" className="w-fit mb-2">{item.category}</Badge>
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>
-                    {item.google_map_link && (
-                      <Button variant="link" className="p-0 mt-2" asChild>
-                        <a href={item.google_map_link} target="_blank" rel="noopener noreferrer">
-                          <MapPin className="h-4 w-4 mr-1" /> View on Map
-                        </a>
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* All Villages Directory */}
       {allVillages && allVillages.length > 0 && (
-        <section id="all-villages" className="py-16 px-4">
+        <section id="all-villages" className="py-16 px-4 bg-secondary/10">
           <div className="container mx-auto">
             <div className="flex items-center gap-3 mb-2">
               <Home className="h-8 w-8 text-primary" />
-              <h2 className="text-3xl font-bold">Villages & Towns in {district.name}</h2>
+              <h2 className="text-3xl font-bold">All Villages & Towns in {district.name}</h2>
             </div>
             <p className="text-muted-foreground mb-6">
-              Explore {allVillages.length} settlements in {district.name} district
+              Complete directory of {allVillages.length} settlements in {district.name} district
             </p>
             
             {/* Search and Filter */}
