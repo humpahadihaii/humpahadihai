@@ -93,7 +93,7 @@ const DistrictDetailPage = () => {
     return filteredVillages.slice(0, INITIAL_VILLAGES_COUNT);
   }, [filteredVillages, showAllVillages]);
 
-  // Fetch district_content for places, food, festivals, culture
+  // Fetch district_content for culture (legacy)
   const { data: districtContent } = useQuery({
     queryKey: ["district-content-all", district?.id],
     queryFn: async () => {
@@ -109,26 +109,150 @@ const DistrictDetailPage = () => {
     enabled: !!district?.id,
   });
 
-  // Separate content by category
-  const placesContent = useMemo(() => 
-    districtContent?.filter(item => item.category === "Place") || [],
-    [districtContent]
-  );
+  // Fetch district_places (new table)
+  const { data: districtPlaces } = useQuery({
+    queryKey: ["district-places", district?.id],
+    queryFn: async () => {
+      if (!district?.id) return [];
+      const { data, error } = await supabase
+        .from("district_places")
+        .select("*")
+        .eq("district_id", district.id)
+        .eq("is_active", true)
+        .order("is_highlighted", { ascending: false })
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!district?.id,
+  });
 
-  const foodContent = useMemo(() => 
-    districtContent?.filter(item => item.category === "Food") || [],
-    [districtContent]
-  );
+  // Fetch district_foods (new table)
+  const { data: districtFoods } = useQuery({
+    queryKey: ["district-foods", district?.id],
+    queryFn: async () => {
+      if (!district?.id) return [];
+      const { data, error } = await supabase
+        .from("district_foods")
+        .select("*")
+        .eq("district_id", district.id)
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!district?.id,
+  });
 
-  const festivalContent = useMemo(() => 
-    districtContent?.filter(item => item.category === "Festival") || [],
-    [districtContent]
-  );
+  // Fetch district_festivals (new table)
+  const { data: districtFestivals } = useQuery({
+    queryKey: ["district-festivals", district?.id],
+    queryFn: async () => {
+      if (!district?.id) return [];
+      const { data, error } = await supabase
+        .from("district_festivals")
+        .select("*")
+        .eq("district_id", district.id)
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!district?.id,
+  });
 
+  // Culture content from legacy district_content table
   const cultureContent = useMemo(() => 
     districtContent?.filter(item => item.category === "Culture") || [],
     [districtContent]
   );
+
+  // Legacy places from district_content (if any)
+  const legacyPlacesContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Place") || [],
+    [districtContent]
+  );
+
+  // Legacy food from district_content (if any)
+  const legacyFoodContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Food") || [],
+    [districtContent]
+  );
+
+  // Legacy festival from district_content (if any)
+  const legacyFestivalContent = useMemo(() => 
+    districtContent?.filter(item => item.category === "Festival") || [],
+    [districtContent]
+  );
+
+  // Combine new tables with legacy data for places
+  const combinedPlaces = useMemo(() => {
+    const newPlaces = districtPlaces?.map(p => ({
+      id: p.id,
+      title: p.name,
+      description: p.short_description || p.full_description || "",
+      image_url: p.image_url,
+      google_map_link: p.google_maps_url,
+      category: "Place",
+      is_highlighted: p.is_highlighted,
+    })) || [];
+    
+    const legacy = legacyPlacesContent.map(p => ({
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      image_url: p.image_url,
+      google_map_link: p.google_map_link,
+      category: p.category,
+      is_highlighted: false,
+    }));
+    
+    return [...newPlaces, ...legacy];
+  }, [districtPlaces, legacyPlacesContent]);
+
+  // Combine new tables with legacy data for foods
+  const combinedFoods = useMemo(() => {
+    const newFoods = districtFoods?.map(f => ({
+      id: f.id,
+      title: f.name,
+      description: f.description || "",
+      image_url: f.image_url,
+      category: "Food",
+    })) || [];
+    
+    const legacy = legacyFoodContent.map(f => ({
+      id: f.id,
+      title: f.title,
+      description: f.description,
+      image_url: f.image_url,
+      category: f.category,
+    }));
+    
+    return [...newFoods, ...legacy];
+  }, [districtFoods, legacyFoodContent]);
+
+  // Combine new tables with legacy data for festivals
+  const combinedFestivals = useMemo(() => {
+    const newFestivals = districtFestivals?.map(f => ({
+      id: f.id,
+      title: f.name,
+      description: f.description || "",
+      image_url: f.image_url,
+      category: "Festival",
+      month: f.month,
+    })) || [];
+    
+    const legacy = legacyFestivalContent.map(f => ({
+      id: f.id,
+      title: f.title,
+      description: f.description,
+      image_url: f.image_url,
+      category: f.category,
+      month: undefined,
+    }));
+    
+    return [...newFestivals, ...legacy];
+  }, [districtFestivals, legacyFestivalContent]);
 
   // Fetch additional content_items linked to this district
   const { data: travelItems } = useQuery({
@@ -297,7 +421,7 @@ const DistrictDetailPage = () => {
               <Button variant="ghost" size="sm" asChild>
                 <a href="#about">About</a>
               </Button>
-              {placesContent.length > 0 && (
+              {combinedPlaces.length > 0 && (
                 <Button variant="ghost" size="sm" asChild>
                   <a href="#places">Places</a>
                 </Button>
@@ -353,14 +477,7 @@ const DistrictDetailPage = () => {
       <div id="places">
         <PlacesToVisit 
           districtName={district.name} 
-          places={placesContent.map(p => ({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            image_url: p.image_url,
-            google_map_link: p.google_map_link,
-            category: p.category,
-          }))} 
+          places={combinedPlaces} 
         />
       </div>
 
@@ -368,20 +485,8 @@ const DistrictDetailPage = () => {
       <div id="heritage" className="bg-secondary/10">
         <FoodAndFestivals
           districtName={district.name}
-          foodItems={foodContent.map(f => ({
-            id: f.id,
-            title: f.title,
-            description: f.description,
-            image_url: f.image_url,
-            category: f.category,
-          }))}
-          festivalItems={festivalContent.map(f => ({
-            id: f.id,
-            title: f.title,
-            description: f.description,
-            image_url: f.image_url,
-            category: f.category,
-          }))}
+          foodItems={combinedFoods}
+          festivalItems={combinedFestivals}
           cultureItems={cultureContent.map(c => ({
             id: c.id,
             title: c.title,
@@ -477,7 +582,7 @@ const DistrictDetailPage = () => {
                   longitude: v.longitude,
                   introduction: v.introduction,
                 })) || []}
-                places={placesContent.map(p => ({
+                places={combinedPlaces.map(p => ({
                   id: p.id,
                   title: p.title,
                   description: p.description,

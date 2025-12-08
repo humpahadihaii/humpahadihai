@@ -15,6 +15,9 @@ export type PermissionKey =
   | "thoughts"
   | "districts"
   | "districtContent"
+  | "districtPlaces"
+  | "districtFoods"
+  | "districtFestivals"
   | "villages"
   | "hotels"
   | "festivals"
@@ -34,12 +37,15 @@ export type PermissionKey =
   | "products"
   | "productOrders"
   | "approvals"
-  | "aiTools";
+  | "aiTools"
+  | "tourismProviders"
+  | "tourismListings"
+  | "tourismInquiries";
 
 export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   dashboard: ["super_admin", "admin", "content_manager", "analytics_viewer", "viewer", "moderator", "editor", "content_editor"],
-  users: ["super_admin", "admin"], // Single unified user management page
-  roles: ["super_admin", "admin"], // Merged into users page
+  users: ["super_admin", "admin"],
+  roles: ["super_admin", "admin"],
   contentSections: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
   stories: ["super_admin", "admin", "content_manager", "editor", "author", "reviewer", "moderator", "content_editor"],
   events: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
@@ -51,6 +57,9 @@ export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   thoughts: ["super_admin", "admin", "content_manager", "editor", "moderator", "content_editor"],
   districts: ["super_admin", "admin", "content_manager"],
   districtContent: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
+  districtPlaces: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
+  districtFoods: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
+  districtFestivals: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
   villages: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
   hotels: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
   festivals: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
@@ -69,8 +78,11 @@ export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   productCategories: ["super_admin", "admin", "content_manager"],
   products: ["super_admin", "admin", "content_manager"],
   productOrders: ["super_admin", "admin", "content_manager", "support_agent"],
-  approvals: ["super_admin", "admin"], // Merged into users page
+  approvals: ["super_admin", "admin"],
   aiTools: ["super_admin", "admin", "content_manager", "editor"],
+  tourismProviders: ["super_admin", "admin", "content_manager"],
+  tourismListings: ["super_admin", "admin", "content_manager"],
+  tourismInquiries: ["super_admin", "admin", "content_manager", "support_agent"],
 };
 
 // Helper to check if a user can use AI features
