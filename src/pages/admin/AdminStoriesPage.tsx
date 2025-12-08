@@ -16,6 +16,7 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search, Upload, Eye } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { AIContentButtons } from "@/components/admin/AIContentButtons";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import Papa from "papaparse";
 import { format } from "date-fns";
@@ -240,7 +241,28 @@ export default function AdminStoriesPage() {
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{editingStory ? "Edit Story" : "Add New Story"}</DialogTitle>
+                  <div className="flex items-center justify-between">
+                    <DialogTitle>{editingStory ? "Edit Story" : "Add New Story"}</DialogTitle>
+                    <AIContentButtons
+                      type="story"
+                      currentContent={{
+                        title: form.watch("title") || "",
+                        body: form.watch("body") || "",
+                        excerpt: form.watch("excerpt") || "",
+                      }}
+                      onContentGenerated={(content) => {
+                        if (content.title) form.setValue("title", content.title);
+                        if (content.excerpt) form.setValue("excerpt", content.excerpt);
+                        if (content.body) form.setValue("body", content.body);
+                        if (content.tags) {
+                          // Could set category based on tags
+                        }
+                        if (!form.watch("slug") && content.title) {
+                          form.setValue("slug", generateSlug(content.title));
+                        }
+                      }}
+                    />
+                  </div>
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
