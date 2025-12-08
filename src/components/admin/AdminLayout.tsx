@@ -120,7 +120,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { role, user, isAdmin } = useAuth();
+  const { role, roles, user, isAdmin } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -132,9 +132,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  // Filter navigation items based on user permissions
+  // Filter navigation items based on user permissions (use all roles for union access)
   const filteredNavigation = navigation.filter(item => 
-    canViewSection(item.permission, role)
+    canViewSection(item.permission, roles)
   );
 
   // Group navigation items by section

@@ -1,56 +1,16 @@
-import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { useAuth, getEffectiveStatus } from "@/hooks/useAuth";
+import { performLogout } from "@/lib/auth";
 
 interface AdminRouteProps {
   children: React.ReactNode;
 }
 
 const AdminRoute = ({ children }: AdminRouteProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { isAuthInitialized, isAuthenticated, profile, roles } = useAuth();
 
-  useEffect(() => {
-    const checkAdminStatus = async (userId: string) => {
-      // Check for both admin and super_admin roles
-      const { data: isAdmin } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'admin'
-      });
-      
-      const { data: isSuperAdmin } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'super_admin'
-      });
-      
-      setIsAdmin(isAdmin || isSuperAdmin || false);
-      setLoading(false);
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminStatus(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminStatus(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (loading) {
+  // Wait for auth to initialize - no redirects during loading
+  if (!isAuthInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -58,14 +18,26 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
+  // Not authenticated - redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (!isAdmin) {
+  // Compute effective status
+  const effectiveStatus = getEffectiveStatus(profile?.status, roles);
+
+  // Disabled users - logout and redirect
+  if (effectiveStatus === "disabled") {
+    performLogout();
+    return <Navigate to="/login" replace />;
+  }
+
+  // Pending users - redirect to pending approval
+  if (effectiveStatus === "pending") {
     return <Navigate to="/pending-approval" replace />;
   }
 
+  // Active user with at least one role - render children
   return <>{children}</>;
 };
 

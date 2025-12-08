@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle, XCircle, LogOut } from "lucide-react";
+import { getEffectiveStatus, UserStatus } from "@/hooks/useAuth";
+import { UserRole } from "@/lib/roles";
 
 const PendingApprovalPage = () => {
   const [status, setStatus] = useState<string>("pending");
@@ -13,80 +15,58 @@ const PendingApprovalPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const ALL_ADMIN_ROLES = [
-      'super_admin', 'admin', 'content_manager', 'content_editor', 'editor',
-      'moderator', 'author', 'reviewer', 'media_manager', 'seo_manager',
-      'support_agent', 'analytics_viewer', 'developer', 'viewer'
-    ];
-
-    const checkForAnyRole = async (userId: string): Promise<boolean> => {
-      for (const role of ALL_ADMIN_ROLES) {
-        const { data: hasRole } = await supabase.rpc('has_role', {
-          _user_id: userId,
-          _role: role as any
-        });
-        if (hasRole) return true;
-      }
-      return false;
-    };
+    let mounted = true;
 
     const checkApprovalStatus = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        navigate("/login");
-        return;
-      }
-
-      setUserEmail(session.user.email || "");
-
-      // Check if user has ANY role that grants admin access
-      const hasAnyRole = await checkForAnyRole(session.user.id);
-
-      if (hasAnyRole) {
-        navigate("/admin");
-        return;
-      }
-
-      // Check admin request status
-      const { data: request } = await supabase
-        .from("admin_requests")
-        .select("status")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (request) {
-        setStatus(request.status);
-        if (request.status === "approved") {
-          // Poll for ANY role assignment before navigating (with max 10 attempts)
-          let attempts = 0;
-          const maxAttempts = 10;
-          
-          const checkRoleAssignment = async () => {
-            attempts++;
-            const hasRole = await checkForAnyRole(session.user.id);
-            
-            if (hasRole) {
-              navigate("/admin");
-            } else if (attempts < maxAttempts) {
-              // Poll again after 1 second if role not yet assigned
-              setTimeout(checkRoleAssignment, 1000);
-            } else {
-              // Stop polling after max attempts, user may need to refresh
-              setLoading(false);
-            }
-          };
-          checkRoleAssignment();
-          return; // Don't set loading to false yet
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          if (mounted) navigate("/login", { replace: true });
+          return;
         }
-      }
 
-      setLoading(false);
+        if (mounted) setUserEmail(session.user.email || "");
+
+        // Fetch roles and profile in parallel
+        const [rolesResult, profileResult, requestResult] = await Promise.all([
+          supabase.from("user_roles").select("role").eq("user_id", session.user.id),
+          supabase.from("profiles").select("status").eq("id", session.user.id).single(),
+          supabase.from("admin_requests").select("status").eq("user_id", session.user.id).single()
+        ]);
+
+        const roles = (rolesResult.data?.map(r => r.role) || []) as UserRole[];
+        const profileStatus = (profileResult.data?.status || "pending") as UserStatus;
+        const effectiveStatus = getEffectiveStatus(profileStatus, roles);
+
+        // If user is active, redirect to admin
+        if (effectiveStatus === "active") {
+          if (mounted) navigate("/admin", { replace: true });
+          return;
+        }
+
+        // If user is disabled, sign out
+        if (effectiveStatus === "disabled") {
+          await supabase.auth.signOut();
+          if (mounted) navigate("/login", { replace: true });
+          return;
+        }
+
+        // Set request status for display
+        if (requestResult.data && mounted) {
+          setStatus(requestResult.data.status);
+        }
+
+        if (mounted) setLoading(false);
+      } catch (error) {
+        console.error("Error checking status:", error);
+        if (mounted) setLoading(false);
+      }
     };
 
     checkApprovalStatus();
 
-    // Listen for status changes
+    // Listen for status changes via realtime
     const channel = supabase
       .channel("admin_requests_changes")
       .on(
@@ -96,20 +76,32 @@ const PendingApprovalPage = () => {
           schema: "public",
           table: "admin_requests",
         },
-        (payload) => {
-          checkApprovalStatus();
+        () => {
+          if (mounted) checkApprovalStatus();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_roles",
+        },
+        () => {
+          if (mounted) checkApprovalStatus();
         }
       )
       .subscribe();
 
     return () => {
+      mounted = false;
       supabase.removeChannel(channel);
     };
   }, [navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   if (loading) {
@@ -151,15 +143,15 @@ const PendingApprovalPage = () => {
               className="text-sm px-4 py-2"
             >
               {status === "pending" && "Waiting for Admin Approval"}
-              {status === "approved" && "Approved"}
+              {status === "approved" && "Approved - Redirecting..."}
               {status === "rejected" && "Rejected"}
             </Badge>
 
             {status === "pending" && (
               <p className="text-muted-foreground text-sm">
                 Your account has been created successfully. Please wait while an administrator
-                reviews and approves your access request. You will receive an email once your
-                account is approved.
+                reviews and approves your access request. You will be redirected automatically
+                once approved.
               </p>
             )}
 

@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { getEffectiveStatus, UserStatus } from "@/hooks/useAuth";
+import { UserRole } from "@/lib/roles";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255),
@@ -30,6 +32,7 @@ const resetSchema = z.object({
 const AuthPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -37,54 +40,56 @@ const AuthPage = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
 
-  useEffect(() => {
-    // Fast role check - single query to user_roles table
-    const checkUserRoles = async (userId: string) => {
-      try {
-        const { data: userRoles, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId);
+  // Helper to fetch user data and determine redirect
+  const handleUserRedirect = async (userId: string) => {
+    try {
+      // Fetch roles and profile in parallel
+      const [rolesResult, profileResult] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+        supabase.from("profiles").select("status").eq("id", userId).single()
+      ]);
 
-        if (error) {
-          console.error("Error fetching roles:", error);
-          navigate("/pending-approval", { replace: true });
-          return;
-        }
+      const roles = (rolesResult.data?.map(r => r.role) || []) as UserRole[];
+      const status = (profileResult.data?.status || "pending") as UserStatus;
+      
+      const effectiveStatus = getEffectiveStatus(status, roles);
 
-        // If user has any role, they can access admin
-        if (userRoles && userRoles.length > 0) {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate("/pending-approval", { replace: true });
-        }
-      } catch (err) {
-        console.error("Role check error:", err);
-        navigate("/pending-approval", { replace: true });
+      if (effectiveStatus === "disabled") {
+        toast.error("Your account has been disabled. Please contact support.");
+        await supabase.auth.signOut();
+        return;
       }
-    };
 
-    // Check if user is already logged in
+      if (effectiveStatus === "pending") {
+        navigate("/pending-approval", { replace: true });
+        return;
+      }
+
+      // Active user with roles - go to admin
+      toast.success("Welcome back!");
+      navigate("/admin", { replace: true });
+    } catch (error) {
+      console.error("Error checking user status:", error);
+      navigate("/pending-approval", { replace: true });
+    }
+  };
+
+  // Check existing session on mount
+  useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await checkUserRoles(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await handleUserRedirect(session.user.id);
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+      } finally {
+        setIsCheckingSession(false);
       }
     };
 
     checkSession();
-
-    // Listen for auth changes - use setTimeout to avoid deadlock
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        // Defer the role check to avoid auth state deadlock
-        setTimeout(() => {
-          checkUserRoles(session.user.id);
-        }, 0);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -92,10 +97,8 @@ const AuthPage = () => {
     setIsLoading(true);
 
     try {
-      // Validate input
       const validatedData = loginSchema.parse(loginData);
       
-      // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: validatedData.email,
         password: validatedData.password,
@@ -115,20 +118,9 @@ const AuthPage = () => {
         return;
       }
 
-      // If login successful, check roles immediately (don't wait for onAuthStateChange)
+      // Successful login - perform single redirect
       if (data.user) {
-        const { data: userRoles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.user.id);
-
-        if (userRoles && userRoles.length > 0) {
-          toast.success("Welcome back!");
-          navigate("/admin", { replace: true });
-        } else {
-          toast.info("Your account is pending admin approval.");
-          navigate("/pending-approval", { replace: true });
-        }
+        await handleUserRedirect(data.user.id);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -147,10 +139,8 @@ const AuthPage = () => {
     setIsLoading(true);
 
     try {
-      // Validate input
       const validatedData = signupSchema.parse(signupData);
       
-      // Sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
         email: validatedData.email,
         password: validatedData.password,
@@ -171,15 +161,12 @@ const AuthPage = () => {
         return;
       }
 
-      // Sign out the user immediately to prevent auto-login
+      // Sign out immediately to prevent auto-login
       await supabase.auth.signOut();
 
       toast.success("Account created! Your request is pending admin approval.");
-      
-      // Clear form
       setSignupData({ email: "", password: "", fullName: "" });
       
-      // Redirect to pending approval page
       setTimeout(() => {
         navigate("/pending-approval");
       }, 1500);
@@ -200,11 +187,10 @@ const AuthPage = () => {
     setIsLoading(true);
 
     try {
-      // Validate email
       const validatedData = resetSchema.parse({ email: resetEmail });
       
       const { error } = await supabase.auth.resetPasswordForEmail(validatedData.email, {
-        redirectTo: `${window.location.origin}/auth`,
+        redirectTo: `${window.location.origin}/login`,
       });
 
       if (error) {
@@ -226,6 +212,15 @@ const AuthPage = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking existing session
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 px-4 py-8 sm:py-12">
