@@ -70,6 +70,7 @@ import AdminTravelRequestsPage from "./pages/admin/AdminTravelRequestsPage";
 import AdminProductCategoriesPage from "./pages/admin/AdminProductCategoriesPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
+import AdminAIToolsPage from "./pages/admin/AdminAIToolsPage";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ const App = () => (
               <Route path="/pending-approval" element={<PendingApprovalPage />} />
               <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
               <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
               <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
               <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />

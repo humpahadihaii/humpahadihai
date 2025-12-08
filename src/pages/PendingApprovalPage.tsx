@@ -13,28 +13,37 @@ const PendingApprovalPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const ALL_ADMIN_ROLES = [
+      'super_admin', 'admin', 'content_manager', 'content_editor', 'editor',
+      'moderator', 'author', 'reviewer', 'media_manager', 'seo_manager',
+      'support_agent', 'analytics_viewer', 'developer', 'viewer'
+    ];
+
+    const checkForAnyRole = async (userId: string): Promise<boolean> => {
+      for (const role of ALL_ADMIN_ROLES) {
+        const { data: hasRole } = await supabase.rpc('has_role', {
+          _user_id: userId,
+          _role: role as any
+        });
+        if (hasRole) return true;
+      }
+      return false;
+    };
+
     const checkApprovalStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        navigate("/auth");
+        navigate("/login");
         return;
       }
 
       setUserEmail(session.user.email || "");
 
-      // Check if user has admin or super_admin role
-      const { data: hasAdminRole } = await supabase.rpc('has_role', {
-        _user_id: session.user.id,
-        _role: 'admin'
-      });
+      // Check if user has ANY role that grants admin access
+      const hasAnyRole = await checkForAnyRole(session.user.id);
 
-      const { data: hasSuperAdminRole } = await supabase.rpc('has_role', {
-        _user_id: session.user.id,
-        _role: 'super_admin'
-      });
-
-      if (hasAdminRole || hasSuperAdminRole) {
+      if (hasAnyRole) {
         navigate("/admin");
         return;
       }
@@ -49,25 +58,26 @@ const PendingApprovalPage = () => {
       if (request) {
         setStatus(request.status);
         if (request.status === "approved") {
-          // Poll for role assignment before navigating
+          // Poll for ANY role assignment before navigating (with max 10 attempts)
+          let attempts = 0;
+          const maxAttempts = 10;
+          
           const checkRoleAssignment = async () => {
-            const { data: hasAdminRole } = await supabase.rpc('has_role', {
-              _user_id: session.user.id,
-              _role: 'admin'
-            });
-            const { data: hasSuperAdminRole } = await supabase.rpc('has_role', {
-              _user_id: session.user.id,
-              _role: 'super_admin'
-            });
+            attempts++;
+            const hasRole = await checkForAnyRole(session.user.id);
             
-            if (hasAdminRole || hasSuperAdminRole) {
+            if (hasRole) {
               navigate("/admin");
-            } else {
+            } else if (attempts < maxAttempts) {
               // Poll again after 1 second if role not yet assigned
               setTimeout(checkRoleAssignment, 1000);
+            } else {
+              // Stop polling after max attempts, user may need to refresh
+              setLoading(false);
             }
           };
           checkRoleAssignment();
+          return; // Don't set loading to false yet
         }
       }
 
@@ -99,7 +109,7 @@ const PendingApprovalPage = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/auth");
+    navigate("/login");
   };
 
   if (loading) {

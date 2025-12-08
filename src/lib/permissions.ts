@@ -33,7 +33,8 @@ export type PermissionKey =
   | "productCategories"
   | "products"
   | "productOrders"
-  | "approvals";
+  | "approvals"
+  | "aiTools";
 
 export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   dashboard: ["super_admin", "admin", "content_manager", "analytics_viewer", "viewer", "moderator", "editor", "content_editor"],
@@ -69,6 +70,13 @@ export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   products: ["super_admin", "admin", "content_manager"],
   productOrders: ["super_admin", "admin", "content_manager", "support_agent"],
   approvals: ["super_admin", "admin"],
+  aiTools: ["super_admin", "admin", "content_manager", "editor"],
+};
+
+// Helper to check if a user can use AI features
+export const canUseAI = (role?: UserRole | string | null): boolean => {
+  if (!role) return false;
+  return PERMISSIONS.aiTools.includes(role as UserRole);
 };
 
 export const canViewSection = (key: PermissionKey, role?: UserRole | string | null): boolean => {

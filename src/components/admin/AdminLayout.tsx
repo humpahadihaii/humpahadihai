@@ -25,7 +25,8 @@ import {
   ShoppingCart,
   Megaphone,
   Plane,
-  Store
+  Store,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -52,6 +53,9 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   // Core
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "dashboard" },
+  
+  // AI Tools
+  { name: "AI Tools", href: "/admin/ai-tools", icon: Sparkles, permission: "aiTools", section: "AI" },
   
   // User Management
   { name: "User Management", href: "/admin/users", icon: Shield, permission: "users", section: "Users" },
