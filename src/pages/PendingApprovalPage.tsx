@@ -49,8 +49,25 @@ const PendingApprovalPage = () => {
       if (request) {
         setStatus(request.status);
         if (request.status === "approved") {
-          // If approved but no role yet, wait a moment
-          setTimeout(() => window.location.reload(), 1000);
+          // Poll for role assignment before navigating
+          const checkRoleAssignment = async () => {
+            const { data: hasAdminRole } = await supabase.rpc('has_role', {
+              _user_id: session.user.id,
+              _role: 'admin'
+            });
+            const { data: hasSuperAdminRole } = await supabase.rpc('has_role', {
+              _user_id: session.user.id,
+              _role: 'super_admin'
+            });
+            
+            if (hasAdminRole || hasSuperAdminRole) {
+              navigate("/admin");
+            } else {
+              // Poll again after 1 second if role not yet assigned
+              setTimeout(checkRoleAssignment, 1000);
+            }
+          };
+          checkRoleAssignment();
         }
       }
 
