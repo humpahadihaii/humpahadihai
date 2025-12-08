@@ -196,6 +196,70 @@ export default function AdminVillagesPage() {
     }
   };
 
+  const handleAISuggest = async () => {
+    if (!selectedDistrictForAI) return;
+    
+    const district = districts.find(d => d.id === selectedDistrictForAI);
+    if (!district) return;
+    
+    setAiGenerating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to use AI features");
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-content`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          type: "villages",
+          districtName: district.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("AI request failed");
+      }
+
+      const result = await response.json();
+      const villagesData = result.villages || [];
+
+      if (villagesData.length === 0) {
+        toast.error("No villages generated. Please try again.");
+        return;
+      }
+
+      // Insert generated villages
+      let insertedCount = 0;
+      for (const v of villagesData) {
+        const slug = v.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        const { error } = await supabase.from("villages").insert({
+          name: v.name,
+          slug,
+          district_id: selectedDistrictForAI,
+          introduction: v.description || `A village in ${district.name} district.`,
+          status: "draft",
+        });
+        if (!error) insertedCount++;
+      }
+
+      toast.success(`Added ${insertedCount} villages to ${district.name}. Please review and edit.`);
+      setAiDialogOpen(false);
+      setSelectedDistrictForAI("");
+      fetchVillages();
+    } catch (error) {
+      console.error("AI generation error:", error);
+      toast.error("Failed to generate villages. Please try again.");
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
   const filteredVillages = villages.filter((village) => {
     const matchesSearch = village.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDistrict = districtFilter === "all" || village.district_id === districtFilter;
@@ -503,6 +567,7 @@ export default function AdminVillagesPage() {
               </Form>
             </DialogContent>
           </Dialog>
+        </div>
         </div>
 
         <Card>
