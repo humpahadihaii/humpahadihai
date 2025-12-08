@@ -55,6 +55,12 @@ import AdminFooterLinksPage from "./pages/admin/AdminFooterLinksPage";
 import AdminContentSectionsPage from "./pages/admin/AdminContentSectionsPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import NotFound from "./pages/NotFound";
+// Monetization & New Features
+import PromotionsPage from "./pages/PromotionsPage";
+import TravelPackagesPage from "./pages/TravelPackagesPage";
+import TravelPackageDetailPage from "./pages/TravelPackageDetailPage";
+import ProductsPage from "./pages/ProductsPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +96,13 @@ const App = () => (
               <Route path="/submit-thought" element={<SubmitThoughtPage />} />
               <Route path="/submit-story" element={<SubmitStoryPage />} />
               <Route path="/my-submissions" element={<MySubmissionsPage />} />
+              {/* Monetization & New Features */}
+              <Route path="/promotions" element={<PromotionsPage />} />
+              <Route path="/travel-packages" element={<TravelPackagesPage />} />
+              <Route path="/travel-packages/:slug" element={<TravelPackageDetailPage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/products/:slug" element={<ProductDetailPage />} />
+              {/* Auth */}
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/pending-approval" element={<PendingApprovalPage />} />
