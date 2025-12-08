@@ -55,6 +55,7 @@ import AdminFooterLinksPage from "./pages/admin/AdminFooterLinksPage";
 import AdminContentSectionsPage from "./pages/admin/AdminContentSectionsPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import NotFound from "./pages/NotFound";
+import UnauthorizedPage from "./pages/admin/UnauthorizedPage";
 // Monetization & New Features
 import PromotionsPage from "./pages/PromotionsPage";
 import TravelPackagesPage from "./pages/TravelPackagesPage";
@@ -114,6 +115,7 @@ const App = () => (
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/pending-approval" element={<PendingApprovalPage />} />
+              <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
               <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
