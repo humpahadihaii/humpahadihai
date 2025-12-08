@@ -61,6 +61,14 @@ import TravelPackagesPage from "./pages/TravelPackagesPage";
 import TravelPackageDetailPage from "./pages/TravelPackageDetailPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+// Admin Monetization Pages
+import AdminPromotionPackagesPage from "./pages/admin/AdminPromotionPackagesPage";
+import AdminPromotionRequestsPage from "./pages/admin/AdminPromotionRequestsPage";
+import AdminTravelPackagesPage from "./pages/admin/AdminTravelPackagesPage";
+import AdminTravelRequestsPage from "./pages/admin/AdminTravelRequestsPage";
+import AdminProductCategoriesPage from "./pages/admin/AdminProductCategoriesPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +141,14 @@ const App = () => (
               <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
               <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
               <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
+              {/* Admin Monetization Routes */}
+              <Route path="/admin/promotion-packages" element={<AdminRoute><AdminPromotionPackagesPage /></AdminRoute>} />
+              <Route path="/admin/promotion-requests" element={<AdminRoute><AdminPromotionRequestsPage /></AdminRoute>} />
+              <Route path="/admin/travel-packages" element={<AdminRoute><AdminTravelPackagesPage /></AdminRoute>} />
+              <Route path="/admin/travel-requests" element={<AdminRoute><AdminTravelRequestsPage /></AdminRoute>} />
+              <Route path="/admin/product-categories" element={<AdminRoute><AdminProductCategoriesPage /></AdminRoute>} />
+              <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
+              <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

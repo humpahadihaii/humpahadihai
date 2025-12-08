@@ -52,7 +52,7 @@ const navigation: NavigationItem[] = [
   { name: "Footer Links", href: "/admin/footer-links", icon: FileText },
   { name: "Culture", href: "/admin/content/culture", icon: FileText },
   { name: "Food", href: "/admin/content/food", icon: FileText },
-  { name: "Travel", href: "/admin/content/travel", icon: FileText },
+  { name: "Travel Content", href: "/admin/content/travel", icon: FileText },
   { name: "Thoughts", href: "/admin/content/thoughts", icon: MessageSquare },
   { name: "Districts", href: "/admin/districts", icon: Map },
   { name: "District Content", href: "/admin/district-content", icon: Calendar },
@@ -62,6 +62,16 @@ const navigation: NavigationItem[] = [
   { name: "Community Submissions", href: "/admin/community-submissions", icon: Users },
   { name: "Submissions", href: "/admin/submissions", icon: Mail },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  // Monetization
+  { name: "Promotion Packages", href: "/admin/promotion-packages", icon: BarChart3 },
+  { name: "Promotion Requests", href: "/admin/promotion-requests", icon: Mail },
+  // Travel Packages
+  { name: "Travel Packages", href: "/admin/travel-packages", icon: Map },
+  { name: "Travel Requests", href: "/admin/travel-requests", icon: Mail },
+  // Products
+  { name: "Product Categories", href: "/admin/product-categories", icon: FileText },
+  { name: "Products", href: "/admin/products", icon: FileText },
+  { name: "Product Orders", href: "/admin/product-orders", icon: Mail },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {

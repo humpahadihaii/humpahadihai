@@ -89,7 +89,13 @@ const AdminProductCategoriesPage = () => {
     } else {
       const { error } = await supabase
         .from("local_product_categories")
-        .insert([data]);
+        .insert({
+          name: data.name,
+          slug: data.slug,
+          description: data.description,
+          is_active: data.is_active,
+          sort_order: data.sort_order
+        });
 
       if (error) {
         toast.error("Failed to create category");
