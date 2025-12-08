@@ -1,21 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Mountain, Utensils, TreePine, Landmark, ChevronRight, Search } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Users, Mountain, Utensils, TreePine, Landmark, ChevronRight, Search, Home, Building } from "lucide-react";
+import { useState, useMemo } from "react";
 import type { Database } from "@/integrations/supabase/types";
 
 type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
 type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
+type Village = Database["public"]["Tables"]["villages"]["Row"];
+
+const INITIAL_VILLAGES_COUNT = 12;
 
 const DistrictDetailPage = () => {
   const { slug } = useParams();
   const [villageSearch, setVillageSearch] = useState("");
+  const [villageTypeFilter, setVillageTypeFilter] = useState<"all" | "village" | "town" | "city">("all");
+  const [showAllVillages, setShowAllVillages] = useState(false);
 
   // Fetch district data
   const { data: district, isLoading: districtLoading } = useQuery({
@@ -49,21 +55,37 @@ const DistrictDetailPage = () => {
     enabled: !!district?.id,
   });
 
-  // Fetch all villages for search
+  // Fetch all villages for the directory
   const { data: allVillages } = useQuery({
     queryKey: ["district-all-villages", district?.id],
     queryFn: async () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("villages")
-        .select("id, name, slug, thumbnail_url, tehsil, population")
+        .select("id, name, slug, thumbnail_url, tehsil, population, introduction, status")
         .eq("district_id", district.id)
+        .eq("status", "published")
         .order("name");
       if (error) throw error;
       return data;
     },
     enabled: !!district?.id,
   });
+
+  // Filter villages by search
+  const filteredVillages = useMemo(() => {
+    if (!allVillages) return [];
+    return allVillages.filter((village) => {
+      const matchesSearch = village.name.toLowerCase().includes(villageSearch.toLowerCase());
+      return matchesSearch;
+    });
+  }, [allVillages, villageSearch]);
+
+  // Get villages to display based on showAllVillages state
+  const displayedVillages = useMemo(() => {
+    if (showAllVillages) return filteredVillages;
+    return filteredVillages.slice(0, INITIAL_VILLAGES_COUNT);
+  }, [filteredVillages, showAllVillages]);
 
   // Fetch food content linked to this district
   const { data: foodItems } = useQuery({
@@ -135,10 +157,6 @@ const DistrictDetailPage = () => {
     enabled: !!district?.id,
   });
 
-  const filteredVillages = allVillages?.filter((village) =>
-    village.name.toLowerCase().includes(villageSearch.toLowerCase())
-  );
-
   if (districtLoading) {
     return (
       <div className="min-h-screen">
@@ -166,14 +184,26 @@ const DistrictDetailPage = () => {
     );
   }
 
+  const metaTitle = `${district.name} District, Uttarakhand - Explore Villages, Culture & Heritage`;
+  const metaDescription = district.overview?.substring(0, 155) + "..." || `Discover ${district.name} district in Uttarakhand.`;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        {district.banner_image && <meta property="og:image" content={district.banner_image} />}
+      </Helmet>
+
       {/* Hero Section */}
       <section className="relative h-[60vh] overflow-hidden">
         <img
           src={district.banner_image || district.image_url || "/placeholder.svg"}
-          alt={district.name}
+          alt={`${district.name} district landscape`}
           className="w-full h-full object-cover"
+          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -233,7 +263,7 @@ const DistrictDetailPage = () => {
         </div>
       </section>
 
-      {/* Overview Section */}
+      {/* About Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <Card className="border-none shadow-lg">
@@ -255,7 +285,7 @@ const DistrictDetailPage = () => {
         </div>
       </section>
 
-      {/* Section 1: Villages */}
+      {/* Villages Section */}
       {villages && villages.length > 0 && (
         <section className="py-16 px-4 bg-secondary/10">
           <div className="container mx-auto">
@@ -279,6 +309,7 @@ const DistrictDetailPage = () => {
                         src={village.thumbnail_url || "/placeholder.svg"}
                         alt={village.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
                       />
                     </div>
                     <CardHeader>
@@ -297,7 +328,7 @@ const DistrictDetailPage = () => {
         </section>
       )}
 
-      {/* Section 2: Famous Food */}
+      {/* Food Section */}
       {foodItems && foodItems.length > 0 && (
         <section className="py-16 px-4">
           <div className="container mx-auto">
@@ -325,6 +356,7 @@ const DistrictDetailPage = () => {
                           src={item.main_image_url}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       </div>
                     )}
@@ -342,7 +374,7 @@ const DistrictDetailPage = () => {
         </section>
       )}
 
-      {/* Section 3: Culture & Heritage */}
+      {/* Culture Section */}
       {cultureItems && cultureItems.length > 0 && (
         <section className="py-16 px-4 bg-secondary/10">
           <div className="container mx-auto">
@@ -370,6 +402,7 @@ const DistrictDetailPage = () => {
                           src={item.main_image_url}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       </div>
                     )}
@@ -387,7 +420,7 @@ const DistrictDetailPage = () => {
         </section>
       )}
 
-      {/* Section 4: Tourist Spots */}
+      {/* Travel Section */}
       {travelItems && travelItems.length > 0 && (
         <section className="py-16 px-4">
           <div className="container mx-auto">
@@ -415,6 +448,7 @@ const DistrictDetailPage = () => {
                           src={item.main_image_url}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       </div>
                     )}
@@ -432,7 +466,7 @@ const DistrictDetailPage = () => {
         </section>
       )}
 
-      {/* District Content Section (from district_content table) */}
+      {/* District Content Section */}
       {districtContent && districtContent.length > 0 && (
         <section className="py-16 px-4 bg-secondary/10">
           <div className="container mx-auto">
@@ -446,6 +480,7 @@ const DistrictDetailPage = () => {
                         src={item.image_url}
                         alt={item.title}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                   )}
@@ -474,42 +509,133 @@ const DistrictDetailPage = () => {
       {allVillages && allVillages.length > 0 && (
         <section id="all-villages" className="py-16 px-4">
           <div className="container mx-auto">
-            <h2 className="text-3xl font-bold mb-2">Villages Directory</h2>
-            <p className="text-muted-foreground mb-6">
-              {allVillages.length} villages in {district.name}
-            </p>
-            <div className="relative max-w-md mb-8">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search villages..."
-                value={villageSearch}
-                onChange={(e) => setVillageSearch(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex items-center gap-3 mb-2">
+              <Home className="h-8 w-8 text-primary" />
+              <h2 className="text-3xl font-bold">Villages & Towns in {district.name}</h2>
             </div>
+            <p className="text-muted-foreground mb-6">
+              Explore {allVillages.length} settlements in {district.name} district
+            </p>
+            
+            {/* Search and Filter */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by village name..."
+                  value={villageSearch}
+                  onChange={(e) => setVillageSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant={villageTypeFilter === "all" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setVillageTypeFilter("all")}
+                >
+                  All
+                </Button>
+                <Button 
+                  variant={villageTypeFilter === "village" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setVillageTypeFilter("village")}
+                >
+                  <Home className="h-3 w-3 mr-1" /> Villages
+                </Button>
+                <Button 
+                  variant={villageTypeFilter === "town" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setVillageTypeFilter("town")}
+                >
+                  <Building className="h-3 w-3 mr-1" /> Towns
+                </Button>
+              </div>
+            </div>
+
+            {/* Results count */}
+            {villageSearch && (
+              <p className="text-sm text-muted-foreground mb-4">
+                Found {filteredVillages.length} result{filteredVillages.length !== 1 ? 's' : ''} for "{villageSearch}"
+              </p>
+            )}
+
+            {/* Villages Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredVillages?.map((village) => (
+              {displayedVillages.map((village) => (
                 <Link key={village.id} to={`/villages/${village.slug}`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                    {village.thumbnail_url && (
-                      <div className="h-24 overflow-hidden rounded-t-lg">
+                  <Card className="hover:shadow-lg transition-all cursor-pointer h-full group border-border/50 hover:border-primary/30">
+                    {village.thumbnail_url ? (
+                      <div className="h-32 overflow-hidden rounded-t-lg">
                         <img
                           src={village.thumbnail_url}
                           alt={village.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
+                      </div>
+                    ) : (
+                      <div className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center rounded-t-lg">
+                        <Home className="h-10 w-10 text-primary/30" />
                       </div>
                     )}
                     <CardHeader className="p-4">
-                      <CardTitle className="text-sm">{village.name}</CardTitle>
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-sm group-hover:text-primary transition-colors line-clamp-1">
+                          {village.name}
+                        </CardTitle>
+                        <Badge variant="outline" className="text-xs shrink-0">
+                          Village
+                        </Badge>
+                      </div>
                       {village.tehsil && (
-                        <CardDescription className="text-xs">{village.tehsil}</CardDescription>
+                        <CardDescription className="text-xs line-clamp-1">
+                          {village.tehsil} Tehsil
+                        </CardDescription>
+                      )}
+                      {village.introduction && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                          {village.introduction.substring(0, 80)}...
+                        </p>
+                      )}
+                      {village.population && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                          <Users className="h-3 w-3" />
+                          <span>{village.population.toLocaleString()} people</span>
+                        </div>
                       )}
                     </CardHeader>
                   </Card>
                 </Link>
               ))}
             </div>
+
+            {/* Show More / Show Less */}
+            {filteredVillages.length > INITIAL_VILLAGES_COUNT && (
+              <div className="text-center mt-8">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowAllVillages(!showAllVillages)}
+                  className="min-w-[200px]"
+                >
+                  {showAllVillages 
+                    ? `Show Less` 
+                    : `Show All ${filteredVillages.length} Villages`
+                  }
+                </Button>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {filteredVillages.length === 0 && villageSearch && (
+              <div className="text-center py-12">
+                <Home className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                <p className="text-muted-foreground">No villages found matching "{villageSearch}"</p>
+                <Button variant="ghost" onClick={() => setVillageSearch("")} className="mt-2">
+                  Clear search
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       )}
