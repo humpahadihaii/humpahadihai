@@ -17,6 +17,7 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import AIVillageDescription from "@/components/admin/AIVillageDescription";
 
 const villageSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -392,7 +393,21 @@ export default function AdminVillagesPage() {
                     name="introduction"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Introduction *</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Introduction *</FormLabel>
+                          <AIVillageDescription
+                            villageName={form.watch("name") || "Village"}
+                            districtName={districts.find(d => d.id === form.watch("district_id"))?.name || "District"}
+                            onContentGenerated={(content) => {
+                              if (content.introduction) form.setValue("introduction", content.introduction);
+                              if (content.history) form.setValue("history", content.history);
+                              if (content.traditions) form.setValue("traditions", content.traditions);
+                              if (content.festivals) form.setValue("festivals", content.festivals);
+                              if (content.foods) form.setValue("foods", content.foods);
+                              if (content.handicrafts) form.setValue("handicrafts", content.handicrafts);
+                            }}
+                          />
+                        </div>
                         <FormControl>
                           <Textarea {...field} rows={3} />
                         </FormControl>
