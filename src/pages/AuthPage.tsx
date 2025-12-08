@@ -38,64 +38,49 @@ const AuthPage = () => {
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
 
   useEffect(() => {
-    const checkUserStatus = async (userId: string) => {
-      // Check if user has any admin role (super_admin or admin)
-      const { data: hasSuperAdmin } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'super_admin'
-      });
+    // Fast role check - single query to user_roles table
+    const checkUserRoles = async (userId: string) => {
+      try {
+        const { data: userRoles, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
 
-      if (hasSuperAdmin) {
-        navigate("/admin", { replace: true });
-        return;
-      }
-
-      const { data: hasAdminRole } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'admin'
-      });
-
-      if (hasAdminRole) {
-        navigate("/admin", { replace: true });
-        return;
-      }
-
-      // Check for other roles that grant admin access
-      const otherAdminRoles = [
-        'content_manager', 'content_editor', 'editor', 'moderator',
-        'author', 'reviewer', 'media_manager', 'seo_manager',
-        'support_agent', 'analytics_viewer', 'developer', 'viewer'
-      ];
-
-      for (const role of otherAdminRoles) {
-        const { data: hasRole } = await supabase.rpc('has_role', {
-          _user_id: userId,
-          _role: role as any
-        });
-        if (hasRole) {
-          navigate("/admin", { replace: true });
+        if (error) {
+          console.error("Error fetching roles:", error);
+          navigate("/pending-approval", { replace: true });
           return;
         }
-      }
 
-      // No role found, go to pending approval
-      navigate("/pending-approval", { replace: true });
+        // If user has any role, they can access admin
+        if (userRoles && userRoles.length > 0) {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/pending-approval", { replace: true });
+        }
+      } catch (err) {
+        console.error("Role check error:", err);
+        navigate("/pending-approval", { replace: true });
+      }
     };
 
     // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        await checkUserStatus(session.user.id);
+        await checkUserRoles(session.user.id);
       }
     };
 
     checkSession();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listen for auth changes - use setTimeout to avoid deadlock
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        await checkUserStatus(session.user.id);
+        // Defer the role check to avoid auth state deadlock
+        setTimeout(() => {
+          checkUserRoles(session.user.id);
+        }, 0);
       }
     });
 
@@ -111,30 +96,46 @@ const AuthPage = () => {
       const validatedData = loginSchema.parse(loginData);
       
       // Sign in with Supabase
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: validatedData.email,
         password: validatedData.password,
       });
 
       if (error) {
+        setIsLoading(false);
         if (error.message.includes("Invalid login credentials")) {
           toast.error("Invalid email or password. Please try again.");
         } else if (error.message.includes("Email not confirmed")) {
           toast.error("Please verify your email before logging in.");
+        } else if (error.message.includes("Network") || error.message.includes("fetch")) {
+          toast.error("Login failed due to a server issue. Please try again.");
         } else {
           toast.error(error.message);
         }
         return;
       }
 
-      toast.success("Welcome back!");
-      // Navigation handled by onAuthStateChange
+      // If login successful, check roles immediately (don't wait for onAuthStateChange)
+      if (data.user) {
+        const { data: userRoles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id);
+
+        if (userRoles && userRoles.length > 0) {
+          toast.success("Welcome back!");
+          navigate("/admin", { replace: true });
+        } else {
+          toast.info("Your account is pending admin approval.");
+          navigate("/pending-approval", { replace: true });
+        }
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
         console.error("Login error:", error);
-        toast.error("An error occurred. Please try again.");
+        toast.error("Login failed due to a server issue. Please try again.");
       }
     } finally {
       setIsLoading(false);

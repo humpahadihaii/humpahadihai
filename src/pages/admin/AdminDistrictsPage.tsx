@@ -23,6 +23,7 @@ const districtSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   slug: z.string().min(2, "Slug is required"),
   overview: z.string().min(10, "Overview must be at least 10 characters"),
+  region: z.string().optional(),
   geography: z.string().optional(),
   population: z.string().optional(),
   cultural_identity: z.string().optional(),
@@ -35,6 +36,7 @@ const districtSchema = z.object({
   image_url: z.string().optional(),
   banner_image: z.string().optional(),
   status: z.enum(["draft", "review", "published"]),
+  sort_order: z.string().optional(),
 });
 
 type DistrictFormData = z.infer<typeof districtSchema>;
@@ -44,6 +46,7 @@ interface District {
   name: string;
   slug: string;
   overview: string;
+  region?: string | null;
   geography?: string | null;
   population?: string | null;
   cultural_identity?: string | null;
@@ -56,6 +59,7 @@ interface District {
   image_url?: string | null;
   banner_image?: string | null;
   status: string;
+  sort_order?: number | null;
   created_at: string;
   updated_at: string;
   highlights?: string | null;
@@ -104,6 +108,7 @@ export default function AdminDistrictsPage() {
       name: "",
       slug: "",
       overview: "",
+      region: "",
       geography: "",
       population: "",
       cultural_identity: "",
@@ -116,6 +121,7 @@ export default function AdminDistrictsPage() {
       image_url: "",
       banner_image: "",
       status: "draft",
+      sort_order: "0",
     },
   });
 
@@ -163,6 +169,7 @@ export default function AdminDistrictsPage() {
       ...data,
       latitude: data.latitude ? parseFloat(data.latitude) : null,
       longitude: data.longitude ? parseFloat(data.longitude) : null,
+      sort_order: data.sort_order ? parseInt(data.sort_order, 10) : 0,
     };
 
     if (editingDistrict) {
@@ -204,8 +211,10 @@ export default function AdminDistrictsPage() {
     setEditingDistrict(district);
     form.reset({
       ...district,
+      region: district.region || "",
       latitude: district.latitude?.toString() || "",
       longitude: district.longitude?.toString() || "",
+      sort_order: district.sort_order?.toString() || "0",
       status: (district.status as "draft" | "review" | "published") || "draft",
     });
     setDialogOpen(true);
