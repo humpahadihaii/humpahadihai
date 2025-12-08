@@ -102,7 +102,17 @@ const AdminPromotionPackagesPage = () => {
     } else {
       const { error } = await supabase
         .from("promotion_packages")
-        .insert([data]);
+        .insert({
+          name: data.name,
+          slug: data.slug,
+          type: data.type,
+          description: data.description,
+          deliverables: data.deliverables,
+          price: data.price,
+          duration_days: data.duration_days,
+          is_active: data.is_active,
+          sort_order: data.sort_order
+        });
 
       if (error) {
         toast.error("Failed to create package");

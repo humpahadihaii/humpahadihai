@@ -122,7 +122,26 @@ const AdminTravelPackagesPage = () => {
     } else {
       const { error } = await supabase
         .from("travel_packages")
-        .insert([data]);
+        .insert({
+          title: data.title,
+          slug: data.slug,
+          short_description: data.short_description,
+          full_description: data.full_description,
+          destination: data.destination,
+          region: data.region,
+          duration_days: data.duration_days,
+          difficulty_level: data.difficulty_level,
+          best_season: data.best_season,
+          starting_point: data.starting_point,
+          ending_point: data.ending_point,
+          price_per_person: data.price_per_person,
+          inclusions: data.inclusions,
+          exclusions: data.exclusions,
+          itinerary: data.itinerary,
+          thumbnail_image_url: data.thumbnail_image_url,
+          is_featured: data.is_featured,
+          is_active: data.is_active
+        });
 
       if (error) {
         toast.error("Failed to create package");
@@ -321,14 +340,12 @@ const AdminTravelPackagesPage = () => {
                   <Textarea id="itinerary" {...form.register("itinerary")} rows={6} placeholder="Day 1: ...\nDay 2: ..." />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Thumbnail Image</Label>
-                  <ImageUpload
-                    currentImage={form.watch("thumbnail_image_url")}
-                    onImageUpload={(url) => form.setValue("thumbnail_image_url", url)}
-                    folder="travel"
-                  />
-                </div>
+                <ImageUpload
+                  label="Thumbnail Image"
+                  id="thumbnail_image_url"
+                  value={form.watch("thumbnail_image_url") || ""}
+                  onChange={(url) => form.setValue("thumbnail_image_url", url)}
+                />
 
                 <div className="flex gap-6">
                   <div className="flex items-center gap-2">

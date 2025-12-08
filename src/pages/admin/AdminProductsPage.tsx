@@ -131,7 +131,20 @@ const AdminProductsPage = () => {
     } else {
       const { error } = await supabase
         .from("local_products")
-        .insert([productData]);
+        .insert({
+          name: productData.name,
+          slug: productData.slug,
+          category_id: productData.category_id || null,
+          short_description: productData.short_description,
+          full_description: productData.full_description,
+          price: productData.price,
+          unit_label: productData.unit_label,
+          stock_status: productData.stock_status,
+          thumbnail_image_url: productData.thumbnail_image_url,
+          tags: productData.tags,
+          is_featured: productData.is_featured,
+          is_active: productData.is_active
+        });
 
       if (error) {
         toast.error("Failed to create product");
@@ -302,14 +315,12 @@ const AdminProductsPage = () => {
                   <Input id="tags" {...form.register("tags")} placeholder="organic, handmade, traditional" />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Thumbnail Image</Label>
-                  <ImageUpload
-                    currentImage={form.watch("thumbnail_image_url")}
-                    onImageUpload={(url) => form.setValue("thumbnail_image_url", url)}
-                    folder="products"
-                  />
-                </div>
+                <ImageUpload
+                  label="Thumbnail Image"
+                  id="thumbnail_image_url"
+                  value={form.watch("thumbnail_image_url") || ""}
+                  onChange={(url) => form.setValue("thumbnail_image_url", url)}
+                />
 
                 <div className="flex gap-6">
                   <div className="flex items-center gap-2">
