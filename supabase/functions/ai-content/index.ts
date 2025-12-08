@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface AIRequest {
-  type: "story" | "travel" | "product" | "promotion" | "seo" | "translate";
+  type: "story" | "travel" | "product" | "promotion" | "seo" | "translate" | "villages";
   action: string;
   inputs: Record<string, string>;
 }
@@ -38,6 +38,10 @@ Keep titles under 60 characters and descriptions under 160 characters.`,
     translate: `${basePrompt}
 You are a translator between English and Hindi. Maintain cultural nuances and the warm, authentic tone.
 Translate naturally, not word-for-word.`,
+    villages: `${basePrompt}
+You are an expert on Uttarakhand geography and settlements. You have deep knowledge of villages, towns, and cities in all 13 districts.
+Provide accurate, verifiable information about settlements. Include a mix of well-known towns and lesser-known villages.
+Focus on authentic Pahadi names and locations.`,
   };
 
   return prompts[type] || basePrompt;
@@ -177,6 +181,29 @@ META_DESCRIPTION: (under 160 characters, compelling with call-to-action)`;
 "${inputs.content}"
 
 Provide only the translation, maintaining the original tone and cultural context.`;
+
+    case "villages":
+      return `List 15-20 important villages, towns, and small cities in ${inputs.districtName} district, Uttarakhand, India.
+
+For each settlement, provide:
+- name: The official name
+- type: Either "village", "town", or "city"
+- description: A brief one-sentence description of what makes it notable (temples, markets, historical significance, scenic beauty, etc.)
+
+Return ONLY a valid JSON array with this exact structure, no other text:
+[
+  {"name": "Settlement Name", "type": "village", "description": "Brief description"},
+  ...
+]
+
+Focus on:
+1. District headquarters and major towns
+2. Historically significant villages
+3. Villages known for temples, festivals, or pilgrimage
+4. Villages famous for handicrafts or local products
+5. Scenic or touristy settlements
+
+Be accurate with names - use authentic local spellings.`;
 
     default:
       return inputs.prompt || "";

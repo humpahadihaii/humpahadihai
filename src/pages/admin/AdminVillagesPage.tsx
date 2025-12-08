@@ -8,12 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
@@ -70,6 +71,9 @@ export default function AdminVillagesPage() {
   const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingVillage, setEditingVillage] = useState<Village | null>(null);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [selectedDistrictForAI, setSelectedDistrictForAI] = useState<string>("");
 
   const form = useForm<VillageFormData>({
     resolver: zodResolver(villageSchema),
@@ -206,13 +210,67 @@ export default function AdminVillagesPage() {
             <h1 className="text-3xl font-bold">Villages Management</h1>
             <p className="text-muted-foreground">Manage villages across all districts</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingVillage(null); form.reset(); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Village
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            {/* AI Suggest Button */}
+            <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  AI: Suggest Villages
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>AI Village Suggestions</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      AI-generated data requires review. Please verify village names and descriptions before publishing.
+                    </AlertDescription>
+                  </Alert>
+                  <div>
+                    <label className="text-sm font-medium">Select District</label>
+                    <Select value={selectedDistrictForAI} onValueChange={setSelectedDistrictForAI}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Choose a district" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districts.map((d) => (
+                          <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    onClick={handleAISuggest} 
+                    disabled={!selectedDistrictForAI || aiGenerating}
+                    className="w-full"
+                  >
+                    {aiGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Generate Villages
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { setEditingVillage(null); form.reset(); }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Village
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingVillage ? "Edit Village" : "Add New Village"}</DialogTitle>
