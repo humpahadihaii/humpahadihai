@@ -54,7 +54,21 @@ const AdminApprovalsPage = () => {
       // Get the selected role or default to moderator
       const roleToGrant: Database["public"]["Enums"]["app_role"] = selectedRoles[request.id] || 'moderator';
 
-      // Update request status
+      // SECURITY FIX: Grant role FIRST, then update status
+      // This ensures if role insert fails, user stays "pending" and can retry
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({
+          user_id: request.user_id,
+          role: roleToGrant,
+        });
+
+      if (roleError) {
+        console.error("Role error:", roleError);
+        throw new Error(`Failed to grant role: ${roleError.message}`);
+      }
+
+      // Only update status after role is successfully granted
       const { error: updateError } = await supabase
         .from("admin_requests")
         .update({
@@ -67,20 +81,9 @@ const AdminApprovalsPage = () => {
 
       if (updateError) {
         console.error("Update error:", updateError);
-        throw new Error(`Failed to update request: ${updateError.message}`);
-      }
-
-      // Grant the role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: request.user_id,
-          role: roleToGrant,
-        });
-
-      if (roleError) {
-        console.error("Role error:", roleError);
-        throw new Error(`Failed to grant role: ${roleError.message}`);
+        // Role was granted but status update failed - log but don't throw
+        // User has access, status can be updated later
+        console.warn("Role granted but status update failed - user has access");
       }
 
       toast.success(`Admin request approved as ${roleToGrant.replace('_', ' ')}`);
