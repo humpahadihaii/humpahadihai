@@ -44,8 +44,7 @@ import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
 import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
 import AdminDistrictContentPage from "./pages/admin/AdminDistrictContentPage";
 import AdminFeaturedHighlightsPage from "./pages/admin/AdminFeaturedHighlightsPage";
-import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
-import AdminRoleManagementPage from "./pages/admin/AdminRoleManagementPage";
+// AdminApprovalsPage and AdminRoleManagementPage merged into AdminUserManagementPage
 import AdminUserManagementPage from "./pages/admin/AdminUserManagementPage";
 import AdminSiteSettingsPage from "./pages/admin/AdminSiteSettingsPage";
 import AdminStoriesPage from "./pages/admin/AdminStoriesPage";
@@ -136,8 +135,9 @@ const App = () => (
               <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
               <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
               <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
-              <Route path="/admin/approvals" element={<AdminRoute><AdminApprovalsPage /></AdminRoute>} />
-              <Route path="/admin/roles" element={<AdminRoute><AdminRoleManagementPage /></AdminRoute>} />
+              {/* Approvals and Roles now merged into /admin/users */}
+              <Route path="/admin/approvals" element={<Navigate to="/admin/users" replace />} />
+              <Route path="/admin/roles" element={<Navigate to="/admin/users" replace />} />
               <Route path="/admin/users" element={<AdminRoute><AdminUserManagementPage /></AdminRoute>} />
               <Route path="/admin/site-settings" element={<AdminRoute><AdminSiteSettingsPage /></AdminRoute>} />
               <Route path="/admin/stories" element={<AdminRoute><AdminStoriesPage /></AdminRoute>} />
