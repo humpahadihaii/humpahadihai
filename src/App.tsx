@@ -61,6 +61,7 @@ import TravelPackagesPage from "./pages/TravelPackagesPage";
 import TravelPackageDetailPage from "./pages/TravelPackageDetailPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import MarketplacePage from "./pages/MarketplacePage";
 // Admin Monetization Pages
 import AdminPromotionPackagesPage from "./pages/admin/AdminPromotionPackagesPage";
 import AdminPromotionRequestsPage from "./pages/admin/AdminPromotionRequestsPage";
@@ -70,6 +71,14 @@ import AdminProductCategoriesPage from "./pages/admin/AdminProductCategoriesPage
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
 import AdminAIToolsPage from "./pages/admin/AdminAIToolsPage";
+// Admin District Content Pages
+import AdminDistrictPlacesPage from "./pages/admin/AdminDistrictPlacesPage";
+import AdminDistrictFoodsPage from "./pages/admin/AdminDistrictFoodsPage";
+import AdminDistrictFestivalsPage from "./pages/admin/AdminDistrictFestivalsPage";
+// Admin Tourism Marketplace Pages
+import AdminTourismProvidersPage from "./pages/admin/AdminTourismProvidersPage";
+import AdminTourismListingsPage from "./pages/admin/AdminTourismListingsPage";
+import AdminTourismInquiriesPage from "./pages/admin/AdminTourismInquiriesPage";
 
 const queryClient = new QueryClient();
 
@@ -111,6 +120,7 @@ const App = () => (
               <Route path="/travel-packages/:slug" element={<TravelPackageDetailPage />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/:slug" element={<ProductDetailPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
               {/* Auth */}
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -145,6 +155,14 @@ const App = () => (
               <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
               <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
               <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
+              {/* Admin District Content Routes */}
+              <Route path="/admin/district-places" element={<AdminRoute><AdminDistrictPlacesPage /></AdminRoute>} />
+              <Route path="/admin/district-foods" element={<AdminRoute><AdminDistrictFoodsPage /></AdminRoute>} />
+              <Route path="/admin/district-festivals" element={<AdminRoute><AdminDistrictFestivalsPage /></AdminRoute>} />
+              {/* Admin Tourism Marketplace Routes */}
+              <Route path="/admin/tourism-providers" element={<AdminRoute><AdminTourismProvidersPage /></AdminRoute>} />
+              <Route path="/admin/tourism-listings" element={<AdminRoute><AdminTourismListingsPage /></AdminRoute>} />
+              <Route path="/admin/tourism-inquiries" element={<AdminRoute><AdminTourismInquiriesPage /></AdminRoute>} />
               {/* Admin Monetization Routes */}
               <Route path="/admin/promotion-packages" element={<AdminRoute><AdminPromotionPackagesPage /></AdminRoute>} />
               <Route path="/admin/promotion-requests" element={<AdminRoute><AdminPromotionRequestsPage /></AdminRoute>} />

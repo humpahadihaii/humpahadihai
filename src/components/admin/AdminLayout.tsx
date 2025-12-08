@@ -55,7 +55,7 @@ const navigation: NavigationItem[] = [
   // AI Tools
   { name: "AI Tools", href: "/admin/ai-tools", icon: Sparkles, permission: "aiTools", section: "AI" },
   
-  // User Management - Single unified page
+  // User Management
   { name: "User Management", href: "/admin/users", icon: Users, permission: "users", section: "Users" },
   
   // Settings
@@ -77,6 +77,9 @@ const navigation: NavigationItem[] = [
   // Places
   { name: "Districts", href: "/admin/districts", icon: Map, permission: "districts", section: "Places" },
   { name: "District Content", href: "/admin/district-content", icon: Calendar, permission: "districtContent" },
+  { name: "District Places", href: "/admin/district-places", icon: Map, permission: "districtPlaces" },
+  { name: "District Foods", href: "/admin/district-foods", icon: Store, permission: "districtFoods" },
+  { name: "District Festivals", href: "/admin/district-festivals", icon: Calendar, permission: "districtFestivals" },
   { name: "Villages", href: "/admin/villages", icon: Home, permission: "villages" },
   { name: "Hotels", href: "/admin/hotels", icon: Hotel, permission: "hotels" },
   { name: "Festivals", href: "/admin/festivals", icon: Calendar, permission: "festivals" },
@@ -90,6 +93,11 @@ const navigation: NavigationItem[] = [
   // Submissions
   { name: "Community Submissions", href: "/admin/community-submissions", icon: Users, permission: "communitySubmissions", section: "Submissions" },
   { name: "Contact Submissions", href: "/admin/submissions", icon: Mail, permission: "submissions" },
+  
+  // Tourism Marketplace
+  { name: "Providers", href: "/admin/tourism-providers", icon: Users, permission: "tourismProviders", section: "Tourism Marketplace" },
+  { name: "Listings", href: "/admin/tourism-listings", icon: Store, permission: "tourismListings" },
+  { name: "Inquiries", href: "/admin/tourism-inquiries", icon: Mail, permission: "tourismInquiries" },
   
   // Monetization
   { name: "Promotion Packages", href: "/admin/promotion-packages", icon: Megaphone, permission: "promotionPackages", section: "Monetization" },
