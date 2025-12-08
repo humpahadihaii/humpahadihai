@@ -1,5 +1,5 @@
-import { ReactNode, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -20,14 +20,22 @@ import {
   UserCheck,
   Shield,
   FileText,
-  Users
+  Users,
+  Package,
+  ShoppingCart,
+  Megaphone,
+  Plane,
+  Store
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { performLogout } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
+import { canViewSection, PermissionKey } from "@/lib/permissions";
+import { Badge } from "@/components/ui/badge";
+import { getRoleLabel, getRoleBadgeVariant } from "@/lib/roles";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -37,80 +45,78 @@ interface NavigationItem {
   name: string;
   href: string;
   icon: any;
-  superAdminOnly?: boolean;
-  adminOnly?: boolean;
+  permission: PermissionKey;
+  section?: string;
 }
 
 const navigation: NavigationItem[] = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "User Management", href: "/admin/users", icon: Shield, adminOnly: true },
-  { name: "Site Settings", href: "/admin/site-settings", icon: Settings, adminOnly: true },
-  { name: "Content Sections", href: "/admin/content-sections", icon: FileText },
-  { name: "Stories", href: "/admin/stories", icon: FileText },
-  { name: "Events", href: "/admin/events", icon: Calendar },
-  { name: "Pages", href: "/admin/pages", icon: FileText },
-  { name: "Footer Links", href: "/admin/footer-links", icon: FileText },
-  { name: "Culture", href: "/admin/content/culture", icon: FileText },
-  { name: "Food", href: "/admin/content/food", icon: FileText },
-  { name: "Travel Content", href: "/admin/content/travel", icon: FileText },
-  { name: "Thoughts", href: "/admin/content/thoughts", icon: MessageSquare },
-  { name: "Districts", href: "/admin/districts", icon: Map },
-  { name: "District Content", href: "/admin/district-content", icon: Calendar },
-  { name: "Villages", href: "/admin/villages", icon: Home },
-  { name: "Gallery", href: "/admin/gallery", icon: Image },
-  { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },
-  { name: "Community Submissions", href: "/admin/community-submissions", icon: Users },
-  { name: "Submissions", href: "/admin/submissions", icon: Mail },
-  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  // Core
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "dashboard" },
+  
+  // User Management
+  { name: "User Management", href: "/admin/users", icon: Shield, permission: "users", section: "Users" },
+  { name: "Role Management", href: "/admin/roles", icon: UserCheck, permission: "roles" },
+  { name: "Approvals", href: "/admin/approvals", icon: UserCheck, permission: "approvals" },
+  
+  // Settings
+  { name: "Site Settings", href: "/admin/site-settings", icon: Settings, permission: "siteSettings", section: "Settings" },
+  
+  // Content
+  { name: "Content Sections", href: "/admin/content-sections", icon: FileText, permission: "contentSections", section: "Content" },
+  { name: "Stories", href: "/admin/stories", icon: FileText, permission: "stories" },
+  { name: "Events", href: "/admin/events", icon: Calendar, permission: "events" },
+  { name: "Pages", href: "/admin/pages", icon: FileText, permission: "pages" },
+  { name: "Footer Links", href: "/admin/footer-links", icon: FileText, permission: "footerLinks" },
+  
+  // Content Types
+  { name: "Culture", href: "/admin/content/culture", icon: FileText, permission: "culture", section: "Content Types" },
+  { name: "Food", href: "/admin/content/food", icon: FileText, permission: "food" },
+  { name: "Travel Content", href: "/admin/content/travel", icon: Plane, permission: "travelContent" },
+  { name: "Thoughts", href: "/admin/content/thoughts", icon: MessageSquare, permission: "thoughts" },
+  
+  // Places
+  { name: "Districts", href: "/admin/districts", icon: Map, permission: "districts", section: "Places" },
+  { name: "District Content", href: "/admin/district-content", icon: Calendar, permission: "districtContent" },
+  { name: "Villages", href: "/admin/villages", icon: Home, permission: "villages" },
+  { name: "Hotels", href: "/admin/hotels", icon: Hotel, permission: "hotels" },
+  { name: "Festivals", href: "/admin/festivals", icon: Calendar, permission: "festivals" },
+  { name: "Highlights", href: "/admin/highlights", icon: FileText, permission: "highlights" },
+  
+  // Media
+  { name: "Gallery", href: "/admin/gallery", icon: Image, permission: "gallery", section: "Media" },
+  { name: "Site Images", href: "/admin/site-images", icon: Image, permission: "siteImages" },
+  { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image, permission: "featuredHighlights" },
+  
+  // Submissions
+  { name: "Community Submissions", href: "/admin/community-submissions", icon: Users, permission: "communitySubmissions", section: "Submissions" },
+  { name: "Contact Submissions", href: "/admin/submissions", icon: Mail, permission: "submissions" },
+  
   // Monetization
-  { name: "Promotion Packages", href: "/admin/promotion-packages", icon: BarChart3 },
-  { name: "Promotion Requests", href: "/admin/promotion-requests", icon: Mail },
+  { name: "Promotion Packages", href: "/admin/promotion-packages", icon: Megaphone, permission: "promotionPackages", section: "Monetization" },
+  { name: "Promotion Requests", href: "/admin/promotion-requests", icon: Mail, permission: "promotionRequests" },
+  
   // Travel Packages
-  { name: "Travel Packages", href: "/admin/travel-packages", icon: Map },
-  { name: "Travel Requests", href: "/admin/travel-requests", icon: Mail },
+  { name: "Travel Packages", href: "/admin/travel-packages", icon: Plane, permission: "travelPackages", section: "Travel" },
+  { name: "Travel Requests", href: "/admin/travel-requests", icon: Mail, permission: "travelRequests" },
+  
   // Products
-  { name: "Product Categories", href: "/admin/product-categories", icon: FileText },
-  { name: "Products", href: "/admin/products", icon: FileText },
-  { name: "Product Orders", href: "/admin/product-orders", icon: Mail },
+  { name: "Product Categories", href: "/admin/product-categories", icon: Package, permission: "productCategories", section: "Store" },
+  { name: "Products", href: "/admin/products", icon: Store, permission: "products" },
+  { name: "Product Orders", href: "/admin/product-orders", icon: ShoppingCart, permission: "productOrders" },
+  
+  // Analytics
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics", section: "Analytics" },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isContentManager, setIsContentManager] = useState(false);
-
-  useEffect(() => {
-    checkAdminRoles();
-  }, []);
-
-  const checkAdminRoles = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const [superAdminCheck, adminCheck, contentManagerCheck, contentEditorCheck] = await Promise.all([
-        supabase.rpc('has_role', { _user_id: user.id, _role: 'super_admin' }),
-        supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
-        supabase.rpc('has_role', { _user_id: user.id, _role: 'content_manager' }),
-        supabase.rpc('has_role', { _user_id: user.id, _role: 'content_editor' })
-      ]);
-      
-      setIsSuperAdmin(superAdminCheck.data || false);
-      setIsAdmin(adminCheck.data || false);
-      setIsContentManager(contentManagerCheck.data || contentEditorCheck.data || false);
-    } catch (error) {
-      console.error("Error checking admin roles:", error);
-    }
-  };
+  const { role, user, isAdmin } = useAuth();
 
   const handleSignOut = async () => {
     try {
       toast.success("Signing out...");
-      // Perform full logout with redirect to auth page
       await performLogout();
     } catch (error) {
       console.error("Sign out error:", error);
@@ -118,50 +124,86 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
+  // Filter navigation items based on user permissions
+  const filteredNavigation = navigation.filter(item => 
+    canViewSection(item.permission, role)
+  );
+
+  // Group navigation items by section
+  const groupedNavigation = filteredNavigation.reduce((acc, item) => {
+    if (item.section) {
+      if (!acc[item.section]) {
+        acc[item.section] = [];
+      }
+    }
+    const section = item.section || Object.keys(acc).pop() || "General";
+    if (!acc[section]) {
+      acc[section] = [];
+    }
+    acc[section].push(item);
+    return acc;
+  }, {} as Record<string, NavigationItem[]>);
+
   const SidebarContent = () => (
     <>
-      <div className="flex h-16 items-center border-b px-6">
+      <div className="flex h-16 items-center border-b px-4">
         {!collapsed && (
-          <Link to="/admin" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">Admin Panel</span>
-          </Link>
+          <div className="flex flex-col">
+            <Link to="/admin" className="flex items-center space-x-2">
+              <span className="text-lg font-bold">Admin Panel</span>
+            </Link>
+            {role && (
+              <Badge variant={getRoleBadgeVariant(role)} className="mt-1 text-xs w-fit">
+                {getRoleLabel(role)}
+              </Badge>
+            )}
+          </div>
         )}
       </div>
 
       <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-1">
-          {navigation
-            .filter(item => {
-              if (item.superAdminOnly) return isSuperAdmin;
-              if (item.adminOnly) return isSuperAdmin || isAdmin;
-              // Content managers can access all content-related pages
-              return true;
-            })
-            .map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {!collapsed && <span>{item.name}</span>}
-                </Link>
-              );
-            })}
+        <nav className="space-y-4">
+          {Object.entries(groupedNavigation).map(([section, items]) => (
+            <div key={section}>
+              {!collapsed && (
+                <h3 className="mb-2 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {section}
+                </h3>
+              )}
+              <div className="space-y-1">
+                {items.map((item) => {
+                  const isActive = location.pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!collapsed && <span>{item.name}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </ScrollArea>
 
       <Separator />
       
-      <div className="p-4">
+      <div className="p-4 space-y-2">
+        {!collapsed && user && (
+          <p className="text-xs text-muted-foreground truncate px-2">
+            {user.email}
+          </p>
+        )}
         <Button
           variant="outline"
           className="w-full justify-start"
@@ -179,7 +221,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden border-r bg-background transition-all duration-300 md:flex md:flex-col",
+          "hidden border-r bg-background transition-all duration-300 md:flex md:flex-col relative",
           collapsed ? "w-16" : "w-64"
         )}
       >

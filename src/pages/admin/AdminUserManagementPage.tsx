@@ -31,7 +31,6 @@ import {
   Users, 
   Shield, 
   Search, 
-  Check, 
   X, 
   Eye, 
   Trash2, 
@@ -39,10 +38,20 @@ import {
   RefreshCw,
   UserX,
   Clock,
-  Key
+  Key,
+  UserMinus
 } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { 
+  ALL_ROLES, 
+  getAssignableRoles, 
+  getRoleLabel, 
+  getRoleBadgeVariant,
+  isSuperAdmin as checkIsSuperAdmin,
+  UserRole 
+} from "@/lib/roles";
+import { canDeleteUsers, canResetPasswords } from "@/lib/permissions";
 
 interface UserProfile {
   id: string;
@@ -63,9 +72,11 @@ const AdminUserManagementPage = () => {
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<UserRole | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [revokeUser, setRevokeUser] = useState<UserProfile | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
@@ -99,6 +110,7 @@ const AdminUserManagementPage = () => {
       
       setIsSuperAdmin(superAdminCheck || false);
       setIsAdmin(adminCheck || false);
+      setCurrentUserRole(superAdminCheck ? 'super_admin' : adminCheck ? 'admin' : null);
 
       if (!superAdminCheck && !adminCheck) {
         toast.error("Access Denied: Admin or Super Admin role required");
@@ -117,40 +129,24 @@ const AdminUserManagementPage = () => {
 
   const fetchAllUsers = async () => {
     try {
-      console.log('[UserManagement] Fetching all users...');
-      
-      // Fetch all profiles (role is now in profiles table)
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (profilesError) {
-        console.error('[UserManagement] Profiles fetch error:', profilesError);
-        throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
-      }
+      if (profilesError) throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
 
-      console.log('[UserManagement] Fetched profiles:', profiles?.length || 0);
-
-      // Fetch all admin requests
       const { data: requests, error: requestsError } = await supabase
         .from("admin_requests")
         .select("*");
 
-      if (requestsError) {
-        console.error('[UserManagement] Admin requests fetch error:', requestsError);
-        throw new Error(`Failed to fetch admin requests: ${requestsError.message}`);
-      }
+      if (requestsError) throw new Error(`Failed to fetch admin requests: ${requestsError.message}`);
 
-      console.log('[UserManagement] Fetched admin requests:', requests?.length || 0);
-
-      // Combine all data
       const allUsers: UserProfile[] = profiles.map(profile => {
         const adminRequest = requests
           .filter(r => r.user_id === profile.id)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
 
-        // Use profile status if exists, otherwise derive from admin_requests
         let status: "active" | "pending" | "rejected" | "disabled" = "active";
         if (profile.status) {
           status = profile.status as "active" | "pending" | "rejected" | "disabled";
@@ -172,11 +168,10 @@ const AdminUserManagementPage = () => {
         };
       });
 
-      console.log('[UserManagement] Combined users:', allUsers.length);
       setUsers(allUsers);
     } catch (error: any) {
-      console.error('[UserManagement] Fatal error fetching users:', error);
-      toast.error(error.message || "Failed to load users. Check console for details.");
+      console.error('[UserManagement] Error fetching users:', error);
+      toast.error(error.message || "Failed to load users.");
     }
   };
 
@@ -186,7 +181,6 @@ const AdminUserManagementPage = () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) throw new Error("Not authenticated");
 
-      // Update request status if it exists
       if (user.admin_request_id) {
         const { error: updateError } = await supabase
           .from("admin_requests")
@@ -201,25 +195,19 @@ const AdminUserManagementPage = () => {
         if (updateError) throw updateError;
       }
 
-      // Grant or update the role in user_roles (trigger will sync to profiles)
       if (user.role) {
-        // Update existing role
         const { error } = await supabase
           .from("user_roles")
           .update({ role: roleToGrant })
           .eq("user_id", user.id);
-
         if (error) throw error;
       } else {
-        // Insert new role
         const { error } = await supabase
           .from("user_roles")
           .insert({ user_id: user.id, role: roleToGrant });
-
         if (error) throw error;
       }
 
-      // Also update profile status to active
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ status: "active" })
@@ -227,7 +215,7 @@ const AdminUserManagementPage = () => {
 
       if (profileError) throw profileError;
 
-      toast.success(`User approved as ${roleToGrant.replace('_', ' ')}`);
+      toast.success(`User approved as ${getRoleLabel(roleToGrant)}`);
       await fetchAllUsers();
     } catch (error: any) {
       console.error("Approve error:", error);
@@ -270,19 +258,15 @@ const AdminUserManagementPage = () => {
     setUpdatingRole(userId);
     try {
       if (hasRole) {
-        // Update existing role
         const { error } = await supabase
           .from("user_roles")
           .update({ role: newRole })
           .eq("user_id", userId);
-
         if (error) throw error;
       } else {
-        // Insert new role
         const { error } = await supabase
           .from("user_roles")
           .insert({ user_id: userId, role: newRole });
-
         if (error) throw error;
       }
 
@@ -301,7 +285,6 @@ const AdminUserManagementPage = () => {
 
     setProcessing(revokeUser.id);
     try {
-      // Delete from user_roles (trigger will sync to profiles)
       const { error } = await supabase
         .from("user_roles")
         .delete()
@@ -315,6 +298,56 @@ const AdminUserManagementPage = () => {
     } catch (error: any) {
       console.error("Error revoking role:", error);
       toast.error(error.message || "Failed to revoke access");
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteUser) return;
+
+    // Prevent self-deletion
+    if (deleteUser.id === currentUserId) {
+      toast.error("You cannot delete your own account");
+      setDeleteUser(null);
+      return;
+    }
+
+    // Only super admin can delete
+    if (!isSuperAdmin) {
+      toast.error("Only Super Admins can delete users");
+      setDeleteUser(null);
+      return;
+    }
+
+    setProcessing(deleteUser.id);
+    try {
+      // First, delete from user_roles
+      await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", deleteUser.id);
+
+      // Delete admin requests
+      await supabase
+        .from("admin_requests")
+        .delete()
+        .eq("user_id", deleteUser.id);
+
+      // Delete profile (this should cascade or be handled by DB constraints)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", deleteUser.id);
+
+      if (profileError) throw profileError;
+      
+      toast.success(`User ${deleteUser.full_name || deleteUser.email} deleted successfully`);
+      await fetchAllUsers();
+      setDeleteUser(null);
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast.error(error.message || "Failed to delete user. The user may still exist in auth.users.");
     } finally {
       setProcessing(null);
     }
@@ -340,12 +373,23 @@ const AdminUserManagementPage = () => {
     }
   };
 
-  const handlePasswordReset = async (userId: string, userEmail: string, isSuperAdmin: boolean) => {
+  const handlePasswordReset = async (userId: string, userEmail: string, targetIsSuperAdmin: boolean) => {
+    // Only admins and super admins can reset passwords
+    if (!canResetPasswords(currentUserRole)) {
+      toast.error("You don't have permission to reset passwords");
+      return;
+    }
+
+    // Only super admin can reset super admin passwords
+    if (targetIsSuperAdmin && !isSuperAdmin) {
+      toast.error("Only Super Admins can reset Super Admin passwords");
+      return;
+    }
+
     setResettingPassword(userId);
     try {
-      // Use Supabase password reset email
       const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-        redirectTo: `${window.location.origin}/auth`,
+        redirectTo: `${window.location.origin}/login`,
       });
 
       if (error) throw error;
@@ -359,30 +403,6 @@ const AdminUserManagementPage = () => {
     }
   };
 
-  const getRoleLabel = (role: string | null): string => {
-    if (!role) return "No Role";
-    const roleMap: Record<string, string> = {
-      'super_admin': 'Super Admin',
-      'admin': 'Admin',
-      'content_editor': 'Content Manager',
-      'content_manager': 'Content Manager',
-      'moderator': 'Moderator',
-      'user': 'User'
-    };
-    return roleMap[role] || role.replace('_', ' ');
-  };
-
-  const getRoleBadgeVariant = (role: string | null): "default" | "destructive" | "secondary" | "outline" => {
-    switch (role) {
-      case 'super_admin': return 'destructive';
-      case 'admin': return 'default';
-      case 'content_editor':
-      case 'content_manager': return 'secondary';
-      case 'moderator': return 'outline';
-      default: return 'outline';
-    }
-  };
-
   const getStatusBadgeVariant = (status: string): "default" | "destructive" | "secondary" => {
     switch (status) {
       case 'active': return 'default';
@@ -392,6 +412,9 @@ const AdminUserManagementPage = () => {
       default: return 'secondary';
     }
   };
+
+  // Get roles that current user can assign
+  const assignableRoles = getAssignableRoles(currentUserRole);
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
@@ -423,7 +446,7 @@ const AdminUserManagementPage = () => {
   }
 
   if (!isSuperAdmin && !isAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin/unauthorized" replace />;
   }
 
   const activeUsers = users.filter(u => u.role !== null);
@@ -556,6 +579,7 @@ const AdminUserManagementPage = () => {
                       const isSelf = isCurrentUser(user.id);
                       const isUpdating = updatingRole === user.id;
                       const isProcessing = processing === user.id;
+                      const userIsSuperAdmin = user.role === 'super_admin';
                       
                       return (
                         <TableRow key={user.id} className={isSelf ? "bg-muted/50" : ""}>
@@ -602,11 +626,11 @@ const AdminUserManagementPage = () => {
                                   <SelectValue placeholder="Select role to approve" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-background z-50">
-                                  <SelectItem value="moderator">Approve as Moderator</SelectItem>
-                                  <SelectItem value="content_editor">Approve as Content Manager</SelectItem>
-                                  <SelectItem value="content_manager">Approve as Content Manager</SelectItem>
-                                  <SelectItem value="admin">Approve as Admin</SelectItem>
-                                  {isSuperAdmin && <SelectItem value="super_admin">Approve as Super Admin</SelectItem>}
+                                  {assignableRoles.map(role => (
+                                    <SelectItem key={role} value={role}>
+                                      Approve as {getRoleLabel(role)}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             ) : (
@@ -618,19 +642,18 @@ const AdminUserManagementPage = () => {
                                       updateRole(user.id, !!user.role, value as Database["public"]["Enums"]["app_role"]);
                                     }
                                   }}
-                                  disabled={isSelf || isProcessing || isUpdating}
+                                  disabled={isSelf || isProcessing || isUpdating || (userIsSuperAdmin && !isSuperAdmin)}
                                 >
                                   <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="No role" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-background z-50">
                                     <SelectItem value="none" disabled>Select role</SelectItem>
-                                    <SelectItem value="user">User</SelectItem>
-                                    <SelectItem value="moderator">Moderator</SelectItem>
-                                    <SelectItem value="content_editor">Content Manager</SelectItem>
-                                    <SelectItem value="content_manager">Content Manager</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
+                                    {assignableRoles.map(role => (
+                                      <SelectItem key={role} value={role}>
+                                        {getRoleLabel(role)}
+                                      </SelectItem>
+                                    ))}
                                   </SelectContent>
                                 </Select>
                                 {isUpdating && (
@@ -648,7 +671,7 @@ const AdminUserManagementPage = () => {
                               : "Never"}
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end gap-1">
                               {user.status === "pending" && (
                                 <Button
                                   variant="ghost"
@@ -660,13 +683,13 @@ const AdminUserManagementPage = () => {
                                   <X className="h-4 w-4 text-destructive" />
                                 </Button>
                               )}
-                              {user.status === "active" && (
+                              {canResetPasswords(currentUserRole) && user.status === "active" && (
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => handlePasswordReset(user.id, user.email, user.role === 'super_admin')}
-                                  disabled={resettingPassword === user.id || (user.role === 'super_admin' && !isSuperAdmin)}
-                                  title={user.role === 'super_admin' && !isSuperAdmin ? "Only Super Admins can reset Super Admin passwords" : "Reset password"}
+                                  onClick={() => handlePasswordReset(user.id, user.email, userIsSuperAdmin)}
+                                  disabled={resettingPassword === user.id || (userIsSuperAdmin && !isSuperAdmin)}
+                                  title={userIsSuperAdmin && !isSuperAdmin ? "Only Super Admins can reset Super Admin passwords" : "Reset password"}
                                 >
                                   <Key className="h-4 w-4" />
                                 </Button>
@@ -684,10 +707,23 @@ const AdminUserManagementPage = () => {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => setRevokeUser(user)}
-                                  disabled={isProcessing}
+                                  disabled={isProcessing || (userIsSuperAdmin && !isSuperAdmin)}
                                   title="Revoke access"
                                 >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                  <UserMinus className="h-4 w-4 text-orange-500" />
+                                </Button>
+                              )}
+                              {/* Delete button - Super Admin only */}
+                              {canDeleteUsers(currentUserRole) && !isSelf && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setDeleteUser(user)}
+                                  disabled={isProcessing}
+                                  title="Delete user permanently"
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               )}
                             </div>
@@ -711,6 +747,7 @@ const AdminUserManagementPage = () => {
                   const isSelf = isCurrentUser(user.id);
                   const isUpdating = updatingRole === user.id;
                   const isProcessing = processing === user.id;
+                  const userIsSuperAdmin = user.role === 'super_admin';
 
                   return (
                     <Card key={user.id} className={isSelf ? "border-primary" : ""}>
@@ -747,11 +784,11 @@ const AdminUserManagementPage = () => {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="bg-background z-50">
-                                <SelectItem value="moderator">Moderator</SelectItem>
-                                <SelectItem value="content_editor">Content Manager</SelectItem>
-                                <SelectItem value="content_manager">Content Manager</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                                {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
+                                {assignableRoles.map(role => (
+                                  <SelectItem key={role} value={role}>
+                                    {getRoleLabel(role)}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <Button
@@ -776,19 +813,18 @@ const AdminUserManagementPage = () => {
                                     updateRole(user.id, !!user.role, value as Database["public"]["Enums"]["app_role"]);
                                   }
                                 }}
-                                disabled={isSelf || isProcessing || isUpdating}
+                                disabled={isSelf || isProcessing || isUpdating || (userIsSuperAdmin && !isSuperAdmin)}
                               >
                                 <SelectTrigger className="flex-1">
                                   <SelectValue placeholder="No role" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-background z-50">
                                   <SelectItem value="none" disabled>Select role</SelectItem>
-                                  <SelectItem value="user">User</SelectItem>
-                                  <SelectItem value="moderator">Moderator</SelectItem>
-                                  <SelectItem value="content_editor">Content Manager</SelectItem>
-                                  <SelectItem value="content_manager">Content Manager</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
-                                  {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
+                                  {assignableRoles.map(role => (
+                                    <SelectItem key={role} value={role}>
+                                      {getRoleLabel(role)}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               {isUpdating && (
@@ -798,13 +834,13 @@ const AdminUserManagementPage = () => {
                           </div>
                         )}
 
-                        <div className="flex gap-2">
-                          {user.status === "active" && (
+                        <div className="flex flex-wrap gap-2">
+                          {canResetPasswords(currentUserRole) && user.status === "active" && (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handlePasswordReset(user.id, user.email, user.role === 'super_admin')}
-                              disabled={resettingPassword === user.id || (user.role === 'super_admin' && !isSuperAdmin)}
+                              onClick={() => handlePasswordReset(user.id, user.email, userIsSuperAdmin)}
+                              disabled={resettingPassword === user.id || (userIsSuperAdmin && !isSuperAdmin)}
                             >
                               <Key className="h-4 w-4 mr-2" />
                               Reset Password
@@ -813,7 +849,6 @@ const AdminUserManagementPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1"
                             onClick={() => setSelectedUser(user)}
                           >
                             <Eye className="h-4 w-4 mr-2" />
@@ -821,12 +856,24 @@ const AdminUserManagementPage = () => {
                           </Button>
                           {user.role && !isSelf && (
                             <Button
-                              variant="destructive"
+                              variant="outline"
                               size="sm"
                               onClick={() => setRevokeUser(user)}
+                              disabled={isProcessing || (userIsSuperAdmin && !isSuperAdmin)}
+                            >
+                              <UserMinus className="h-4 w-4 mr-2" />
+                              Revoke
+                            </Button>
+                          )}
+                          {canDeleteUsers(currentUserRole) && !isSelf && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => setDeleteUser(user)}
                               disabled={isProcessing}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
                             </Button>
                           )}
                         </div>
@@ -925,6 +972,43 @@ const AdminUserManagementPage = () => {
                   </>
                 ) : (
                   "Revoke Access"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete User Dialog - Super Admin Only */}
+        <AlertDialog open={!!deleteUser} onOpenChange={(open) => !open && setDeleteUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-destructive">Delete User Permanently</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>
+                  Are you sure you want to permanently delete <strong>{deleteUser?.full_name || deleteUser?.email}</strong>?
+                </p>
+                <p className="font-semibold text-destructive">
+                  This action cannot be undone. The user's profile and all associated data will be removed.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={processing === deleteUser?.id}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteUser}
+                disabled={processing === deleteUser?.id}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {processing === deleteUser?.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete User
+                  </>
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>
