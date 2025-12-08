@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { useAuth } from "@/hooks/useAuth";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCMSSettings } from "@/hooks/useCMSSettings";
 import { performLogout } from "@/lib/auth";
@@ -12,51 +11,19 @@ import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { getImage } = useSiteImages();
   const { data: settings } = useCMSSettings();
+  const { isAuthenticated, isAdmin } = useAuth();
   
   const logo = settings?.logo_image || getImage('site_logo', logoFallback);
   const siteName = settings?.site_name || "Hum Pahadi Haii";
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const { data } = await supabase.rpc('has_role', {
-          _user_id: session.user.id,
-          _role: 'admin'
-        });
-        setIsAdmin(data || false);
-      }
-    };
-
-    checkAdminStatus();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminStatus();
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleSignOut = async () => {
     try {
       toast.success("Signing out...");
-      // Reset local state immediately
-      setUser(null);
-      setIsAdmin(false);
       setIsOpen(false);
-      // Perform full logout with redirect
       await performLogout();
     } catch (error) {
       console.error("Sign out error:", error);
@@ -71,6 +38,7 @@ const Navigation = () => {
     { name: "Travel", path: "/travel" },
     { name: "Districts", path: "/districts" },
     { name: "Gallery", path: "/gallery" },
+    { name: "Marketplace", path: "/marketplace" },
     { name: "Thoughts", path: "/thoughts" },
     { name: "Promotions", path: "/promotions" },
     { name: "Travel Packages", path: "/travel-packages" },
@@ -96,12 +64,12 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
                   isActive(item.path)
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-muted"
@@ -110,7 +78,7 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            {user ? (
+            {isAuthenticated ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -128,7 +96,7 @@ const Navigation = () => {
                 className="gap-2"
               >
                 <LogIn className="h-4 w-4" />
-                Login as Admin
+                Login
               </Button>
             )}
           </div>
@@ -137,7 +105,7 @@ const Navigation = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -146,7 +114,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="lg:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <Link
@@ -162,13 +130,10 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              {user ? (
+              {isAuthenticated ? (
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    handleSignOut();
-                    setIsOpen(false);
-                  }}
+                  onClick={handleSignOut}
                   className="justify-start gap-2 px-4"
                 >
                   <LogOut className="h-4 w-4" />
@@ -184,7 +149,7 @@ const Navigation = () => {
                   className="justify-start gap-2 px-4"
                 >
                   <LogIn className="h-4 w-4" />
-                  Login as Admin
+                  Login
                 </Button>
               )}
             </div>

@@ -91,9 +91,17 @@ export const canUseAI = (role?: UserRole | string | null): boolean => {
   return PERMISSIONS.aiTools.includes(role as UserRole);
 };
 
-export const canViewSection = (key: PermissionKey, role?: UserRole | string | null): boolean => {
-  if (!role) return false;
-  return PERMISSIONS[key]?.includes(role as UserRole) ?? false;
+// Check if user with given roles can view a section (union of all roles)
+export const canViewSection = (key: PermissionKey, roles?: UserRole | UserRole[] | string | string[] | null): boolean => {
+  if (!roles) return false;
+  
+  // Handle array of roles (multi-role support)
+  if (Array.isArray(roles)) {
+    return roles.some(role => PERMISSIONS[key]?.includes(role as UserRole) ?? false);
+  }
+  
+  // Handle single role
+  return PERMISSIONS[key]?.includes(roles as UserRole) ?? false;
 };
 
 export const canManageUsers = (role?: UserRole | string | null): boolean => {

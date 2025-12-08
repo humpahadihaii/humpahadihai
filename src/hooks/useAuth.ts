@@ -1,138 +1,244 @@
-import { useState, useEffect, useCallback } from "react";
-import { User } from "@supabase/supabase-js";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/lib/roles";
 
+export type UserStatus = "pending" | "active" | "disabled";
+
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  status: UserStatus | null;
+  role: UserRole | null;
+}
+
 interface AuthState {
   user: User | null;
-  role: UserRole | null;
+  session: Session | null;
+  profile: UserProfile | null;
+  roles: UserRole[];
   isLoading: boolean;
+  isAuthInitialized: boolean;
   isAuthenticated: boolean;
-  isSuperAdmin: boolean;
-  isAdmin: boolean;
 }
+
+// Compute effective status based on profile status and roles
+export const getEffectiveStatus = (
+  status?: UserStatus | string | null,
+  roles?: UserRole[] | string[]
+): UserStatus => {
+  if (status === "disabled") return "disabled";
+  if (!roles || roles.length === 0) return "pending";
+  if (status === "pending") return "pending";
+  return "active";
+};
 
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
-    role: null,
+    session: null,
+    profile: null,
+    roles: [],
     isLoading: true,
+    isAuthInitialized: false,
     isAuthenticated: false,
-    isSuperAdmin: false,
-    isAdmin: false,
   });
 
-  const fetchUserRole = useCallback(async (userId: string): Promise<UserRole | null> => {
+  // Fetch user roles from user_roles table
+  const fetchUserRoles = useCallback(async (userId: string): Promise<UserRole[]> => {
     try {
-      // Check for super_admin first
-      const { data: isSuperAdmin } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "super_admin",
-      });
+      const { data: userRoles, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
 
-      if (isSuperAdmin) return "super_admin";
-
-      // Check for admin
-      const { data: isAdmin } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
-      });
-
-      if (isAdmin) return "admin";
-
-      // Check for other roles in priority order
-      const rolesToCheck: UserRole[] = [
-        "content_manager",
-        "content_editor",
-        "editor",
-        "moderator",
-        "author",
-        "reviewer",
-        "media_manager",
-        "seo_manager",
-        "support_agent",
-        "analytics_viewer",
-        "developer",
-        "viewer",
-        "user",
-      ];
-
-      for (const role of rolesToCheck) {
-        const { data: hasRole } = await supabase.rpc("has_role", {
-          _user_id: userId,
-          _role: role,
-        });
-        if (hasRole) return role;
+      if (error) {
+        console.error("Error fetching roles:", error);
+        return [];
       }
 
-      return null;
+      return (userRoles?.map(r => r.role) || []) as UserRole[];
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error("Error fetching user roles:", error);
+      return [];
+    }
+  }, []);
+
+  // Fetch user profile
+  const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, status, role")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+
+      return profile as UserProfile;
+    } catch (error) {
+      console.error("Error fetching profile:", error);
       return null;
     }
   }, []);
 
-  const updateAuthState = useCallback(async (user: User | null) => {
-    if (!user) {
+  // Update auth state with user data
+  const updateAuthState = useCallback(async (session: Session | null) => {
+    if (!session?.user) {
       setAuthState({
         user: null,
-        role: null,
+        session: null,
+        profile: null,
+        roles: [],
         isLoading: false,
+        isAuthInitialized: true,
         isAuthenticated: false,
-        isSuperAdmin: false,
-        isAdmin: false,
       });
       return;
     }
 
-    const role = await fetchUserRole(user.id);
-    
+    // Fetch profile and roles in parallel
+    const [profile, roles] = await Promise.all([
+      fetchProfile(session.user.id),
+      fetchUserRoles(session.user.id),
+    ]);
+
     setAuthState({
-      user,
-      role,
+      user: session.user,
+      session,
+      profile,
+      roles,
       isLoading: false,
+      isAuthInitialized: true,
       isAuthenticated: true,
-      isSuperAdmin: role === "super_admin",
-      isAdmin: role === "super_admin" || role === "admin",
     });
-  }, [fetchUserRole]);
+  }, [fetchProfile, fetchUserRoles]);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      updateAuthState(session?.user ?? null);
-    });
+    let mounted = true;
 
-    // Listen for auth changes
+    // Get initial session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          await updateAuthState(session);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        if (mounted) {
+          setAuthState(prev => ({
+            ...prev,
+            isLoading: false,
+            isAuthInitialized: true,
+          }));
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth changes - use synchronous state update only
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        updateAuthState(session?.user ?? null);
+      (event, session) => {
+        if (!mounted) return;
+        
+        // Only handle sign-out synchronously to prevent loops
+        if (event === 'SIGNED_OUT') {
+          setAuthState({
+            user: null,
+            session: null,
+            profile: null,
+            roles: [],
+            isLoading: false,
+            isAuthInitialized: true,
+            isAuthenticated: false,
+          });
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Defer data fetching to avoid deadlock
+          setTimeout(() => {
+            if (mounted) {
+              updateAuthState(session);
+            }
+          }, 0);
+        }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [updateAuthState]);
 
+  // Compute derived values
+  const effectiveStatus = useMemo(() => {
+    return getEffectiveStatus(authState.profile?.status, authState.roles);
+  }, [authState.profile?.status, authState.roles]);
+
+  const isSuperAdmin = useMemo(() => {
+    return authState.roles.includes("super_admin");
+  }, [authState.roles]);
+
+  const isAdmin = useMemo(() => {
+    return authState.roles.includes("super_admin") || authState.roles.includes("admin");
+  }, [authState.roles]);
+
+  // Get the highest priority role for display purposes
+  const role = useMemo((): UserRole | null => {
+    const priorityOrder: UserRole[] = [
+      "super_admin", "admin", "content_manager", "content_editor", "editor",
+      "moderator", "author", "reviewer", "media_manager", "seo_manager",
+      "support_agent", "analytics_viewer", "developer", "viewer", "user"
+    ];
+    
+    for (const r of priorityOrder) {
+      if (authState.roles.includes(r)) return r;
+    }
+    return null;
+  }, [authState.roles]);
+
+  // Check if user has a specific role
   const hasRole = useCallback(
     (requiredRole: UserRole): boolean => {
-      if (!authState.role) return false;
-      return authState.role === requiredRole;
+      return authState.roles.includes(requiredRole);
     },
-    [authState.role]
+    [authState.roles]
   );
 
+  // Check if user has any of the required roles (union of roles)
   const hasAnyRole = useCallback(
     (requiredRoles: UserRole[]): boolean => {
-      if (!authState.role) return false;
-      return requiredRoles.includes(authState.role);
+      return authState.roles.some(r => requiredRoles.includes(r));
     },
-    [authState.role]
+    [authState.roles]
   );
 
+  // Refresh auth state
+  const refetch = useCallback(async () => {
+    if (authState.session) {
+      await updateAuthState(authState.session);
+    }
+  }, [authState.session, updateAuthState]);
+
   return {
-    ...authState,
+    user: authState.user,
+    session: authState.session,
+    profile: authState.profile,
+    roles: authState.roles,
+    role, // Primary role for display
+    isLoading: authState.isLoading,
+    isAuthInitialized: authState.isAuthInitialized,
+    isAuthenticated: authState.isAuthenticated,
+    effectiveStatus,
+    isSuperAdmin,
+    isAdmin,
     hasRole,
     hasAnyRole,
-    refetch: () => updateAuthState(authState.user),
+    refetch,
   };
 };
