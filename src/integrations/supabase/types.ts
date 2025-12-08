@@ -648,6 +648,97 @@ export type Database = {
           },
         ]
       }
+      district_festivals: {
+        Row: {
+          created_at: string
+          description: string | null
+          district_id: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          month: string | null
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          district_id: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          month?: string | null
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          district_id?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          month?: string | null
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "district_festivals_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      district_foods: {
+        Row: {
+          created_at: string
+          description: string | null
+          district_id: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          district_id: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          district_id?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "district_foods_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       district_highlights: {
         Row: {
           created_at: string
@@ -750,6 +841,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "district_hotels_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      district_places: {
+        Row: {
+          created_at: string
+          district_id: string
+          full_description: string | null
+          google_maps_url: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_highlighted: boolean
+          map_lat: number | null
+          map_lng: number | null
+          name: string
+          short_description: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          district_id: string
+          full_description?: string | null
+          google_maps_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_highlighted?: boolean
+          map_lat?: number | null
+          map_lng?: number | null
+          name: string
+          short_description?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          district_id?: string
+          full_description?: string | null
+          google_maps_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_highlighted?: boolean
+          map_lat?: number | null
+          map_lng?: number | null
+          name?: string
+          short_description?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "district_places_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
@@ -1490,6 +1640,213 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      tourism_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          listing_id: string | null
+          message: string | null
+          phone: string | null
+          preferred_dates: string | null
+          provider_id: string | null
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          phone?: string | null
+          preferred_dates?: string | null
+          provider_id?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          phone?: string | null
+          preferred_dates?: string | null
+          provider_id?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tourism_inquiries_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "tourism_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tourism_inquiries_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "tourism_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tourism_listings: {
+        Row: {
+          base_price: number | null
+          category: string
+          created_at: string
+          district_id: string | null
+          full_description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_featured: boolean
+          price_unit: string | null
+          provider_id: string
+          short_description: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number | null
+          category?: string
+          created_at?: string
+          district_id?: string | null
+          full_description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          price_unit?: string | null
+          provider_id: string
+          short_description?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number | null
+          category?: string
+          created_at?: string
+          district_id?: string | null
+          full_description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          price_unit?: string | null
+          provider_id?: string
+          short_description?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tourism_listings_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tourism_listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "tourism_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tourism_providers: {
+        Row: {
+          contact_name: string | null
+          created_at: string
+          description: string | null
+          district_id: string | null
+          email: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_verified: boolean
+          name: string
+          phone: string | null
+          rating: number | null
+          type: string
+          updated_at: string
+          village_id: string | null
+          website_url: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          district_id?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_verified?: boolean
+          name: string
+          phone?: string | null
+          rating?: number | null
+          type?: string
+          updated_at?: string
+          village_id?: string | null
+          website_url?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          district_id?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_verified?: boolean
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          type?: string
+          updated_at?: string
+          village_id?: string | null
+          website_url?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tourism_providers_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tourism_providers_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       travel_booking_requests: {
         Row: {
