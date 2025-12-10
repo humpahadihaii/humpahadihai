@@ -23,6 +23,7 @@ import DisclaimerPage from "./pages/DisclaimerPage";
 import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminRoute from "./components/AdminRoute";
+import AdminDashboardRoute from "./components/AdminDashboardRoute";
 import ThoughtsPage from "./pages/ThoughtsPage";
 import SubmitThoughtPage from "./pages/SubmitThoughtPage";
 import SubmitStoryPage from "./pages/SubmitStoryPage";
@@ -132,7 +133,7 @@ const App = () => (
               <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/pending-approval" element={<PendingApprovalRoute />} />
               <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
-              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin" element={<AdminDashboardRoute><AdminDashboard /></AdminDashboardRoute>} />
               <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
               <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
               <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />

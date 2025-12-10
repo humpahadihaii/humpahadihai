@@ -43,7 +43,7 @@ export type PermissionKey =
   | "tourismInquiries";
 
 export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
-  dashboard: ["super_admin", "admin", "content_manager", "analytics_viewer", "viewer", "moderator", "editor", "content_editor"],
+  dashboard: ["super_admin", "admin"],
   users: ["super_admin", "admin"],
   roles: ["super_admin", "admin"],
   contentSections: ["super_admin", "admin", "content_manager", "editor", "content_editor"],
