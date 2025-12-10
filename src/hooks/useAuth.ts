@@ -72,6 +72,7 @@ export const useAuth = () => {
   useEffect(() => {
     let mounted = true;
     let initComplete = false;
+    let rolesLoadingTimeout: NodeJS.Timeout | null = null;
 
     // Initialize auth on mount
     const initAuth = async () => {
@@ -101,9 +102,21 @@ export const useAuth = () => {
           }));
           initComplete = true;
 
+          // Safety timeout: ensure isRolesLoading becomes false within 5 seconds
+          rolesLoadingTimeout = setTimeout(() => {
+            if (mounted) {
+              console.log("[Auth] Safety timeout: forcing isRolesLoading to false");
+              setAuthState(prev => ({
+                ...prev,
+                isRolesLoading: false,
+              }));
+            }
+          }, 5000);
+
           // Load profile/roles without blocking
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
           if (mounted) {
+            if (rolesLoadingTimeout) clearTimeout(rolesLoadingTimeout);
             setAuthState(prev => ({
               ...prev,
               profile,
@@ -141,7 +154,7 @@ export const useAuth = () => {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
+      async (event, newSession) => {
         if (!mounted) return;
 
         console.log("[Auth] Auth event:", event, "user:", newSession?.user?.email || "none");
@@ -163,7 +176,7 @@ export const useAuth = () => {
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
           if (newSession?.user?.id) {
             console.log("[Auth] Updating session for", event);
-            // Update session state immediately
+            // Update session state immediately with loading indicator
             setAuthState(prev => ({
               ...prev,
               user: newSession.user,
@@ -172,11 +185,11 @@ export const useAuth = () => {
               isRolesLoading: true,
             }));
 
-            // Defer profile/roles loading to avoid blocking and potential deadlocks
-            setTimeout(async () => {
-              if (!mounted) return;
+            // Load profile/roles directly (no setTimeout to prevent race conditions)
+            try {
               const { profile, roles } = await loadProfileAndRoles(newSession.user.id);
               if (mounted) {
+                console.log("[Auth] Roles loaded after auth event:", roles);
                 setAuthState(prev => ({
                   ...prev,
                   profile,
@@ -184,7 +197,15 @@ export const useAuth = () => {
                   isRolesLoading: false,
                 }));
               }
-            }, 0);
+            } catch (error) {
+              console.error("[Auth] Error loading roles after auth event:", error);
+              if (mounted) {
+                setAuthState(prev => ({
+                  ...prev,
+                  isRolesLoading: false,
+                }));
+              }
+            }
           }
         }
       }
@@ -192,6 +213,7 @@ export const useAuth = () => {
 
     return () => {
       mounted = false;
+      if (rolesLoadingTimeout) clearTimeout(rolesLoadingTimeout);
       subscription.unsubscribe();
     };
   }, [loadProfileAndRoles]);
