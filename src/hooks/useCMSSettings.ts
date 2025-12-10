@@ -26,6 +26,7 @@ export interface CMSSiteSettings {
   email_team: string | null;
   email_admin: string | null;
   email_post: string | null;
+  whatsapp_number: string | null;
 }
 
 export const useCMSSettings = () => {

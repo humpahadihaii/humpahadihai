@@ -11,6 +11,7 @@ import { format, differenceInDays, startOfDay, isBefore } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 
 type BookingType = "package" | "listing" | "product";
 
@@ -210,15 +211,37 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="flex flex-col items-center justify-center py-6 text-center">
             <CheckCircle className="h-16 w-16 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Booking Submitted!</h3>
-            <p className="text-muted-foreground mb-6">
+            <h3 className="text-xl font-semibold mb-2">
+              {type === "product" ? "Order Submitted!" : "Booking Submitted!"}
+            </h3>
+            <p className="text-muted-foreground mb-4">
               {type === "product" 
                 ? "Thank you! Your order request has been received. We'll confirm via WhatsApp/phone soon."
                 : "Thank you! Your booking request has been received. We will contact you soon to confirm."}
             </p>
-            <Button onClick={() => onOpenChange(false)}>Close</Button>
+            
+            <BookingContactPrompt
+              booking={{
+                type,
+                itemName: item.title,
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                startDate: formData.startDate ? format(formData.startDate, "PPP") : undefined,
+                endDate: formData.endDate ? format(formData.endDate, "PPP") : undefined,
+                adults: formData.adults,
+                children: formData.children,
+                quantity: formData.quantity,
+                notes: formData.notes,
+                city: formData.city,
+                pincode: formData.pincode,
+                shippingAddress: formData.shippingAddress,
+              }}
+            />
+            
+            <Button onClick={() => onOpenChange(false)} className="mt-4">Close</Button>
           </div>
         </DialogContent>
       </Dialog>
