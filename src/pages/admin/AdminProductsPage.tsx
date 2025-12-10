@@ -17,6 +17,10 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { AIContentButtons } from "@/components/admin/AIContentButtons";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { productsExcelConfig } from "@/lib/excelConfigs";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -60,6 +64,8 @@ const AdminProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(productsExcelConfig);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -220,6 +226,13 @@ const AdminProductsPage = () => {
             <h1 className="text-3xl font-bold">Local Products</h1>
             <p className="text-muted-foreground">Manage Pahadi products</p>
           </div>
+          <div className="flex items-center gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(products)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
           <Dialog open={dialogOpen} onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) {
@@ -363,6 +376,7 @@ const AdminProductsPage = () => {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card>
@@ -435,6 +449,19 @@ const AdminProductsPage = () => {
           </CardContent>
         </Card>
       </div>
+      <ExcelImportModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        sectionName="Products"
+        onDownloadTemplate={excel.downloadTemplate}
+        onParseFile={excel.parseExcelFile}
+        onImport={excel.importFromExcel}
+        onDownloadErrors={excel.downloadErrorReport}
+        importing={excel.importing}
+        importProgress={excel.importProgress}
+        importResult={excel.importResult}
+        onRefresh={fetchProducts}
+      />
     </AdminLayout>
   );
 };

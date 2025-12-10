@@ -15,6 +15,10 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building, CheckCircle } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { tourismProvidersExcelConfig } from "@/lib/excelConfigs";
 
 interface TourismProvider {
   id: string;
@@ -51,6 +55,8 @@ const AdminTourismProvidersPage = () => {
   const [editingProvider, setEditingProvider] = useState<TourismProvider | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(tourismProvidersExcelConfig);
   const [formData, setFormData] = useState({
     name: "",
     type: "homestay",
@@ -212,7 +218,14 @@ const AdminTourismProvidersPage = () => {
             <h1 className="text-3xl font-bold">Tourism Providers</h1>
             <p className="text-muted-foreground">Manage homestays, hotels, guides, and local service providers</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <div className="flex items-center gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredProviders)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => resetForm()}>
                 <Plus className="mr-2 h-4 w-4" /> Add Provider
@@ -316,6 +329,7 @@ const AdminTourismProvidersPage = () => {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card>
@@ -419,6 +433,19 @@ const AdminTourismProvidersPage = () => {
           </CardContent>
         </Card>
       </div>
+      <ExcelImportModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        sectionName="Tourism Providers"
+        onDownloadTemplate={excel.downloadTemplate}
+        onParseFile={excel.parseExcelFile}
+        onImport={excel.importFromExcel}
+        onDownloadErrors={excel.downloadErrorReport}
+        importing={excel.importing}
+        importProgress={excel.importProgress}
+        importResult={excel.importResult}
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["tourism-providers"] })}
+      />
     </AdminLayout>
   );
 };

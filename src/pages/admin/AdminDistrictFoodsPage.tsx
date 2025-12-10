@@ -14,6 +14,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Utensils, Sparkles, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { districtFoodsExcelConfig } from "@/lib/excelConfigs";
 
 interface DistrictFood {
   id: string;
@@ -31,6 +35,8 @@ const AdminDistrictFoodsPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFood, setEditingFood] = useState<DistrictFood | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(districtFoodsExcelConfig);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -196,6 +202,12 @@ const AdminDistrictFoodsPage = () => {
             <h1 className="text-3xl font-bold">Local Food</h1>
             <p className="text-muted-foreground">Manage traditional foods and dishes by district</p>
           </div>
+          <ExcelImportExportButtons
+            onExport={() => excel.exportToExcel(foods)}
+            onImportClick={() => setImportOpen(true)}
+            exporting={excel.exporting}
+            importing={excel.importing}
+          />
         </div>
 
         <Card>
@@ -330,6 +342,19 @@ const AdminDistrictFoodsPage = () => {
           </Card>
         )}
       </div>
+      <ExcelImportModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        sectionName="District Foods"
+        onDownloadTemplate={excel.downloadTemplate}
+        onParseFile={excel.parseExcelFile}
+        onImport={excel.importFromExcel}
+        onDownloadErrors={excel.downloadErrorReport}
+        importing={excel.importing}
+        importProgress={excel.importProgress}
+        importResult={excel.importResult}
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["district-foods"] })}
+      />
     </AdminLayout>
   );
 };
