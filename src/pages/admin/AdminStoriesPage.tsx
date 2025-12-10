@@ -24,6 +24,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { storiesExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const storySchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -64,6 +65,7 @@ export default function AdminStoriesPage() {
   const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(storiesExcelConfig);
+  const { logCreate, logUpdate, logDelete, logPublish } = useAdminActivityLogger();
 
   const form = useForm<StoryFormData>({
     resolver: zodResolver(storySchema),
@@ -121,18 +123,24 @@ export default function AdminStoriesPage() {
         toast.error(`Failed to update: ${error.message}`);
       } else {
         toast.success("Story updated successfully");
+        if (data.status === "published" && editingStory.status !== "published") {
+          logPublish("story", editingStory.id, data.title);
+        } else {
+          logUpdate("story", editingStory.id, data.title);
+        }
         fetchStories();
         setDialogOpen(false);
         setEditingStory(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("cms_stories").insert([storyData]);
+      const { data: insertedData, error } = await supabase.from("cms_stories").insert([storyData]).select().single();
 
       if (error) {
         toast.error(`Failed to create: ${error.message}`);
       } else {
         toast.success("Story created successfully");
+        if (insertedData) logCreate("story", insertedData.id, data.title);
         fetchStories();
         setDialogOpen(false);
         form.reset();
@@ -157,11 +165,13 @@ export default function AdminStoriesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this story?")) return;
+    const story = stories.find(s => s.id === id);
     const { error } = await supabase.from("cms_stories").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete story");
     } else {
       toast.success("Story deleted");
+      logDelete("story", id, story?.title);
       fetchStories();
     }
   };

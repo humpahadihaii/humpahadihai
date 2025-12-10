@@ -60,6 +60,7 @@ import {
   UserRole 
 } from "@/lib/roles";
 import { canDeleteUsers, canResetPasswords } from "@/lib/permissions";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 

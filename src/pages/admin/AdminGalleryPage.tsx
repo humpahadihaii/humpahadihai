@@ -18,6 +18,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { galleryExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const gallerySchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -46,6 +47,7 @@ export default function AdminGalleryPage() {
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(galleryExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
@@ -97,13 +99,14 @@ export default function AdminGalleryPage() {
         });
       } else {
         toast.success("Item updated successfully");
+        logUpdate("gallery_item", editingItem.id, data.title);
         fetchItems();
         setDialogOpen(false);
         setEditingItem(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("gallery_items").insert([galleryData]);
+      const { data: insertedData, error } = await supabase.from("gallery_items").insert([galleryData]).select().single();
 
       if (error) {
         console.error("Gallery insert error:", error);
@@ -112,6 +115,7 @@ export default function AdminGalleryPage() {
         });
       } else {
         toast.success("Item created successfully");
+        if (insertedData) logCreate("gallery_item", insertedData.id, data.title);
         fetchItems();
         setDialogOpen(false);
         form.reset();
@@ -132,11 +136,13 @@ export default function AdminGalleryPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
+    const item = items.find(i => i.id === id);
     const { error } = await supabase.from("gallery_items").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete item");
     } else {
       toast.success("Item deleted");
+      logDelete("gallery_item", id, item?.title);
       fetchItems();
     }
   };

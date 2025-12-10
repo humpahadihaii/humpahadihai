@@ -22,6 +22,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { villagesExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const villageSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -81,6 +82,7 @@ export default function AdminVillagesPage() {
   const [selectedDistrictForAI, setSelectedDistrictForAI] = useState<string>("");
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(villagesExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<VillageFormData>({
     resolver: zodResolver(villageSchema),
@@ -152,18 +154,20 @@ export default function AdminVillagesPage() {
         toast.error("Failed to update village");
       } else {
         toast.success("Village updated successfully");
+        logUpdate("village", editingVillage.id, data.name);
         fetchVillages();
         setDialogOpen(false);
         setEditingVillage(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("villages").insert(villageData);
+      const { data: insertedData, error } = await supabase.from("villages").insert(villageData).select().single();
 
       if (error) {
         toast.error("Failed to create village");
       } else {
         toast.success("Village created successfully");
+        if (insertedData) logCreate("village", insertedData.id, data.name);
         fetchVillages();
         setDialogOpen(false);
         form.reset();
@@ -194,11 +198,13 @@ export default function AdminVillagesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
+    const village = villages.find(v => v.id === id);
     const { error } = await supabase.from("villages").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete village");
     } else {
       toast.success("Village deleted");
+      logDelete("village", id, village?.name);
       fetchVillages();
     }
   };

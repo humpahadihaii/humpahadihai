@@ -19,6 +19,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { tourismListingsExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 interface TourismListing {
   id: string;
@@ -53,6 +54,7 @@ const AdminTourismListingsPage = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(tourismListingsExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
   const [formData, setFormData] = useState({
     provider_id: "",
     title: "",
@@ -113,14 +115,21 @@ const AdminTourismListingsPage = () => {
       if (editingListing) {
         const { error } = await supabase.from("tourism_listings").update(data).eq("id", editingListing.id);
         if (error) throw error;
+        return { id: editingListing.id, title: data.title, isEdit: true };
       } else {
-        const { error } = await supabase.from("tourism_listings").insert([data as any]);
+        const { data: inserted, error } = await supabase.from("tourism_listings").insert([data as any]).select().single();
         if (error) throw error;
+        return { id: inserted?.id, title: data.title, isEdit: false };
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["tourism-listings"] });
-      toast.success(editingListing ? "Listing updated" : "Listing added");
+      toast.success(result.isEdit ? "Listing updated" : "Listing added");
+      if (result.isEdit) {
+        logUpdate("listing", result.id, result.title);
+      } else if (result.id) {
+        logCreate("listing", result.id, result.title);
+      }
       resetForm();
     },
     onError: (error) => {
@@ -130,13 +139,15 @@ const AdminTourismListingsPage = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, title }: { id: string; title: string }) => {
       const { error } = await supabase.from("tourism_listings").delete().eq("id", id);
       if (error) throw error;
+      return { id, title };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["tourism-listings"] });
       toast.success("Listing deleted");
+      logDelete("listing", result.id, result.title);
     },
     onError: () => toast.error("Failed to delete listing"),
   });

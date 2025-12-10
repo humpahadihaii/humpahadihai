@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { AIContentButtons } from "@/components/admin/AIContentButtons";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const packageSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -61,6 +62,7 @@ const AdminTravelPackagesPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<any>(null);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<PackageFormData>({
     resolver: zodResolver(packageSchema),
@@ -120,8 +122,9 @@ const AdminTravelPackagesPage = () => {
         return;
       }
       toast.success("Package updated successfully");
+      logUpdate("travel_package", editingPackage.id, data.title);
     } else {
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from("travel_packages")
         .insert({
           title: data.title,
@@ -142,13 +145,14 @@ const AdminTravelPackagesPage = () => {
           thumbnail_image_url: data.thumbnail_image_url,
           is_featured: data.is_featured,
           is_active: data.is_active
-        });
+        }).select().single();
 
       if (error) {
         toast.error("Failed to create package");
         return;
       }
       toast.success("Package created successfully");
+      if (insertedData) logCreate("travel_package", insertedData.id, data.title);
     }
 
     form.reset();
@@ -193,6 +197,7 @@ const AdminTravelPackagesPage = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this package?")) return;
 
+    const pkg = packages.find(p => p.id === id);
     const { error } = await supabase
       .from("travel_packages")
       .delete()
@@ -203,6 +208,7 @@ const AdminTravelPackagesPage = () => {
       return;
     }
     toast.success("Package deleted successfully");
+    logDelete("travel_package", id, pkg?.title);
     fetchPackages();
   };
 

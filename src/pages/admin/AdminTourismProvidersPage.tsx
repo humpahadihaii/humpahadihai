@@ -20,6 +20,7 @@ import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportBu
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { tourismProvidersExcelConfig } from "@/lib/excelConfigs";
 import { AISeedProvidersModal } from "@/components/admin/AISeedProvidersModal";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 interface TourismProvider {
   id: string;
