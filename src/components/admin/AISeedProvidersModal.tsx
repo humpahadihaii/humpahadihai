@@ -56,7 +56,7 @@ export function AISeedProvidersModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error("Not authenticated");
 
-      // Call AI to generate providers
+      // Call AI to generate providers using direct prompt
       const prompt = mode === "providers" 
         ? `Generate a JSON array of ${count[0]} fictional tourism providers in ${selectedDistrict.name} district, Uttarakhand, India.
 For each provider, include:
@@ -80,21 +80,35 @@ For each listing, include:
 Return ONLY valid JSON array, no other text:
 [{"title": "...", "category": "...", "short_description": "...", "base_price": 1500, "price_unit": "per night"}, ...]`;
 
+      // Use the story type with a raw prompt approach
       const response = await supabase.functions.invoke("ai-content", {
         body: {
           type: "story",
-          action: "generate",
+          action: "raw", // Use raw action to pass prompt directly
           inputs: { prompt },
         },
       });
 
-      if (response.error) throw response.error;
+      // Handle error response properly
+      if (response.error) {
+        const errorMessage = response.error.message || "Edge Function returned an error";
+        throw new Error(errorMessage);
+      }
+
+      // Check for error in response data
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
 
       const content = response.data?.content || "";
       
+      if (!content) {
+        throw new Error("AI returned empty content. Please try again.");
+      }
+      
       // Parse JSON from response
       const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) throw new Error("Could not parse AI response");
+      if (!jsonMatch) throw new Error("Could not parse AI response. Please try again.");
       
       const items = JSON.parse(jsonMatch[0]);
 

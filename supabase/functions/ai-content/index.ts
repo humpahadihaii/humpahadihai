@@ -84,6 +84,10 @@ Provide the expanded version directly.`;
           return `Improve the wording, flow, and engagement of this content while maintaining its meaning:
 "${inputs.content}"`;
 
+        case "raw":
+          // Direct prompt passthrough for advanced use cases like AI seeding
+          return inputs.prompt || "";
+
         default:
           return inputs.prompt || "";
       }
