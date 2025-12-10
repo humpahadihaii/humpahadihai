@@ -3,8 +3,5 @@ project_id = "qxeodogwbdndgfslbyej"
 [functions.ai-content]
 verify_jwt = false
 
-[functions.ga-event]
-verify_jwt = false
-
 [functions.track]
 verify_jwt = false
