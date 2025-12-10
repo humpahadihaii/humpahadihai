@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,9 @@ import { performLogout } from "@/lib/auth";
 import { toast } from "sonner";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
 
+// Environment flag for dev/staging - show visible admin login
+const SHOW_ADMIN_LOGIN = import.meta.env.VITE_SHOW_ADMIN_LOGIN === "true";
+
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -17,8 +20,36 @@ const Navigation = () => {
   const { data: settings } = useCMSSettings();
   const { isAuthenticated, isAdmin } = useAuth();
   
+  // Secret logo click trigger state
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
   const logo = settings?.logo_image || getImage('site_logo', logoFallback);
   const siteName = settings?.site_name || "Hum Pahadi Haii";
+
+  // Secret 11-click trigger handler
+  const handleLogoClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // Don't prevent navigation, just count clicks
+    clickCountRef.current += 1;
+    
+    // Clear existing timer
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+    
+    // Check if we reached 11 clicks
+    if (clickCountRef.current >= 11) {
+      clickCountRef.current = 0;
+      toast.success("Admin access triggered", { duration: 2000 });
+      navigate("/login");
+      return;
+    }
+    
+    // Reset counter after 12 seconds
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 12000);
+  }, [navigate]);
 
   const handleSignOut = async () => {
     try {
@@ -45,8 +76,12 @@ const Navigation = () => {
     { name: "Shop", path: "/products" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
+    // Only show Admin link if user is already admin
     ...(isAdmin ? [{ name: "Admin", path: "/admin" }] : []),
   ];
+
+  // Determine if we should show login button (only for authenticated users or with env flag)
+  const showLoginButton = SHOW_ADMIN_LOGIN || isAuthenticated;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -54,8 +89,12 @@ const Navigation = () => {
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          {/* Logo with secret click trigger */}
+          <Link 
+            to="/" 
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            onClick={handleLogoClick}
+          >
             <img src={logo} alt={`${siteName} Logo`} width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-primary">{siteName}</h1>
@@ -78,26 +117,29 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            {isAuthenticated ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSignOut}
-                className="gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate("/login")}
-                className="gap-2"
-              >
-                <LogIn className="h-4 w-4" />
-                Login
-              </Button>
+            {/* Only show auth buttons if authenticated or env flag is set */}
+            {showLoginButton && (
+              isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => navigate("/login")}
+                  className="gap-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Button>
+              )
             )}
           </div>
 
@@ -130,27 +172,30 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              {isAuthenticated ? (
-                <Button
-                  variant="ghost"
-                  onClick={handleSignOut}
-                  className="justify-start gap-2 px-4"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    navigate("/login");
-                    setIsOpen(false);
-                  }}
-                  className="justify-start gap-2 px-4"
-                >
-                  <LogIn className="h-4 w-4" />
-                  Login
-                </Button>
+              {/* Only show auth buttons if authenticated or env flag is set */}
+              {showLoginButton && (
+                isAuthenticated ? (
+                  <Button
+                    variant="ghost"
+                    onClick={handleSignOut}
+                    className="justify-start gap-2 px-4"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      navigate("/login");
+                      setIsOpen(false);
+                    }}
+                    className="justify-start gap-2 px-4"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Login
+                  </Button>
+                )
               )}
             </div>
           </div>
