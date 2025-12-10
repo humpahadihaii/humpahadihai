@@ -8,12 +8,14 @@ import { useCMSSettings } from "@/hooks/useCMSSettings";
 import { performLogout } from "@/lib/auth";
 import { toast } from "sonner";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
+import { AdminPinModal } from "@/components/AdminPinModal";
 
 // Environment flag for dev/staging - show visible admin login
 const SHOW_ADMIN_LOGIN = import.meta.env.VITE_SHOW_ADMIN_LOGIN === "true";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { getImage } = useSiteImages();
@@ -26,6 +28,12 @@ const Navigation = () => {
   
   const logo = settings?.logo_image || getImage('site_logo', logoFallback);
   const siteName = settings?.site_name || "Hum Pahadi Haii";
+
+  // Handler called after successful PIN verification
+  const handlePinSuccess = useCallback(() => {
+    toast.success("Admin access granted", { duration: 2000 });
+    navigate("/login");
+  }, [navigate]);
 
   // Secret 11-click trigger handler
   const handleLogoClick = useCallback((e: React.MouseEvent) => {
@@ -50,18 +58,8 @@ const Navigation = () => {
       
       toast.success("Admin access triggered", { duration: 2000 });
       
-      // Try multiple methods to open admin login
-      // 1. Check for global openAdminModal function
-      if (typeof (window as any).openAdminModal === 'function') {
-        (window as any).openAdminModal();
-        return;
-      }
-      
-      // 2. Dispatch custom event for any listeners
-      window.dispatchEvent(new CustomEvent('hp:open-admin-login'));
-      
-      // 3. Fallback: navigate to login page
-      navigate("/login");
+      // Open PIN modal instead of navigating directly
+      setShowPinModal(true);
       return;
     }
     
@@ -69,7 +67,7 @@ const Navigation = () => {
     clickTimerRef.current = setTimeout(() => {
       clickCountRef.current = 0;
     }, 12000);
-  }, [navigate]);
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -221,6 +219,12 @@ const Navigation = () => {
           </div>
         )}
       </div>
+      {/* Admin PIN Modal */}
+      <AdminPinModal
+        open={showPinModal}
+        onOpenChange={setShowPinModal}
+        onSuccess={handlePinSuccess}
+      />
     </nav>
   );
 };
