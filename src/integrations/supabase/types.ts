@@ -1257,6 +1257,75 @@ export type Database = {
         }
         Relationships: []
       }
+      page_settings: {
+        Row: {
+          bottom_seo_text: string | null
+          created_at: string
+          custom_section_cta_label: string | null
+          custom_section_cta_link: string | null
+          custom_section_description: string | null
+          custom_section_title: string | null
+          extra_data: Json | null
+          faqs: Json | null
+          hero_bullets: Json | null
+          hero_cta_label: string | null
+          hero_cta_link: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          intro_text: string | null
+          meta_description: string | null
+          meta_title: string | null
+          page_key: string
+          updated_at: string
+        }
+        Insert: {
+          bottom_seo_text?: string | null
+          created_at?: string
+          custom_section_cta_label?: string | null
+          custom_section_cta_link?: string | null
+          custom_section_description?: string | null
+          custom_section_title?: string | null
+          extra_data?: Json | null
+          faqs?: Json | null
+          hero_bullets?: Json | null
+          hero_cta_label?: string | null
+          hero_cta_link?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          intro_text?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          page_key: string
+          updated_at?: string
+        }
+        Update: {
+          bottom_seo_text?: string | null
+          created_at?: string
+          custom_section_cta_label?: string | null
+          custom_section_cta_link?: string | null
+          custom_section_description?: string | null
+          custom_section_title?: string | null
+          extra_data?: Json | null
+          faqs?: Json | null
+          hero_bullets?: Json | null
+          hero_cta_label?: string | null
+          hero_cta_link?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          intro_text?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          page_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_order_requests: {
         Row: {
           admin_notes: string | null

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageSettings } from "@/hooks/usePageSettings";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MapPin, Star, Phone, Mail, Globe } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MapPin, Star, Check, Search, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -57,8 +60,10 @@ const CATEGORIES = [
 ];
 
 export default function MarketplacePage() {
+  const { data: pageSettings } = usePageSettings("marketplace");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [enquiryListing, setEnquiryListing] = useState<TourismListing | null>(null);
   const [enquiryForm, setEnquiryForm] = useState({
     full_name: "",
@@ -109,6 +114,31 @@ export default function MarketplacePage() {
     },
   });
 
+  const { data: featuredProviders } = useQuery({
+    queryKey: ["featured-providers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tourism_providers")
+        .select("*, district:districts(name)")
+        .eq("is_active", true)
+        .eq("is_verified", true)
+        .order("rating", { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const filteredListings = listings?.filter(listing => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      listing.title.toLowerCase().includes(query) ||
+      listing.provider?.name.toLowerCase().includes(query) ||
+      listing.district?.name.toLowerCase().includes(query)
+    );
+  });
+
   const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!enquiryListing) return;
@@ -147,33 +177,69 @@ export default function MarketplacePage() {
   return (
     <>
       <Helmet>
-        <title>Tourism Marketplace | Local Stays & Experiences in Uttarakhand</title>
+        <title>{pageSettings?.meta_title || "Tourism Marketplace | Local Stays & Experiences in Uttarakhand"}</title>
         <meta
           name="description"
-          content="Discover authentic homestays, local guides, taxis, and unique experiences in Uttarakhand. Book directly with local providers."
+          content={pageSettings?.meta_description || "Discover authentic homestays, local guides, taxis, and unique experiences in Uttarakhand. Book directly with local providers."}
         />
       </Helmet>
 
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="bg-primary/10 py-12 md:py-16">
+        <section 
+          className="relative bg-primary/10 py-16 md:py-24"
+          style={pageSettings?.hero_image_url ? {
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${pageSettings.hero_image_url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          } : undefined}
+        >
           <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Tourism Marketplace
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Discover authentic local stays, experienced guides, reliable taxis, and unique
-              experiences across Uttarakhand. Connect directly with verified local providers.
-            </p>
+            <div className={`max-w-3xl ${pageSettings?.hero_image_url ? 'text-white' : ''}`}>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                {pageSettings?.hero_title || "Tourism Marketplace"}
+              </h1>
+              <p className="text-lg md:text-xl opacity-90 mb-6">
+                {pageSettings?.hero_subtitle || "Discover authentic local stays, experienced guides, reliable taxis, and unique experiences across Uttarakhand."}
+              </p>
+              
+              {pageSettings?.hero_bullets && pageSettings.hero_bullets.length > 0 && (
+                <ul className="space-y-2 mb-8">
+                  {pageSettings.hero_bullets.map((bullet, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>{bullet.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {pageSettings?.hero_cta_label && pageSettings?.hero_cta_link && (
+                <Button asChild size="lg" className="mt-4">
+                  <Link to={pageSettings.hero_cta_link}>
+                    {pageSettings.hero_cta_label}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         </section>
 
         {/* Filters */}
-        <section className="py-6 border-b bg-card">
+        <section className="py-6 border-b bg-card sticky top-0 z-10">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search listings or providers..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               <div className="flex-1 max-w-xs">
-                <Label className="text-sm mb-1.5 block">District</Label>
                 <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Districts" />
@@ -189,7 +255,6 @@ export default function MarketplacePage() {
                 </Select>
               </div>
               <div className="flex-1 max-w-xs">
-                <Label className="text-sm mb-1.5 block">Category</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Categories" />
@@ -207,9 +272,49 @@ export default function MarketplacePage() {
           </div>
         </section>
 
+        {/* Featured Providers */}
+        {featuredProviders && featuredProviders.length > 0 && (
+          <section className="py-8 bg-muted/30">
+            <div className="container mx-auto px-4">
+              <h2 className="text-xl font-semibold mb-4">Verified Providers</h2>
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                {featuredProviders.map((provider: any) => (
+                  <div 
+                    key={provider.id} 
+                    className="flex-shrink-0 w-48 bg-card rounded-lg p-4 border shadow-sm"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary" className="text-xs">Verified</Badge>
+                      {provider.rating && (
+                        <span className="flex items-center gap-1 text-sm">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          {provider.rating}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-medium text-sm line-clamp-1">{provider.name}</h3>
+                    {provider.district && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <MapPin className="h-3 w-3" />
+                        {provider.district.name}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Listings Grid */}
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">
+                {filteredListings?.length || 0} Listings Found
+              </h2>
+            </div>
+
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -223,9 +328,9 @@ export default function MarketplacePage() {
                   </Card>
                 ))}
               </div>
-            ) : listings && listings.length > 0 ? (
+            ) : filteredListings && filteredListings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {listings.map((listing) => (
+                {filteredListings.map((listing) => (
                   <Card
                     key={listing.id}
                     className={`overflow-hidden hover:shadow-lg transition-shadow ${
@@ -290,8 +395,7 @@ export default function MarketplacePage() {
                           ₹{listing.base_price.toLocaleString()}
                           {listing.price_unit && (
                             <span className="text-sm font-normal text-muted-foreground">
-                              {" "}
-                              / {listing.price_unit}
+                              {" "}/ {listing.price_unit}
                             </span>
                           )}
                         </p>
@@ -317,6 +421,66 @@ export default function MarketplacePage() {
             )}
           </div>
         </section>
+
+        {/* Custom Request CTA */}
+        {pageSettings?.custom_section_title && (
+          <section className="py-12 bg-primary/5">
+            <div className="container mx-auto px-4 text-center">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                {pageSettings.custom_section_title}
+              </h2>
+              {pageSettings.custom_section_description && (
+                <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+                  {pageSettings.custom_section_description}
+                </p>
+              )}
+              {pageSettings.custom_section_cta_label && pageSettings.custom_section_cta_link && (
+                <Button asChild size="lg">
+                  <Link to={pageSettings.custom_section_cta_link}>
+                    {pageSettings.custom_section_cta_label}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* FAQ Section */}
+        {pageSettings?.faqs && pageSettings.faqs.length > 0 && (
+          <section className="py-12">
+            <div className="container mx-auto px-4">
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
+                Frequently Asked Questions
+              </h2>
+              <div className="max-w-3xl mx-auto">
+                <Accordion type="single" collapsible className="w-full">
+                  {pageSettings.faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`faq-${index}`}>
+                      <AccordionTrigger className="text-left">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Bottom SEO Text */}
+        {pageSettings?.bottom_seo_text && (
+          <section className="py-8 bg-muted/30">
+            <div className="container mx-auto px-4">
+              <div className="prose prose-sm max-w-none text-muted-foreground">
+                {pageSettings.bottom_seo_text}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Enquiry Dialog */}
@@ -350,7 +514,7 @@ export default function MarketplacePage() {
               />
             </div>
             <div>
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">Phone / WhatsApp</Label>
               <Input
                 id="phone"
                 value={enquiryForm.phone}
