@@ -71,6 +71,7 @@ import AdminProductCategoriesPage from "./pages/admin/AdminProductCategoriesPage
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
 import AdminAIToolsPage from "./pages/admin/AdminAIToolsPage";
+import AdminPageSettingsPage from "./pages/admin/AdminPageSettingsPage";
 // Admin District Content Pages
 import AdminDistrictPlacesPage from "./pages/admin/AdminDistrictPlacesPage";
 import AdminDistrictFoodsPage from "./pages/admin/AdminDistrictFoodsPage";
@@ -171,6 +172,7 @@ const App = () => (
               <Route path="/admin/product-categories" element={<AdminRoute><AdminProductCategoriesPage /></AdminRoute>} />
               <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
               <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
+              <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
