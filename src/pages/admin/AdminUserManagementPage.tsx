@@ -48,7 +48,8 @@ import {
   Check,
   Pencil,
   UserCheck,
-  UserX
+  UserX,
+  UserCog
 } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -61,6 +62,7 @@ import {
 } from "@/lib/roles";
 import { canDeleteUsers, canResetPasswords } from "@/lib/permissions";
 import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
+import { ImpersonateButton } from "@/components/admin/ImpersonateButton";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -610,6 +612,14 @@ const AdminUserManagementPage = () => {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
+                                  {/* Impersonate button - only for Super Admins, not for self or other super admins */}
+                                  {isSuperAdmin && !isSelf && !userIsSuperAdmin && (
+                                    <ImpersonateButton
+                                      targetUserId={user.id}
+                                      targetEmail={user.email}
+                                      targetName={user.full_name}
+                                    />
+                                  )}
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -701,6 +711,14 @@ const AdminUserManagementPage = () => {
                             </p>
 
                             <div className="flex flex-wrap gap-2">
+                              {/* Impersonate button - only for Super Admins, not for self or other super admins */}
+                              {isSuperAdmin && !isSelf && !userIsSuperAdmin && (
+                                <ImpersonateButton
+                                  targetUserId={user.id}
+                                  targetEmail={user.email}
+                                  targetName={user.full_name}
+                                />
+                              )}
                               <Button
                                 variant="outline"
                                 size="sm"

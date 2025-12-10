@@ -35,6 +35,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { canViewSection, PermissionKey } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
 import { getRoleLabel, getRoleBadgeVariant } from "@/lib/roles";
+import { ImpersonationBanner } from "./ImpersonationBanner";
+import { useImpersonation } from "@/hooks/useImpersonation";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -265,53 +267,60 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     </>
   );
 
-  return (
-    <div className="flex h-screen w-full overflow-hidden">
-      {/* Desktop Sidebar */}
-      <aside
-        className={cn(
-          "hidden border-r bg-background transition-all duration-300 md:flex md:flex-col relative",
-          collapsed ? "w-16" : "w-64"
-        )}
-      >
-        <SidebarContent />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute -right-4 top-20 z-10 rounded-full border bg-background"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          <ChevronLeft
-            className={cn(
-              "h-4 w-4 transition-transform",
-              collapsed && "rotate-180"
-            )}
-          />
-        </Button>
-      </aside>
+  const { isImpersonating } = useImpersonation();
 
-      {/* Mobile Sidebar */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetTrigger asChild className="md:hidden">
+  return (
+    <div className="flex h-screen w-full overflow-hidden flex-col">
+      {/* Impersonation Banner - fixed at top */}
+      <ImpersonationBanner />
+      
+      <div className={cn("flex flex-1 overflow-hidden", isImpersonating && "pt-0")}>
+        {/* Desktop Sidebar */}
+        <aside
+          className={cn(
+            "hidden border-r bg-background transition-all duration-300 md:flex md:flex-col relative",
+            collapsed ? "w-16" : "w-64"
+          )}
+        >
+          <SidebarContent />
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-4 top-4 z-50"
+            className="absolute -right-4 top-20 z-10 rounded-full border bg-background"
+            onClick={() => setCollapsed(!collapsed)}
           >
-            <Menu className="h-6 w-6" />
+            <ChevronLeft
+              className={cn(
+                "h-4 w-4 transition-transform",
+                collapsed && "rotate-180"
+              )}
+            />
           </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <div className="flex h-full flex-col">
-            <SidebarContent />
-          </div>
-        </SheetContent>
-      </Sheet>
+        </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6 md:p-8">{children}</div>
-      </main>
+        {/* Mobile Sidebar */}
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-4 top-4 z-50"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <div className="flex h-full flex-col">
+              <SidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 md:p-8">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }

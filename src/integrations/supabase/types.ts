@@ -50,6 +50,51 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_impersonations: {
+        Row: {
+          created_at: string
+          end_ip: unknown
+          end_ua: string | null
+          ended_at: string | null
+          id: string
+          impersonated_user_id: string
+          reason: string | null
+          session_token: string | null
+          start_ip: unknown
+          start_ua: string | null
+          started_at: string
+          super_admin_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_ip?: unknown
+          end_ua?: string | null
+          ended_at?: string | null
+          id?: string
+          impersonated_user_id: string
+          reason?: string | null
+          session_token?: string | null
+          start_ip?: unknown
+          start_ua?: string | null
+          started_at?: string
+          super_admin_id: string
+        }
+        Update: {
+          created_at?: string
+          end_ip?: unknown
+          end_ua?: string | null
+          ended_at?: string | null
+          id?: string
+          impersonated_user_id?: string
+          reason?: string | null
+          session_token?: string | null
+          start_ip?: unknown
+          start_ua?: string | null
+          started_at?: string
+          super_admin_id?: string
+        }
+        Relationships: []
+      }
       admin_requests: {
         Row: {
           approved_at: string | null

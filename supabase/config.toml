@@ -1,5 +1,8 @@
 project_id = "qxeodogwbdndgfslbyej"
 
+[functions.impersonate-user]
+verify_jwt = true
+
 [functions.ai-content]
 verify_jwt = false
 
