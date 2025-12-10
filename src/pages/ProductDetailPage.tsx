@@ -10,14 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ShoppingBag, ArrowLeft, Tag } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Tag, CheckCircle } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { BookingModal } from "@/components/BookingModal";
+import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 
 const ProductDetailPage = () => {
   const { slug } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isEnquirySuccess, setIsEnquirySuccess] = useState(false);
+  const [submittedEnquiryData, setSubmittedEnquiryData] = useState<typeof formData | null>(null);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -61,7 +64,21 @@ const ProductDetailPage = () => {
       if (error) throw error;
 
       toast.success("Order request submitted! We'll contact you soon.");
-      setIsDialogOpen(false);
+      setSubmittedEnquiryData({ ...formData });
+      setIsEnquirySuccess(true);
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      toast.error("Failed to submit order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEnquiryDialogClose = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setIsEnquirySuccess(false);
+      setSubmittedEnquiryData(null);
       setFormData({
         full_name: "",
         email: "",
@@ -72,11 +89,6 @@ const ProductDetailPage = () => {
         preferred_delivery: "",
         message: "",
       });
-    } catch (error) {
-      console.error("Error submitting order:", error);
-      toast.error("Failed to submit order. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -187,103 +199,131 @@ const ProductDetailPage = () => {
                 >
                   {product.stock_status === "out_of_stock" ? "Out of Stock" : "Order Now"}
                 </Button>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog open={isDialogOpen} onOpenChange={handleEnquiryDialogClose}>
                   <DialogTrigger asChild>
                     <Button size="lg" variant="outline" className="flex-1" disabled={product.stock_status === "out_of_stock"}>
                       Enquire
                     </Button>
                   </DialogTrigger>
                 <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Order: {product.name}</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="full_name">Full Name *</Label>
-                        <Input
-                          id="full_name"
-                          required
-                          value={formData.full_name}
-                          onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone</Label>
-                        <Input
-                          id="phone"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="quantity">Quantity</Label>
-                        <Input
-                          id="quantity"
-                          type="number"
-                          min={1}
-                          value={formData.quantity}
-                          onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="city">City</Label>
-                        <Input
-                          id="city"
-                          value={formData.city}
-                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="pincode">Pincode</Label>
-                        <Input
-                          id="pincode"
-                          value={formData.pincode}
-                          onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="preferred_delivery">Preferred Delivery</Label>
-                      <Input
-                        id="preferred_delivery"
-                        placeholder="e.g., Courier, Speed Post, Pick-up"
-                        value={formData.preferred_delivery}
-                        onChange={(e) => setFormData({ ...formData, preferred_delivery: e.target.value })}
+                  {isEnquirySuccess && submittedEnquiryData ? (
+                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                      <CheckCircle className="h-16 w-16 text-primary mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">Order Request Submitted!</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Thank you! We've received your order for {product.name}. We will contact you soon.
+                      </p>
+                      
+                      <BookingContactPrompt
+                        booking={{
+                          type: "product",
+                          itemName: product.name,
+                          name: submittedEnquiryData.full_name,
+                          email: submittedEnquiryData.email,
+                          phone: submittedEnquiryData.phone,
+                          quantity: submittedEnquiryData.quantity,
+                          notes: submittedEnquiryData.message,
+                          city: submittedEnquiryData.city,
+                          pincode: submittedEnquiryData.pincode,
+                        }}
                       />
+                      
+                      <Button onClick={() => handleEnquiryDialogClose(false)} className="mt-4">Close</Button>
                     </div>
+                  ) : (
+                    <>
+                      <DialogHeader>
+                        <DialogTitle>Order: {product.name}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="full_name">Full Name *</Label>
+                            <Input
+                              id="full_name"
+                              required
+                              value={formData.full_name}
+                              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              required
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            />
+                          </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Additional Message</Label>
-                      <Textarea
-                        id="message"
-                        rows={3}
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      />
-                    </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input
+                              id="phone"
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="quantity">Quantity</Label>
+                            <Input
+                              id="quantity"
+                              type="number"
+                              min={1}
+                              value={formData.quantity}
+                              onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                            />
+                          </div>
+                        </div>
 
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Submitting..." : "Submit Order Request"}
-                    </Button>
-                  </form>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City</Label>
+                            <Input
+                              id="city"
+                              value={formData.city}
+                              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="pincode">Pincode</Label>
+                            <Input
+                              id="pincode"
+                              value={formData.pincode}
+                              onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="preferred_delivery">Preferred Delivery</Label>
+                          <Input
+                            id="preferred_delivery"
+                            placeholder="e.g., Courier, Speed Post, Pick-up"
+                            value={formData.preferred_delivery}
+                            onChange={(e) => setFormData({ ...formData, preferred_delivery: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="message">Additional Message</Label>
+                          <Textarea
+                            id="message"
+                            rows={3}
+                            value={formData.message}
+                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          />
+                        </div>
+
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                          {isSubmitting ? "Submitting..." : "Submit Order Request"}
+                        </Button>
+                      </form>
+                    </>
+                  )}
                 </DialogContent>
               </Dialog>
               </div>

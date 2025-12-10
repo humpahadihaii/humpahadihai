@@ -414,6 +414,7 @@ export type Database = {
           tagline: string
           twitter_url: string | null
           updated_at: string
+          whatsapp_number: string | null
           youtube_url: string | null
         }
         Insert: {
@@ -442,6 +443,7 @@ export type Database = {
           tagline?: string
           twitter_url?: string | null
           updated_at?: string
+          whatsapp_number?: string | null
           youtube_url?: string | null
         }
         Update: {
@@ -470,6 +472,7 @@ export type Database = {
           tagline?: string
           twitter_url?: string | null
           updated_at?: string
+          whatsapp_number?: string | null
           youtube_url?: string | null
         }
         Relationships: []

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink, CalendarPlus } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { BookingModal } from "@/components/BookingModal";
+import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 
 interface TourismListing {
   id: string;
@@ -33,6 +34,8 @@ const TravelPackageDetailPage = () => {
   const { slug } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isEnquirySuccess, setIsEnquirySuccess] = useState(false);
+  const [submittedEnquiryData, setSubmittedEnquiryData] = useState<typeof formData | null>(null);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -110,7 +113,22 @@ const TravelPackageDetailPage = () => {
       if (error) throw error;
 
       toast.success("Enquiry submitted! We'll contact you soon.");
-      setIsDialogOpen(false);
+      setSubmittedEnquiryData({ ...formData });
+      setIsEnquirySuccess(true);
+    } catch (error) {
+      console.error("Error submitting enquiry:", error);
+      toast.error("Failed to submit enquiry. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEnquiryDialogClose = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      // Reset on close
+      setIsEnquirySuccess(false);
+      setSubmittedEnquiryData(null);
       setFormData({
         full_name: "",
         email: "",
@@ -121,11 +139,6 @@ const TravelPackageDetailPage = () => {
         city: "",
         message: "",
       });
-    } catch (error) {
-      console.error("Error submitting enquiry:", error);
-      toast.error("Failed to submit enquiry. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -377,104 +390,132 @@ const TravelPackageDetailPage = () => {
                     <CalendarPlus className="h-4 w-4 mr-2" />
                     Book Now
                   </Button>
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <Dialog open={isDialogOpen} onOpenChange={handleEnquiryDialogClose}>
                     <DialogTrigger asChild>
                       <Button size="lg" variant="outline" className="flex-1 md:flex-none">
                         Enquire
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Book: {pkg.title}</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="full_name">Full Name *</Label>
-                            <Input
-                              id="full_name"
-                              required
-                              value={formData.full_name}
-                              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email *</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              required
-                              value={formData.email}
-                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Phone</Label>
-                            <Input
-                              id="phone"
-                              value={formData.phone}
-                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="city">City</Label>
-                            <Input
-                              id="city"
-                              value={formData.city}
-                              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="preferred_start_date">Preferred Date</Label>
-                            <Input
-                              id="preferred_start_date"
-                              type="date"
-                              value={formData.preferred_start_date}
-                              onChange={(e) => setFormData({ ...formData, preferred_start_date: e.target.value })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="number_of_travellers">No. of Travellers</Label>
-                            <Input
-                              id="number_of_travellers"
-                              type="number"
-                              min={1}
-                              value={formData.number_of_travellers}
-                              onChange={(e) => setFormData({ ...formData, number_of_travellers: parseInt(e.target.value) || 1 })}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="month_or_season">Preferred Month/Season</Label>
-                          <Input
-                            id="month_or_season"
-                            placeholder="e.g., March, Summer, Monsoon"
-                            value={formData.month_or_season}
-                            onChange={(e) => setFormData({ ...formData, month_or_season: e.target.value })}
+                      {isEnquirySuccess && submittedEnquiryData ? (
+                        <div className="flex flex-col items-center justify-center py-6 text-center">
+                          <CheckCircle className="h-16 w-16 text-primary mb-4" />
+                          <h3 className="text-xl font-semibold mb-2">Enquiry Submitted!</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Thank you! We've received your enquiry for {pkg.title}. We will contact you soon.
+                          </p>
+                          
+                          <BookingContactPrompt
+                            booking={{
+                              type: "enquiry",
+                              itemName: pkg.title,
+                              name: submittedEnquiryData.full_name,
+                              email: submittedEnquiryData.email,
+                              phone: submittedEnquiryData.phone,
+                              startDate: submittedEnquiryData.preferred_start_date || undefined,
+                              adults: submittedEnquiryData.number_of_travellers,
+                              notes: submittedEnquiryData.message,
+                              city: submittedEnquiryData.city,
+                            }}
                           />
+                          
+                          <Button onClick={() => handleEnquiryDialogClose(false)} className="mt-4">Close</Button>
                         </div>
+                      ) : (
+                        <>
+                          <DialogHeader>
+                            <DialogTitle>Enquire: {pkg.title}</DialogTitle>
+                          </DialogHeader>
+                          <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="full_name">Full Name *</Label>
+                                <Input
+                                  id="full_name"
+                                  required
+                                  value={formData.full_name}
+                                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="email">Email *</Label>
+                                <Input
+                                  id="email"
+                                  type="email"
+                                  required
+                                  value={formData.email}
+                                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                />
+                              </div>
+                            </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="message">Additional Message</Label>
-                          <Textarea
-                            id="message"
-                            rows={3}
-                            value={formData.message}
-                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                          />
-                        </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="phone">Phone</Label>
+                                <Input
+                                  id="phone"
+                                  value={formData.phone}
+                                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="city">City</Label>
+                                <Input
+                                  id="city"
+                                  value={formData.city}
+                                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                />
+                              </div>
+                            </div>
 
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                          {isSubmitting ? "Submitting..." : "Submit Enquiry"}
-                        </Button>
-                      </form>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="preferred_start_date">Preferred Date</Label>
+                                <Input
+                                  id="preferred_start_date"
+                                  type="date"
+                                  value={formData.preferred_start_date}
+                                  onChange={(e) => setFormData({ ...formData, preferred_start_date: e.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="number_of_travellers">No. of Travellers</Label>
+                                <Input
+                                  id="number_of_travellers"
+                                  type="number"
+                                  min={1}
+                                  value={formData.number_of_travellers}
+                                  onChange={(e) => setFormData({ ...formData, number_of_travellers: parseInt(e.target.value) || 1 })}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="month_or_season">Preferred Month/Season</Label>
+                              <Input
+                                id="month_or_season"
+                                placeholder="e.g., March, Summer, Monsoon"
+                                value={formData.month_or_season}
+                                onChange={(e) => setFormData({ ...formData, month_or_season: e.target.value })}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="message">Additional Message</Label>
+                              <Textarea
+                                id="message"
+                                rows={3}
+                                value={formData.message}
+                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                              />
+                            </div>
+
+                            <Button type="submit" className="w-full" disabled={isSubmitting}>
+                              {isSubmitting ? "Submitting..." : "Submit Enquiry"}
+                            </Button>
+                          </form>
+                        </>
+                      )}
                     </DialogContent>
                   </Dialog>
                 </div>
