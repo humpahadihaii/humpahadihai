@@ -73,6 +73,8 @@ const AdminDistrictFoodsPage = () => {
     enabled: !!selectedDistrict,
   });
 
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
+
   const saveMutation = useMutation({
     mutationFn: async (data: Partial<DistrictFood>) => {
       if (editingFood) {
@@ -81,16 +83,26 @@ const AdminDistrictFoodsPage = () => {
           .update(data)
           .eq("id", editingFood.id);
         if (error) throw error;
+        return { isUpdate: true, id: editingFood.id, name: data.name };
       } else {
-        const { error } = await supabase
+        const { data: newData, error } = await supabase
           .from("district_foods")
-          .insert([{ ...data, district_id: selectedDistrict } as any]);
+          .insert([{ ...data, district_id: selectedDistrict } as any])
+          .select()
+          .single();
         if (error) throw error;
+        return { isUpdate: false, id: newData?.id, name: data.name };
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["district-foods"] });
-      toast.success(editingFood ? "Food item updated" : "Food item added");
+      if (result?.isUpdate) {
+        toast.success("Food item updated");
+        logUpdate("district_food", result.id, result.name);
+      } else {
+        toast.success("Food item added");
+        logCreate("district_food", result?.id || "unknown", result?.name);
+      }
       resetForm();
     },
     onError: (error) => {
@@ -100,13 +112,15 @@ const AdminDistrictFoodsPage = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
       const { error } = await supabase.from("district_foods").delete().eq("id", id);
       if (error) throw error;
+      return { id, name };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["district-foods"] });
       toast.success("Food item deleted");
+      logDelete("district_food", result.id, result.name);
     },
     onError: () => toast.error("Failed to delete food item"),
   });
@@ -329,7 +343,7 @@ const AdminDistrictFoodsPage = () => {
                             <Button size="sm" variant="ghost" onClick={() => handleEdit(food)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => deleteMutation.mutate(food.id)}>
+                            <Button size="sm" variant="ghost" onClick={() => deleteMutation.mutate({ id: food.id, name: food.name })}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>

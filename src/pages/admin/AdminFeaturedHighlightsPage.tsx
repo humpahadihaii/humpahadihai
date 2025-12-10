@@ -156,6 +156,7 @@ function SortableHighlight({ highlight, onEdit, onDelete, onToggleStatus, isDele
 
 const AdminFeaturedHighlightsPage = () => {
   const queryClient = useQueryClient();
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [items, setItems] = useState<FeaturedHighlight[]>([]);
@@ -198,14 +199,18 @@ const AdminFeaturedHighlightsPage = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: FeaturedHighlightInsert) => {
-      const { error } = await supabase
+      const { data: newData, error } = await supabase
         .from("featured_highlights")
-        .insert([data]);
+        .insert([data])
+        .select()
+        .single();
       if (error) throw error;
+      return newData;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["featured-highlights"] });
       toast.success("Highlight created successfully");
+      logCreate("featured_highlight", data?.id || "unknown", data?.title);
       resetForm();
       setDialogOpen(false);
     },
@@ -221,10 +226,12 @@ const AdminFeaturedHighlightsPage = () => {
         .update(data)
         .eq("id", id);
       if (error) throw error;
+      return { id, title: data.title };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["featured-highlights"] });
       toast.success("Highlight updated successfully");
+      logUpdate("featured_highlight", result.id, result.title);
       resetForm();
       setDialogOpen(false);
     },
@@ -234,16 +241,18 @@ const AdminFeaturedHighlightsPage = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, title }: { id: string; title: string }) => {
       const { error } = await supabase
         .from("featured_highlights")
         .delete()
         .eq("id", id);
       if (error) throw error;
+      return { id, title };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["featured-highlights"] });
       toast.success("Highlight deleted successfully");
+      logDelete("featured_highlight", result.id, result.title);
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to delete highlight");
@@ -538,7 +547,10 @@ const AdminFeaturedHighlightsPage = () => {
                     key={highlight.id}
                     highlight={highlight}
                     onEdit={handleEdit}
-                    onDelete={(id) => deleteMutation.mutate(id)}
+                    onDelete={(id) => {
+                      const highlight = items.find(h => h.id === id);
+                      deleteMutation.mutate({ id, title: highlight?.title || "" });
+                    }}
                     onToggleStatus={handleToggleStatus}
                     isDeleting={deleteMutation.isPending}
                   />

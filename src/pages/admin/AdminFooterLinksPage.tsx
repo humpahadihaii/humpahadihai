@@ -97,18 +97,20 @@ export default function AdminFooterLinksPage() {
         toast.error(`Failed to update: ${error.message}`);
       } else {
         toast.success("Link updated successfully");
+        logUpdate("footer_link", editingLink.id, data.label);
         fetchLinks();
         setDialogOpen(false);
         setEditingLink(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("cms_footer_links").insert([linkData]);
+      const { data: newData, error } = await supabase.from("cms_footer_links").insert([linkData]).select().single();
 
       if (error) {
         toast.error(`Failed to create: ${error.message}`);
       } else {
         toast.success("Link created successfully");
+        logCreate("footer_link", newData?.id || "unknown", data.label);
         fetchLinks();
         setDialogOpen(false);
         form.reset();
@@ -130,11 +132,13 @@ export default function AdminFooterLinksPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this link?")) return;
+    const link = links.find(l => l.id === id);
     const { error } = await supabase.from("cms_footer_links").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete link");
     } else {
       toast.success("Link deleted");
+      logDelete("footer_link", id, link?.label);
       fetchLinks();
     }
   };

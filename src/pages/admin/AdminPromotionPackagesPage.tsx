@@ -108,8 +108,9 @@ const AdminPromotionPackagesPage = () => {
         return;
       }
       toast.success("Package updated successfully");
+      logUpdate("promotion_package", editingPackage.id, data.name);
     } else {
-      const { error } = await supabase
+      const { data: newData, error } = await supabase
         .from("promotion_packages")
         .insert({
           name: data.name,
@@ -121,13 +122,16 @@ const AdminPromotionPackagesPage = () => {
           duration_days: data.duration_days,
           is_active: data.is_active,
           sort_order: data.sort_order
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         toast.error("Failed to create package");
         return;
       }
       toast.success("Package created successfully");
+      logCreate("promotion_package", newData?.id || "unknown", data.name);
     }
 
     form.reset();
@@ -155,6 +159,7 @@ const AdminPromotionPackagesPage = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this package?")) return;
 
+    const pkg = packages.find(p => p.id === id);
     const { error } = await supabase
       .from("promotion_packages")
       .delete()
@@ -165,6 +170,7 @@ const AdminPromotionPackagesPage = () => {
       return;
     }
     toast.success("Package deleted successfully");
+    logDelete("promotion_package", id, pkg?.name);
     fetchPackages();
   };
 

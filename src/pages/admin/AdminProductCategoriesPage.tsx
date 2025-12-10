@@ -94,8 +94,9 @@ const AdminProductCategoriesPage = () => {
         return;
       }
       toast.success("Category updated successfully");
+      logUpdate("product_category", editingCategory.id, data.name);
     } else {
-      const { error } = await supabase
+      const { data: newData, error } = await supabase
         .from("local_product_categories")
         .insert({
           name: data.name,
@@ -103,13 +104,16 @@ const AdminProductCategoriesPage = () => {
           description: data.description,
           is_active: data.is_active,
           sort_order: data.sort_order
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         toast.error("Failed to create category");
         return;
       }
       toast.success("Category created successfully");
+      logCreate("product_category", newData?.id || "unknown", data.name);
     }
 
     form.reset();
@@ -133,6 +137,7 @@ const AdminProductCategoriesPage = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
 
+    const category = categories.find(c => c.id === id);
     const { error } = await supabase
       .from("local_product_categories")
       .delete()
@@ -143,6 +148,7 @@ const AdminProductCategoriesPage = () => {
       return;
     }
     toast.success("Category deleted successfully");
+    logDelete("product_category", id, category?.name);
     fetchCategories();
   };
 

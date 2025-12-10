@@ -79,6 +79,13 @@ export default function AdminCommunitySubmissionsPage() {
       });
     } else {
       toast.success(`Submission ${newStatus}`);
+      if (newStatus === "approved") {
+        logApprove("community_submission", selectedSubmission.id, selectedSubmission.title);
+      } else if (newStatus === "rejected") {
+        logReject("community_submission", selectedSubmission.id, selectedSubmission.title);
+      } else {
+        logUpdate("community_submission", selectedSubmission.id, `${selectedSubmission.title} → ${newStatus}`);
+      }
       fetchSubmissions();
       setReviewDialogOpen(false);
       setSelectedSubmission(null);
