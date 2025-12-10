@@ -30,6 +30,7 @@ interface AuthState {
 }
 
 export const useAuth = () => {
+  // 1. All useState hooks first (always called)
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     session: null,
@@ -39,11 +40,12 @@ export const useAuth = () => {
     isRolesLoading: false,
   });
 
-  // Use ref to track mount status and prevent state updates after unmount
+  // 2. All useRef hooks (always called)
   const mountedRef = useRef(true);
   const initCompletedRef = useRef(false);
+  const loadingRef = useRef(false);
 
-  // Load profile and roles for a user - defined outside useEffect to be stable
+  // 3. All useCallback hooks (always called, in same order)
   const loadProfileAndRoles = useCallback(async (userId: string): Promise<{
     profile: UserProfile | null;
     roles: AppRole[];
@@ -73,19 +75,61 @@ export const useAuth = () => {
     }
   }, []);
 
+  const signOut = useCallback(async () => {
+    console.log("[Auth] Starting sign out...");
+    try {
+      setAuthState({
+        user: null,
+        session: null,
+        profile: null,
+        roles: [],
+        isAuthInitialized: true,
+        isRolesLoading: false,
+      });
+      
+      await supabase.auth.signOut({ scope: 'local' });
+      console.log("[Auth] Sign out complete");
+    } catch (e) {
+      console.error("[Auth] Sign out error:", e);
+    }
+  }, []);
+
+  // 4. All useMemo hooks (always called, in same order)
+  const isSuperAdmin = useMemo(() => checkIsSuperAdmin(authState.roles), [authState.roles]);
+  const canAccessAdminPanel = useMemo(() => hasAdminPanelAccess(authState.roles), [authState.roles]);
+  const hasRoles = useMemo(() => checkHasAnyRole(authState.roles), [authState.roles]);
+  const isAuthenticated = useMemo(() => !!authState.session, [authState.session]);
+  const isApproved = useMemo(() => isSuperAdmin || canAccessAdminPanel || hasRoles, [isSuperAdmin, canAccessAdminPanel, hasRoles]);
+  const isAdmin = useMemo(() => authState.roles.includes("super_admin") || authState.roles.includes("admin"), [authState.roles]);
+  const role = useMemo((): AppRole | null => getHighestPriorityRole(authState.roles), [authState.roles]);
+
+  // More useCallback hooks after useMemo (consistent order)
+  const hasRole = useCallback((requiredRole: AppRole): boolean => authState.roles.includes(requiredRole), [authState.roles]);
+  const hasAnyRole = useCallback((requiredRoles: AppRole[]): boolean => authState.roles.some((r) => requiredRoles.includes(r)), [authState.roles]);
+
+  const refetch = useCallback(async () => {
+    if (authState.session?.user?.id) {
+      console.log("[Auth] Refetching profile and roles");
+      setAuthState(prev => ({ ...prev, isRolesLoading: true }));
+      const { profile, roles } = await loadProfileAndRoles(authState.session.user.id);
+      setAuthState((prev) => ({ ...prev, profile, roles, isRolesLoading: false }));
+    }
+  }, [authState.session, loadProfileAndRoles]);
+
+  // 5. useEffect hooks last (always called)
   useEffect(() => {
     mountedRef.current = true;
     initCompletedRef.current = false;
 
-    // Initialize auth on mount
     const initAuth = async () => {
-      // Skip if already completed (handles StrictMode double-invoke)
-      if (initCompletedRef.current) {
-        console.log("[Auth] Init already completed, skipping");
+      if (initCompletedRef.current || loadingRef.current) {
+        console.log("[Auth] Init already in progress or completed, skipping");
         return;
       }
 
+      loadingRef.current = true;
       console.log("[Auth] Starting initialization...");
+      
       try {
         const { data, error } = await supabase.auth.getSession();
         
@@ -101,7 +145,6 @@ export const useAuth = () => {
         initCompletedRef.current = true;
 
         if (session?.user?.id) {
-          // Set initialized with session immediately
           setAuthState(prev => ({
             ...prev,
             user: session.user,
@@ -110,7 +153,6 @@ export const useAuth = () => {
             isRolesLoading: true,
           }));
 
-          // Load profile/roles
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
           if (mountedRef.current) {
             console.log("[Auth] Init complete with roles:", roles);
@@ -140,12 +182,13 @@ export const useAuth = () => {
             isRolesLoading: false,
           }));
         }
+      } finally {
+        loadingRef.current = false;
       }
     };
 
     initAuth();
 
-    // Subscribe to auth changes - MUST NOT be async function
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         if (!mountedRef.current) return;
@@ -165,12 +208,10 @@ export const useAuth = () => {
           return;
         }
 
-        // For auth events, update session immediately then load data via setTimeout
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           if (newSession?.user?.id) {
             console.log("[Auth] Updating session for", event);
             
-            // Update session state immediately
             setAuthState(prev => ({
               ...prev,
               user: newSession.user,
@@ -179,9 +220,8 @@ export const useAuth = () => {
               isRolesLoading: true,
             }));
 
-            // Load profile/roles in next tick to avoid Supabase deadlock
             const userId = newSession.user.id;
-            setTimeout(async () => {
+            Promise.resolve().then(async () => {
               if (!mountedRef.current) return;
               try {
                 const { profile, roles } = await loadProfileAndRoles(userId);
@@ -203,7 +243,7 @@ export const useAuth = () => {
                   }));
                 }
               }
-            }, 0);
+            });
           }
         }
       }
@@ -213,55 +253,7 @@ export const useAuth = () => {
       mountedRef.current = false;
       subscription.unsubscribe();
     };
-  }, []); // Empty dependency array - only run once on mount
-
-  // Compute derived values
-  const isSuperAdmin = useMemo(() => checkIsSuperAdmin(authState.roles), [authState.roles]);
-  const canAccessAdminPanel = useMemo(() => hasAdminPanelAccess(authState.roles), [authState.roles]);
-  const hasRoles = useMemo(() => checkHasAnyRole(authState.roles), [authState.roles]);
-  const isAuthenticated = useMemo(() => !!authState.session, [authState.session]);
-  const isApproved = useMemo(() => isSuperAdmin || canAccessAdminPanel || hasRoles, [isSuperAdmin, canAccessAdminPanel, hasRoles]);
-  const isAdmin = useMemo(() => authState.roles.includes("super_admin") || authState.roles.includes("admin"), [authState.roles]);
-
-  // Get highest priority role for display
-  const role = useMemo((): AppRole | null => {
-    return getHighestPriorityRole(authState.roles);
-  }, [authState.roles]);
-
-  const hasRole = useCallback((requiredRole: AppRole): boolean => authState.roles.includes(requiredRole), [authState.roles]);
-  const hasAnyRole = useCallback((requiredRoles: AppRole[]): boolean => authState.roles.some((r) => requiredRoles.includes(r)), [authState.roles]);
-
-  const refetch = useCallback(async () => {
-    if (authState.session?.user?.id) {
-      console.log("[Auth] Refetching profile and roles");
-      setAuthState(prev => ({ ...prev, isRolesLoading: true }));
-      const { profile, roles } = await loadProfileAndRoles(authState.session.user.id);
-      setAuthState((prev) => ({ ...prev, profile, roles, isRolesLoading: false }));
-    }
-  }, [authState.session, loadProfileAndRoles]);
-
-  // Sign out function - guaranteed to complete and navigate
-  const signOut = useCallback(async () => {
-    console.log("[Auth] Starting sign out...");
-    try {
-      // Clear state first to prevent any UI issues
-      setAuthState({
-        user: null,
-        session: null,
-        profile: null,
-        roles: [],
-        isAuthInitialized: true,
-        isRolesLoading: false,
-      });
-      
-      // Then sign out from Supabase
-      await supabase.auth.signOut({ scope: 'local' });
-      console.log("[Auth] Sign out complete");
-    } catch (e) {
-      console.error("[Auth] Sign out error:", e);
-      // Even on error, state is already cleared so user can proceed
-    }
-  }, []);
+  }, [loadProfileAndRoles]);
 
   return {
     user: authState.user,
