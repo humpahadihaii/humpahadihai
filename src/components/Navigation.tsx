@@ -28,8 +28,7 @@ const Navigation = () => {
   const siteName = settings?.site_name || "Hum Pahadi Haii";
 
   // Secret 11-click trigger handler
-  const handleLogoClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // Don't prevent navigation, just count clicks
+  const handleLogoClick = useCallback((e: React.MouseEvent) => {
     clickCountRef.current += 1;
     
     // Clear existing timer
@@ -39,8 +38,29 @@ const Navigation = () => {
     
     // Check if we reached 11 clicks
     if (clickCountRef.current >= 11) {
+      // IMPORTANT: Prevent the Link's default navigation to "/"
+      e.preventDefault();
+      e.stopPropagation();
+      
       clickCountRef.current = 0;
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+        clickTimerRef.current = null;
+      }
+      
       toast.success("Admin access triggered", { duration: 2000 });
+      
+      // Try multiple methods to open admin login
+      // 1. Check for global openAdminModal function
+      if (typeof (window as any).openAdminModal === 'function') {
+        (window as any).openAdminModal();
+        return;
+      }
+      
+      // 2. Dispatch custom event for any listeners
+      window.dispatchEvent(new CustomEvent('hp:open-admin-login'));
+      
+      // 3. Fallback: navigate to login page
       navigate("/login");
       return;
     }
