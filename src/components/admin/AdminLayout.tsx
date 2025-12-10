@@ -121,7 +121,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const { role, roles, user, isAdmin, isAuthInitialized, isAuthenticated, session } = useAuth();
+  const { role, roles, user, isAdmin, isAuthInitialized, session } = useAuth();
 
   const handleSignOut = async () => {
     if (signingOut) return; // Prevent double-click
