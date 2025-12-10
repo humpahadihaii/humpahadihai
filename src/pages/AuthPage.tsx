@@ -55,10 +55,10 @@ const AuthPage = () => {
       const roles = normalizeRoles(rolesData?.map((r) => r.role) || []);
       const superAdmin = isSuperAdmin(roles);
 
-      // Use centralized routing logic
+      // Use centralized routing logic - this returns role-specific routes
       const target = routeAfterLogin({ roles, isSuperAdmin: superAdmin });
       
-      if (target === "/admin") {
+      if (target !== "/pending-approval") {
         toast.success("Welcome back!");
       }
       

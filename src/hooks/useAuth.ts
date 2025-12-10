@@ -7,6 +7,7 @@ import {
   isSuperAdmin as checkIsSuperAdmin,
   hasAdminPanelAccess,
   hasAnyRole as checkHasAnyRole,
+  getHighestPriorityRole,
 } from "@/lib/authRoles";
 
 export type UserStatus = "pending" | "active" | "disabled";
@@ -25,6 +26,7 @@ interface AuthState {
   profile: UserProfile | null;
   roles: AppRole[];
   isAuthInitialized: boolean;
+  isRolesLoading: boolean;
 }
 
 export const useAuth = () => {
@@ -34,6 +36,7 @@ export const useAuth = () => {
     profile: null,
     roles: [],
     isAuthInitialized: false,
+    isRolesLoading: false,
   });
 
   // Load profile and roles for a user - NEVER THROWS
@@ -80,16 +83,27 @@ export const useAuth = () => {
 
         const session = data?.session ?? null;
 
+        // CRITICAL: Set isAuthInitialized to TRUE immediately after session check
+        // This prevents infinite loading on admin routes
         if (session?.user?.id) {
+          // Set initialized with session, then load profile/roles async
+          setAuthState(prev => ({
+            ...prev,
+            user: session.user,
+            session,
+            isAuthInitialized: true,
+            isRolesLoading: true,
+          }));
+
+          // Load profile/roles without blocking
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
           if (mounted) {
-            setAuthState({
-              user: session.user,
-              session,
+            setAuthState(prev => ({
+              ...prev,
               profile,
               roles,
-              isAuthInitialized: true,
-            });
+              isRolesLoading: false,
+            }));
           }
         } else {
           setAuthState({
@@ -98,6 +112,7 @@ export const useAuth = () => {
             profile: null,
             roles: [],
             isAuthInitialized: true,
+            isRolesLoading: false,
           });
         }
       } catch (error) {
@@ -109,6 +124,7 @@ export const useAuth = () => {
             profile: null,
             roles: [],
             isAuthInitialized: true, // ALWAYS set to true, even on error
+            isRolesLoading: false,
           });
         }
       }
@@ -118,7 +134,7 @@ export const useAuth = () => {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         if (!mounted) return;
 
         console.log("Auth event:", event);
@@ -130,23 +146,36 @@ export const useAuth = () => {
             profile: null,
             roles: [],
             isAuthInitialized: true,
+            isRolesLoading: false,
           });
           return;
         }
 
-        // For any sign-in or token refresh, load user data
+        // For SIGNED_IN or TOKEN_REFRESHED, update session immediately then load data
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
           if (newSession?.user?.id) {
-            const { profile, roles } = await loadProfileAndRoles(newSession.user.id);
-            if (mounted) {
-              setAuthState({
-                user: newSession.user,
-                session: newSession,
-                profile,
-                roles,
-                isAuthInitialized: true,
-              });
-            }
+            // Update session state immediately
+            setAuthState(prev => ({
+              ...prev,
+              user: newSession.user,
+              session: newSession,
+              isAuthInitialized: true,
+              isRolesLoading: true,
+            }));
+
+            // Defer profile/roles loading to avoid blocking and potential deadlocks
+            setTimeout(async () => {
+              if (!mounted) return;
+              const { profile, roles } = await loadProfileAndRoles(newSession.user.id);
+              if (mounted) {
+                setAuthState(prev => ({
+                  ...prev,
+                  profile,
+                  roles,
+                  isRolesLoading: false,
+                }));
+              }
+            }, 0);
           }
         }
       }
@@ -168,15 +197,7 @@ export const useAuth = () => {
 
   // Get highest priority role for display
   const role = useMemo((): AppRole | null => {
-    const priorityOrder: AppRole[] = [
-      "super_admin", "admin", "content_manager", "content_editor", "editor",
-      "moderator", "author", "reviewer", "media_manager", "seo_manager",
-      "support_agent", "analytics_viewer", "developer", "viewer", "user",
-    ];
-    for (const r of priorityOrder) {
-      if (authState.roles.includes(r)) return r;
-    }
-    return null;
+    return getHighestPriorityRole(authState.roles);
   }, [authState.roles]);
 
   const hasRole = useCallback((requiredRole: AppRole): boolean => authState.roles.includes(requiredRole), [authState.roles]);
@@ -185,24 +206,28 @@ export const useAuth = () => {
   const refetch = useCallback(async () => {
     if (authState.session?.user?.id) {
       const { profile, roles } = await loadProfileAndRoles(authState.session.user.id);
-      setAuthState((prev) => ({ ...prev, profile, roles }));
+      setAuthState((prev) => ({ ...prev, profile, roles, isRolesLoading: false }));
     }
   }, [authState.session, loadProfileAndRoles]);
 
   // Sign out function
   const signOut = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
+      // Clear state first
+      setAuthState({
+        user: null,
+        session: null,
+        profile: null,
+        roles: [],
+        isAuthInitialized: true,
+        isRolesLoading: false,
+      });
+      
+      // Then sign out from Supabase
+      await supabase.auth.signOut({ scope: 'local' });
     } catch (e) {
       console.error("Sign out error:", e);
     }
-    setAuthState({
-      user: null,
-      session: null,
-      profile: null,
-      roles: [],
-      isAuthInitialized: true,
-    });
   }, []);
 
   return {
@@ -212,6 +237,7 @@ export const useAuth = () => {
     roles: authState.roles,
     role,
     isAuthInitialized: authState.isAuthInitialized,
+    isRolesLoading: authState.isRolesLoading,
     isAuthenticated,
     isSuperAdmin,
     isAdmin,
@@ -225,5 +251,5 @@ export const useAuth = () => {
 };
 
 // Re-export for convenience
-export { normalizeRoles, isSuperAdmin, hasAdminPanelAccess, routeAfterLogin } from "@/lib/authRoles";
+export { normalizeRoles, isSuperAdmin, hasAdminPanelAccess, routeAfterLogin, getHighestPriorityRole } from "@/lib/authRoles";
 export type { AppRole } from "@/lib/authRoles";
