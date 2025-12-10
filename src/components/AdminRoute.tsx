@@ -7,10 +7,16 @@ interface AdminRouteProps {
 }
 
 const AdminRoute = ({ children }: AdminRouteProps) => {
-  const { isAuthInitialized, isAuthenticated, profile, roles } = useAuth();
+  const { isAuthInitialized, isAuthenticated, profile, roles, session } = useAuth();
 
-  // Wait for auth to initialize - no redirects during loading
+  // Wait for auth to initialize - but with a timeout safety
+  // If we have a session but still loading, show content anyway
   if (!isAuthInitialized) {
+    // If we already have session data, don't block
+    if (session) {
+      return <>{children}</>;
+    }
+    
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -19,7 +25,7 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
   }
 
   // Not authenticated - redirect to login
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !session) {
     return <Navigate to="/login" replace />;
   }
 
