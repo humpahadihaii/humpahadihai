@@ -165,13 +165,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     console.log("[AdminLayout] No session, redirecting to login");
     return <Navigate to="/login" replace />;
   }
-
-  // CRITICAL: Only super_admin and admin roles can access admin panel
-  const isAdminRole = isSuperAdmin || roles.includes("admin");
-  if (!isAdminRole) {
-    console.log("[AdminLayout] Access denied - user lacks admin role:", user?.email, "roles:", roles);
-    return <Navigate to="/" replace />;
-  }
   
   // Log access for debugging
   console.log("[AdminLayout] Rendering for user:", user?.email, "roles:", roles);

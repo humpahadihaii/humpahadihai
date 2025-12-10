@@ -9,10 +9,9 @@ interface ProtectedRouteProps {
 
 /**
  * ProtectedRoute - Guards admin routes with permission checks
- * ONLY super_admin and admin roles can access admin panel
  */
 const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
-  const { isAuthInitialized, session, roles, isSuperAdmin, profile, isPending } = useAuth();
+  const { isAuthInitialized, session, roles, isSuperAdmin, canAccessAdminPanel, profile, isPending } = useAuth();
 
   // Show spinner only during initial auth check
   if (!isAuthInitialized) {
@@ -28,7 +27,20 @@ const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Disabled user = login
+  // Super Admin = full access
+  if (isSuperAdmin) {
+    return <>{children}</>;
+  }
+
+  // Has admin panel access - check specific permission
+  if (canAccessAdminPanel) {
+    if (!canViewSection(permission, roles)) {
+      return <Navigate to="/admin/unauthorized" replace />;
+    }
+    return <>{children}</>;
+  }
+
+  // Disabled = login
   if (profile?.status === "disabled") {
     return <Navigate to="/login" replace />;
   }
@@ -38,21 +50,7 @@ const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // Super Admin = full access
-  if (isSuperAdmin) {
-    return <>{children}</>;
-  }
-
-  // CRITICAL: Only admin role can access admin panel (strict check)
-  const isAdminRole = roles.includes("admin");
-  if (isAdminRole) {
-    if (!canViewSection(permission, roles)) {
-      return <Navigate to="/admin/unauthorized" replace />;
-    }
-    return <>{children}</>;
-  }
-
-  // No admin access - redirect home
+  // No admin access = home
   return <Navigate to="/" replace />;
 };
 
