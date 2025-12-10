@@ -135,6 +135,14 @@ export const useAuth = () => {
         
         if (error) {
           console.error("[Auth] Error getting session:", error);
+          if (mountedRef.current) {
+            setAuthState(prev => ({
+              ...prev,
+              isAuthInitialized: true,
+              isRolesLoading: false,
+            }));
+          }
+          return;
         }
 
         if (!mountedRef.current) return;
