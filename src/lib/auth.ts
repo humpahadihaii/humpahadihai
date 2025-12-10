@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
  * 5. Redirects to the login page
  */
 export const performLogout = async (): Promise<void> => {
+  console.log("[Auth] performLogout: Starting logout process...");
+  
   // 1. Clear all Supabase-related localStorage items FIRST (before signOut which might hang)
   const keysToRemove: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -24,6 +26,7 @@ export const performLogout = async (): Promise<void> => {
     }
   }
   keysToRemove.forEach(key => localStorage.removeItem(key));
+  console.log("[Auth] performLogout: Cleared localStorage items:", keysToRemove.length);
 
   // 2. Clear sessionStorage entirely
   sessionStorage.clear();
@@ -38,12 +41,14 @@ export const performLogout = async (): Promise<void> => {
   // 4. Sign out from Supabase (use local scope for faster signout)
   try {
     await supabase.auth.signOut({ scope: 'local' });
+    console.log("[Auth] performLogout: Supabase signOut complete");
   } catch (error) {
-    console.error("Supabase signOut error:", error);
+    console.error("[Auth] performLogout: Supabase signOut error:", error);
     // Continue with redirect even if signOut fails
   }
 
   // 5. Force redirect to login page using window.location for a clean slate
+  console.log("[Auth] performLogout: Redirecting to /login");
   window.location.href = '/login';
 };
 
@@ -55,6 +60,8 @@ export const handleLogoutWithNavigate = async (
   navigate: (path: string) => void,
   onSuccess?: () => void
 ): Promise<void> => {
+  console.log("[Auth] handleLogoutWithNavigate: Starting...");
+  
   // Clear localStorage items first
   const keysToRemove: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -83,8 +90,9 @@ export const handleLogoutWithNavigate = async (
   try {
     // Sign out from Supabase
     await supabase.auth.signOut({ scope: 'local' });
+    console.log("[Auth] handleLogoutWithNavigate: Supabase signOut complete");
   } catch (error) {
-    console.error("Logout error:", error);
+    console.error("[Auth] handleLogoutWithNavigate: Logout error:", error);
   }
 
   // Call success callback if provided
