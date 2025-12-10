@@ -14,6 +14,10 @@ import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { productCategoriesExcelConfig } from "@/lib/excelConfigs";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -40,6 +44,8 @@ const AdminProductCategoriesPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ProductCategory | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(productCategoriesExcelConfig);
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
@@ -146,16 +152,23 @@ const AdminProductCategoriesPage = () => {
             <h1 className="text-3xl font-bold">Product Categories</h1>
             <p className="text-muted-foreground">Manage product categories</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) {
-              setEditingCategory(null);
-              form.reset();
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" /> Add Category</Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(categories)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) {
+                setEditingCategory(null);
+                form.reset();
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button><Plus className="mr-2 h-4 w-4" /> Add Category</Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{editingCategory ? "Edit Category" : "Add New Category"}</DialogTitle>
@@ -199,7 +212,8 @@ const AdminProductCategoriesPage = () => {
                 </Button>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         <Card>

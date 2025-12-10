@@ -14,6 +14,10 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { galleryExcelConfig } from "@/lib/excelConfigs";
 
 const gallerySchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -40,6 +44,8 @@ export default function AdminGalleryPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(galleryExcelConfig);
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
@@ -150,11 +156,18 @@ export default function AdminGalleryPage() {
             <h1 className="text-3xl font-bold">Gallery Management</h1>
             <p className="text-muted-foreground">Manage gallery images and media</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingItem(null); form.reset(); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Image
+          <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredItems)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { setEditingItem(null); form.reset(); }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Image
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -232,7 +245,8 @@ export default function AdminGalleryPage() {
                 </form>
               </Form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         <Card>

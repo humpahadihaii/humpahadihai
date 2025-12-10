@@ -11,9 +11,12 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Upload, GripVertical, ExternalLink, Link } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, ExternalLink, Link } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import Papa from "papaparse";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { footerLinksExcelConfig } from "@/lib/excelConfigs";
 
 const footerLinkSchema = z.object({
   label: z.string().min(1, "Label required"),
@@ -40,6 +43,8 @@ export default function AdminFooterLinksPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<FooterLink | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(footerLinksExcelConfig);
 
   const form = useForm<FooterLinkFormData>({
     resolver: zodResolver(footerLinkSchema),
@@ -132,44 +137,6 @@ export default function AdminFooterLinksPage() {
     }
   };
 
-  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        const rows = results.data as Record<string, string>[];
-        const validRows = rows.filter(row => row.label);
-        
-        if (validRows.length === 0) {
-          toast.error("No valid rows found in CSV");
-          return;
-        }
-
-        const linksToInsert = validRows.map((row, index) => ({
-          label: row.label,
-          page_slug: row.page_slug || null,
-          url: row.url || null,
-          is_external: row.is_external === "true",
-          display_order: parseInt(row.display_order) || (links.length + index),
-        }));
-
-        const { error } = await supabase.from("cms_footer_links").insert(linksToInsert);
-
-        if (error) {
-          toast.error(`Import failed: ${error.message}`);
-        } else {
-          toast.success(`Imported ${linksToInsert.length} footer links`);
-          fetchLinks();
-        }
-      },
-      error: () => {
-        toast.error("Failed to parse CSV file");
-      },
-    });
-  };
-
   const isExternal = form.watch("is_external");
 
   return (
@@ -181,20 +148,12 @@ export default function AdminFooterLinksPage() {
             <p className="text-muted-foreground">Manage footer navigation links</p>
           </div>
           <div className="flex gap-2">
-            <label className="cursor-pointer">
-              <Input
-                type="file"
-                accept=".csv"
-                onChange={handleCSVImport}
-                className="hidden"
-              />
-              <Button variant="outline" asChild>
-                <span>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import CSV
-                </span>
-              </Button>
-            </label>
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(links)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => { 

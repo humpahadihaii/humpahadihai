@@ -15,6 +15,10 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { festivalsExcelConfig } from "@/lib/excelConfigs";
 
 const festivalSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -57,6 +61,8 @@ export default function AdminFestivalsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFestival, setEditingFestival] = useState<Festival | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(festivalsExcelConfig);
 
   const form = useForm<FestivalFormData>({
     resolver: zodResolver(festivalSchema),
@@ -161,11 +167,18 @@ export default function AdminFestivalsPage() {
             <h1 className="text-3xl font-bold">Festivals Management</h1>
             <p className="text-muted-foreground">Manage cultural festivals and celebrations</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingFestival(null); form.reset(); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Festival
+          <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredFestivals)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { setEditingFestival(null); form.reset(); }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Festival
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -271,6 +284,7 @@ export default function AdminFestivalsPage() {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card>

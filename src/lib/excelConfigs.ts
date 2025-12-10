@@ -450,3 +450,22 @@ export const featuredHighlightsExcelConfig: ExcelConfig = {
     { key: "status", header: "Status" },
   ],
 };
+
+// Aliases for compatibility
+export const hotelsExcelConfig = districtHotelsExcelConfig;
+export const highlightsExcelConfig = {
+  tableName: "district_highlights",
+  sheetName: "DistrictHighlights",
+  columns: [
+    { key: "id", header: "ID" },
+    { key: "district_id", header: "District ID" },
+    { key: "name", header: "Name", required: true },
+    { key: "type", header: "Type", required: true },
+    { key: "description", header: "Description" },
+    { key: "image_url", header: "Image URL" },
+    { key: "status", header: "Status" },
+  ],
+  lookups: [
+    { key: "district_id", nameKey: "district_name", table: "districts", nameField: "name" },
+  ],
+} as ExcelConfig;

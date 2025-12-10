@@ -16,6 +16,10 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { highlightsExcelConfig } from "@/lib/excelConfigs";
 
 const highlightSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -54,6 +58,8 @@ export default function AdminHighlightsPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingHighlight, setEditingHighlight] = useState<Highlight | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(highlightsExcelConfig);
 
   const form = useForm<HighlightFormData>({
     resolver: zodResolver(highlightSchema),
@@ -174,11 +180,18 @@ export default function AdminHighlightsPage() {
             <h1 className="text-3xl font-bold">District Highlights</h1>
             <p className="text-muted-foreground">Manage attractions, food, festivals for districts</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingHighlight(null); form.reset(); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Highlight
+          <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredHighlights)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { setEditingHighlight(null); form.reset(); }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Highlight
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -308,6 +321,7 @@ export default function AdminHighlightsPage() {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card>
