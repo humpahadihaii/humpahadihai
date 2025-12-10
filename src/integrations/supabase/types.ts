@@ -300,6 +300,42 @@ export type Database = {
           },
         ]
       }
+      bookings_summary: {
+        Row: {
+          booking_type: string | null
+          created_at: string
+          device: string | null
+          id: string
+          listing_id: string | null
+          package_id: string | null
+          product_id: string | null
+          referrer: string | null
+          url: string | null
+        }
+        Insert: {
+          booking_type?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          listing_id?: string | null
+          package_id?: string | null
+          product_id?: string | null
+          referrer?: string | null
+          url?: string | null
+        }
+        Update: {
+          booking_type?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          listing_id?: string | null
+          package_id?: string | null
+          product_id?: string | null
+          referrer?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       cms_content_sections: {
         Row: {
           body: string | null
@@ -1316,6 +1352,27 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       local_product_categories: {
         Row: {
           created_at: string
@@ -1542,6 +1599,27 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           page_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      page_views: {
+        Row: {
+          count: number
+          id: string
+          page: string
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          id?: string
+          page: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          id?: string
+          page?: string
           updated_at?: string
         }
         Relationships: []
@@ -1796,6 +1874,39 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      site_visits: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string
+          device: string | null
+          id: string
+          ip_hash: string | null
+          referrer: string | null
+          url: string
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_hash?: string | null
+          referrer?: string | null
+          url: string
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_hash?: string | null
+          referrer?: string | null
+          url?: string
         }
         Relationships: []
       }

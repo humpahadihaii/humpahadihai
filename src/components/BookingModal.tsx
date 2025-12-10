@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 import { analytics } from "@/lib/analytics";
+import { trackBookingSummary } from "@/lib/internalTracker";
 
 type BookingType = "package" | "listing" | "product";
 
@@ -190,7 +191,7 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
 
       if (error) throw error;
 
-      // Track booking event for analytics
+      // Track booking event for GA analytics
       analytics.booking({
         booking_id: bookingResult?.id || 'unknown',
         booking_type: type,
@@ -201,6 +202,15 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
         start_date: formData.startDate ? format(formData.startDate, "yyyy-MM-dd") : undefined,
         end_date: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : undefined,
         user_logged_in: !!user,
+      });
+
+      // Track with internal analytics (privacy-friendly)
+      trackBookingSummary({
+        packageId: type === "package" ? item.id : undefined,
+        listingId: type === "listing" ? item.id : undefined,
+        productId: type === "product" ? item.id : undefined,
+        bookingType: type,
+        url: window.location.href,
       });
 
       setIsSuccess(true);
