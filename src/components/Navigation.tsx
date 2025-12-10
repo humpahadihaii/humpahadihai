@@ -114,9 +114,9 @@ const Navigation = () => {
             onClick={handleLogoClick}
           >
             <img src={logo} alt={`${siteName} Logo`} width="56" height="56" className="h-14 w-14 rounded-full object-cover" />
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-primary">{siteName}</h1>
-              <p className="text-xs text-muted-foreground">Uttarakhand Heritage</p>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-primary">{siteName}</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Uttarakhand Heritage</p>
             </div>
           </Link>
 
