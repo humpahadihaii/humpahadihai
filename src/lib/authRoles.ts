@@ -20,10 +20,14 @@ export type AppRole =
   | "developer"
   | "user";
 
-// Roles that grant access to the admin panel
+// Roles that grant FULL access to the admin panel (restricted to top-tier admins only)
 export const ADMIN_PANEL_ROLES: AppRole[] = [
   "super_admin",
   "admin",
+];
+
+// Roles that can access specific admin sections (but not full admin panel)
+export const STAFF_ROLES: AppRole[] = [
   "content_manager",
   "content_editor",
   "editor",
@@ -122,6 +126,7 @@ export interface AuthRedirectContext {
 /**
  * Determine where to redirect after login based on roles and status.
  * This is the SINGLE SOURCE OF TRUTH for post-login routing.
+ * ONLY super_admin and admin roles go to admin panel.
  */
 export function routeAfterLogin(ctx: AuthRedirectContext): string {
   const { roles, isSuperAdmin: superAdmin, profileStatus } = ctx;
@@ -131,16 +136,12 @@ export function routeAfterLogin(ctx: AuthRedirectContext): string {
     return "/admin";
   }
 
-  // 2. Any admin-panel role → admin dashboard (or role-specific route)
-  if (hasAdminPanelAccess(roles)) {
-    const highestRole = getHighestPriorityRole(roles);
-    if (highestRole && ROLE_DEFAULT_ROUTES[highestRole]) {
-      return ROLE_DEFAULT_ROUTES[highestRole]!;
-    }
+  // 2. ADMIN role only → admin dashboard
+  if (roles.includes("admin")) {
     return "/admin";
   }
 
-  // 3. User has 'user' role only (no admin access) → home
+  // 3. Any other role (staff, user, etc.) → home page (no admin access)
   if (hasAnyRole(roles)) {
     return "/";
   }
