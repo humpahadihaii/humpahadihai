@@ -22,6 +22,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { districtsExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const districtSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -96,6 +97,7 @@ export default function AdminDistrictsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDistrict, setEditingDistrict] = useState<District | null>(null);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
   
   // Census Import State
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -191,13 +193,14 @@ export default function AdminDistrictsPage() {
         });
       } else {
         toast.success("District updated successfully");
+        logUpdate("district", editingDistrict.id, data.name);
         fetchDistricts();
         setDialogOpen(false);
         setEditingDistrict(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("districts").insert(districtData);
+      const { data: insertedData, error } = await supabase.from("districts").insert(districtData).select().single();
 
       if (error) {
         console.error("District insert error:", error);
@@ -206,6 +209,7 @@ export default function AdminDistrictsPage() {
         });
       } else {
         toast.success("District created successfully");
+        if (insertedData) logCreate("district", insertedData.id, data.name);
         fetchDistricts();
         setDialogOpen(false);
         form.reset();
@@ -229,6 +233,7 @@ export default function AdminDistrictsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this district?")) return;
 
+    const district = districts.find(d => d.id === id);
     const { error } = await supabase.from("districts").delete().eq("id", id);
 
     if (error) {
@@ -238,6 +243,7 @@ export default function AdminDistrictsPage() {
       });
     } else {
       toast.success("District deleted successfully");
+      logDelete("district", id, district?.name);
       fetchDistricts();
     }
   };
