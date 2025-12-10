@@ -44,6 +44,7 @@ export const useAuth = () => {
     profile: UserProfile | null;
     roles: AppRole[];
   }> => {
+    console.log("[Auth] Loading profile and roles for user:", userId);
     try {
       const [profileResult, rolesResult] = await Promise.all([
         supabase
@@ -60,28 +61,32 @@ export const useAuth = () => {
       const profile = profileResult.error ? null : (profileResult.data as UserProfile);
       const roles = rolesResult.error ? [] : normalizeRoles(rolesResult.data?.map((r) => r.role) || []);
 
+      console.log("[Auth] Loaded profile:", profile?.email, "roles:", roles);
       return { profile, roles };
     } catch (error) {
-      console.error("Error loading profile/roles:", error);
+      console.error("[Auth] Error loading profile/roles:", error);
       return { profile: null, roles: [] };
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
+    let initComplete = false;
 
     // Initialize auth on mount
     const initAuth = async () => {
+      console.log("[Auth] Starting initialization...");
       try {
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error("Error getting session:", error);
+          console.error("[Auth] Error getting session:", error);
         }
 
         if (!mounted) return;
 
         const session = data?.session ?? null;
+        console.log("[Auth] Session check complete, user:", session?.user?.email || "none");
 
         // CRITICAL: Set isAuthInitialized to TRUE immediately after session check
         // This prevents infinite loading on admin routes
@@ -94,6 +99,7 @@ export const useAuth = () => {
             isAuthInitialized: true,
             isRolesLoading: true,
           }));
+          initComplete = true;
 
           // Load profile/roles without blocking
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
@@ -114,18 +120,19 @@ export const useAuth = () => {
             isAuthInitialized: true,
             isRolesLoading: false,
           });
+          initComplete = true;
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
-        if (mounted) {
-          setAuthState({
-            user: null,
-            session: null,
-            profile: null,
-            roles: [],
-            isAuthInitialized: true, // ALWAYS set to true, even on error
+        console.error("[Auth] Error initializing auth:", error);
+      } finally {
+        // GUARANTEE: Always set initialized even if something went wrong
+        if (mounted && !initComplete) {
+          console.log("[Auth] Setting initialized in finally block");
+          setAuthState(prev => ({
+            ...prev,
+            isAuthInitialized: true,
             isRolesLoading: false,
-          });
+          }));
         }
       }
     };
@@ -137,9 +144,10 @@ export const useAuth = () => {
       (event, newSession) => {
         if (!mounted) return;
 
-        console.log("Auth event:", event);
+        console.log("[Auth] Auth event:", event, "user:", newSession?.user?.email || "none");
 
         if (event === "SIGNED_OUT" || !newSession) {
+          console.log("[Auth] User signed out, clearing state");
           setAuthState({
             user: null,
             session: null,
@@ -154,6 +162,7 @@ export const useAuth = () => {
         // For SIGNED_IN or TOKEN_REFRESHED, update session immediately then load data
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
           if (newSession?.user?.id) {
+            console.log("[Auth] Updating session for", event);
             // Update session state immediately
             setAuthState(prev => ({
               ...prev,
@@ -205,15 +214,18 @@ export const useAuth = () => {
 
   const refetch = useCallback(async () => {
     if (authState.session?.user?.id) {
+      console.log("[Auth] Refetching profile and roles");
+      setAuthState(prev => ({ ...prev, isRolesLoading: true }));
       const { profile, roles } = await loadProfileAndRoles(authState.session.user.id);
       setAuthState((prev) => ({ ...prev, profile, roles, isRolesLoading: false }));
     }
   }, [authState.session, loadProfileAndRoles]);
 
-  // Sign out function
+  // Sign out function - guaranteed to complete and navigate
   const signOut = useCallback(async () => {
+    console.log("[Auth] Starting sign out...");
     try {
-      // Clear state first
+      // Clear state first to prevent any UI issues
       setAuthState({
         user: null,
         session: null,
@@ -225,8 +237,10 @@ export const useAuth = () => {
       
       // Then sign out from Supabase
       await supabase.auth.signOut({ scope: 'local' });
+      console.log("[Auth] Sign out complete");
     } catch (e) {
-      console.error("Sign out error:", e);
+      console.error("[Auth] Sign out error:", e);
+      // Even on error, state is already cleared so user can proceed
     }
   }, []);
 

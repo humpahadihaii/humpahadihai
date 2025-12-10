@@ -139,9 +139,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  // Show skeleton only if auth is not initialized AND we don't have a session yet
-  // This prevents infinite loading
+  // Show skeleton only if auth is not initialized
+  // This prevents infinite loading - we ALWAYS have isAuthInitialized = true after initial check
   if (!isAuthInitialized) {
+    console.log("[AdminLayout] Auth not initialized, showing skeleton");
     return (
       <div className="flex h-screen w-full overflow-hidden">
         <aside className="hidden border-r bg-background md:flex md:flex-col w-64">
@@ -163,8 +164,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // If no session after initialization, redirect to login
   if (!session) {
+    console.log("[AdminLayout] No session, redirecting to login");
     return <Navigate to="/login" replace />;
   }
+  
+  // Log access for debugging
+  console.log("[AdminLayout] Rendering for user:", user?.email, "roles:", roles);
 
   // Filter navigation items based on user permissions (use all roles for union access)
   // If roles is empty but user is authenticated, show at least dashboard
