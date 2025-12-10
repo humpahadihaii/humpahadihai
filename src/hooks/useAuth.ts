@@ -86,7 +86,7 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Update auth state with user data
+  // Update auth state with user data - always sets isAuthInitialized to true
   const updateAuthState = useCallback(async (session: Session | null) => {
     if (!session?.user) {
       setAuthState({
@@ -101,21 +101,35 @@ export const useAuth = () => {
       return;
     }
 
-    // Fetch profile and roles in parallel
-    const [profile, roles] = await Promise.all([
-      fetchProfile(session.user.id),
-      fetchUserRoles(session.user.id),
-    ]);
+    try {
+      // Fetch profile and roles in parallel
+      const [profile, roles] = await Promise.all([
+        fetchProfile(session.user.id),
+        fetchUserRoles(session.user.id),
+      ]);
 
-    setAuthState({
-      user: session.user,
-      session,
-      profile,
-      roles,
-      isLoading: false,
-      isAuthInitialized: true,
-      isAuthenticated: true,
-    });
+      setAuthState({
+        user: session.user,
+        session,
+        profile,
+        roles,
+        isLoading: false,
+        isAuthInitialized: true,
+        isAuthenticated: true,
+      });
+    } catch (error) {
+      console.error("Error updating auth state:", error);
+      // Even on error, set initialized to true to prevent infinite loading
+      setAuthState({
+        user: session.user,
+        session,
+        profile: null,
+        roles: [],
+        isLoading: false,
+        isAuthInitialized: true,
+        isAuthenticated: true,
+      });
+    }
   }, [fetchProfile, fetchUserRoles]);
 
   useEffect(() => {
@@ -124,13 +138,19 @@ export const useAuth = () => {
     // Get initial session
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+        }
+        
         if (mounted) {
           await updateAuthState(session);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
         if (mounted) {
+          // Always mark as initialized even on error
           setAuthState(prev => ({
             ...prev,
             isLoading: false,
@@ -142,13 +162,15 @@ export const useAuth = () => {
 
     initializeAuth();
 
-    // Listen for auth changes - use synchronous state update only
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
         
-        // Only handle sign-out synchronously to prevent loops
+        console.log("Auth state change:", event);
+        
         if (event === 'SIGNED_OUT') {
+          // Handle sign-out synchronously
           setAuthState({
             user: null,
             session: null,
@@ -158,13 +180,26 @@ export const useAuth = () => {
             isAuthInitialized: true,
             isAuthenticated: false,
           });
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Defer data fetching to avoid deadlock
-          setTimeout(() => {
-            if (mounted) {
-              updateAuthState(session);
-            }
-          }, 0);
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+          // Defer data fetching to avoid deadlock, but keep initialized true
+          if (session) {
+            // Mark as loading but keep initialized true to prevent blank screen
+            setAuthState(prev => ({
+              ...prev,
+              user: session.user,
+              session,
+              isAuthenticated: true,
+              isLoading: true,
+              isAuthInitialized: true, // Keep this true!
+            }));
+            
+            // Fetch additional data
+            setTimeout(() => {
+              if (mounted) {
+                updateAuthState(session);
+              }
+            }, 0);
+          }
         }
       }
     );
