@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MapPin, Star, Check, Search, ArrowRight } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { MapPin, Star, Check, Search, ArrowRight, List, Map as MapIcon, Filter, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -59,11 +60,23 @@ const CATEGORIES = [
   { value: "taxi_service", label: "Taxi Services" },
 ];
 
+const SORT_OPTIONS = [
+  { value: "recommended", label: "Recommended" },
+  { value: "price_low", label: "Price: Low to High" },
+  { value: "price_high", label: "Price: High to Low" },
+  { value: "rating", label: "Rating: High to Low" },
+];
+
 export default function MarketplacePage() {
   const { data: pageSettings } = usePageSettings("marketplace");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("recommended");
+  const [minRating, setMinRating] = useState(0);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [showFilters, setShowFilters] = useState(false);
   const [enquiryListing, setEnquiryListing] = useState<TourismListing | null>(null);
   const [enquiryForm, setEnquiryForm] = useState({
     full_name: "",
@@ -129,15 +142,40 @@ export default function MarketplacePage() {
     },
   });
 
-  const filteredListings = listings?.filter(listing => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      listing.title.toLowerCase().includes(query) ||
-      listing.provider?.name.toLowerCase().includes(query) ||
-      listing.district?.name.toLowerCase().includes(query)
-    );
-  });
+  const filteredListings = listings
+    ?.filter(listing => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          listing.title.toLowerCase().includes(query) ||
+          listing.provider?.name.toLowerCase().includes(query) ||
+          listing.district?.name.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+      // Rating filter
+      if (minRating > 0 && (listing.provider?.rating || 0) < minRating) return false;
+      // Price filter
+      if (listing.base_price) {
+        if (listing.base_price < priceRange[0] || listing.base_price > priceRange[1]) return false;
+      }
+      return true;
+    })
+    ?.sort((a, b) => {
+      switch (sortBy) {
+        case "price_low":
+          return (a.base_price || 0) - (b.base_price || 0);
+        case "price_high":
+          return (b.base_price || 0) - (a.base_price || 0);
+        case "rating":
+          return (b.provider?.rating || 0) - (a.provider?.rating || 0);
+        case "recommended":
+        default:
+          // Featured first, then by rating
+          if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+          return (b.provider?.rating || 0) - (a.provider?.rating || 0);
+      }
+    });
 
   const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,22 +264,23 @@ export default function MarketplacePage() {
           </div>
         </section>
 
-        {/* Filters */}
-        <section className="py-6 border-b bg-card sticky top-0 z-10">
+        {/* Filters Bar */}
+        <section className="py-4 border-b bg-card sticky top-0 z-10">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search listings or providers..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex-1 max-w-xs">
+            <div className="flex flex-col gap-4">
+              {/* Main filter row */}
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search listings or providers..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
                 <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full md:w-44">
                     <SelectValue placeholder="All Districts" />
                   </SelectTrigger>
                   <SelectContent>
@@ -253,10 +292,8 @@ export default function MarketplacePage() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="flex-1 max-w-xs">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full md:w-44">
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -267,7 +304,90 @@ export default function MarketplacePage() {
                     ))}
                   </SelectContent>
                 </Select>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full md:w-44">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={showFilters ? "bg-primary/10" : ""}
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                  </Button>
+                  <div className="flex border rounded-md">
+                    <Button
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      size="icon"
+                      onClick={() => setViewMode("list")}
+                      className="rounded-r-none"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "map" ? "default" : "ghost"}
+                      size="icon"
+                      onClick={() => setViewMode("map")}
+                      className="rounded-l-none"
+                    >
+                      <MapIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
+              
+              {/* Advanced filters row */}
+              {showFilters && (
+                <div className="flex flex-col md:flex-row gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <Label className="text-sm mb-2 block">Minimum Rating</Label>
+                    <Select value={String(minRating)} onValueChange={(v) => setMinRating(Number(v))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">Any Rating</SelectItem>
+                        <SelectItem value="3">3+ Stars</SelectItem>
+                        <SelectItem value="4">4+ Stars</SelectItem>
+                        <SelectItem value="4.5">4.5+ Stars</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-sm mb-2 block">Price Range: ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}</Label>
+                    <Slider
+                      min={0}
+                      max={50000}
+                      step={500}
+                      value={priceRange}
+                      onValueChange={(v) => setPriceRange(v as [number, number])}
+                      className="mt-3"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setMinRating(0);
+                        setPriceRange([0, 50000]);
+                      }}
+                    >
+                      Reset Filters
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -306,16 +426,34 @@ export default function MarketplacePage() {
           </section>
         )}
 
-        {/* Listings Grid */}
+        {/* Listings Section */}
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">
                 {filteredListings?.length || 0} Listings Found
               </h2>
+              <span className="text-sm text-muted-foreground">
+                {viewMode === "map" ? "Map View" : "List View"}
+              </span>
             </div>
 
-            {isLoading ? (
+            {viewMode === "map" ? (
+              /* Map View Placeholder - Would integrate with Leaflet/Mapbox */
+              <div className="relative rounded-lg overflow-hidden border bg-muted/20" style={{ height: "500px" }}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                  <MapIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Map View Coming Soon</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Interactive map showing all listings with pins. Click on a pin to view details.
+                  </p>
+                  <Button variant="outline" className="mt-4" onClick={() => setViewMode("list")}>
+                    <List className="h-4 w-4 mr-2" />
+                    Switch to List View
+                  </Button>
+                </div>
+              </div>
+            ) : isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
                   <Card key={i}>

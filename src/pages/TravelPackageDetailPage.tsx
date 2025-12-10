@@ -4,14 +4,29 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink } from "lucide-react";
 import { Helmet } from "react-helmet";
+
+interface TourismListing {
+  id: string;
+  title: string;
+  short_description: string | null;
+  category: string;
+  base_price: number | null;
+  price_unit: string | null;
+  image_url: string | null;
+  provider: {
+    name: string;
+    is_verified: boolean;
+    rating: number | null;
+  } | null;
+}
 
 const TravelPackageDetailPage = () => {
   const { slug } = useParams();
@@ -42,6 +57,40 @@ const TravelPackageDetailPage = () => {
       return data;
     },
     enabled: !!slug,
+  });
+
+  // Fetch related marketplace listings based on region
+  const { data: relatedListings = [] } = useQuery({
+    queryKey: ["related-listings", pkg?.region],
+    queryFn: async () => {
+      if (!pkg?.region) return [];
+      
+      // Get districts matching the region
+      const { data: districts } = await supabase
+        .from("districts")
+        .select("id")
+        .eq("region", pkg.region);
+      
+      if (!districts || districts.length === 0) return [];
+      
+      const districtIds = districts.map(d => d.id);
+      
+      const { data, error } = await supabase
+        .from("tourism_listings")
+        .select(`
+          id, title, short_description, category, base_price, price_unit, image_url,
+          provider:tourism_providers(name, is_verified, rating)
+        `)
+        .eq("is_active", true)
+        .in("category", ["stay", "local_experience"])
+        .in("district_id", districtIds)
+        .order("is_featured", { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      return data as TourismListing[];
+    },
+    enabled: !!pkg?.region,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -247,6 +296,71 @@ const TravelPackageDetailPage = () => {
               </Card>
             )}
           </div>
+
+          {/* Related Marketplace Listings */}
+          {relatedListings.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Home className="h-5 w-5 text-primary" />
+                  Local Stays & Experiences in {pkg.region}
+                </h2>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/marketplace?region=${pkg.region}`}>
+                    View All
+                    <ExternalLink className="h-3 w-3 ml-1" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {relatedListings.map((listing) => (
+                  <Card key={listing.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="relative h-32 bg-muted">
+                      {listing.image_url ? (
+                        <img
+                          src={listing.image_url}
+                          alt={listing.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <Home className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="p-3">
+                      <h3 className="font-medium text-sm line-clamp-1">{listing.title}</h3>
+                      {listing.provider && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <span>{listing.provider.name}</span>
+                          {listing.provider.rating && (
+                            <span className="flex items-center gap-0.5">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              {listing.provider.rating}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {listing.base_price && (
+                        <p className="text-sm font-semibold text-primary mt-1">
+                          ₹{listing.base_price.toLocaleString()}
+                          {listing.price_unit && (
+                            <span className="text-xs font-normal text-muted-foreground"> / {listing.price_unit}</span>
+                          )}
+                        </p>
+                      )}
+                    </CardContent>
+                    <CardFooter className="p-3 pt-0">
+                      <Button variant="outline" size="sm" className="w-full" asChild>
+                        <Link to={`/marketplace`}>View Details</Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Price & CTA */}
           <Card className="sticky bottom-4 bg-background/95 backdrop-blur-sm">
