@@ -121,7 +121,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const { role, roles, user, isAdmin, isAuthInitialized, isLoading } = useAuth();
+  const { role, roles, user, isAdmin, isAuthInitialized } = useAuth();
 
   const handleSignOut = async () => {
     if (signingOut) return; // Prevent double-click
@@ -139,8 +139,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  // Show loading skeleton while auth is initializing
-  if (!isAuthInitialized || isLoading) {
+  // Only show skeleton while auth is initially loading (not yet initialized)
+  // Once initialized, show the admin panel even if roles are still loading
+  if (!isAuthInitialized) {
     return (
       <div className="flex h-screen w-full overflow-hidden">
         <aside className="hidden border-r bg-background md:flex md:flex-col w-64">
