@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { RBACRole, isSuperAdmin, canAccessSection } from "@/lib/rbac";
 
 interface AdminDashboardRouteProps {
   children: React.ReactNode;
@@ -8,19 +9,19 @@ interface AdminDashboardRouteProps {
 /**
  * AdminDashboardRoute - Stricter guard for /admin (Dashboard) route
  * 
- * Only allows SUPER_ADMIN and ADMIN roles.
+ * Only allows SUPER_ADMIN, ADMIN, and ANALYTICS_VIEWER roles.
  * All other roles are redirected to their appropriate section.
  */
 const AdminDashboardRoute = ({ children }: AdminDashboardRouteProps) => {
   const { 
     isAuthInitialized, 
     session, 
-    isSuperAdmin, 
-    canAccessAdminPanel, 
-    isPending,
     profile,
-    roles 
+    roles: authRoles 
   } = useAuth();
+
+  // Convert to RBACRole array
+  const roles = (authRoles || []) as RBACRole[];
 
   // 1. Still initializing - show spinner
   if (!isAuthInitialized) {
@@ -41,28 +42,58 @@ const AdminDashboardRoute = ({ children }: AdminDashboardRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // 4. Super Admin or Admin → allow dashboard access
-  if (isSuperAdmin || roles.includes("admin")) {
-    return <>{children}</>;
-  }
-
-  // 5. User has admin panel access but not super_admin/admin → redirect to content sections
-  if (canAccessAdminPanel) {
-    return <Navigate to="/admin/content-sections" replace />;
-  }
-
-  // 6. User has roles but no admin access → send to home
-  if (roles.length > 0 && !canAccessAdminPanel) {
-    return <Navigate to="/" replace />;
-  }
-
-  // 7. No roles (pending) → pending approval page
-  if (isPending) {
+  // 4. No roles (pending) → pending approval
+  if (roles.length === 0) {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // 8. Fallback: home
-  return <Navigate to="/" replace />;
+  // 5. Check access using RBAC system - /admin is in the allowed list for specific roles
+  if (canAccessSection(roles, "/admin")) {
+    return <>{children}</>;
+  }
+
+  // 6. Has other admin access → redirect to content sections
+  if (roles.some(r => ["content_manager", "content_editor", "editor"].includes(r))) {
+    return <Navigate to="/admin/content-sections" replace />;
+  }
+
+  // 7. Moderator/Reviewer → community submissions
+  if (roles.some(r => ["moderator", "reviewer"].includes(r))) {
+    return <Navigate to="/admin/community-submissions" replace />;
+  }
+
+  // 8. Author → stories
+  if (roles.includes("author")) {
+    return <Navigate to="/admin/stories" replace />;
+  }
+
+  // 9. Media Manager → gallery
+  if (roles.includes("media_manager")) {
+    return <Navigate to="/admin/gallery" replace />;
+  }
+
+  // 10. SEO Manager → pages
+  if (roles.includes("seo_manager")) {
+    return <Navigate to="/admin/pages" replace />;
+  }
+
+  // 11. Support Agent → submissions
+  if (roles.includes("support_agent")) {
+    return <Navigate to="/admin/submissions" replace />;
+  }
+
+  // 12. Developer → site settings
+  if (roles.includes("developer")) {
+    return <Navigate to="/admin/site-settings" replace />;
+  }
+
+  // 13. No admin access → home
+  if (!roles.some(r => r !== "user")) {
+    return <Navigate to="/" replace />;
+  }
+
+  // 14. Fallback: redirect to content sections for any admin panel role
+  return <Navigate to="/admin/content-sections" replace />;
 };
 
 export default AdminDashboardRoute;

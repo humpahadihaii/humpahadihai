@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  AppRole,
+  RBACRole,
   normalizeRoles,
   isSuperAdmin as checkIsSuperAdmin,
   hasAdminPanelAccess,
-  hasAnyRole as checkHasAnyRole,
   getHighestPriorityRole,
-  isPendingApproval,
-} from "@/lib/authRoles";
+  isAdmin as checkIsAdmin,
+  canAccessSection,
+} from "@/lib/rbac";
 
 export type UserStatus = "pending" | "active" | "disabled";
 
@@ -18,14 +18,14 @@ interface UserProfile {
   email: string;
   full_name: string | null;
   status: UserStatus | null;
-  role: AppRole | null;
+  role: RBACRole | null;
 }
 
 interface AuthState {
   user: User | null;
   session: Session | null;
   profile: UserProfile | null;
-  roles: AppRole[];
+  roles: RBACRole[];
   isAuthInitialized: boolean;
 }
 
@@ -46,7 +46,7 @@ export const useAuth = () => {
   // 3. All useCallback hooks
   const loadProfileAndRoles = useCallback(async (userId: string): Promise<{
     profile: UserProfile | null;
-    roles: AppRole[];
+    roles: RBACRole[];
   }> => {
     try {
       const [profileResult, rolesResult] = await Promise.all([
@@ -100,16 +100,22 @@ export const useAuth = () => {
   // 4. All useMemo hooks - derived state
   const isSuperAdmin = useMemo(() => checkIsSuperAdmin(authState.roles), [authState.roles]);
   const canAccessAdminPanel = useMemo(() => hasAdminPanelAccess(authState.roles), [authState.roles]);
-  const hasRoles = useMemo(() => checkHasAnyRole(authState.roles), [authState.roles]);
+  const hasRoles = useMemo(() => authState.roles.length > 0, [authState.roles]);
   const isAuthenticated = useMemo(() => !!authState.session, [authState.session]);
-  const isPending = useMemo(() => isPendingApproval(authState.roles, authState.profile?.status), [authState.roles, authState.profile?.status]);
+  const isPending = useMemo(() => {
+    // If user has any roles, they are not pending
+    if (authState.roles.length > 0) return false;
+    // No roles = pending
+    return true;
+  }, [authState.roles]);
   const isApproved = useMemo(() => !isPending && (isSuperAdmin || canAccessAdminPanel || hasRoles), [isPending, isSuperAdmin, canAccessAdminPanel, hasRoles]);
-  const isAdmin = useMemo(() => authState.roles.includes("super_admin") || authState.roles.includes("admin"), [authState.roles]);
-  const role = useMemo((): AppRole | null => getHighestPriorityRole(authState.roles), [authState.roles]);
+  const isAdmin = useMemo(() => checkIsAdmin(authState.roles), [authState.roles]);
+  const role = useMemo((): RBACRole | null => getHighestPriorityRole(authState.roles), [authState.roles]);
 
   // Role checking utilities
-  const hasRole = useCallback((requiredRole: AppRole): boolean => authState.roles.includes(requiredRole), [authState.roles]);
-  const hasAnyRole = useCallback((requiredRoles: AppRole[]): boolean => authState.roles.some((r) => requiredRoles.includes(r)), [authState.roles]);
+  const hasRole = useCallback((requiredRole: RBACRole): boolean => authState.roles.includes(requiredRole), [authState.roles]);
+  const hasAnyRole = useCallback((requiredRoles: RBACRole[]): boolean => authState.roles.some((r) => requiredRoles.includes(r)), [authState.roles]);
+  const canAccess = useCallback((section: string): boolean => canAccessSection(authState.roles, section), [authState.roles]);
 
   // 5. useEffect for initialization
   useEffect(() => {
@@ -133,7 +139,7 @@ export const useAuth = () => {
         const session = data?.session ?? null;
 
         if (session?.user?.id) {
-          // CRITICAL: Load profile/roles FIRST before marking initialized
+          // Load profile/roles FIRST before marking initialized
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
           
           if (mountedRef.current) {
@@ -183,7 +189,6 @@ export const useAuth = () => {
 
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           if (newSession?.user?.id) {
-            // CRITICAL: Load roles BEFORE setting state to prevent race condition
             const userId = newSession.user.id;
             
             // Load profile/roles first
@@ -236,11 +241,19 @@ export const useAuth = () => {
     isPending,
     hasRole,
     hasAnyRole,
+    canAccess,
     refetch,
     signOut,
   };
 };
 
-// Re-export for convenience
-export { normalizeRoles, isSuperAdmin, hasAdminPanelAccess, routeAfterLogin, getHighestPriorityRole, isPendingApproval } from "@/lib/authRoles";
-export type { AppRole } from "@/lib/authRoles";
+// Re-export types from RBAC
+export type { RBACRole } from "@/lib/rbac";
+export { 
+  normalizeRoles, 
+  isSuperAdmin, 
+  hasAdminPanelAccess, 
+  getHighestPriorityRole,
+  canAccessSection,
+  routeAfterLogin,
+} from "@/lib/rbac";
