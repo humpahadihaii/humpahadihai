@@ -1784,6 +1784,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           is_featured: boolean
+          is_sample: boolean
           price_unit: string | null
           provider_id: string
           short_description: string | null
@@ -1801,6 +1802,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           is_featured?: boolean
+          is_sample?: boolean
           price_unit?: string | null
           provider_id: string
           short_description?: string | null
@@ -1818,6 +1820,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           is_featured?: boolean
+          is_sample?: boolean
           price_unit?: string | null
           provider_id?: string
           short_description?: string | null
@@ -1852,10 +1855,12 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_sample: boolean
           is_verified: boolean
           name: string
           phone: string | null
           rating: number | null
+          source: string
           type: string
           updated_at: string
           village_id: string | null
@@ -1871,10 +1876,12 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_sample?: boolean
           is_verified?: boolean
           name: string
           phone?: string | null
           rating?: number | null
+          source?: string
           type?: string
           updated_at?: string
           village_id?: string | null
@@ -1890,10 +1897,12 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_sample?: boolean
           is_verified?: boolean
           name?: string
           phone?: string | null
           rating?: number | null
+          source?: string
           type?: string
           updated_at?: string
           village_id?: string | null
