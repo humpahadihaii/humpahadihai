@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AnalyticsSettingsCard } from "@/components/admin/AnalyticsSettingsCard";
 import { GAEventsDiagnostics } from "@/components/admin/GAEventsDiagnostics";
-import { BarChart3, Eye, Heart, MapPin, TrendingUp, ShoppingCart, Calendar, Users, Download } from "lucide-react";
+import { InternalAnalyticsDashboard } from "@/components/admin/InternalAnalyticsDashboard";
+import { BarChart3, Eye, Heart, MapPin, TrendingUp, ShoppingCart, Calendar, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { format, subDays, startOfDay, endOfDay } from "date-fns";
+import { format, subDays } from "date-fns";
 
 interface AnalyticsSummary {
   totalDistricts: number;
@@ -162,13 +163,18 @@ export default function AdminAnalyticsPage() {
           </Button>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+        <Tabs defaultValue="site-analytics" className="space-y-4">
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="site-analytics">Site Analytics</TabsTrigger>
+            <TabsTrigger value="overview">Content Overview</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="settings">GA Settings</TabsTrigger>
+            <TabsTrigger value="ga-settings">GA Settings</TabsTrigger>
             <TabsTrigger value="diagnostics">Event Diagnostics</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="site-analytics">
+            <InternalAnalyticsDashboard />
+          </TabsContent>
 
           <TabsContent value="overview" className="space-y-4">
             {loading ? (
@@ -269,7 +275,7 @@ export default function AdminAnalyticsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="settings">
+          <TabsContent value="ga-settings">
             <AnalyticsSettingsCard />
           </TabsContent>
 

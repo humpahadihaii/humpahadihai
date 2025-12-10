@@ -51,6 +51,7 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   // Core
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "dashboard" },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics" },
   
   // AI Tools
   { name: "AI Tools", href: "/admin/ai-tools", icon: Sparkles, permission: "aiTools", section: "AI" },
@@ -111,9 +112,6 @@ const navigation: NavigationItem[] = [
   { name: "Product Categories", href: "/admin/product-categories", icon: Package, permission: "productCategories", section: "Store" },
   { name: "Products", href: "/admin/products", icon: Store, permission: "products" },
   { name: "Product Orders", href: "/admin/product-orders", icon: ShoppingCart, permission: "productOrders" },
-  
-  // Analytics
-  { name: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics", section: "Analytics" },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {
