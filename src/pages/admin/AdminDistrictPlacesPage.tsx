@@ -14,6 +14,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, MapPin, Sparkles, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { districtPlacesExcelConfig } from "@/lib/excelConfigs";
 
 interface DistrictPlace {
   id: string;
@@ -36,6 +40,8 @@ const AdminDistrictPlacesPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPlace, setEditingPlace] = useState<DistrictPlace | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(districtPlacesExcelConfig);
   const [formData, setFormData] = useState({
     name: "",
     short_description: "",
@@ -223,6 +229,12 @@ const AdminDistrictPlacesPage = () => {
             <h1 className="text-3xl font-bold">Places to Visit</h1>
             <p className="text-muted-foreground">Manage tourist attractions and landmarks</p>
           </div>
+          <ExcelImportExportButtons
+            onExport={() => excel.exportToExcel(places)}
+            onImportClick={() => setImportOpen(true)}
+            exporting={excel.exporting}
+            importing={excel.importing}
+          />
         </div>
 
         <Card>
@@ -414,6 +426,19 @@ const AdminDistrictPlacesPage = () => {
           </Card>
         )}
       </div>
+      <ExcelImportModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        sectionName="District Places"
+        onDownloadTemplate={excel.downloadTemplate}
+        onParseFile={excel.parseExcelFile}
+        onImport={excel.importFromExcel}
+        onDownloadErrors={excel.downloadErrorReport}
+        importing={excel.importing}
+        importProgress={excel.importProgress}
+        importResult={excel.importResult}
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["district-places"] })}
+      />
     </AdminLayout>
   );
 };

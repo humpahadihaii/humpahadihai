@@ -14,6 +14,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, CalendarDays, Sparkles, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { districtFestivalsExcelConfig } from "@/lib/excelConfigs";
 
 interface DistrictFestival {
   id: string;
@@ -32,6 +36,8 @@ const AdminDistrictFestivalsPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFestival, setEditingFestival] = useState<DistrictFestival | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(districtFestivalsExcelConfig);
   const [formData, setFormData] = useState({
     name: "",
     month: "",
@@ -202,6 +208,12 @@ const AdminDistrictFestivalsPage = () => {
             <h1 className="text-3xl font-bold">Festivals & Culture</h1>
             <p className="text-muted-foreground">Manage festivals, melas and cultural events by district</p>
           </div>
+          <ExcelImportExportButtons
+            onExport={() => excel.exportToExcel(festivals)}
+            onImportClick={() => setImportOpen(true)}
+            exporting={excel.exporting}
+            importing={excel.importing}
+          />
         </div>
 
         <Card>
@@ -346,6 +358,19 @@ const AdminDistrictFestivalsPage = () => {
           </Card>
         )}
       </div>
+      <ExcelImportModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        sectionName="District Festivals"
+        onDownloadTemplate={excel.downloadTemplate}
+        onParseFile={excel.parseExcelFile}
+        onImport={excel.importFromExcel}
+        onDownloadErrors={excel.downloadErrorReport}
+        importing={excel.importing}
+        importProgress={excel.importProgress}
+        importResult={excel.importResult}
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["district-festivals"] })}
+      />
     </AdminLayout>
   );
 };

@@ -389,3 +389,64 @@ export const contentItemsExcelConfig: ExcelConfig = {
     { key: "district_id", nameKey: "district_name", table: "districts", nameField: "name" },
   ],
 };
+
+// Festivals (global)
+export const festivalsExcelConfig: ExcelConfig = {
+  tableName: "festivals",
+  sheetName: "Festivals",
+  columns: [
+    { key: "id", header: "ID" },
+    { key: "name", header: "Name", required: true },
+    { key: "description", header: "Description", required: true },
+    { key: "month", header: "Month", type: "number" },
+    { key: "region", header: "Region" },
+    { key: "image_url", header: "Image URL" },
+  ],
+};
+
+// Site Images
+export const siteImagesExcelConfig: ExcelConfig = {
+  tableName: "site_images",
+  sheetName: "SiteImages",
+  columns: [
+    { key: "id", header: "ID" },
+    { key: "key", header: "Key", required: true },
+    { key: "title", header: "Title", required: true },
+    { key: "description", header: "Description" },
+    { key: "image_url", header: "Image URL", required: true },
+    { key: "category", header: "Category", required: true },
+  ],
+};
+
+// Thoughts
+export const thoughtsExcelConfig: ExcelConfig = {
+  tableName: "thoughts",
+  sheetName: "Thoughts",
+  columns: [
+    { key: "id", header: "ID" },
+    { key: "name", header: "Name", required: true },
+    { key: "location", header: "Location", required: true },
+    { key: "thought", header: "Thought", required: true },
+    { key: "photo_url", header: "Photo URL" },
+    { key: "sentiment", header: "Sentiment" },
+    { key: "status", header: "Status" },
+    { key: "likes_count", header: "Likes", type: "number" },
+  ],
+};
+
+// Featured Highlights
+export const featuredHighlightsExcelConfig: ExcelConfig = {
+  tableName: "featured_highlights",
+  sheetName: "FeaturedHighlights",
+  columns: [
+    { key: "id", header: "ID" },
+    { key: "title", header: "Title", required: true },
+    { key: "description", header: "Description", required: true },
+    { key: "image_url", header: "Image URL", required: true },
+    { key: "button_text", header: "Button Text", required: true },
+    { key: "button_link", header: "Button Link", required: true },
+    { key: "gradient_color", header: "Gradient Color", required: true },
+    { key: "order_position", header: "Order", type: "number" },
+    { key: "status", header: "Status" },
+  ],
+};
