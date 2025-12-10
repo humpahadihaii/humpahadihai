@@ -27,42 +27,37 @@ const PendingApprovalPage = () => {
 
         if (mounted) setUserEmail(session.user.email || "");
 
-        // Fetch roles and admin request in parallel
-        const [rolesResult, requestResult] = await Promise.all([
-          supabase.from("user_roles").select("role").eq("user_id", session.user.id),
-          supabase.from("admin_requests").select("status").eq("user_id", session.user.id).single()
-        ]);
+        // Fetch roles from user_roles table
+        const { data: rolesData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
 
-        const roles = normalizeRoles(rolesResult.data?.map(r => r.role) || []);
+        const roles = normalizeRoles(rolesData?.map(r => r.role) || []);
         
-        // BULLETPROOF CHECK: If user has ANY role, they should NOT be on this page
+        // BULLETPROOF CHECK: If user has ANY admin panel role, they should NOT be on this page
         // Redirect them to the appropriate place immediately
-        if (isSuperAdmin(roles) || hasAdminPanelAccess(roles) || hasAnyRole(roles)) {
+        if (isSuperAdmin(roles) || hasAdminPanelAccess(roles)) {
           const target = routeAfterLogin({ roles, isSuperAdmin: isSuperAdmin(roles) });
           if (mounted) navigate(target, { replace: true });
           return;
         }
 
-        // Set request status for display (only for users with no roles)
-        if (requestResult.data && mounted) {
-          setStatus(requestResult.data.status);
-          
-          // If approved in admin_requests but still no roles, they need role assignment
-          if (requestResult.data.status === "approved") {
-            // Re-check roles after a moment (in case of race condition)
-            setTimeout(async () => {
-              const { data: recheck } = await supabase
-                .from("user_roles")
-                .select("role")
-                .eq("user_id", session.user.id);
-              
-              const recheckedRoles = normalizeRoles(recheck?.map(r => r.role) || []);
-              if (hasAnyRole(recheckedRoles)) {
-                const target = routeAfterLogin({ roles: recheckedRoles, isSuperAdmin: isSuperAdmin(recheckedRoles) });
-                navigate(target, { replace: true });
-              }
-            }, 1000);
-          }
+        // If user has regular 'user' role only, send them to home
+        if (hasAnyRole(roles) && !hasAdminPanelAccess(roles)) {
+          if (mounted) navigate("/", { replace: true });
+          return;
+        }
+
+        // Fetch admin request status for display purposes
+        const { data: requestData } = await supabase
+          .from("admin_requests")
+          .select("status")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (requestData && mounted) {
+          setStatus(requestData.status);
         }
 
         if (mounted) setLoading(false);

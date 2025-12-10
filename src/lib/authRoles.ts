@@ -64,7 +64,52 @@ export function hasAdminPanelAccess(roles: AppRole[]): boolean {
   return roles.some((r) => ADMIN_PANEL_ROLES.includes(r));
 }
 
-// Determine where to redirect after login
+// Role priority order (highest to lowest)
+const ROLE_PRIORITY: AppRole[] = [
+  "super_admin",
+  "admin",
+  "content_manager",
+  "content_editor",
+  "editor",
+  "moderator",
+  "author",
+  "reviewer",
+  "media_manager",
+  "seo_manager",
+  "support_agent",
+  "analytics_viewer",
+  "developer",
+  "viewer",
+  "user",
+];
+
+// Get the highest priority role from the user's roles
+export function getHighestPriorityRole(roles: AppRole[]): AppRole | null {
+  for (const role of ROLE_PRIORITY) {
+    if (roles.includes(role)) return role;
+  }
+  return null;
+}
+
+// Role-based default routes
+const ROLE_DEFAULT_ROUTES: Partial<Record<AppRole, string>> = {
+  super_admin: "/admin",
+  admin: "/admin",
+  content_manager: "/admin/content-sections",
+  content_editor: "/admin/content-sections",
+  editor: "/admin/content-sections",
+  moderator: "/admin/community-submissions",
+  author: "/admin/stories",
+  reviewer: "/admin/community-submissions",
+  media_manager: "/admin/gallery",
+  seo_manager: "/admin/pages",
+  support_agent: "/admin/submissions",
+  analytics_viewer: "/admin/analytics",
+  viewer: "/admin",
+  developer: "/admin",
+};
+
+// Determine where to redirect after login based on roles
 export function routeAfterLogin(ctx: {
   roles: AppRole[];
   isSuperAdmin: boolean;
@@ -76,8 +121,12 @@ export function routeAfterLogin(ctx: {
     return "/admin";
   }
 
-  // 2. Any admin-panel role → admin dashboard
+  // 2. Any admin-panel role → find the best route based on highest priority role
   if (hasAdminPanelAccess(roles)) {
+    const highestRole = getHighestPriorityRole(roles);
+    if (highestRole && ROLE_DEFAULT_ROUTES[highestRole]) {
+      return ROLE_DEFAULT_ROUTES[highestRole]!;
+    }
     return "/admin";
   }
 

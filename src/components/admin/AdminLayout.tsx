@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -121,7 +121,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const { role, roles, user, isAdmin, isAuthInitialized, session } = useAuth();
+  const { role, roles, user, isAuthInitialized, session, canAccessAdminPanel, isSuperAdmin } = useAuth();
 
   const handleSignOut = async () => {
     if (signingOut) return; // Prevent double-click
@@ -139,12 +139,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  // Show skeleton only if:
-  // 1. Auth is not initialized AND we don't have a session yet
-  // Never block indefinitely - if we have a session, show content
-  const showSkeleton = !isAuthInitialized && !session;
-
-  if (showSkeleton) {
+  // Show skeleton only if auth is not initialized AND we don't have a session yet
+  // This prevents infinite loading
+  if (!isAuthInitialized) {
     return (
       <div className="flex h-screen w-full overflow-hidden">
         <aside className="hidden border-r bg-background md:flex md:flex-col w-64">
@@ -162,6 +159,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </main>
       </div>
     );
+  }
+
+  // If no session after initialization, redirect to login
+  if (!session) {
+    return <Navigate to="/login" replace />;
   }
 
   // Filter navigation items based on user permissions (use all roles for union access)
