@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AnalyticsProvider } from "./components/AnalyticsProvider";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
@@ -91,11 +92,12 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AdminToolbar />
-        <div className="flex flex-col min-h-screen">
-          <Navigation />
-          <main className="flex-grow">
-            <Routes>
+        <AnalyticsProvider>
+          <AdminToolbar />
+          <div className="flex flex-col min-h-screen">
+            <Navigation />
+            <main className="flex-grow">
+              <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/culture" element={<CulturePage />} />
               <Route path="/culture/:slug" element={<ContentDetailPage contentType="culture" />} />
@@ -183,6 +185,7 @@ const App = () => (
           </main>
           <Footer />
         </div>
+        </AnalyticsProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

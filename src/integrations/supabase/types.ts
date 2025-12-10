@@ -113,6 +113,33 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_settings: {
+        Row: {
+          ad_personalization_enabled: boolean
+          analytics_enabled: boolean
+          anonymize_ip: boolean
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          ad_personalization_enabled?: boolean
+          analytics_enabled?: boolean
+          anonymize_ip?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          ad_personalization_enabled?: boolean
+          analytics_enabled?: boolean
+          anonymize_ip?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string
@@ -1205,6 +1232,45 @@ export type Database = {
           name?: string
           region?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ga_events: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          event_name: string
+          ga_response: Json | null
+          id: string
+          payload: Json
+          retry_count: number
+          sent_at: string | null
+          status: string
+          user_id_hash: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          event_name: string
+          ga_response?: Json | null
+          id?: string
+          payload?: Json
+          retry_count?: number
+          sent_at?: string | null
+          status?: string
+          user_id_hash?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          event_name?: string
+          ga_response?: Json | null
+          id?: string
+          payload?: Json
+          retry_count?: number
+          sent_at?: string | null
+          status?: string
+          user_id_hash?: string | null
         }
         Relationships: []
       }
