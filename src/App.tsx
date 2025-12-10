@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
@@ -87,6 +87,110 @@ import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 
 const queryClient = new QueryClient();
 
+// Component to conditionally render layout based on route
+const AppContent = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  
+  return (
+    <>
+      <AdminToolbar />
+      <div className="flex flex-col min-h-screen">
+        {/* Hide Navigation and Footer on admin routes - AdminLayout has its own */}
+        {!isAdminRoute && <Navigation />}
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/culture" element={<CulturePage />} />
+            <Route path="/culture/:slug" element={<ContentDetailPage contentType="culture" />} />
+            <Route path="/food" element={<FoodPage />} />
+            <Route path="/food/:slug" element={<ContentDetailPage contentType="food" />} />
+            <Route path="/travel" element={<TravelPage />} />
+            <Route path="/travel/:slug" element={<ContentDetailPage contentType="travel" />} />
+            <Route path="/districts" element={<DistrictsPage />} />
+            <Route path="/districts/:slug" element={<DistrictDetailPage />} />
+            <Route path="/villages/:slug" element={<VillageDetailPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
+            <Route path="/thoughts" element={<ThoughtsPage />} />
+            <Route path="/thoughts/:slug" element={<ContentDetailPage contentType="thought" />} />
+            <Route path="/submit-thought" element={<SubmitThoughtPage />} />
+            <Route path="/submit-story" element={<SubmitStoryPage />} />
+            <Route path="/my-submissions" element={<MySubmissionsPage />} />
+            {/* Monetization & New Features */}
+            <Route path="/promotions" element={<PromotionsPage />} />
+            <Route path="/travel-packages" element={<TravelPackagesPage />} />
+            <Route path="/travel-packages/:slug" element={<TravelPackageDetailPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:slug" element={<ProductDetailPage />} />
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/list-your-business" element={<ListYourBusinessPage />} />
+            {/* Auth */}
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
+            <Route path="/pending-approval" element={<PendingApprovalRoute />} />
+            <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
+            <Route path="/admin" element={<AdminDashboardRoute><AdminDashboard /></AdminDashboardRoute>} />
+            <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
+            <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
+            <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
+            <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />
+            <Route path="/admin/content/thoughts" element={<AdminRoute><AdminThoughtsContentPage /></AdminRoute>} />
+            <Route path="/admin/community-submissions" element={<AdminRoute><AdminCommunitySubmissionsPage /></AdminRoute>} />
+            <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
+            <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
+            <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
+            <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
+            <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
+            <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
+            <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
+            <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
+            <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
+            <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
+            <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
+            <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
+            {/* Approvals and Roles now merged into /admin/users */}
+            <Route path="/admin/approvals" element={<Navigate to="/admin/users" replace />} />
+            <Route path="/admin/roles" element={<Navigate to="/admin/users" replace />} />
+            <Route path="/admin/users" element={<AdminRoute><AdminUserManagementPage /></AdminRoute>} />
+            <Route path="/admin/site-settings" element={<AdminRoute><AdminSiteSettingsPage /></AdminRoute>} />
+            <Route path="/admin/stories" element={<AdminRoute><AdminStoriesPage /></AdminRoute>} />
+            <Route path="/admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
+            <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
+            <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
+            <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
+            {/* Admin District Content Routes */}
+            <Route path="/admin/district-places" element={<AdminRoute><AdminDistrictPlacesPage /></AdminRoute>} />
+            <Route path="/admin/district-foods" element={<AdminRoute><AdminDistrictFoodsPage /></AdminRoute>} />
+            <Route path="/admin/district-festivals" element={<AdminRoute><AdminDistrictFestivalsPage /></AdminRoute>} />
+            {/* Admin Tourism Marketplace Routes */}
+            <Route path="/admin/tourism-providers" element={<AdminRoute><AdminTourismProvidersPage /></AdminRoute>} />
+            <Route path="/admin/tourism-listings" element={<AdminRoute><AdminTourismListingsPage /></AdminRoute>} />
+            <Route path="/admin/tourism-inquiries" element={<AdminRoute><AdminTourismInquiriesPage /></AdminRoute>} />
+            {/* Admin Monetization Routes */}
+            <Route path="/admin/promotion-packages" element={<AdminRoute><AdminPromotionPackagesPage /></AdminRoute>} />
+            <Route path="/admin/promotion-requests" element={<AdminRoute><AdminPromotionRequestsPage /></AdminRoute>} />
+            <Route path="/admin/travel-packages" element={<AdminRoute><AdminTravelPackagesPage /></AdminRoute>} />
+            <Route path="/admin/travel-requests" element={<AdminRoute><AdminTravelRequestsPage /></AdminRoute>} />
+            <Route path="/admin/product-categories" element={<AdminRoute><AdminProductCategoriesPage /></AdminRoute>} />
+            <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
+            <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
+            <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
+            <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        {!isAdminRoute && <Footer />}
+      </div>
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -94,98 +198,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AnalyticsProvider>
-          <AdminToolbar />
-          <div className="flex flex-col min-h-screen">
-            <Navigation />
-            <main className="flex-grow">
-              <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/culture" element={<CulturePage />} />
-              <Route path="/culture/:slug" element={<ContentDetailPage contentType="culture" />} />
-              <Route path="/food" element={<FoodPage />} />
-              <Route path="/food/:slug" element={<ContentDetailPage contentType="food" />} />
-              <Route path="/travel" element={<TravelPage />} />
-              <Route path="/travel/:slug" element={<ContentDetailPage contentType="travel" />} />
-              <Route path="/districts" element={<DistrictsPage />} />
-              <Route path="/districts/:slug" element={<DistrictDetailPage />} />
-              <Route path="/villages/:slug" element={<VillageDetailPage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/disclaimer" element={<DisclaimerPage />} />
-              <Route path="/thoughts" element={<ThoughtsPage />} />
-              <Route path="/thoughts/:slug" element={<ContentDetailPage contentType="thought" />} />
-              <Route path="/submit-thought" element={<SubmitThoughtPage />} />
-              <Route path="/submit-story" element={<SubmitStoryPage />} />
-              <Route path="/my-submissions" element={<MySubmissionsPage />} />
-              {/* Monetization & New Features */}
-              <Route path="/promotions" element={<PromotionsPage />} />
-              <Route path="/travel-packages" element={<TravelPackagesPage />} />
-              <Route path="/travel-packages/:slug" element={<TravelPackageDetailPage />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/products/:slug" element={<ProductDetailPage />} />
-              <Route path="/marketplace" element={<MarketplacePage />} />
-              <Route path="/list-your-business" element={<ListYourBusinessPage />} />
-              {/* Auth */}
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/auth" element={<Navigate to="/login" replace />} />
-              <Route path="/pending-approval" element={<PendingApprovalRoute />} />
-              <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
-              <Route path="/admin" element={<AdminDashboardRoute><AdminDashboard /></AdminDashboardRoute>} />
-              <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
-              <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
-              <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
-              <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />
-              <Route path="/admin/content/thoughts" element={<AdminRoute><AdminThoughtsContentPage /></AdminRoute>} />
-              <Route path="/admin/community-submissions" element={<AdminRoute><AdminCommunitySubmissionsPage /></AdminRoute>} />
-              <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
-              <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
-              <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
-              <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
-              <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
-              <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
-              <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
-              <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
-              <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
-              <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
-              <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
-              <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
-              {/* Approvals and Roles now merged into /admin/users */}
-              <Route path="/admin/approvals" element={<Navigate to="/admin/users" replace />} />
-              <Route path="/admin/roles" element={<Navigate to="/admin/users" replace />} />
-              <Route path="/admin/users" element={<AdminRoute><AdminUserManagementPage /></AdminRoute>} />
-              <Route path="/admin/site-settings" element={<AdminRoute><AdminSiteSettingsPage /></AdminRoute>} />
-              <Route path="/admin/stories" element={<AdminRoute><AdminStoriesPage /></AdminRoute>} />
-              <Route path="/admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
-              <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
-              <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
-              <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
-              {/* Admin District Content Routes */}
-              <Route path="/admin/district-places" element={<AdminRoute><AdminDistrictPlacesPage /></AdminRoute>} />
-              <Route path="/admin/district-foods" element={<AdminRoute><AdminDistrictFoodsPage /></AdminRoute>} />
-              <Route path="/admin/district-festivals" element={<AdminRoute><AdminDistrictFestivalsPage /></AdminRoute>} />
-              {/* Admin Tourism Marketplace Routes */}
-              <Route path="/admin/tourism-providers" element={<AdminRoute><AdminTourismProvidersPage /></AdminRoute>} />
-              <Route path="/admin/tourism-listings" element={<AdminRoute><AdminTourismListingsPage /></AdminRoute>} />
-              <Route path="/admin/tourism-inquiries" element={<AdminRoute><AdminTourismInquiriesPage /></AdminRoute>} />
-              {/* Admin Monetization Routes */}
-              <Route path="/admin/promotion-packages" element={<AdminRoute><AdminPromotionPackagesPage /></AdminRoute>} />
-              <Route path="/admin/promotion-requests" element={<AdminRoute><AdminPromotionRequestsPage /></AdminRoute>} />
-              <Route path="/admin/travel-packages" element={<AdminRoute><AdminTravelPackagesPage /></AdminRoute>} />
-              <Route path="/admin/travel-requests" element={<AdminRoute><AdminTravelRequestsPage /></AdminRoute>} />
-              <Route path="/admin/product-categories" element={<AdminRoute><AdminProductCategoriesPage /></AdminRoute>} />
-              <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
-              <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
-              <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
-              <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+          <AppContent />
         </AnalyticsProvider>
       </BrowserRouter>
     </TooltipProvider>
