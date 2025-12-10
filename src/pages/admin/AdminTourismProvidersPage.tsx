@@ -13,12 +13,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Building, CheckCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Building, CheckCircle, Sparkles, FlaskConical } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { tourismProvidersExcelConfig } from "@/lib/excelConfigs";
+import { AISeedProvidersModal } from "@/components/admin/AISeedProvidersModal";
 
 interface TourismProvider {
   id: string;
@@ -35,6 +36,8 @@ interface TourismProvider {
   image_url: string | null;
   is_verified: boolean;
   is_active: boolean;
+  is_sample: boolean;
+  source: string;
   rating: number | null;
 }
 
@@ -45,6 +48,7 @@ const PROVIDER_TYPES = [
   { value: "guide", label: "Guide" },
   { value: "taxi", label: "Taxi/Transport" },
   { value: "tour_operator", label: "Tour Operator" },
+  { value: "trek_operator", label: "Trek Operator" },
   { value: "experience", label: "Experience Provider" },
   { value: "other", label: "Other" },
 ];
@@ -55,7 +59,10 @@ const AdminTourismProvidersPage = () => {
   const [editingProvider, setEditingProvider] = useState<TourismProvider | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
+  const [sampleFilter, setSampleFilter] = useState("all");
   const [importOpen, setImportOpen] = useState(false);
+  const [aiSeedOpen, setAiSeedOpen] = useState(false);
   const excel = useExcelOperations(tourismProvidersExcelConfig);
   const [formData, setFormData] = useState({
     name: "",
@@ -109,10 +116,14 @@ const AdminTourismProvidersPage = () => {
     },
   });
 
-  const filteredProviders = providers.filter((p) => {
+  const filteredProviders = providers.filter((p: any) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === "all" || p.type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesSource = sourceFilter === "all" || p.source === sourceFilter;
+    const matchesSample = sampleFilter === "all" || 
+      (sampleFilter === "sample" && p.is_sample) || 
+      (sampleFilter === "real" && !p.is_sample);
+    return matchesSearch && matchesType && matchesSource && matchesSample;
   });
 
   const saveMutation = useMutation({
@@ -333,8 +344,11 @@ const AdminTourismProvidersPage = () => {
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Filter Providers</CardTitle>
+            <Button variant="outline" onClick={() => setAiSeedOpen(true)}>
+              <Sparkles className="mr-2 h-4 w-4" /> AI: Generate Samples
+            </Button>
           </CardHeader>
           <CardContent className="flex gap-4 flex-wrap">
             <Input
@@ -344,7 +358,7 @@ const AdminTourismProvidersPage = () => {
               className="w-64"
             />
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 {PROVIDER_TYPES.map((t) => (
@@ -352,8 +366,31 @@ const AdminTourismProvidersPage = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="admin">Admin Added</SelectItem>
+                <SelectItem value="intake_form">Intake Form</SelectItem>
+                <SelectItem value="ai_generated">AI Generated</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sampleFilter} onValueChange={setSampleFilter}>
+              <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Data</SelectItem>
+                <SelectItem value="real">Real Only</SelectItem>
+                <SelectItem value="sample">Samples Only</SelectItem>
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
+
+        <AISeedProvidersModal 
+          open={aiSeedOpen} 
+          onOpenChange={setAiSeedOpen} 
+          mode="providers" 
+        />
 
         <Card>
           <CardContent className="pt-6">

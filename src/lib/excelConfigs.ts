@@ -237,6 +237,8 @@ export const tourismProvidersExcelConfig: ExcelConfig = {
     { key: "rating", header: "Rating", type: "number" },
     { key: "is_verified", header: "Verified", type: "boolean" },
     { key: "is_active", header: "Active", type: "boolean" },
+    { key: "is_sample", header: "Sample", type: "boolean" },
+    { key: "source", header: "Source" },
   ],
   lookups: [
     { key: "district_id", nameKey: "district_name", table: "districts", nameField: "name" },
@@ -262,6 +264,7 @@ export const tourismListingsExcelConfig: ExcelConfig = {
     { key: "is_featured", header: "Featured", type: "boolean" },
     { key: "is_active", header: "Active", type: "boolean" },
     { key: "sort_order", header: "Sort Order", type: "number" },
+    { key: "is_sample", header: "Sample", type: "boolean" },
   ],
   lookups: [
     { key: "provider_id", nameKey: "provider_name", table: "tourism_providers", nameField: "name" },

@@ -62,6 +62,7 @@ import TravelPackageDetailPage from "./pages/TravelPackageDetailPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import MarketplacePage from "./pages/MarketplacePage";
+import ListYourBusinessPage from "./pages/ListYourBusinessPage";
 // Admin Monetization Pages
 import AdminPromotionPackagesPage from "./pages/admin/AdminPromotionPackagesPage";
 import AdminPromotionRequestsPage from "./pages/admin/AdminPromotionRequestsPage";
@@ -122,6 +123,7 @@ const App = () => (
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/:slug" element={<ProductDetailPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/list-your-business" element={<ListYourBusinessPage />} />
               {/* Auth */}
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
