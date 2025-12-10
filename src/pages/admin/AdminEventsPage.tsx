@@ -14,11 +14,14 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Search, Upload, Calendar, MapPin } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Calendar, MapPin } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import Papa from "papaparse";
 import { format } from "date-fns";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { eventsExcelConfig } from "@/lib/excelConfigs";
 
 const eventSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -53,6 +56,8 @@ export default function AdminEventsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(eventsExcelConfig);
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -155,47 +160,6 @@ export default function AdminEventsPage() {
     }
   };
 
-  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        const rows = results.data as Record<string, string>[];
-        const validRows = rows.filter(row => row.title && row.slug);
-        
-        if (validRows.length === 0) {
-          toast.error("No valid rows found in CSV");
-          return;
-        }
-
-        const eventsToInsert = validRows.map(row => ({
-          title: row.title,
-          slug: row.slug || generateSlug(row.title),
-          description: row.description || null,
-          banner_image_url: row.banner_image_url || null,
-          location: row.location || null,
-          event_date: row.event_date || null,
-          is_featured: row.is_featured === "true",
-          status: row.status === "published" ? "published" : "draft",
-        }));
-
-        const { error } = await supabase.from("cms_events").insert(eventsToInsert);
-
-        if (error) {
-          toast.error(`Import failed: ${error.message}`);
-        } else {
-          toast.success(`Imported ${eventsToInsert.length} events`);
-          fetchEvents();
-        }
-      },
-      error: () => {
-        toast.error("Failed to parse CSV file");
-      },
-    });
-  };
-
   const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || event.status === statusFilter;
@@ -211,20 +175,12 @@ export default function AdminEventsPage() {
             <p className="text-muted-foreground">Manage events and promotions</p>
           </div>
           <div className="flex gap-2">
-            <label className="cursor-pointer">
-              <Input
-                type="file"
-                accept=".csv"
-                onChange={handleCSVImport}
-                className="hidden"
-              />
-              <Button variant="outline" asChild>
-                <span>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import CSV
-                </span>
-              </Button>
-            </label>
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredEvents)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => { setEditingEvent(null); form.reset(); }}>

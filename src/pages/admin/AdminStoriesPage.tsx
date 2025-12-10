@@ -20,6 +20,10 @@ import { AIContentButtons } from "@/components/admin/AIContentButtons";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import Papa from "papaparse";
 import { format } from "date-fns";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { storiesExcelConfig } from "@/lib/excelConfigs";
 
 const storySchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -58,6 +62,8 @@ export default function AdminStoriesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingStory, setEditingStory] = useState<Story | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(storiesExcelConfig);
 
   const form = useForm<StoryFormData>({
     resolver: zodResolver(storySchema),
@@ -218,20 +224,12 @@ export default function AdminStoriesPage() {
             <p className="text-muted-foreground">Manage blog posts and articles</p>
           </div>
           <div className="flex gap-2">
-            <label className="cursor-pointer">
-              <Input
-                type="file"
-                accept=".csv"
-                onChange={handleCSVImport}
-                className="hidden"
-              />
-              <Button variant="outline" asChild>
-                <span>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import CSV
-                </span>
-              </Button>
-            </label>
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredStories)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => { setEditingStory(null); form.reset(); }}>

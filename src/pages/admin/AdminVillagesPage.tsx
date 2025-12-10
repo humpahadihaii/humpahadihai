@@ -18,6 +18,10 @@ import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2 } from "
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import AIVillageDescription from "@/components/admin/AIVillageDescription";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { villagesExcelConfig } from "@/lib/excelConfigs";
 
 const villageSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -75,6 +79,8 @@ export default function AdminVillagesPage() {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [selectedDistrictForAI, setSelectedDistrictForAI] = useState<string>("");
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(villagesExcelConfig);
 
   const form = useForm<VillageFormData>({
     resolver: zodResolver(villageSchema),
@@ -276,6 +282,12 @@ export default function AdminVillagesPage() {
             <p className="text-muted-foreground">Manage villages across all districts</p>
           </div>
           <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredVillages)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
             {/* AI Suggest Button */}
             <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
               <DialogTrigger asChild>

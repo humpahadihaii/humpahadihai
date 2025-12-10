@@ -16,6 +16,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { AIContentButtons } from "@/components/admin/AIContentButtons";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { promotionPackagesExcelConfig } from "@/lib/excelConfigs";
 
 const packageSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -50,6 +54,8 @@ const AdminPromotionPackagesPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<PromotionPackage | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(promotionPackagesExcelConfig);
 
   const form = useForm<PackageFormData>({
     resolver: zodResolver(packageSchema),
@@ -168,16 +174,23 @@ const AdminPromotionPackagesPage = () => {
             <h1 className="text-3xl font-bold">Promotion Packages</h1>
             <p className="text-muted-foreground">Manage promotion offerings</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) {
-              setEditingPackage(null);
-              form.reset();
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" /> Add Package</Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(packages)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) {
+                setEditingPackage(null);
+                form.reset();
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button><Plus className="mr-2 h-4 w-4" /> Add Package</Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <div className="flex items-center justify-between">
@@ -269,7 +282,8 @@ const AdminPromotionPackagesPage = () => {
                 </Button>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         <Card>

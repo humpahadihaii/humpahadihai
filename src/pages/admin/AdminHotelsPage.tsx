@@ -16,6 +16,10 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search, Star } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { hotelsExcelConfig } from "@/lib/excelConfigs";
 
 const hotelSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -66,6 +70,8 @@ export default function AdminHotelsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(hotelsExcelConfig);
 
   const form = useForm<HotelFormData>({
     resolver: zodResolver(hotelSchema),
@@ -198,11 +204,18 @@ export default function AdminHotelsPage() {
             <h1 className="text-3xl font-bold">Hotels & Stays Management</h1>
             <p className="text-muted-foreground">Manage accommodations across Uttarakhand</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingHotel(null); form.reset(); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Hotel
+          <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredHotels)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { setEditingHotel(null); form.reset(); }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Hotel
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -443,6 +456,7 @@ export default function AdminHotelsPage() {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card>

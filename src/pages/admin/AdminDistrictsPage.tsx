@@ -18,6 +18,10 @@ import { Pencil, Trash2, Plus, Search, FolderUp, Upload, FileText, AlertCircle, 
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import Papa from "papaparse";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { districtsExcelConfig } from "@/lib/excelConfigs";
 
 const districtSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -101,6 +105,8 @@ export default function AdminDistrictsPage() {
   const [currentBatch, setCurrentBatch] = useState(0);
   const [totalBatches, setTotalBatches] = useState(0);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [excelImportOpen, setExcelImportOpen] = useState(false);
+  const excel = useExcelOperations(districtsExcelConfig);
 
   const form = useForm<DistrictFormData>({
     resolver: zodResolver(districtSchema),
@@ -422,6 +428,12 @@ export default function AdminDistrictsPage() {
             <p className="text-muted-foreground">Manage all 13 districts of Uttarakhand</p>
           </div>
           <div className="flex gap-2">
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredDistricts)}
+              onImportClick={() => setExcelImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
             {/* Census Import Button */}
             <Dialog open={importDialogOpen} onOpenChange={(open) => {
               setImportDialogOpen(open);

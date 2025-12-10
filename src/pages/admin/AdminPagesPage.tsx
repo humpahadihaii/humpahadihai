@@ -12,11 +12,14 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Search, Upload, Eye, FileText } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Eye, FileText } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import Papa from "papaparse";
 import { format } from "date-fns";
+import { useExcelOperations } from "@/hooks/useExcelOperations";
+import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
+import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
+import { pagesExcelConfig } from "@/lib/excelConfigs";
 
 const pageSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -48,6 +51,8 @@ export default function AdminPagesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const excel = useExcelOperations(pagesExcelConfig);
 
   const form = useForm<PageFormData>({
     resolver: zodResolver(pageSchema),
@@ -146,45 +151,6 @@ export default function AdminPagesPage() {
     }
   };
 
-  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        const rows = results.data as Record<string, string>[];
-        const validRows = rows.filter(row => row.title && row.slug);
-        
-        if (validRows.length === 0) {
-          toast.error("No valid rows found in CSV");
-          return;
-        }
-
-        const pagesToInsert = validRows.map(row => ({
-          title: row.title,
-          slug: row.slug || generateSlug(row.title),
-          body: row.body || null,
-          meta_title: row.meta_title || null,
-          meta_description: row.meta_description || null,
-          status: row.status === "published" ? "published" : "draft",
-        }));
-
-        const { error } = await supabase.from("cms_pages").insert(pagesToInsert);
-
-        if (error) {
-          toast.error(`Import failed: ${error.message}`);
-        } else {
-          toast.success(`Imported ${pagesToInsert.length} pages`);
-          fetchPages();
-        }
-      },
-      error: () => {
-        toast.error("Failed to parse CSV file");
-      },
-    });
-  };
-
   const filteredPages = pages.filter((page) => {
     const matchesSearch = page.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || page.status === statusFilter;
@@ -200,20 +166,12 @@ export default function AdminPagesPage() {
             <p className="text-muted-foreground">Manage static pages (Privacy, Terms, About, etc.)</p>
           </div>
           <div className="flex gap-2">
-            <label className="cursor-pointer">
-              <Input
-                type="file"
-                accept=".csv"
-                onChange={handleCSVImport}
-                className="hidden"
-              />
-              <Button variant="outline" asChild>
-                <span>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import CSV
-                </span>
-              </Button>
-            </label>
+            <ExcelImportExportButtons
+              onExport={() => excel.exportToExcel(filteredPages)}
+              onImportClick={() => setImportOpen(true)}
+              exporting={excel.exporting}
+              importing={excel.importing}
+            />
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => { setEditingPage(null); form.reset(); }}>
