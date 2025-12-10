@@ -49,11 +49,13 @@ const AIVillageDescription = ({ villageName, districtName, onContentGenerated }:
         }),
       });
 
+      const result = await response.json();
+      
       if (!response.ok) {
-        throw new Error("AI request failed");
+        const errorMessage = result?.error || `AI request failed with status ${response.status}`;
+        throw new Error(errorMessage);
       }
 
-      const result = await response.json();
       const content = result.content || "";
 
       // Parse the content into sections
@@ -82,7 +84,8 @@ const AIVillageDescription = ({ villageName, districtName, onContentGenerated }:
       toast.success("Content generated! Review and apply.");
     } catch (error) {
       console.error("AI generation error:", error);
-      toast.error("Failed to generate content. Please try again.");
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      toast.error(errorMsg);
     } finally {
       setIsGenerating(false);
     }
