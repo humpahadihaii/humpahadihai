@@ -17,6 +17,7 @@ import { Slider } from "@/components/ui/slider";
 import { MapPin, Star, Check, Search, ArrowRight, List, Map as MapIcon, Filter, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BookingModal } from "@/components/BookingModal";
 
 interface TourismListing {
   id: string;
@@ -78,6 +79,7 @@ export default function MarketplacePage() {
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [showFilters, setShowFilters] = useState(false);
   const [enquiryListing, setEnquiryListing] = useState<TourismListing | null>(null);
+  const [bookingListing, setBookingListing] = useState<TourismListing | null>(null);
   const [enquiryForm, setEnquiryForm] = useState({
     full_name: "",
     email: "",
@@ -539,12 +541,19 @@ export default function MarketplacePage() {
                         </p>
                       )}
                     </CardContent>
-                    <CardFooter className="pt-0">
+                    <CardFooter className="pt-0 flex gap-2">
                       <Button
-                        className="w-full"
+                        className="flex-1"
+                        onClick={() => setBookingListing(listing)}
+                      >
+                        Book Now
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
                         onClick={() => setEnquiryListing(listing)}
                       >
-                        Enquire Now
+                        Enquire
                       </Button>
                     </CardFooter>
                   </Card>
@@ -684,6 +693,23 @@ export default function MarketplacePage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Booking Modal */}
+      {bookingListing && (
+        <BookingModal
+          open={!!bookingListing}
+          onOpenChange={(open) => !open && setBookingListing(null)}
+          type="listing"
+          item={{
+            id: bookingListing.id,
+            title: bookingListing.title,
+            price: bookingListing.base_price || undefined,
+            category: bookingListing.category,
+            district: bookingListing.district?.name,
+          }}
+          source="marketplace"
+        />
+      )}
     </>
   );
 }

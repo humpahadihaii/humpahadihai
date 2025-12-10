@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ShoppingBag, ArrowLeft, Tag } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { BookingModal } from "@/components/BookingModal";
 
 const ProductDetailPage = () => {
   const { slug } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -176,12 +178,21 @@ const ProductDetailPage = () => {
                 </div>
               )}
 
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="w-full" disabled={product.stock_status === "out_of_stock"}>
-                    {product.stock_status === "out_of_stock" ? "Out of Stock" : "Enquire / Order"}
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-3">
+                <Button 
+                  size="lg" 
+                  className="flex-1" 
+                  disabled={product.stock_status === "out_of_stock"}
+                  onClick={() => setIsBookingOpen(true)}
+                >
+                  {product.stock_status === "out_of_stock" ? "Out of Stock" : "Order Now"}
+                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" variant="outline" className="flex-1" disabled={product.stock_status === "out_of_stock"}>
+                      Enquire
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Order: {product.name}</DialogTitle>
@@ -275,6 +286,7 @@ const ProductDetailPage = () => {
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
           </div>
 
@@ -289,6 +301,19 @@ const ProductDetailPage = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Booking Modal */}
+          <BookingModal
+            open={isBookingOpen}
+            onOpenChange={setIsBookingOpen}
+            type="product"
+            item={{
+              id: product.id,
+              title: product.name,
+              price: product.price,
+            }}
+            source="shop"
+          />
         </div>
       </div>
     </>

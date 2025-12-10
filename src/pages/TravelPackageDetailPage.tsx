@@ -383,100 +383,100 @@ const TravelPackageDetailPage = () => {
                         Enquire
                       </Button>
                     </DialogTrigger>
-                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Book: {pkg.title}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="full_name">Full Name *</Label>
-                          <Input
-                            id="full_name"
-                            required
-                            value={formData.full_name}
-                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                          />
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Book: {pkg.title}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="full_name">Full Name *</Label>
+                            <Input
+                              id="full_name"
+                              required
+                              value={formData.full_name}
+                              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              required
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email *</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            required
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          />
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input
+                              id="phone"
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City</Label>
+                            <Input
+                              id="city"
+                              value={formData.city}
+                              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="preferred_start_date">Preferred Date</Label>
+                            <Input
+                              id="preferred_start_date"
+                              type="date"
+                              value={formData.preferred_start_date}
+                              onChange={(e) => setFormData({ ...formData, preferred_start_date: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="number_of_travellers">No. of Travellers</Label>
+                            <Input
+                              id="number_of_travellers"
+                              type="number"
+                              min={1}
+                              value={formData.number_of_travellers}
+                              onChange={(e) => setFormData({ ...formData, number_of_travellers: parseInt(e.target.value) || 1 })}
+                            />
+                          </div>
+                        </div>
+
                         <div className="space-y-2">
-                          <Label htmlFor="phone">Phone</Label>
+                          <Label htmlFor="month_or_season">Preferred Month/Season</Label>
                           <Input
-                            id="phone"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            id="month_or_season"
+                            placeholder="e.g., March, Summer, Monsoon"
+                            value={formData.month_or_season}
+                            onChange={(e) => setFormData({ ...formData, month_or_season: e.target.value })}
                           />
                         </div>
+
                         <div className="space-y-2">
-                          <Label htmlFor="city">City</Label>
-                          <Input
-                            id="city"
-                            value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          <Label htmlFor="message">Additional Message</Label>
+                          <Textarea
+                            id="message"
+                            rows={3}
+                            value={formData.message}
+                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                           />
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="preferred_start_date">Preferred Date</Label>
-                          <Input
-                            id="preferred_start_date"
-                            type="date"
-                            value={formData.preferred_start_date}
-                            onChange={(e) => setFormData({ ...formData, preferred_start_date: e.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="number_of_travellers">No. of Travellers</Label>
-                          <Input
-                            id="number_of_travellers"
-                            type="number"
-                            min={1}
-                            value={formData.number_of_travellers}
-                            onChange={(e) => setFormData({ ...formData, number_of_travellers: parseInt(e.target.value) || 1 })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="month_or_season">Preferred Month/Season</Label>
-                        <Input
-                          id="month_or_season"
-                          placeholder="e.g., March, Summer, Monsoon"
-                          value={formData.month_or_season}
-                          onChange={(e) => setFormData({ ...formData, month_or_season: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="message">Additional Message</Label>
-                        <Textarea
-                          id="message"
-                          rows={3}
-                          value={formData.message}
-                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        />
-                      </div>
-
-                      <Button type="submit" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? "Submitting..." : "Submit Enquiry"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                          {isSubmitting ? "Submitting..." : "Submit Enquiry"}
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </CardContent>
@@ -498,11 +498,6 @@ const TravelPackageDetailPage = () => {
           />
         </div>
       </div>
-    </>
-  );
-};
-
-export default TravelPackageDetailPage;
     </>
   );
 };
