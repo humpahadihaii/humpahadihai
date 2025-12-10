@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { normalizeRoles, isSuperAdmin, routeAfterLogin } from "@/lib/authRoles";
+import { normalizeRoles, isSuperAdmin, routeAfterLogin, RBACRole } from "@/lib/rbac";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255),
@@ -60,10 +60,9 @@ const AuthPage = () => {
       }
 
       const roles = normalizeRoles(rolesData?.map((r) => r.role) || []);
-      const superAdmin = isSuperAdmin(roles);
 
       // Use centralized routing logic
-      const target = routeAfterLogin({ roles, isSuperAdmin: superAdmin });
+      const target = routeAfterLogin(roles);
       
       if (target !== "/pending-approval") {
         toast.success("Welcome back!");
