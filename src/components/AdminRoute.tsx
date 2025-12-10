@@ -46,13 +46,14 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // 4. Super Admin or any admin panel role → allow access
-  if (isSuperAdmin || canAccessAdminPanel) {
+  // 4. ONLY Super Admin or Admin role → allow access (strict check)
+  const isAdminRole = isSuperAdmin || roles.includes("admin");
+  if (isAdminRole) {
     return <>{children}</>;
   }
 
   // 5. User has roles but no admin access → send to home
-  if (roles.length > 0 && !canAccessAdminPanel) {
+  if (roles.length > 0) {
     return <Navigate to="/" replace />;
   }
 
