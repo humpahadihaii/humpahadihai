@@ -38,9 +38,13 @@ const AuthPage = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   // Helper to fetch user data and determine redirect using centralized logic
   const handleUserRedirect = async (userId: string) => {
+    if (hasRedirected) return; // Prevent multiple redirects
+    setHasRedirected(true);
+    
     try {
       // Fetch roles from user_roles table
       const { data: rolesData, error: rolesError } = await supabase
@@ -65,28 +69,36 @@ const AuthPage = () => {
       navigate(target, { replace: true });
     } catch (error) {
       console.error("Error checking user status:", error);
-      // On error, default to pending-approval for safety
+      setHasRedirected(false); // Reset on error
       navigate("/pending-approval", { replace: true });
     }
   };
 
-  // Check existing session on mount
+  // Check existing session on mount only
   useEffect(() => {
+    let mounted = true;
+    
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        if (session?.user && mounted && !hasRedirected) {
           await handleUserRedirect(session.user.id);
         }
       } catch (error) {
         console.error("Session check error:", error);
       } finally {
-        setIsCheckingSession(false);
+        if (mounted) {
+          setIsCheckingSession(false);
+        }
       }
     };
 
     checkSession();
-  }, [navigate]);
+    
+    return () => {
+      mounted = false;
+    };
+  }, []); // Only run once on mount
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
