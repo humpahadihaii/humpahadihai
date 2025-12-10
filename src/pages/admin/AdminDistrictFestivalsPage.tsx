@@ -75,6 +75,8 @@ const AdminDistrictFestivalsPage = () => {
     enabled: !!selectedDistrict,
   });
 
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
+
   const saveMutation = useMutation({
     mutationFn: async (data: Partial<DistrictFestival>) => {
       if (editingFestival) {
@@ -83,16 +85,26 @@ const AdminDistrictFestivalsPage = () => {
           .update(data)
           .eq("id", editingFestival.id);
         if (error) throw error;
+        return { isUpdate: true, id: editingFestival.id, name: data.name };
       } else {
-        const { error } = await supabase
+        const { data: newData, error } = await supabase
           .from("district_festivals")
-          .insert([{ ...data, district_id: selectedDistrict } as any]);
+          .insert([{ ...data, district_id: selectedDistrict } as any])
+          .select()
+          .single();
         if (error) throw error;
+        return { isUpdate: false, id: newData?.id, name: data.name };
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["district-festivals"] });
-      toast.success(editingFestival ? "Festival updated" : "Festival added");
+      if (result?.isUpdate) {
+        toast.success("Festival updated");
+        logUpdate("district_festival", result.id, result.name);
+      } else {
+        toast.success("Festival added");
+        logCreate("district_festival", result?.id || "unknown", result?.name);
+      }
       resetForm();
     },
     onError: (error) => {
@@ -102,13 +114,15 @@ const AdminDistrictFestivalsPage = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
       const { error } = await supabase.from("district_festivals").delete().eq("id", id);
       if (error) throw error;
+      return { id, name };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["district-festivals"] });
       toast.success("Festival deleted");
+      logDelete("district_festival", result.id, result.name);
     },
     onError: () => toast.error("Failed to delete festival"),
   });
@@ -345,7 +359,7 @@ const AdminDistrictFestivalsPage = () => {
                             <Button size="sm" variant="ghost" onClick={() => handleEdit(festival)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => deleteMutation.mutate(festival.id)}>
+                            <Button size="sm" variant="ghost" onClick={() => deleteMutation.mutate({ id: festival.id, name: festival.name })}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>

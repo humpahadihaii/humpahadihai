@@ -172,6 +172,9 @@ export default function AdminBookingsPage() {
         description: "The booking has been updated successfully.",
       });
 
+      const booking = bookings.find(b => b.id === bookingId);
+      logUpdate("booking", bookingId, `${booking?.name || "Booking"} → ${updates.status || "updated"}`);
+
       fetchBookings();
       if (selectedBooking?.id === bookingId) {
         setSelectedBooking({ ...selectedBooking, ...updates });

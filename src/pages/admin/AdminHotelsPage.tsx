@@ -73,6 +73,7 @@ export default function AdminHotelsPage() {
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(hotelsExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<HotelFormData>({
     resolver: zodResolver(hotelSchema),
@@ -139,18 +140,20 @@ export default function AdminHotelsPage() {
         toast.error("Failed to update hotel");
       } else {
         toast.success("Hotel updated successfully");
+        logUpdate("hotel", editingHotel.id, data.name);
         fetchHotels();
         setDialogOpen(false);
         setEditingHotel(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("district_hotels").insert(hotelData);
+      const { data: newData, error } = await supabase.from("district_hotels").insert(hotelData).select().single();
 
       if (error) {
         toast.error("Failed to create hotel");
       } else {
         toast.success("Hotel created successfully");
+        logCreate("hotel", newData?.id || "unknown", data.name);
         fetchHotels();
         setDialogOpen(false);
         form.reset();
@@ -180,11 +183,13 @@ export default function AdminHotelsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
+    const hotel = hotels.find(h => h.id === id);
     const { error } = await supabase.from("district_hotels").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete hotel");
     } else {
       toast.success("Hotel deleted");
+      logDelete("hotel", id, hotel?.name);
       fetchHotels();
     }
   };

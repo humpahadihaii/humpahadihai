@@ -69,6 +69,7 @@ const AdminPromotionRequestsPage = () => {
   };
 
   const updateStatus = async (id: string, status: string) => {
+    const request = requests.find(r => r.id === id);
     const { error } = await supabase
       .from("promotion_requests")
       .update({ status })
@@ -79,6 +80,7 @@ const AdminPromotionRequestsPage = () => {
       return;
     }
     toast.success("Status updated");
+    logUpdate("promotion_request", id, `${request?.business_name} → ${status}`);
     fetchRequests();
   };
 
@@ -95,6 +97,7 @@ const AdminPromotionRequestsPage = () => {
       return;
     }
     toast.success("Notes saved");
+    logUpdate("promotion_request", selectedRequest.id, selectedRequest.business_name);
     setSelectedRequest(null);
     fetchRequests();
   };

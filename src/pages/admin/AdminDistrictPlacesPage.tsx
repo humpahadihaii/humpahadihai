@@ -83,6 +83,8 @@ const AdminDistrictPlacesPage = () => {
     enabled: !!selectedDistrict,
   });
 
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
+
   const saveMutation = useMutation({
     mutationFn: async (data: Partial<DistrictPlace>) => {
       if (editingPlace) {
@@ -91,16 +93,26 @@ const AdminDistrictPlacesPage = () => {
           .update(data)
           .eq("id", editingPlace.id);
         if (error) throw error;
+        return { isUpdate: true, id: editingPlace.id, name: data.name };
       } else {
-        const { error } = await supabase
+        const { data: newData, error } = await supabase
           .from("district_places")
-          .insert([{ ...data, district_id: selectedDistrict } as any]);
+          .insert([{ ...data, district_id: selectedDistrict } as any])
+          .select()
+          .single();
         if (error) throw error;
+        return { isUpdate: false, id: newData?.id, name: data.name };
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["district-places"] });
-      toast.success(editingPlace ? "Place updated" : "Place added");
+      if (result?.isUpdate) {
+        toast.success("Place updated");
+        logUpdate("district_place", result.id, result.name);
+      } else {
+        toast.success("Place added");
+        logCreate("district_place", result?.id || "unknown", result?.name);
+      }
       resetForm();
     },
     onError: (error) => {
@@ -110,13 +122,15 @@ const AdminDistrictPlacesPage = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
       const { error } = await supabase.from("district_places").delete().eq("id", id);
       if (error) throw error;
+      return { id, name };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["district-places"] });
       toast.success("Place deleted");
+      logDelete("district_place", result.id, result.name);
     },
     onError: () => toast.error("Failed to delete place"),
   });
@@ -413,7 +427,7 @@ const AdminDistrictPlacesPage = () => {
                             <Button size="sm" variant="ghost" onClick={() => handleEdit(place)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => deleteMutation.mutate(place.id)}>
+                            <Button size="sm" variant="ghost" onClick={() => deleteMutation.mutate({ id: place.id, name: place.name })}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
