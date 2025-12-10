@@ -1,30 +1,25 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-
-interface AdminRouteProps {
-  children: React.ReactNode;
-}
+import PendingApprovalPage from "@/pages/PendingApprovalPage";
 
 /**
- * AdminRoute - The SINGLE guard for all /admin/* routes
+ * PendingApprovalRoute - Guard for /pending-approval route
  * 
  * Decision flow:
  * 1. Not initialized → show spinner
  * 2. No session → redirect to /login
- * 3. Super Admin or has admin panel access → show admin content
+ * 3. Super Admin or has admin panel access → redirect to /admin (they shouldn't see this page)
  * 4. Has roles but no admin access → redirect to home
- * 5. No roles (pending) → redirect to /pending-approval
- * 6. Disabled user → redirect to /login
+ * 5. No roles (truly pending) → show pending approval page
  */
-const AdminRoute = ({ children }: AdminRouteProps) => {
+const PendingApprovalRoute = () => {
   const { 
     isAuthInitialized, 
     session, 
     isSuperAdmin, 
-    canAccessAdminPanel, 
+    canAccessAdminPanel,
     isPending,
-    profile,
-    roles 
+    roles
   } = useAuth();
 
   // 1. Still initializing - show spinner
@@ -36,33 +31,28 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     );
   }
 
-  // 2. No session = not logged in
+  // 2. No session → login
   if (!session) {
     return <Navigate to="/login" replace />;
   }
 
-  // 3. Disabled user → login
-  if (profile?.status === "disabled") {
-    return <Navigate to="/login" replace />;
-  }
-
-  // 4. Super Admin or any admin panel role → allow access
+  // 3. Super Admin or admin panel access → they should NOT see pending page
   if (isSuperAdmin || canAccessAdminPanel) {
-    return <>{children}</>;
+    return <Navigate to="/admin" replace />;
   }
 
-  // 5. User has roles but no admin access → send to home
+  // 4. Has roles but not admin roles → send to home
   if (roles.length > 0 && !canAccessAdminPanel) {
     return <Navigate to="/" replace />;
   }
 
-  // 6. No roles (pending) → pending approval page
+  // 5. Truly pending (no roles) → show the page
   if (isPending) {
-    return <Navigate to="/pending-approval" replace />;
+    return <PendingApprovalPage />;
   }
 
-  // 7. Fallback: home
+  // 6. Fallback: home
   return <Navigate to="/" replace />;
 };
 
-export default AdminRoute;
+export default PendingApprovalRoute;

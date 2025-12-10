@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,9 +38,17 @@ const AuthPage = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
+  const redirectedRef = useRef(false);
 
-  // Helper to fetch user data and determine redirect
-  const handleUserRedirect = async (userId: string) => {
+  /**
+   * Fetch roles and determine redirect destination using centralized logic.
+   * This is the ONLY place that decides where to go after login.
+   */
+  const performRedirect = async (userId: string) => {
+    // Prevent multiple redirects
+    if (redirectedRef.current) return;
+    redirectedRef.current = true;
+
     try {
       const { data: rolesData, error: rolesError } = await supabase
         .from("user_roles")
@@ -54,11 +62,8 @@ const AuthPage = () => {
       const roles = normalizeRoles(rolesData?.map((r) => r.role) || []);
       const superAdmin = isSuperAdmin(roles);
 
-      console.log("[AuthPage] Roles fetched:", roles, "isSuperAdmin:", superAdmin);
-
+      // Use centralized routing logic
       const target = routeAfterLogin({ roles, isSuperAdmin: superAdmin });
-      
-      console.log("[AuthPage] Redirecting to:", target);
       
       if (target !== "/pending-approval") {
         toast.success("Welcome back!");
@@ -66,20 +71,21 @@ const AuthPage = () => {
       
       navigate(target, { replace: true });
     } catch (error) {
-      console.error("Error checking user status:", error);
+      console.error("Error during redirect:", error);
+      // On error, go to pending (safest option)
       navigate("/pending-approval", { replace: true });
     }
   };
 
-  // Check existing session on mount only
+  // Check existing session on mount ONLY
   useEffect(() => {
     let mounted = true;
     
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user && mounted) {
-          await handleUserRedirect(session.user.id);
+        if (session?.user && mounted && !redirectedRef.current) {
+          await performRedirect(session.user.id);
         }
       } catch (error) {
         console.error("Session check error:", error);
@@ -99,6 +105,8 @@ const AuthPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
 
     try {
@@ -123,9 +131,9 @@ const AuthPage = () => {
         return;
       }
 
-      // Successful login - perform single redirect using centralized logic
+      // Successful login - perform single redirect
       if (data.user) {
-        await handleUserRedirect(data.user.id);
+        await performRedirect(data.user.id);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -134,13 +142,14 @@ const AuthPage = () => {
         console.error("Login error:", error);
         toast.error("Login failed due to a server issue. Please try again.");
       }
-    } finally {
       setIsLoading(false);
     }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
 
     try {
@@ -163,17 +172,19 @@ const AuthPage = () => {
         } else {
           toast.error(error.message);
         }
+        setIsLoading(false);
         return;
       }
 
-      // Sign out immediately to prevent auto-login
+      // Sign out immediately to prevent auto-login for new users
       await supabase.auth.signOut();
 
       toast.success("Account created! Your request is pending admin approval.");
       setSignupData({ email: "", password: "", fullName: "" });
       
+      // Navigate to pending approval after short delay
       setTimeout(() => {
-        navigate("/pending-approval");
+        navigate("/pending-approval", { replace: true });
       }, 1500);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -189,6 +200,8 @@ const AuthPage = () => {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
 
     try {
@@ -200,6 +213,7 @@ const AuthPage = () => {
 
       if (error) {
         toast.error(error.message);
+        setIsLoading(false);
         return;
       }
 

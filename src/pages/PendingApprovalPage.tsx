@@ -1,55 +1,37 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle, XCircle, LogOut } from "lucide-react";
-import { normalizeRoles, isSuperAdmin, hasAdminPanelAccess, routeAfterLogin, hasAnyRole } from "@/lib/authRoles";
+import { useAuth } from "@/hooks/useAuth";
 
+/**
+ * PendingApprovalPage - STATIC component that shows pending status
+ * 
+ * IMPORTANT: This component does NOT contain any redirect logic.
+ * All routing decisions are made by PendingApprovalRoute wrapper.
+ * This component only displays information and handles sign out.
+ */
 const PendingApprovalPage = () => {
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<string>("pending");
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState<string>("");
-  const navigate = useNavigate();
+  const userEmail = session?.user?.email || "";
 
+  // Fetch admin request status for display purposes ONLY (no redirects)
   useEffect(() => {
     let mounted = true;
 
-    const checkApprovalStatus = async () => {
+    const fetchRequestStatus = async () => {
+      if (!session?.user?.id) {
+        if (mounted) setLoading(false);
+        return;
+      }
+
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session?.user) {
-          if (mounted) navigate("/login", { replace: true });
-          return;
-        }
-
-        if (mounted) setUserEmail(session.user.email || "");
-
-        // Fetch roles from user_roles table
-        const { data: rolesData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-
-        const roles = normalizeRoles(rolesData?.map(r => r.role) || []);
-        
-        // BULLETPROOF CHECK: If user has ANY admin panel role, they should NOT be on this page
-        // Redirect them to the appropriate place immediately
-        if (isSuperAdmin(roles) || hasAdminPanelAccess(roles)) {
-          const target = routeAfterLogin({ roles, isSuperAdmin: isSuperAdmin(roles) });
-          if (mounted) navigate(target, { replace: true });
-          return;
-        }
-
-        // If user has regular 'user' role only, send them to home
-        if (hasAnyRole(roles) && !hasAdminPanelAccess(roles)) {
-          if (mounted) navigate("/", { replace: true });
-          return;
-        }
-
-        // Fetch admin request status for display purposes
         const { data: requestData } = await supabase
           .from("admin_requests")
           .select("status")
@@ -59,30 +41,18 @@ const PendingApprovalPage = () => {
         if (requestData && mounted) {
           setStatus(requestData.status);
         }
-
-        if (mounted) setLoading(false);
       } catch (error) {
-        console.error("Error checking status:", error);
+        console.error("Error fetching request status:", error);
+      } finally {
         if (mounted) setLoading(false);
       }
     };
 
-    checkApprovalStatus();
+    fetchRequestStatus();
 
-    // Listen for role changes via realtime
+    // Listen for status changes (for display update only)
     const channel = supabase
-      .channel("pending_approval_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "user_roles",
-        },
-        () => {
-          if (mounted) checkApprovalStatus();
-        }
-      )
+      .channel("pending_status_display")
       .on(
         "postgres_changes",
         {
@@ -90,8 +60,10 @@ const PendingApprovalPage = () => {
           schema: "public",
           table: "admin_requests",
         },
-        () => {
-          if (mounted) checkApprovalStatus();
+        (payload) => {
+          if (mounted && payload.new && payload.new.user_id === session?.user?.id) {
+            setStatus(payload.new.status as string);
+          }
         }
       )
       .subscribe();
@@ -100,10 +72,10 @@ const PendingApprovalPage = () => {
       mounted = false;
       supabase.removeChannel(channel);
     };
-  }, [navigate]);
+  }, [session?.user?.id]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate("/login", { replace: true });
   };
 
@@ -146,21 +118,20 @@ const PendingApprovalPage = () => {
               className="text-sm px-4 py-2"
             >
               {status === "pending" && "Waiting for Admin Approval"}
-              {status === "approved" && "Approved - Redirecting..."}
+              {status === "approved" && "Approved - Please refresh or re-login"}
               {status === "rejected" && "Rejected"}
             </Badge>
 
             {status === "pending" && (
               <p className="text-muted-foreground text-sm">
                 Your account has been created successfully. Please wait while an administrator
-                reviews and approves your access request. You will be redirected automatically
-                once approved.
+                reviews and approves your access request.
               </p>
             )}
 
             {status === "approved" && (
               <p className="text-muted-foreground text-sm">
-                Your account has been approved! Redirecting you to the admin panel...
+                Your account has been approved! Please sign out and sign back in to access the admin panel.
               </p>
             )}
 
