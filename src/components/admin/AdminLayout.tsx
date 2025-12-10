@@ -120,22 +120,53 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { role, roles, user, isAdmin } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+  const { role, roles, user, isAdmin, isAuthInitialized, isLoading } = useAuth();
 
   const handleSignOut = async () => {
+    if (signingOut) return; // Prevent double-click
+    
+    setSigningOut(true);
+    toast.info("Signing out...");
+    
     try {
-      toast.success("Signing out...");
       await performLogout();
+      // performLogout does a hard redirect, so this code may not execute
     } catch (error) {
       console.error("Sign out error:", error);
       toast.error("Error signing out. Please try again.");
+      setSigningOut(false);
     }
   };
 
+  // Show loading skeleton while auth is initializing
+  if (!isAuthInitialized || isLoading) {
+    return (
+      <div className="flex h-screen w-full overflow-hidden">
+        <aside className="hidden border-r bg-background md:flex md:flex-col w-64">
+          <div className="flex h-16 items-center border-b px-4">
+            <div className="h-6 w-32 bg-muted animate-pulse rounded" />
+          </div>
+          <div className="flex-1 px-3 py-4 space-y-2">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-8 bg-muted animate-pulse rounded" />
+            ))}
+          </div>
+        </aside>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </main>
+      </div>
+    );
+  }
+
   // Filter navigation items based on user permissions (use all roles for union access)
-  const filteredNavigation = navigation.filter(item => 
-    canViewSection(item.permission, roles)
-  );
+  // If roles is empty but user is authenticated, show at least dashboard
+  const hasAnyPermissions = roles && roles.length > 0;
+  
+  const filteredNavigation = hasAnyPermissions 
+    ? navigation.filter(item => canViewSection(item.permission, roles))
+    : [navigation[0]]; // At minimum show Dashboard for any authenticated user
 
   // Group navigation items by section
   const groupedNavigation = filteredNavigation.reduce((acc, item) => {
@@ -216,9 +247,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           variant="outline"
           className="w-full justify-start"
           onClick={handleSignOut}
+          disabled={signingOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          {!collapsed && "Sign Out"}
+          {!collapsed && (signingOut ? "Signing out..." : "Sign Out")}
         </Button>
       </div>
     </>

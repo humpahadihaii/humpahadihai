@@ -9,14 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
  * 5. Redirects to the auth page
  */
 export const performLogout = async (): Promise<void> => {
-  try {
-    // 1. Sign out from Supabase (this invalidates the session on the server)
-    await supabase.auth.signOut({ scope: 'global' });
-  } catch (error) {
-    console.error("Supabase signOut error:", error);
-  }
-
-  // 2. Clear all Supabase-related localStorage items
+  // 1. Clear all Supabase-related localStorage items FIRST (before signOut which might hang)
   const keysToRemove: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -32,17 +25,25 @@ export const performLogout = async (): Promise<void> => {
   }
   keysToRemove.forEach(key => localStorage.removeItem(key));
 
-  // 3. Clear sessionStorage entirely
+  // 2. Clear sessionStorage entirely
   sessionStorage.clear();
 
-  // 4. Clear any auth-related cookies
+  // 3. Clear any auth-related cookies
   const cookiesToClear = ['token', 'role', 'sb-access-token', 'sb-refresh-token'];
   cookiesToClear.forEach(cookieName => {
     document.cookie = `${cookieName}=; Max-Age=0; path=/;`;
     document.cookie = `${cookieName}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
   });
 
-  // 5. Force redirect to auth page using window.location for a clean slate
+  // 4. Sign out from Supabase (use local scope for faster signout)
+  try {
+    await supabase.auth.signOut({ scope: 'local' });
+  } catch (error) {
+    console.error("Supabase signOut error:", error);
+    // Continue with redirect even if signOut fails
+  }
+
+  // 5. Force redirect to login page using window.location for a clean slate
   window.location.href = '/login';
 };
 
