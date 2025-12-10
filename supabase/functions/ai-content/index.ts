@@ -272,8 +272,8 @@ serve(async (req) => {
 
     console.log("AI Request:", { type: request.type, action: request.action });
 
-    // Call Google Gemini API - using gemini-1.5-flash for better free tier limits
-    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // Call Google Gemini API - using gemini-2.0-flash (gemini-1.5-flash is deprecated)
+    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const response = await fetch(geminiEndpoint, {
       method: "POST",
