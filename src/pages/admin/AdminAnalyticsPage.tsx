@@ -3,8 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { AnalyticsSettingsCard } from "@/components/admin/AnalyticsSettingsCard";
-import { GAEventsDiagnostics } from "@/components/admin/GAEventsDiagnostics";
 import { InternalAnalyticsDashboard } from "@/components/admin/InternalAnalyticsDashboard";
 import { BarChart3, Eye, Heart, MapPin, TrendingUp, ShoppingCart, Calendar, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -168,8 +166,6 @@ export default function AdminAnalyticsPage() {
             <TabsTrigger value="site-analytics">Site Analytics</TabsTrigger>
             <TabsTrigger value="overview">Content Overview</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="ga-settings">GA Settings</TabsTrigger>
-            <TabsTrigger value="diagnostics">Event Diagnostics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="site-analytics">
@@ -273,14 +269,6 @@ export default function AdminAnalyticsPage() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="ga-settings">
-            <AnalyticsSettingsCard />
-          </TabsContent>
-
-          <TabsContent value="diagnostics">
-            <GAEventsDiagnostics />
           </TabsContent>
         </Tabs>
       </div>
