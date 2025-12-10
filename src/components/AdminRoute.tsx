@@ -39,20 +39,16 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
   // to prevent infinite loading. AdminLayout handles the actual display.
   // Here we allow through to AdminLayout which will show skeleton while roles load.
   
-  // Still loading roles - show brief spinner (max 3 seconds then allow through)
-  // This prevents infinite loading while still giving time for roles to load
-  if (isRolesLoading) {
-    console.log("[AdminRoute] Roles still loading, showing brief spinner");
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Super Admin or any admin panel role = allow access
+  // Super Admin or any admin panel role = allow access (even while roles still loading)
+  // This allows the UI to render while roles are being fetched
   if (isSuperAdmin || canAccessAdminPanel) {
     console.log("[AdminRoute] Access granted:", { isSuperAdmin, canAccessAdminPanel });
+    return <>{children}</>;
+  }
+
+  // Still loading roles - allow through, AdminLayout will show skeleton
+  if (isRolesLoading) {
+    console.log("[AdminRoute] Roles still loading, allowing through to AdminLayout");
     return <>{children}</>;
   }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -39,7 +39,11 @@ export const useAuth = () => {
     isRolesLoading: false,
   });
 
-  // Load profile and roles for a user - NEVER THROWS
+  // Use ref to track mount status and prevent state updates after unmount
+  const mountedRef = useRef(true);
+  const initCompletedRef = useRef(false);
+
+  // Load profile and roles for a user - defined outside useEffect to be stable
   const loadProfileAndRoles = useCallback(async (userId: string): Promise<{
     profile: UserProfile | null;
     roles: AppRole[];
@@ -70,12 +74,17 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    let initComplete = false;
-    let rolesLoadingTimeout: NodeJS.Timeout | null = null;
+    mountedRef.current = true;
+    initCompletedRef.current = false;
 
     // Initialize auth on mount
     const initAuth = async () => {
+      // Skip if already completed (handles StrictMode double-invoke)
+      if (initCompletedRef.current) {
+        console.log("[Auth] Init already completed, skipping");
+        return;
+      }
+
       console.log("[Auth] Starting initialization...");
       try {
         const { data, error } = await supabase.auth.getSession();
@@ -84,15 +93,15 @@ export const useAuth = () => {
           console.error("[Auth] Error getting session:", error);
         }
 
-        if (!mounted) return;
+        if (!mountedRef.current) return;
 
         const session = data?.session ?? null;
         console.log("[Auth] Session check complete, user:", session?.user?.email || "none");
 
-        // CRITICAL: Set isAuthInitialized to TRUE immediately after session check
-        // This prevents infinite loading on admin routes
+        initCompletedRef.current = true;
+
         if (session?.user?.id) {
-          // Set initialized with session, then load profile/roles async
+          // Set initialized with session immediately
           setAuthState(prev => ({
             ...prev,
             user: session.user,
@@ -100,23 +109,11 @@ export const useAuth = () => {
             isAuthInitialized: true,
             isRolesLoading: true,
           }));
-          initComplete = true;
 
-          // Safety timeout: ensure isRolesLoading becomes false within 5 seconds
-          rolesLoadingTimeout = setTimeout(() => {
-            if (mounted) {
-              console.log("[Auth] Safety timeout: forcing isRolesLoading to false");
-              setAuthState(prev => ({
-                ...prev,
-                isRolesLoading: false,
-              }));
-            }
-          }, 5000);
-
-          // Load profile/roles without blocking
+          // Load profile/roles
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
-          if (mounted) {
-            if (rolesLoadingTimeout) clearTimeout(rolesLoadingTimeout);
+          if (mountedRef.current) {
+            console.log("[Auth] Init complete with roles:", roles);
             setAuthState(prev => ({
               ...prev,
               profile,
@@ -133,14 +130,10 @@ export const useAuth = () => {
             isAuthInitialized: true,
             isRolesLoading: false,
           });
-          initComplete = true;
         }
       } catch (error) {
         console.error("[Auth] Error initializing auth:", error);
-      } finally {
-        // GUARANTEE: Always set initialized even if something went wrong
-        if (mounted && !initComplete) {
-          console.log("[Auth] Setting initialized in finally block");
+        if (mountedRef.current) {
           setAuthState(prev => ({
             ...prev,
             isAuthInitialized: true,
@@ -152,10 +145,10 @@ export const useAuth = () => {
 
     initAuth();
 
-    // Subscribe to auth changes
+    // Subscribe to auth changes - MUST NOT be async function
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        if (!mounted) return;
+      (event, newSession) => {
+        if (!mountedRef.current) return;
 
         console.log("[Auth] Auth event:", event, "user:", newSession?.user?.email || "none");
 
@@ -172,11 +165,12 @@ export const useAuth = () => {
           return;
         }
 
-        // For SIGNED_IN or TOKEN_REFRESHED, update session immediately then load data
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+        // For auth events, update session immediately then load data via setTimeout
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           if (newSession?.user?.id) {
             console.log("[Auth] Updating session for", event);
-            // Update session state immediately with loading indicator
+            
+            // Update session state immediately
             setAuthState(prev => ({
               ...prev,
               user: newSession.user,
@@ -185,38 +179,41 @@ export const useAuth = () => {
               isRolesLoading: true,
             }));
 
-            // Load profile/roles directly (no setTimeout to prevent race conditions)
-            try {
-              const { profile, roles } = await loadProfileAndRoles(newSession.user.id);
-              if (mounted) {
-                console.log("[Auth] Roles loaded after auth event:", roles);
-                setAuthState(prev => ({
-                  ...prev,
-                  profile,
-                  roles,
-                  isRolesLoading: false,
-                }));
+            // Load profile/roles in next tick to avoid Supabase deadlock
+            const userId = newSession.user.id;
+            setTimeout(async () => {
+              if (!mountedRef.current) return;
+              try {
+                const { profile, roles } = await loadProfileAndRoles(userId);
+                if (mountedRef.current) {
+                  console.log("[Auth] Roles loaded after", event, ":", roles);
+                  setAuthState(prev => ({
+                    ...prev,
+                    profile,
+                    roles,
+                    isRolesLoading: false,
+                  }));
+                }
+              } catch (error) {
+                console.error("[Auth] Error loading roles after auth event:", error);
+                if (mountedRef.current) {
+                  setAuthState(prev => ({
+                    ...prev,
+                    isRolesLoading: false,
+                  }));
+                }
               }
-            } catch (error) {
-              console.error("[Auth] Error loading roles after auth event:", error);
-              if (mounted) {
-                setAuthState(prev => ({
-                  ...prev,
-                  isRolesLoading: false,
-                }));
-              }
-            }
+            }, 0);
           }
         }
       }
     );
 
     return () => {
-      mounted = false;
-      if (rolesLoadingTimeout) clearTimeout(rolesLoadingTimeout);
+      mountedRef.current = false;
       subscription.unsubscribe();
     };
-  }, [loadProfileAndRoles]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Compute derived values
   const isSuperAdmin = useMemo(() => checkIsSuperAdmin(authState.roles), [authState.roles]);
