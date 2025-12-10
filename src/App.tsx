@@ -91,13 +91,14 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/auth" || location.pathname === "/pending-approval";
   
   return (
     <>
       <AdminToolbar />
       <div className="flex flex-col min-h-screen">
-        {/* Hide Navigation and Footer on admin routes - AdminLayout has its own */}
-        {!isAdminRoute && <Navigation />}
+        {/* Hide Navigation on admin and auth routes */}
+        {!isAdminRoute && !isAuthRoute && <Navigation />}
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -185,7 +186,7 @@ const AppContent = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        {!isAdminRoute && <Footer />}
+        {!isAdminRoute && !isAuthRoute && <Footer />}
       </div>
     </>
   );
