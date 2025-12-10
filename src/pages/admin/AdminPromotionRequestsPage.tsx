@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, Search } from "lucide-react";
 import { format } from "date-fns";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 interface PromotionRequest {
   id: string;
@@ -47,6 +48,7 @@ const AdminPromotionRequestsPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedRequest, setSelectedRequest] = useState<PromotionRequest | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const { logUpdate } = useAdminActivityLogger();
 
   useEffect(() => {
     fetchRequests();

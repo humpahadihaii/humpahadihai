@@ -18,6 +18,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { districtFestivalsExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 interface DistrictFestival {
   id: string;
