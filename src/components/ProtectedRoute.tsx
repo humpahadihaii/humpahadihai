@@ -7,8 +7,11 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+/**
+ * ProtectedRoute - Guards admin routes with permission checks
+ */
 const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
-  const { isAuthInitialized, session, roles, isSuperAdmin, canAccessAdminPanel, profile, isRolesLoading } = useAuth();
+  const { isAuthInitialized, session, roles, isSuperAdmin, canAccessAdminPanel, profile, isPending } = useAuth();
 
   // Show spinner only during initial auth check
   if (!isAuthInitialized) {
@@ -22,15 +25,6 @@ const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
   // No session = not logged in
   if (!session) {
     return <Navigate to="/login" replace />;
-  }
-
-  // If roles are still loading, show brief loading
-  if (isRolesLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
   }
 
   // Super Admin = full access
@@ -52,7 +46,7 @@ const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
   }
 
   // No roles = pending approval
-  if (roles.length === 0) {
+  if (isPending) {
     return <Navigate to="/pending-approval" replace />;
   }
 

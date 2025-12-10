@@ -109,19 +109,29 @@ const ROLE_DEFAULT_ROUTES: Partial<Record<AppRole, string>> = {
   developer: "/admin",
 };
 
-// Determine where to redirect after login based on roles
-export function routeAfterLogin(ctx: {
+// ============================================
+// CENTRALIZED REDIRECT LOGIC
+// ============================================
+
+export interface AuthRedirectContext {
   roles: AppRole[];
   isSuperAdmin: boolean;
-}): string {
-  const { roles, isSuperAdmin: superAdmin } = ctx;
+  profileStatus?: string | null;
+}
 
-  // 1. SUPER ADMIN always goes to admin dashboard
+/**
+ * Determine where to redirect after login based on roles and status.
+ * This is the SINGLE SOURCE OF TRUTH for post-login routing.
+ */
+export function routeAfterLogin(ctx: AuthRedirectContext): string {
+  const { roles, isSuperAdmin: superAdmin, profileStatus } = ctx;
+
+  // 1. SUPER ADMIN always goes to admin dashboard - no exceptions
   if (superAdmin) {
     return "/admin";
   }
 
-  // 2. Any admin-panel role → find the best route based on highest priority role
+  // 2. Any admin-panel role → admin dashboard (or role-specific route)
   if (hasAdminPanelAccess(roles)) {
     const highestRole = getHighestPriorityRole(roles);
     if (highestRole && ROLE_DEFAULT_ROUTES[highestRole]) {
@@ -130,11 +140,29 @@ export function routeAfterLogin(ctx: {
     return "/admin";
   }
 
-  // 3. User role only (no admin access) → home
+  // 3. User has 'user' role only (no admin access) → home
   if (hasAnyRole(roles)) {
     return "/";
   }
 
-  // 4. No roles → pending approval
+  // 4. No roles at all → pending approval
   return "/pending-approval";
+}
+
+/**
+ * Check if a user should be considered "pending" (needs approval)
+ */
+export function isPendingApproval(roles: AppRole[], profileStatus?: string | null): boolean {
+  // If user has any admin panel role, they are NOT pending
+  if (isSuperAdmin(roles) || hasAdminPanelAccess(roles)) {
+    return false;
+  }
+  
+  // If user has any role at all (even just 'user'), they are NOT pending
+  if (hasAnyRole(roles)) {
+    return false;
+  }
+  
+  // No roles = pending
+  return true;
 }

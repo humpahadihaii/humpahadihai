@@ -52,7 +52,7 @@ import AdminEventsPage from "./pages/admin/AdminEventsPage";
 import AdminPagesPage from "./pages/admin/AdminPagesPage";
 import AdminFooterLinksPage from "./pages/admin/AdminFooterLinksPage";
 import AdminContentSectionsPage from "./pages/admin/AdminContentSectionsPage";
-import PendingApprovalPage from "./pages/PendingApprovalPage";
+import PendingApprovalRoute from "./components/PendingApprovalRoute";
 import NotFound from "./pages/NotFound";
 import UnauthorizedPage from "./pages/admin/UnauthorizedPage";
 // Monetization & New Features
@@ -128,7 +128,7 @@ const App = () => (
               {/* Auth */}
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
-              <Route path="/pending-approval" element={<PendingApprovalPage />} />
+              <Route path="/pending-approval" element={<PendingApprovalRoute />} />
               <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
