@@ -213,7 +213,7 @@ export const ROLE_PERMISSIONS: Record<RBACRole, AdminSection[]> = {
     "/admin/bookings",
   ],
 
-  // ANALYTICS_VIEWER: Read-only dashboard and analytics
+  // ANALYTICS_VIEWER: Read-only dashboard and analytics (frontend only)
   analytics_viewer: [
     "/admin",
     "/admin/analytics",
