@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Loader2, CheckCircle, Users, Baby } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { CalendarIcon, Loader2, CheckCircle, Users, Baby, AlertCircle } from "lucide-react";
+import { format, differenceInDays, startOfDay, isBefore } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -79,9 +79,33 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
     }
   }, [formData.startDate, item.duration_days, type]);
 
+  // Get today's date with time stripped for consistent comparison
+  const today = useMemo(() => startOfDay(new Date()), []);
+
   const nights = formData.startDate && formData.endDate 
     ? differenceInDays(formData.endDate, formData.startDate)
     : undefined;
+
+  // Date validation errors
+  const dateErrors = useMemo(() => {
+    const errors: { startDate?: string; endDate?: string } = {};
+    
+    if (formData.startDate && isBefore(startOfDay(formData.startDate), today)) {
+      errors.startDate = "Please select a date from today onwards.";
+    }
+    
+    if (formData.endDate) {
+      if (isBefore(startOfDay(formData.endDate), today)) {
+        errors.endDate = "Please select a date from today onwards.";
+      } else if (formData.startDate && isBefore(formData.endDate, formData.startDate)) {
+        errors.endDate = "End date cannot be earlier than start date.";
+      }
+    }
+    
+    return errors;
+  }, [formData.startDate, formData.endDate, today]);
+
+  const hasDateErrors = Object.keys(dateErrors).length > 0;
 
   const calculateTotalPrice = () => {
     if (!item.price) return undefined;
@@ -256,7 +280,7 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
           {/* Date Fields */}
           {showDateFields && (
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className="space-y-1">
                 <Label>{isStay ? "Check-in Date" : "Start Date"}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -264,25 +288,33 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !formData.startDate && "text-muted-foreground"
+                        !formData.startDate && "text-muted-foreground",
+                        dateErrors.startDate && "border-destructive"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.startDate ? format(formData.startDate, "PPP") : "Select date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.startDate}
                       onSelect={(date) => setFormData(prev => ({ ...prev, startDate: date }))}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => isBefore(startOfDay(date), today)}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
+                {dateErrors.startDate && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {dateErrors.startDate}
+                  </p>
+                )}
               </div>
-              <div>
+              <div className="space-y-1">
                 <Label>{isStay ? "Check-out Date" : "End Date"}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -290,7 +322,8 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !formData.endDate && "text-muted-foreground"
+                        !formData.endDate && "text-muted-foreground",
+                        dateErrors.endDate && "border-destructive"
                       )}
                       disabled={type === "package" && !!item.duration_days}
                     >
@@ -298,16 +331,26 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
                       {formData.endDate ? format(formData.endDate, "PPP") : "Select date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.endDate}
                       onSelect={(date) => setFormData(prev => ({ ...prev, endDate: date }))}
-                      disabled={(date) => date < (formData.startDate || new Date())}
+                      disabled={(date) => {
+                        const minDate = formData.startDate ? startOfDay(formData.startDate) : today;
+                        return isBefore(startOfDay(date), minDate);
+                      }}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
+                {dateErrors.endDate && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {dateErrors.endDate}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -419,7 +462,7 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
           )}
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || hasDateErrors}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
