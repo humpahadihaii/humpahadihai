@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,7 +80,7 @@ export default function AdminPageSettingsPage() {
         hero_title: data.hero_title || null,
         hero_subtitle: data.hero_subtitle || null,
         hero_image_url: data.hero_image_url || null,
-        hero_bullets: data.hero_bullets || [],
+        hero_bullets: (data.hero_bullets || []) as unknown as Json,
         hero_cta_label: data.hero_cta_label || null,
         hero_cta_link: data.hero_cta_link || null,
         intro_text: data.intro_text || null,
@@ -88,7 +89,7 @@ export default function AdminPageSettingsPage() {
         custom_section_description: data.custom_section_description || null,
         custom_section_cta_label: data.custom_section_cta_label || null,
         custom_section_cta_link: data.custom_section_cta_link || null,
-        faqs: data.faqs || [],
+        faqs: (data.faqs || []) as unknown as Json,
         meta_title: data.meta_title || null,
         meta_description: data.meta_description || null,
       };
@@ -102,7 +103,7 @@ export default function AdminPageSettingsPage() {
       } else {
         const { error } = await supabase
           .from("page_settings")
-          .insert({ page_key: activeTab, ...payload });
+          .insert([{ page_key: activeTab, ...payload }]);
         if (error) throw error;
       }
     },
@@ -215,6 +216,7 @@ export default function AdminPageSettingsPage() {
                   <div className="space-y-2">
                     <Label>Hero Image</Label>
                     <ImageUpload
+                      label="Hero Image"
                       value={formData.hero_image_url || ""}
                       onChange={url => setFormData({ ...formData, hero_image_url: url })}
                     />
