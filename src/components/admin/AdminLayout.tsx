@@ -122,6 +122,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { role, roles, user, isAuthInitialized, session, canAccessAdminPanel, isSuperAdmin } = useAuth();
+  const { isImpersonating } = useImpersonation();
 
   const handleSignOut = async () => {
     if (signingOut) return; // Prevent double-click
@@ -266,8 +267,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </div>
     </>
   );
-
-  const { isImpersonating } = useImpersonation();
 
   return (
     <div className="flex h-screen w-full overflow-hidden flex-col">
