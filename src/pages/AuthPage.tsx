@@ -38,15 +38,10 @@ const AuthPage = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
-  const [hasRedirected, setHasRedirected] = useState(false);
 
-  // Helper to fetch user data and determine redirect using centralized logic
+  // Helper to fetch user data and determine redirect
   const handleUserRedirect = async (userId: string) => {
-    if (hasRedirected) return; // Prevent multiple redirects
-    setHasRedirected(true);
-    
     try {
-      // Fetch roles from user_roles table
       const { data: rolesData, error: rolesError } = await supabase
         .from("user_roles")
         .select("role")
@@ -59,8 +54,11 @@ const AuthPage = () => {
       const roles = normalizeRoles(rolesData?.map((r) => r.role) || []);
       const superAdmin = isSuperAdmin(roles);
 
-      // Use centralized routing logic - this returns role-specific routes
+      console.log("[AuthPage] Roles fetched:", roles, "isSuperAdmin:", superAdmin);
+
       const target = routeAfterLogin({ roles, isSuperAdmin: superAdmin });
+      
+      console.log("[AuthPage] Redirecting to:", target);
       
       if (target !== "/pending-approval") {
         toast.success("Welcome back!");
@@ -69,7 +67,6 @@ const AuthPage = () => {
       navigate(target, { replace: true });
     } catch (error) {
       console.error("Error checking user status:", error);
-      setHasRedirected(false); // Reset on error
       navigate("/pending-approval", { replace: true });
     }
   };
@@ -81,7 +78,7 @@ const AuthPage = () => {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user && mounted && !hasRedirected) {
+        if (session?.user && mounted) {
           await handleUserRedirect(session.user.id);
         }
       } catch (error) {
@@ -98,7 +95,7 @@ const AuthPage = () => {
     return () => {
       mounted = false;
     };
-  }, []); // Only run once on mount
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
