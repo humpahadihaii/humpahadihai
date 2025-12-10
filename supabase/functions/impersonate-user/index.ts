@@ -28,21 +28,20 @@ serve(async (req) => {
 
     // Create admin client with service role
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Create user client to verify caller
-    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
 
-    // Get the current user
-    const { data: { user: caller }, error: userError } = await supabaseUser.auth.getUser();
+    // Extract the JWT token and verify directly using the admin client
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user: caller }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    
     if (userError || !caller) {
       console.error("Auth error:", userError);
       return new Response(
-        JSON.stringify({ success: false, error: "Unauthorized" }),
+        JSON.stringify({ success: false, error: "Unauthorized - Invalid token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    
+    console.log("Authenticated user:", caller.email);
 
     // Verify caller is super_admin
     const { data: isSuperAdmin } = await supabaseAdmin.rpc('has_role', {
