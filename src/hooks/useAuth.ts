@@ -133,17 +133,18 @@ export const useAuth = () => {
         const session = data?.session ?? null;
 
         if (session?.user?.id) {
-          // Set session immediately, then load profile/roles
-          setAuthState(prev => ({
-            ...prev,
-            user: session.user,
-            session,
-            isAuthInitialized: true,
-          }));
-
+          // CRITICAL: Load profile/roles FIRST before marking initialized
           const { profile, roles } = await loadProfileAndRoles(session.user.id);
+          
           if (mountedRef.current) {
-            setAuthState(prev => ({ ...prev, profile, roles }));
+            // Set EVERYTHING at once including isAuthInitialized
+            setAuthState({
+              user: session.user,
+              session,
+              profile,
+              roles,
+              isAuthInitialized: true,
+            });
           }
         } else {
           setAuthState({
@@ -182,24 +183,31 @@ export const useAuth = () => {
 
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           if (newSession?.user?.id) {
-            setAuthState(prev => ({
-              ...prev,
-              user: newSession.user,
-              session: newSession,
-              isAuthInitialized: true,
-            }));
-
-            // Load profile/roles asynchronously (deferred)
+            // CRITICAL: Load roles BEFORE setting state to prevent race condition
             const userId = newSession.user.id;
-            Promise.resolve().then(async () => {
+            
+            // Load profile/roles first
+            loadProfileAndRoles(userId).then(({ profile, roles }) => {
               if (!mountedRef.current) return;
-              try {
-                const { profile, roles } = await loadProfileAndRoles(userId);
-                if (mountedRef.current) {
-                  setAuthState(prev => ({ ...prev, profile, roles }));
-                }
-              } catch (error) {
-                console.error("[Auth] Error loading roles:", error);
+              
+              // Set ALL state at once including roles
+              setAuthState({
+                user: newSession.user,
+                session: newSession,
+                profile,
+                roles,
+                isAuthInitialized: true,
+              });
+            }).catch((error) => {
+              console.error("[Auth] Error loading roles:", error);
+              // Still set session even if roles fail
+              if (mountedRef.current) {
+                setAuthState(prev => ({
+                  ...prev,
+                  user: newSession.user,
+                  session: newSession,
+                  isAuthInitialized: true,
+                }));
               }
             });
           }
