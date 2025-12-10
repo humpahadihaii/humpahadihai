@@ -122,6 +122,121 @@ export type Database = {
         }
         Relationships: []
       }
+      bookings: {
+        Row: {
+          admin_notes: string | null
+          adults: number | null
+          children: number | null
+          city: string | null
+          created_at: string
+          currency: string | null
+          email: string
+          end_date: string | null
+          id: string
+          listing_id: string | null
+          name: string
+          nights: number | null
+          notes: string | null
+          package_id: string | null
+          payment_status: string | null
+          phone: string
+          pincode: string | null
+          product_id: string | null
+          quantity: number | null
+          shipping_address: string | null
+          source: string | null
+          start_date: string | null
+          status: string | null
+          total_price: number | null
+          type: string
+          unit_price: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          adults?: number | null
+          children?: number | null
+          city?: string | null
+          created_at?: string
+          currency?: string | null
+          email: string
+          end_date?: string | null
+          id?: string
+          listing_id?: string | null
+          name: string
+          nights?: number | null
+          notes?: string | null
+          package_id?: string | null
+          payment_status?: string | null
+          phone: string
+          pincode?: string | null
+          product_id?: string | null
+          quantity?: number | null
+          shipping_address?: string | null
+          source?: string | null
+          start_date?: string | null
+          status?: string | null
+          total_price?: number | null
+          type: string
+          unit_price?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          adults?: number | null
+          children?: number | null
+          city?: string | null
+          created_at?: string
+          currency?: string | null
+          email?: string
+          end_date?: string | null
+          id?: string
+          listing_id?: string | null
+          name?: string
+          nights?: number | null
+          notes?: string | null
+          package_id?: string | null
+          payment_status?: string | null
+          phone?: string
+          pincode?: string | null
+          product_id?: string | null
+          quantity?: number | null
+          shipping_address?: string | null
+          source?: string | null
+          start_date?: string | null
+          status?: string | null
+          total_price?: number | null
+          type?: string
+          unit_price?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "tourism_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "travel_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "local_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cms_content_sections: {
         Row: {
           body: string | null

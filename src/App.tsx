@@ -81,6 +81,7 @@ import AdminDistrictFestivalsPage from "./pages/admin/AdminDistrictFestivalsPage
 import AdminTourismProvidersPage from "./pages/admin/AdminTourismProvidersPage";
 import AdminTourismListingsPage from "./pages/admin/AdminTourismListingsPage";
 import AdminTourismInquiriesPage from "./pages/admin/AdminTourismInquiriesPage";
+import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 
 const queryClient = new QueryClient();
 
@@ -175,6 +176,7 @@ const App = () => (
               <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
               <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
               <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
+              <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

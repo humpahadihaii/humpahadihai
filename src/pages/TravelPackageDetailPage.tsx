@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink } from "lucide-react";
+import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink, CalendarPlus } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { BookingModal } from "@/components/BookingModal";
 
 interface TourismListing {
   id: string;
@@ -31,6 +32,7 @@ interface TourismListing {
 const TravelPackageDetailPage = () => {
   const { slug } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -370,12 +372,17 @@ const TravelPackageDetailPage = () => {
                   <p className="text-sm text-muted-foreground">Price per person</p>
                   <span className="text-3xl font-bold text-primary">₹{pkg.price_per_person.toLocaleString()}</span>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="lg" className="w-full md:w-auto">
-                      Enquire / Book This Trip
-                    </Button>
-                  </DialogTrigger>
+                <div className="flex gap-3 w-full md:w-auto">
+                  <Button size="lg" className="flex-1 md:flex-none" onClick={() => setIsBookingOpen(true)}>
+                    <CalendarPlus className="h-4 w-4 mr-2" />
+                    Book Now
+                  </Button>
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="lg" variant="outline" className="flex-1 md:flex-none">
+                        Enquire
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Book: {pkg.title}</DialogTitle>
@@ -470,11 +477,32 @@ const TravelPackageDetailPage = () => {
                     </form>
                   </DialogContent>
                 </Dialog>
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Booking Modal */}
+          <BookingModal
+            open={isBookingOpen}
+            onOpenChange={setIsBookingOpen}
+            type="package"
+            item={{
+              id: pkg.id,
+              title: pkg.title,
+              price: pkg.price_per_person,
+              duration_days: pkg.duration_days || undefined,
+              district: pkg.destination || pkg.region || undefined,
+            }}
+            source="travel_package_page"
+          />
         </div>
       </div>
+    </>
+  );
+};
+
+export default TravelPackageDetailPage;
     </>
   );
 };
