@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
+import { analytics } from "@/lib/analytics";
 
 type BookingType = "package" | "listing" | "product";
 
@@ -181,9 +182,26 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
         bookingData.pincode = formData.pincode || null;
       }
 
-      const { error } = await supabase.from("bookings").insert(bookingData as never);
+      const { data: bookingResult, error } = await supabase
+        .from("bookings")
+        .insert(bookingData as never)
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Track booking event for analytics
+      analytics.booking({
+        booking_id: bookingResult?.id || 'unknown',
+        booking_type: type,
+        item_id: item.id,
+        item_name: item.title,
+        price: calculateTotalPrice(),
+        currency: 'INR',
+        start_date: formData.startDate ? format(formData.startDate, "yyyy-MM-dd") : undefined,
+        end_date: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : undefined,
+        user_logged_in: !!user,
+      });
 
       setIsSuccess(true);
       toast({
