@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/lib/roles";
@@ -45,6 +45,10 @@ export const useAuth = () => {
     isAuthenticated: false,
   });
 
+  // Track if we've already initialized to prevent duplicate init
+  const hasInitialized = useRef(false);
+  const isInitializing = useRef(false);
+
   // Fetch user roles from user_roles table
   const fetchUserRoles = useCallback(async (userId: string): Promise<UserRole[]> => {
     try {
@@ -86,23 +90,9 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Update auth state with user data - always sets isAuthInitialized to true
-  const updateAuthState = useCallback(async (session: Session | null) => {
-    if (!session?.user) {
-      setAuthState({
-        user: null,
-        session: null,
-        profile: null,
-        roles: [],
-        isLoading: false,
-        isAuthInitialized: true,
-        isAuthenticated: false,
-      });
-      return;
-    }
-
+  // Load profile and roles for a user
+  const loadUserData = useCallback(async (session: Session) => {
     try {
-      // Fetch profile and roles in parallel
       const [profile, roles] = await Promise.all([
         fetchProfile(session.user.id),
         fetchUserRoles(session.user.id),
@@ -118,8 +108,8 @@ export const useAuth = () => {
         isAuthenticated: true,
       });
     } catch (error) {
-      console.error("Error updating auth state:", error);
-      // Even on error, set initialized to true to prevent infinite loading
+      console.error("Error loading user data:", error);
+      // Still mark as authenticated and initialized even if profile/roles fail
       setAuthState({
         user: session.user,
         session,
@@ -132,11 +122,30 @@ export const useAuth = () => {
     }
   }, [fetchProfile, fetchUserRoles]);
 
+  // Clear auth state (for logout)
+  const clearAuthState = useCallback(() => {
+    setAuthState({
+      user: null,
+      session: null,
+      profile: null,
+      roles: [],
+      isLoading: false,
+      isAuthInitialized: true,
+      isAuthenticated: false,
+    });
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
     const initializeAuth = async () => {
+      // Prevent duplicate initialization
+      if (isInitializing.current || hasInitialized.current) {
+        return;
+      }
+      
+      isInitializing.current = true;
+
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -144,18 +153,22 @@ export const useAuth = () => {
           console.error("Error getting session:", error);
         }
         
-        if (mounted) {
-          await updateAuthState(session);
+        if (!mounted) return;
+
+        if (session) {
+          await loadUserData(session);
+        } else {
+          clearAuthState();
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
         if (mounted) {
-          // Always mark as initialized even on error
-          setAuthState(prev => ({
-            ...prev,
-            isLoading: false,
-            isAuthInitialized: true,
-          }));
+          clearAuthState();
+        }
+      } finally {
+        if (mounted) {
+          hasInitialized.current = true;
+          isInitializing.current = false;
         }
       }
     };
@@ -164,42 +177,39 @@ export const useAuth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (!mounted) return;
         
         console.log("Auth state change:", event);
         
+        // Always set initialized to true on any auth event
+        // to prevent infinite loading
         if (event === 'SIGNED_OUT') {
-          // Handle sign-out synchronously
-          setAuthState({
-            user: null,
-            session: null,
-            profile: null,
-            roles: [],
-            isLoading: false,
-            isAuthInitialized: true,
-            isAuthenticated: false,
-          });
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-          // Defer data fetching to avoid deadlock, but keep initialized true
+          clearAuthState();
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           if (session) {
-            // Mark as loading but keep initialized true to prevent blank screen
+            // Load user data without blocking UI
+            // Set basic auth state immediately, then load additional data
             setAuthState(prev => ({
               ...prev,
               user: session.user,
               session,
               isAuthenticated: true,
-              isLoading: true,
-              isAuthInitialized: true, // Keep this true!
+              isAuthInitialized: true, // Critical: always set to true
+              isLoading: true, // Show we're loading more data
             }));
             
-            // Fetch additional data
-            setTimeout(() => {
-              if (mounted) {
-                updateAuthState(session);
-              }
-            }, 0);
+            // Load profile and roles in background
+            loadUserData(session);
           }
+        } else if (event === 'INITIAL_SESSION') {
+          // Initial session is handled by initializeAuth, skip to avoid duplicate
+          if (!hasInitialized.current && session) {
+            await loadUserData(session);
+          } else if (!hasInitialized.current && !session) {
+            clearAuthState();
+          }
+          hasInitialized.current = true;
         }
       }
     );
@@ -208,7 +218,7 @@ export const useAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [updateAuthState]);
+  }, [loadUserData, clearAuthState]);
 
   // Compute derived values
   const effectiveStatus = useMemo(() => {
@@ -256,9 +266,9 @@ export const useAuth = () => {
   // Refresh auth state
   const refetch = useCallback(async () => {
     if (authState.session) {
-      await updateAuthState(authState.session);
+      await loadUserData(authState.session);
     }
-  }, [authState.session, updateAuthState]);
+  }, [authState.session, loadUserData]);
 
   return {
     user: authState.user,
