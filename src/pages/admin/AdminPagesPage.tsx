@@ -20,6 +20,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { pagesExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const pageSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -53,6 +54,7 @@ export default function AdminPagesPage() {
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(pagesExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<PageFormData>({
     resolver: zodResolver(pageSchema),
@@ -108,18 +110,20 @@ export default function AdminPagesPage() {
         toast.error(`Failed to update: ${error.message}`);
       } else {
         toast.success("Page updated successfully");
+        logUpdate("page", editingPage.id, data.title);
         fetchPages();
         setDialogOpen(false);
         setEditingPage(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("cms_pages").insert([pageData]);
+      const { data: inserted, error } = await supabase.from("cms_pages").insert([pageData]).select();
 
       if (error) {
         toast.error(`Failed to create: ${error.message}`);
       } else {
         toast.success("Page created successfully");
+        if (inserted?.[0]) logCreate("page", inserted[0].id, data.title);
         fetchPages();
         setDialogOpen(false);
         form.reset();
@@ -140,13 +144,14 @@ export default function AdminPagesPage() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (!confirm("Are you sure you want to delete this page?")) return;
     const { error } = await supabase.from("cms_pages").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete page");
     } else {
       toast.success("Page deleted");
+      logDelete("page", id, title);
       fetchPages();
     }
   };
@@ -385,7 +390,7 @@ export default function AdminPagesPage() {
                             <Button variant="ghost" size="icon" onClick={() => handleEdit(page)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(page.id)}>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(page.id, page.title)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>

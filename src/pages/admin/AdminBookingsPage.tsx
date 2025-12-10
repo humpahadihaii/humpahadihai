@@ -13,6 +13,7 @@ import { Loader2, Search, Eye, Package, MapPin, ShoppingBag, Calendar, Phone, Ma
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 interface Booking {
   id: string;
@@ -77,6 +78,7 @@ export default function AdminBookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { logUpdate } = useAdminActivityLogger();
 
   const fetchBookings = async () => {
     setLoading(true);

@@ -18,6 +18,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { productCategoriesExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -46,6 +47,7 @@ const AdminProductCategoriesPage = () => {
   const [editingCategory, setEditingCategory] = useState<ProductCategory | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(productCategoriesExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),

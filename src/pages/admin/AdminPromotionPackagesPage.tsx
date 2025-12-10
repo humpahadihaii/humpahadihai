@@ -20,6 +20,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { promotionPackagesExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const packageSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -56,6 +57,7 @@ const AdminPromotionPackagesPage = () => {
   const [editingPackage, setEditingPackage] = useState<PromotionPackage | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(promotionPackagesExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<PackageFormData>({
     resolver: zodResolver(packageSchema),

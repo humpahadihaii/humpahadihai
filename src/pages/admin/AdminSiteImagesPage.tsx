@@ -14,6 +14,7 @@ import * as z from "zod";
 import { Pencil, Trash2, Plus, Search, ImageIcon } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const siteImageSchema = z.object({
   key: z.string().min(1, "Key required"),
@@ -42,6 +43,7 @@ export default function AdminSiteImagesPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SiteImage | null>(null);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<SiteImageFormData>({
     resolver: zodResolver(siteImageSchema),
@@ -92,18 +94,20 @@ export default function AdminSiteImagesPage() {
         toast.error("Failed to update image");
       } else {
         toast.success("Image updated successfully");
+        logUpdate("site_image", editingItem.id, data.title);
         fetchItems();
         setDialogOpen(false);
         setEditingItem(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("site_images").insert([imageData]);
+      const { data: inserted, error } = await supabase.from("site_images").insert([imageData]).select();
 
       if (error) {
         toast.error("Failed to create image");
       } else {
         toast.success("Image created successfully");
+        if (inserted?.[0]) logCreate("site_image", inserted[0].id, data.title);
         fetchItems();
         setDialogOpen(false);
         form.reset();
@@ -123,13 +127,14 @@ export default function AdminSiteImagesPage() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (!confirm("Are you sure?")) return;
     const { error } = await supabase.from("site_images").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete image");
     } else {
       toast.success("Image deleted");
+      logDelete("site_image", id, title);
       fetchItems();
     }
   };
@@ -316,7 +321,7 @@ export default function AdminSiteImagesPage() {
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id, item.title)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

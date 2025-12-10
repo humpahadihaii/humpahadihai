@@ -22,6 +22,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { eventsExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const eventSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -58,6 +59,7 @@ export default function AdminEventsPage() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(eventsExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -115,18 +117,20 @@ export default function AdminEventsPage() {
         toast.error(`Failed to update: ${error.message}`);
       } else {
         toast.success("Event updated successfully");
+        logUpdate("event", editingEvent.id, data.title);
         fetchEvents();
         setDialogOpen(false);
         setEditingEvent(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("cms_events").insert([eventData]);
+      const { data: inserted, error } = await supabase.from("cms_events").insert([eventData]).select();
 
       if (error) {
         toast.error(`Failed to create: ${error.message}`);
       } else {
         toast.success("Event created successfully");
+        if (inserted?.[0]) logCreate("event", inserted[0].id, data.title);
         fetchEvents();
         setDialogOpen(false);
         form.reset();
@@ -149,13 +153,14 @@ export default function AdminEventsPage() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
     const { error } = await supabase.from("cms_events").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete event");
     } else {
       toast.success("Event deleted");
+      logDelete("event", id, title);
       fetchEvents();
     }
   };
@@ -432,7 +437,7 @@ export default function AdminEventsPage() {
                             <Button variant="ghost" size="icon" onClick={() => handleEdit(event)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(event.id)}>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(event.id, event.title)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>

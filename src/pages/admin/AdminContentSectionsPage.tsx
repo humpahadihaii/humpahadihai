@@ -17,6 +17,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import Papa from "papaparse";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const sectionSchema = z.object({
   slug: z.string().min(2, "Slug required"),
@@ -48,6 +49,7 @@ export default function AdminContentSectionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<SectionFormData>({
     resolver: zodResolver(sectionSchema),
@@ -104,18 +106,20 @@ export default function AdminContentSectionsPage() {
         toast.error(`Failed to update: ${error.message}`);
       } else {
         toast.success("Section updated successfully");
+        logUpdate("content_section", editingSection.id, data.title);
         fetchSections();
         setDialogOpen(false);
         setEditingSection(null);
         form.reset();
       }
     } else {
-      const { error } = await supabase.from("cms_content_sections").insert([sectionData]);
+      const { data: inserted, error } = await supabase.from("cms_content_sections").insert([sectionData]).select();
 
       if (error) {
         toast.error(`Failed to create: ${error.message}`);
       } else {
         toast.success("Section created successfully");
+        if (inserted?.[0]) logCreate("content_section", inserted[0].id, data.title);
         fetchSections();
         setDialogOpen(false);
         form.reset();
@@ -137,13 +141,14 @@ export default function AdminContentSectionsPage() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (!confirm("Are you sure you want to delete this section?")) return;
     const { error } = await supabase.from("cms_content_sections").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete section");
     } else {
       toast.success("Section deleted");
+      logDelete("content_section", id, title);
       fetchSections();
     }
   };
@@ -434,7 +439,7 @@ export default function AdminContentSectionsPage() {
                             <Button variant="ghost" size="icon" onClick={() => handleEdit(section)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(section.id)}>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(section.id, section.title)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>

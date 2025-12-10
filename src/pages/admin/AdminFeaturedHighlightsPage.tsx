@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 type FeaturedHighlight = Database["public"]["Tables"]["featured_highlights"]["Row"];
 type FeaturedHighlightInsert = Database["public"]["Tables"]["featured_highlights"]["Insert"];

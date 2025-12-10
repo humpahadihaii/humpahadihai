@@ -17,6 +17,7 @@ import { useExcelOperations } from "@/hooks/useExcelOperations";
 import { ExcelImportExportButtons } from "@/components/admin/ExcelImportExportButtons";
 import { ExcelImportModal } from "@/components/admin/ExcelImportModal";
 import { footerLinksExcelConfig } from "@/lib/excelConfigs";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 const footerLinkSchema = z.object({
   label: z.string().min(1, "Label required"),
@@ -45,6 +46,7 @@ export default function AdminFooterLinksPage() {
   const [editingLink, setEditingLink] = useState<FooterLink | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const excel = useExcelOperations(footerLinksExcelConfig);
+  const { logCreate, logUpdate, logDelete } = useAdminActivityLogger();
 
   const form = useForm<FooterLinkFormData>({
     resolver: zodResolver(footerLinkSchema),

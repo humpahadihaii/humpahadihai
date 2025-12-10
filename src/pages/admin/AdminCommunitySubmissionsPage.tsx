@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Search, Eye, CheckCircle, XCircle, AlertCircle, FileText, Image as ImageIcon } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import type { Database } from "@/integrations/supabase/types";
+import { useAdminActivityLogger } from "@/hooks/useAdminActivityLogger";
 
 type CommunitySubmission = Database["public"]["Tables"]["community_submissions"]["Row"];
 
@@ -25,6 +26,7 @@ export default function AdminCommunitySubmissionsPage() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<CommunitySubmission | null>(null);
   const [reviewerNotes, setReviewerNotes] = useState("");
+  const { logApprove, logReject, logUpdate } = useAdminActivityLogger();
 
   useEffect(() => {
     fetchSubmissions();
