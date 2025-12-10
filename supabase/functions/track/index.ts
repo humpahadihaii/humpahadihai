@@ -93,15 +93,34 @@ serve(async (req) => {
       );
     }
 
-    // Record site visit
+    // Extract section from URL path
+    const urlPath = url ? new URL(url, 'https://example.com').pathname : '/';
+    let section = 'home';
+    if (urlPath.startsWith('/districts')) section = 'districts';
+    else if (urlPath.startsWith('/travel')) section = 'travel';
+    else if (urlPath.startsWith('/marketplace')) section = 'marketplace';
+    else if (urlPath.startsWith('/products') || urlPath.startsWith('/shop')) section = 'shop';
+    else if (urlPath.startsWith('/culture')) section = 'culture';
+    else if (urlPath.startsWith('/food')) section = 'food';
+    else if (urlPath.startsWith('/gallery')) section = 'gallery';
+    else if (urlPath.startsWith('/thoughts')) section = 'thoughts';
+    else if (urlPath.startsWith('/about')) section = 'about';
+    else if (urlPath.startsWith('/contact')) section = 'contact';
+    else if (urlPath.startsWith('/stories')) section = 'stories';
+    else if (urlPath.startsWith('/promotions')) section = 'promotions';
+    else if (urlPath !== '/') section = 'other';
+
+    // Record site visit with full details
     const { error: visitError } = await supabase
       .from('site_visits')
       .insert({
         url: url || '/',
         referrer: categorizeReferrer(referrer),
+        raw_referrer: referrer || null,
         device,
         browser,
-        ip_hash: ipHash
+        ip_hash: ipHash,
+        section
       });
 
     if (visitError) {

@@ -6,23 +6,33 @@ import { Button } from '@/components/ui/button';
 import { useInternalAnalytics, DateRange } from '@/hooks/useInternalAnalytics';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, LineChart, Line, Legend 
+  PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import { 
   Users, Eye, MousePointer, TrendingUp, Monitor, Smartphone, Globe, 
-  Calendar, Download, Activity
+  Calendar, Download, Activity, Clock, MapPin
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { format, formatDistanceToNow } from 'date-fns';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const COLORS = [
   'hsl(var(--primary))', 
   'hsl(var(--secondary))', 
-  'hsl(142 76% 36%)', // Green
-  'hsl(38 92% 50%)',  // Orange
-  'hsl(262 83% 58%)', // Purple
-  'hsl(330 81% 60%)', // Pink
-  'hsl(199 89% 48%)', // Sky blue
+  'hsl(142 76% 36%)',
+  'hsl(38 92% 50%)',
+  'hsl(262 83% 58%)',
+  'hsl(330 81% 60%)',
+  'hsl(199 89% 48%)',
 ];
 
 export function FrontendAnalytics() {
@@ -36,12 +46,14 @@ export function FrontendAnalytics() {
     browserData,
     dailyVisits,
     bookingSummary,
+    sectionData,
+    visitorDetails,
   } = useInternalAnalytics(dateRange);
 
   const exportCSV = <T extends object>(data: T[], filename: string) => {
     if (!data.length) return;
     const headers = Object.keys(data[0] as object);
-    const rows = data.map(row => headers.map(h => (row as Record<string, unknown>)[h]).join(','));
+    const rows = data.map(row => headers.map(h => String((row as Record<string, unknown>)[h] ?? '')).join(','));
     const csvContent = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -206,62 +218,171 @@ export function FrontendAnalytics() {
       </Card>
 
       {/* Detailed Tabs */}
-      <Tabs defaultValue="pages" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="pages">Top Pages</TabsTrigger>
+      <Tabs defaultValue="visitors" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+          <TabsTrigger value="visitors">Visitor Log</TabsTrigger>
+          <TabsTrigger value="sections">Sections</TabsTrigger>
           <TabsTrigger value="referrers">Sources</TabsTrigger>
           <TabsTrigger value="devices">Devices</TabsTrigger>
           <TabsTrigger value="conversions">Conversions</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pages">
+        {/* Visitor Log Tab - NEW */}
+        <TabsContent value="visitors">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Top Pages
+                  <Clock className="h-5 w-5" />
+                  Visitor Log
                 </CardTitle>
+                <CardDescription>Recent visits with time, section, referrer, device & IP</CardDescription>
               </div>
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => exportCSV(pagePerformance, 'top-pages')}
-                disabled={!pagePerformance.length}
+                onClick={() => exportCSV(visitorDetails, 'visitor-log')}
+                disabled={!visitorDetails.length}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                {pagePerformance.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={pagePerformance} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" tick={{ fontSize: 12 }} />
-                      <YAxis 
-                        dataKey="page" 
-                        type="category" 
-                        tick={{ fontSize: 11 }} 
-                        width={150}
-                        tickFormatter={(v) => v.length > 25 ? v.slice(0, 25) + '...' : v}
-                      />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--background))', 
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    No page data available
-                  </div>
-                )}
+              <ScrollArea className="h-[400px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Section</TableHead>
+                      <TableHead>Page URL</TableHead>
+                      <TableHead>Referrer</TableHead>
+                      <TableHead>Device</TableHead>
+                      <TableHead>Browser</TableHead>
+                      <TableHead>IP Hash</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {visitorDetails.length > 0 ? (
+                      visitorDetails.map((visitor) => (
+                        <TableRow key={visitor.id}>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDistanceToNow(new Date(visitor.created_at), { addSuffix: true })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {visitor.section}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm max-w-[150px] truncate" title={visitor.url}>
+                            {visitor.url}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <Badge variant="secondary" className="capitalize w-fit">
+                                {visitor.referrer}
+                              </Badge>
+                              {visitor.raw_referrer && (
+                                <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={visitor.raw_referrer}>
+                                  {visitor.raw_referrer}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {visitor.device === 'mobile' && <Smartphone className="h-3 w-3 mr-1" />}
+                              {visitor.device === 'desktop' && <Monitor className="h-3 w-3 mr-1" />}
+                              {visitor.device}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm capitalize">
+                            {visitor.browser}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            {visitor.ip_hash.slice(0, 8)}...
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          No visitor data available
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Sections Tab - NEW */}
+        <TabsContent value="sections">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Section Breakdown
+                </CardTitle>
+                <CardDescription>Which sections visitors are viewing</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => exportCSV(sectionData, 'sections')}
+                disabled={!sectionData.length}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="h-[300px]">
+                  {sectionData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={sectionData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          dataKey="count"
+                          nameKey="section"
+                          label={({ section, percent }) => `${section} ${(percent * 100).toFixed(0)}%`}
+                          labelLine={false}
+                        >
+                          {sectionData.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      No section data
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {sectionData.map((item, index) => (
+                    <div key={item.section} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="capitalize font-medium">{item.section}</span>
+                      </div>
+                      <span className="text-muted-foreground">{item.count}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -433,47 +554,23 @@ export function FrontendAnalytics() {
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <div className="text-sm text-muted-foreground">Conversion Rate</div>
-                    <div className="text-2xl font-bold">{conversionRate}%</div>
-                  </div>
-                  <div className="space-y-2">
-                    {bookingSummary.byType.map((item, index) => (
-                      <div key={item.type} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                          />
-                          <span className="capitalize font-medium">{item.type}</span>
-                        </div>
-                        <span className="text-muted-foreground">{item.count}</span>
-                      </div>
-                    ))}
+                    <div className="text-3xl font-bold">{conversionRate}%</div>
                   </div>
                 </div>
                 <div className="h-[250px]">
                   {bookingSummary.byType.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={bookingSummary.byType}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          dataKey="count"
-                          nameKey="type"
-                          label={({ type, percent }) => `${type} ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {bookingSummary.byType.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
+                      <BarChart data={bookingSummary.byType}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="type" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
                         <Tooltip />
-                        <Legend />
-                      </PieChart>
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      No conversion data available
+                      No conversion data
                     </div>
                   )}
                 </div>

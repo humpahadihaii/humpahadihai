@@ -11,8 +11,8 @@ import {
   PieChart, Pie, Cell, LineChart, Line 
 } from 'recharts';
 import { 
-  Shield, Activity, UserCheck, AlertTriangle, Calendar, Download, 
-  Search, Users, Zap, FileSpreadsheet
+  Shield, Activity, UserCheck, Calendar, Download, 
+  Search, Zap, FileSpreadsheet, Eye, Users
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -38,6 +38,7 @@ const COLORS = [
 export function BackendAnalytics() {
   const [dateRange, setDateRange] = useState<DateRange>('30days');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sectionSearchQuery, setSectionSearchQuery] = useState('');
   const {
     loading,
     adminActivities,
@@ -46,7 +47,9 @@ export function BackendAnalytics() {
     activityByAction,
     activityByEntity,
     dailyActivity,
-    refetch,
+    adminSectionVisits,
+    sectionVisitBreakdown,
+    userSectionBreakdown,
   } = useBackendAnalytics(dateRange);
 
   const filteredActivities = adminActivities.filter(a => 
@@ -54,6 +57,11 @@ export function BackendAnalytics() {
     a.summary?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     a.entity_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     a.action?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredSectionVisits = adminSectionVisits.filter(sv =>
+    sv.user_email?.toLowerCase().includes(sectionSearchQuery.toLowerCase()) ||
+    sv.section?.toLowerCase().includes(sectionSearchQuery.toLowerCase())
   );
 
   const exportCSV = <T extends object>(data: T[], filename: string) => {
@@ -103,7 +111,7 @@ export function BackendAnalytics() {
             <Shield className="h-5 w-5 text-destructive" />
             Backend Analytics
           </h2>
-          <p className="text-sm text-muted-foreground">Admin activity & system logs (sensitive)</p>
+          <p className="text-sm text-muted-foreground">Admin activity & section visits (sensitive)</p>
         </div>
         <div className="flex gap-2">
           <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
@@ -122,7 +130,7 @@ export function BackendAnalytics() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Admin Actions</CardTitle>
@@ -130,6 +138,16 @@ export function BackendAnalytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{backendStats.totalAdminActions}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Section Visits</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{backendStats.totalSectionVisits}</div>
           </CardContent>
         </Card>
 
@@ -211,12 +229,122 @@ export function BackendAnalytics() {
       </Card>
 
       {/* Tabs for detailed views */}
-      <Tabs defaultValue="activity" className="space-y-4">
+      <Tabs defaultValue="section-visits" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="section-visits">Section Visits</TabsTrigger>
           <TabsTrigger value="activity">Activity Feed</TabsTrigger>
           <TabsTrigger value="impersonations">Impersonations</TabsTrigger>
           <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
         </TabsList>
+
+        {/* Section Visits Tab - NEW */}
+        <TabsContent value="section-visits">
+          <Card>
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Admin Section Visits
+                </CardTitle>
+                <CardDescription>Which admin sections were visited by whom and when</CardDescription>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by user or section..."
+                    value={sectionSearchQuery}
+                    onChange={(e) => setSectionSearchQuery(e.target.value)}
+                    className="pl-9 w-full sm:w-[250px]"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => exportCSV(filteredSectionVisits, 'section-visits')}
+                  disabled={!filteredSectionVisits.length}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Visit Log */}
+                <div className="lg:col-span-2">
+                  <ScrollArea className="h-[400px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Time</TableHead>
+                          <TableHead>User</TableHead>
+                          <TableHead>Section</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredSectionVisits.length > 0 ? (
+                          filteredSectionVisits.map((visit) => (
+                            <TableRow key={visit.id}>
+                              <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                                {formatDistanceToNow(new Date(visit.created_at), { addSuffix: true })}
+                              </TableCell>
+                              <TableCell className="text-sm font-medium max-w-[180px] truncate">
+                                {visit.user_email}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {visit.section}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                              No section visits found
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </div>
+
+                {/* Breakdown */}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <FileSpreadsheet className="h-4 w-4" />
+                      By Section
+                    </h4>
+                    <div className="space-y-1 max-h-[180px] overflow-y-auto">
+                      {sectionVisitBreakdown.slice(0, 10).map((item) => (
+                        <div key={item.section} className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm">
+                          <span className="capitalize truncate">{item.section}</span>
+                          <Badge variant="secondary">{item.count}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      By User
+                    </h4>
+                    <div className="space-y-1 max-h-[180px] overflow-y-auto">
+                      {userSectionBreakdown.slice(0, 10).map((item) => (
+                        <div key={item.user_email} className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm">
+                          <span className="truncate max-w-[150px]">{item.user_email}</span>
+                          <Badge variant="secondary">{item.count}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="activity">
           <Card>

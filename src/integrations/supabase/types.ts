@@ -131,6 +131,30 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_section_visits: {
+        Row: {
+          created_at: string
+          id: string
+          section: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          section: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          section?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string | null
@@ -1930,7 +1954,9 @@ export type Database = {
           device: string | null
           id: string
           ip_hash: string | null
+          raw_referrer: string | null
           referrer: string | null
+          section: string | null
           url: string
         }
         Insert: {
@@ -1940,7 +1966,9 @@ export type Database = {
           device?: string | null
           id?: string
           ip_hash?: string | null
+          raw_referrer?: string | null
           referrer?: string | null
+          section?: string | null
           url: string
         }
         Update: {
@@ -1950,7 +1978,9 @@ export type Database = {
           device?: string | null
           id?: string
           ip_hash?: string | null
+          raw_referrer?: string | null
           referrer?: string | null
+          section?: string | null
           url?: string
         }
         Relationships: []

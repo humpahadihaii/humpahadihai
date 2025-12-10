@@ -40,6 +40,23 @@ interface BookingSummaryData {
   byType: { type: string; count: number }[];
 }
 
+interface SectionData {
+  section: string;
+  count: number;
+}
+
+interface VisitorDetail {
+  id: string;
+  url: string;
+  section: string;
+  referrer: string;
+  raw_referrer: string | null;
+  device: string;
+  browser: string;
+  ip_hash: string;
+  created_at: string;
+}
+
 export function useInternalAnalytics(dateRange: DateRange) {
   const [loading, setLoading] = useState(true);
   const [trafficOverview, setTrafficOverview] = useState<TrafficOverview>({ totalVisits: 0, uniqueVisitors: 0, totalPageViews: 0 });
@@ -49,6 +66,8 @@ export function useInternalAnalytics(dateRange: DateRange) {
   const [browserData, setBrowserData] = useState<BrowserData[]>([]);
   const [dailyVisits, setDailyVisits] = useState<DailyVisits[]>([]);
   const [bookingSummary, setBookingSummary] = useState<BookingSummaryData>({ total: 0, byType: [] });
+  const [sectionData, setSectionData] = useState<SectionData[]>([]);
+  const [visitorDetails, setVisitorDetails] = useState<VisitorDetail[]>([]);
 
   const getDateFilter = useCallback(() => {
     const now = new Date();
@@ -71,11 +90,24 @@ export function useInternalAnalytics(dateRange: DateRange) {
       const dateFilter = getDateFilter();
 
       // Fetch site visits
-      let visitsQuery = supabase.from('site_visits').select('*');
+      let visitsQuery = supabase.from('site_visits').select('*').order('created_at', { ascending: false });
       if (dateFilter) {
         visitsQuery = visitsQuery.gte('created_at', dateFilter);
       }
       const { data: visits } = await visitsQuery;
+
+      // Store detailed visitor data (last 100 for display)
+      setVisitorDetails((visits || []).slice(0, 100).map(v => ({
+        id: v.id,
+        url: v.url,
+        section: v.section || 'unknown',
+        referrer: v.referrer || 'direct',
+        raw_referrer: v.raw_referrer,
+        device: v.device || 'unknown',
+        browser: v.browser || 'unknown',
+        ip_hash: v.ip_hash || '',
+        created_at: v.created_at
+      })));
 
       // Calculate traffic overview
       const uniqueIPs = new Set(visits?.map(v => v.ip_hash) || []);
@@ -134,6 +166,18 @@ export function useInternalAnalytics(dateRange: DateRange) {
           .slice(-30) // Last 30 days max
       );
 
+      // Calculate section breakdown
+      const sectionCounts: Record<string, number> = {};
+      visits?.forEach(v => {
+        const sec = v.section || 'unknown';
+        sectionCounts[sec] = (sectionCounts[sec] || 0) + 1;
+      });
+      setSectionData(
+        Object.entries(sectionCounts)
+          .map(([section, count]) => ({ section, count }))
+          .sort((a, b) => b.count - a.count)
+      );
+
       // Fetch page views
       const { data: pageViews } = await supabase
         .from('page_views')
@@ -182,6 +226,8 @@ export function useInternalAnalytics(dateRange: DateRange) {
     browserData,
     dailyVisits,
     bookingSummary,
+    sectionData,
+    visitorDetails,
     refetch: fetchAnalytics
   };
 }
