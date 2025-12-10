@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
-import { useAuth, getEffectiveStatus } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { routeAfterLogin } from "@/lib/authRoles";
 import { performLogout } from "@/lib/auth";
 
 interface AdminRouteProps {
@@ -7,7 +8,15 @@ interface AdminRouteProps {
 }
 
 const AdminRoute = ({ children }: AdminRouteProps) => {
-  const { isAuthInitialized, isAuthenticated, profile, roles, session } = useAuth();
+  const {
+    isAuthInitialized,
+    isAuthenticated,
+    session,
+    roles,
+    isSuperAdmin,
+    canAccessAdminPanel,
+    profile,
+  } = useAuth();
 
   // Wait for auth to initialize - but with a timeout safety
   // If we have a session but still loading, show content anyway
@@ -16,7 +25,7 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     if (session) {
       return <>{children}</>;
     }
-    
+
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -29,22 +38,25 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Compute effective status
-  const effectiveStatus = getEffectiveStatus(profile?.status, roles);
+  // SUPER_ADMIN always has access - no other checks needed
+  if (isSuperAdmin) {
+    return <>{children}</>;
+  }
+
+  // Any admin panel role has access
+  if (canAccessAdminPanel) {
+    return <>{children}</>;
+  }
 
   // Disabled users - logout and redirect
-  if (effectiveStatus === "disabled") {
+  if (profile?.status === "disabled") {
     performLogout();
     return <Navigate to="/login" replace />;
   }
 
-  // Pending users - redirect to pending approval
-  if (effectiveStatus === "pending") {
-    return <Navigate to="/pending-approval" replace />;
-  }
-
-  // Active user with at least one role - render children
-  return <>{children}</>;
+  // No admin panel access - redirect to appropriate place
+  const target = routeAfterLogin({ roles, isSuperAdmin });
+  return <Navigate to={target} replace />;
 };
 
 export default AdminRoute;

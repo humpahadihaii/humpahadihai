@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
-import { useAuth, getEffectiveStatus } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { PermissionKey, canViewSection } from "@/lib/permissions";
+import { routeAfterLogin } from "@/lib/authRoles";
 
 interface ProtectedRouteProps {
   permission: PermissionKey;
@@ -8,15 +9,28 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
-  const { isAuthInitialized, isAuthenticated, profile, roles } = useAuth();
+  const { 
+    isAuthInitialized, 
+    isAuthenticated, 
+    profile, 
+    roles,
+    isSuperAdmin,
+    canAccessAdminPanel,
+    session,
+  } = useAuth();
 
   // Wait for auth to initialize - no redirects during loading
+  // But if we already have a session, proceed
   if (!isAuthInitialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    if (session) {
+      // Session exists, don't block
+    } else {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
   }
 
   // Not authenticated - redirect to login
@@ -24,24 +38,28 @@ const ProtectedRoute = ({ permission, children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Compute effective status
-  const effectiveStatus = getEffectiveStatus(profile?.status, roles);
-
-  // Non-active users - redirect appropriately
-  if (effectiveStatus === "pending") {
-    return <Navigate to="/pending-approval" replace />;
+  // SUPER_ADMIN always has access - bypass all other checks
+  if (isSuperAdmin) {
+    return <>{children}</>;
   }
 
-  if (effectiveStatus === "disabled") {
+  // User has admin panel access - check specific permission
+  if (canAccessAdminPanel) {
+    // Check permission using all roles (union of permissions)
+    if (!canViewSection(permission, roles)) {
+      return <Navigate to="/admin/unauthorized" replace />;
+    }
+    return <>{children}</>;
+  }
+
+  // Disabled users - redirect to login
+  if (profile?.status === "disabled") {
     return <Navigate to="/login" replace />;
   }
 
-  // Check permission using all roles (union of permissions)
-  if (!canViewSection(permission, roles)) {
-    return <Navigate to="/admin/unauthorized" replace />;
-  }
-
-  return <>{children}</>;
+  // No admin panel access - redirect appropriately
+  const target = routeAfterLogin({ roles, isSuperAdmin });
+  return <Navigate to={target} replace />;
 };
 
 export default ProtectedRoute;

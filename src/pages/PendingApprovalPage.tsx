@@ -5,8 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle, XCircle, LogOut } from "lucide-react";
-import { getEffectiveStatus, UserStatus } from "@/hooks/useAuth";
-import { UserRole } from "@/lib/roles";
+import { normalizeRoles, isSuperAdmin, hasAdminPanelAccess, routeAfterLogin, hasAnyRole } from "@/lib/authRoles";
 
 const PendingApprovalPage = () => {
   const [status, setStatus] = useState<string>("pending");
@@ -28,33 +27,42 @@ const PendingApprovalPage = () => {
 
         if (mounted) setUserEmail(session.user.email || "");
 
-        // Fetch roles and profile in parallel
-        const [rolesResult, profileResult, requestResult] = await Promise.all([
+        // Fetch roles and admin request in parallel
+        const [rolesResult, requestResult] = await Promise.all([
           supabase.from("user_roles").select("role").eq("user_id", session.user.id),
-          supabase.from("profiles").select("status").eq("id", session.user.id).single(),
           supabase.from("admin_requests").select("status").eq("user_id", session.user.id).single()
         ]);
 
-        const roles = (rolesResult.data?.map(r => r.role) || []) as UserRole[];
-        const profileStatus = (profileResult.data?.status || "pending") as UserStatus;
-        const effectiveStatus = getEffectiveStatus(profileStatus, roles);
-
-        // If user is active, redirect to admin
-        if (effectiveStatus === "active") {
-          if (mounted) navigate("/admin", { replace: true });
+        const roles = normalizeRoles(rolesResult.data?.map(r => r.role) || []);
+        
+        // BULLETPROOF CHECK: If user has ANY role, they should NOT be on this page
+        // Redirect them to the appropriate place immediately
+        if (isSuperAdmin(roles) || hasAdminPanelAccess(roles) || hasAnyRole(roles)) {
+          const target = routeAfterLogin({ roles, isSuperAdmin: isSuperAdmin(roles) });
+          if (mounted) navigate(target, { replace: true });
           return;
         }
 
-        // If user is disabled, sign out
-        if (effectiveStatus === "disabled") {
-          await supabase.auth.signOut();
-          if (mounted) navigate("/login", { replace: true });
-          return;
-        }
-
-        // Set request status for display
+        // Set request status for display (only for users with no roles)
         if (requestResult.data && mounted) {
           setStatus(requestResult.data.status);
+          
+          // If approved in admin_requests but still no roles, they need role assignment
+          if (requestResult.data.status === "approved") {
+            // Re-check roles after a moment (in case of race condition)
+            setTimeout(async () => {
+              const { data: recheck } = await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", session.user.id);
+              
+              const recheckedRoles = normalizeRoles(recheck?.map(r => r.role) || []);
+              if (hasAnyRole(recheckedRoles)) {
+                const target = routeAfterLogin({ roles: recheckedRoles, isSuperAdmin: isSuperAdmin(recheckedRoles) });
+                navigate(target, { replace: true });
+              }
+            }, 1000);
+          }
         }
 
         if (mounted) setLoading(false);
@@ -66,15 +74,15 @@ const PendingApprovalPage = () => {
 
     checkApprovalStatus();
 
-    // Listen for status changes via realtime
+    // Listen for role changes via realtime
     const channel = supabase
-      .channel("admin_requests_changes")
+      .channel("pending_approval_changes")
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
-          table: "admin_requests",
+          table: "user_roles",
         },
         () => {
           if (mounted) checkApprovalStatus();
@@ -83,9 +91,9 @@ const PendingApprovalPage = () => {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "UPDATE",
           schema: "public",
-          table: "user_roles",
+          table: "admin_requests",
         },
         () => {
           if (mounted) checkApprovalStatus();

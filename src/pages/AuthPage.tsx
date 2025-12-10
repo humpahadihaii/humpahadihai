@@ -9,8 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { getEffectiveStatus, UserStatus } from "@/hooks/useAuth";
-import { UserRole } from "@/lib/roles";
+import { normalizeRoles, isSuperAdmin, routeAfterLogin } from "@/lib/authRoles";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255),
@@ -40,36 +39,33 @@ const AuthPage = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
 
-  // Helper to fetch user data and determine redirect
+  // Helper to fetch user data and determine redirect using centralized logic
   const handleUserRedirect = async (userId: string) => {
     try {
-      // Fetch roles and profile in parallel
-      const [rolesResult, profileResult] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", userId),
-        supabase.from("profiles").select("status").eq("id", userId).single()
-      ]);
+      // Fetch roles from user_roles table
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
 
-      const roles = (rolesResult.data?.map(r => r.role) || []) as UserRole[];
-      const status = (profileResult.data?.status || "pending") as UserStatus;
+      if (rolesError) {
+        console.error("Error fetching roles:", rolesError);
+      }
+
+      const roles = normalizeRoles(rolesData?.map((r) => r.role) || []);
+      const superAdmin = isSuperAdmin(roles);
+
+      // Use centralized routing logic
+      const target = routeAfterLogin({ roles, isSuperAdmin: superAdmin });
       
-      const effectiveStatus = getEffectiveStatus(status, roles);
-
-      if (effectiveStatus === "disabled") {
-        toast.error("Your account has been disabled. Please contact support.");
-        await supabase.auth.signOut();
-        return;
+      if (target === "/admin") {
+        toast.success("Welcome back!");
       }
-
-      if (effectiveStatus === "pending") {
-        navigate("/pending-approval", { replace: true });
-        return;
-      }
-
-      // Active user with roles - go to admin
-      toast.success("Welcome back!");
-      navigate("/admin", { replace: true });
+      
+      navigate(target, { replace: true });
     } catch (error) {
       console.error("Error checking user status:", error);
+      // On error, default to pending-approval for safety
       navigate("/pending-approval", { replace: true });
     }
   };
@@ -118,7 +114,7 @@ const AuthPage = () => {
         return;
       }
 
-      // Successful login - perform single redirect
+      // Successful login - perform single redirect using centralized logic
       if (data.user) {
         await handleUserRedirect(data.user.id);
       }

@@ -1,4 +1,5 @@
 // Centralized role definitions matching the database app_role enum
+// NOTE: For auth-related role checks, prefer using src/lib/authRoles.ts
 export type UserRole =
   | "super_admin"
   | "admin"
