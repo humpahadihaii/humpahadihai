@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.analytics-worker]
 verify_jwt = false
+
+[functions.analytics-alerts]
+verify_jwt = false
+
+[functions.analytics-export]
+verify_jwt = false
