@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import GoogleMap, { MapMarker } from "@/components/maps/GoogleMap";
+import LeafletMap, { MapMarker } from "@/components/maps/LeafletMap";
 import { useMapSettings } from "@/hooks/useMapSettings";
 
 interface DistrictMapProps {
@@ -101,13 +101,12 @@ const DistrictMap = ({
   }
 
   return (
-    <GoogleMap
+    <LeafletMap
       markers={markers}
       center={{ lat: defaultLat, lng: defaultLng }}
       zoom={9}
       title={`Map of ${districtName}`}
       height="400px"
-      enableClustering={settings?.enable_clustering ?? true}
     />
   );
 };

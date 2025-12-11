@@ -58,50 +58,12 @@ export const useMapSettings = () => {
     },
   });
 
-  const testApiKey = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("maps-geocode", {
-        body: { action: "test" },
-      });
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: async (data) => {
-      const status = data.success ? "valid" : "invalid";
-      await supabase
-        .from("map_settings")
-        .update({
-          api_key_status: status,
-          last_api_test: new Date().toISOString(),
-        })
-        .eq("singleton_flag", true);
-      
-      queryClient.invalidateQueries({ queryKey: ["map-settings"] });
-      
-      if (data.success) {
-        toast.success("API key is valid!");
-      } else {
-        toast.error("API key test failed: " + (data.error || data.status));
-      }
-    },
-    onError: (error) => {
-      toast.error("Failed to test API key: " + error.message);
-    },
-  });
-
-  // Get client-side API key from environment
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || null;
-
   return {
     settings,
     isLoading,
     error,
-    apiKey,
     updateSettings: updateSettings.mutate,
     isUpdating: updateSettings.isPending,
-    testApiKey: testApiKey.mutate,
-    isTestingApiKey: testApiKey.isPending,
   };
 };
 
