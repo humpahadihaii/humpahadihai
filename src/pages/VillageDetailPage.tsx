@@ -10,6 +10,7 @@ import { MapPin, Utensils, Landmark, ChevronRight, ArrowLeft, Store, Package, Sh
 import { useVillageLinkedContent } from "@/hooks/useVillageLinks";
 import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
+import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 
 const VillageDetailPage = () => {
   const { slug } = useParams();
@@ -487,8 +488,18 @@ const VillageDetailPage = () => {
               </Tabs>
             </div>
 
-            {/* Sidebar - More in District */}
-            <div className="lg:col-span-1">
+            {/* Sidebar */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Events Widget */}
+              {village?.id && (
+                <EventCalendarWidget 
+                  villageId={village.id} 
+                  title={`Events in ${village.name}`}
+                  limit={3}
+                />
+              )}
+
+              {/* More in District */}
               {hasRelatedContent && village?.districts && (
                 <Card className="sticky top-4">
                   <CardHeader>

@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
   id: string;
@@ -21,12 +23,16 @@ interface Event {
 }
 
 interface EventCalendarWidgetProps {
-  events: Event[];
+  events?: Event[];
   isLoading?: boolean;
   title?: string;
   showViewAll?: boolean;
   viewAllLink?: string;
   compact?: boolean;
+  // Optional: fetch events automatically by villageId or districtId
+  villageId?: string;
+  districtId?: string;
+  limit?: number;
 }
 
 const EVENT_TYPE_COLORS: Record<string, string> = {
@@ -43,13 +49,56 @@ const EVENT_TYPE_COLORS: Record<string, string> = {
 };
 
 export default function EventCalendarWidget({
-  events,
-  isLoading,
+  events: propEvents,
+  isLoading: propLoading,
   title = "Upcoming Events",
   showViewAll = true,
   viewAllLink = "/events",
   compact = false,
+  villageId,
+  districtId,
+  limit = 5,
 }: EventCalendarWidgetProps) {
+  // Fetch events automatically if villageId or districtId is provided
+  const { data: fetchedEvents, isLoading: fetchLoading } = useQuery({
+    queryKey: ["widget-events", villageId, districtId, limit],
+    queryFn: async () => {
+      let query = supabase
+        .from("events")
+        .select(`
+          id, title, slug, short_description, cover_image_url, 
+          start_at, end_at, event_type, is_free, ticket_price,
+          village:villages(id, name, slug)
+        `)
+        .eq("status", "published")
+        .gte("start_at", new Date().toISOString())
+        .order("start_at", { ascending: true })
+        .limit(limit);
+
+      if (villageId) {
+        query = query.eq("village_id", villageId);
+      }
+      if (districtId) {
+        query = query.eq("district_id", districtId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Event[];
+    },
+    enabled: !propEvents && (!!villageId || !!districtId),
+  });
+
+  const events = propEvents || fetchedEvents || [];
+  const isLoading = propLoading || fetchLoading;
+
+  // Generate viewAllLink based on filters
+  const computedViewAllLink = villageId 
+    ? `/events?village=${villageId}` 
+    : districtId 
+    ? `/events?district=${districtId}` 
+    : viewAllLink;
+
   if (isLoading) {
     return (
       <Card>
@@ -91,7 +140,7 @@ export default function EventCalendarWidget({
           </CardTitle>
           {showViewAll && (
             <Button variant="ghost" size="sm" asChild>
-              <Link to={viewAllLink} className="text-primary">
+              <Link to={computedViewAllLink} className="text-primary">
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
