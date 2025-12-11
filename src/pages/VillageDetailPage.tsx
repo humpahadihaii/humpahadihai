@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Utensils, Landmark, ChevronRight, ArrowLeft, Store, Package, ShoppingBag } from "lucide-react";
 import { useVillageLinkedContent } from "@/hooks/useVillageLinks";
+import SEOHead from "@/components/SEOHead";
+import { usePageSEO } from "@/hooks/useSEO";
 
 const VillageDetailPage = () => {
   const { slug } = useParams();
@@ -86,6 +88,17 @@ const VillageDetailPage = () => {
   const { providers, listings, packages, products, isLoading: linkedLoading } = useVillageLinkedContent(village?.id);
   const hasLinkedContent = providers.length > 0 || listings.length > 0 || packages.length > 0 || products.length > 0;
 
+  // SEO metadata
+  const seoMeta = usePageSEO('village', village ? {
+    name: village.name,
+    slug: village.slug,
+    description: village.introduction || village.history,
+    excerpt: village.introduction,
+    image: village.thumbnail_url,
+    district_name: village.districts?.name,
+    highlights: village.introduction?.substring(0, 100),
+  } : undefined);
+
   if (isLoading) {
     return (
       <div className="min-h-screen p-8">
@@ -98,6 +111,8 @@ const VillageDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+      <SEOHead meta={seoMeta} />
+      
       {/* Hero Section */}
       <section className="relative h-96 overflow-hidden">
         <img

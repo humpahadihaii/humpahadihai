@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink, CalendarPlus } from "lucide-react";
-import { Helmet } from "react-helmet";
+import SEOHead from "@/components/SEOHead";
+import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 
@@ -168,12 +169,21 @@ const TravelPackageDetailPage = () => {
     );
   }
 
+  // SEO metadata
+  const seoMeta = usePageSEO('travel_package', {
+    name: pkg.title,
+    title: pkg.title,
+    slug: pkg.slug,
+    description: pkg.short_description || pkg.full_description,
+    image: pkg.thumbnail_image_url,
+    duration: pkg.duration_days ? `${pkg.duration_days} Days` : undefined,
+    price: pkg.price_per_person,
+    region: pkg.region,
+  });
+
   return (
     <>
-      <Helmet>
-        <title>{pkg.title} | Travel Packages | Hum Pahadi Haii</title>
-        <meta name="description" content={pkg.short_description || `Explore ${pkg.title} - a curated travel experience in Uttarakhand.`} />
-      </Helmet>
+      <SEOHead meta={seoMeta} />
 
       <div className="min-h-screen py-8 px-4">
         <div className="container mx-auto max-w-4xl">

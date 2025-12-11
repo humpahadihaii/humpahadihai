@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
-import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +11,8 @@ import { useState, useMemo, lazy, Suspense } from "react";
 import type { Database } from "@/integrations/supabase/types";
 import PlacesToVisit from "@/components/PlacesToVisit";
 import FoodAndFestivals from "@/components/FoodAndFestivals";
+import SEOHead from "@/components/SEOHead";
+import { usePageSEO } from "@/hooks/useSEO";
 
 // Lazy load the map component
 const DistrictMap = lazy(() => import("@/components/DistrictMap"));
@@ -299,39 +300,20 @@ const DistrictDetailPage = () => {
     );
   }
 
-  const metaTitle = `${district.name} District, Uttarakhand - Villages, Places, Food & Culture | Pahadi Heritage Encyclopedia`;
-  const metaDescription = district.overview?.substring(0, 155) + "..." || `Discover ${district.name} district in Uttarakhand - explore villages, famous places, local food, festivals and rich cultural heritage.`;
-
-  // Structured data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "AdministrativeArea",
-    "name": `${district.name} District`,
-    "containedInPlace": {
-      "@type": "State",
-      "name": "Uttarakhand",
-      "containedInPlace": {
-        "@type": "Country",
-        "name": "India"
-      }
-    },
-    "description": district.overview,
-    "image": district.banner_image || district.image_url,
-  };
+  // SEO metadata using the new SEO engine
+  const seoMeta = usePageSEO('district', {
+    name: district.name,
+    slug: district.slug,
+    description: district.overview,
+    overview: district.overview,
+    image: district.banner_image || district.image_url,
+    region: district.region,
+    highlights: district.highlights,
+  });
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>{metaTitle}</title>
-        <meta name="description" content={metaDescription} />
-        <meta property="og:title" content={metaTitle} />
-        <meta property="og:description" content={metaDescription} />
-        {district.banner_image && <meta property="og:image" content={district.banner_image} />}
-        <link rel="canonical" href={`https://humpahadihaii.in/districts/${district.slug}`} />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      </Helmet>
+      <SEOHead meta={seoMeta} />
 
       {/* Hero Section */}
       <section className="relative h-[60vh] overflow-hidden">

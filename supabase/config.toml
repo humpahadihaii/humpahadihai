@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.village-links]
 verify_jwt = true
+
+[functions.sitemap]
+verify_jwt = false
