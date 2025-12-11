@@ -56,6 +56,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
   
   // Settings
   { name: "Site Settings", href: "/admin/site-settings", icon: Settings, section: "Settings" },
+  { name: "Map Settings", href: "/admin/map-settings", icon: Map },
   { name: "Notify Settings", href: "/admin/notify-settings", icon: Bell },
   { name: "Page Settings", href: "/admin/page-settings", icon: FileText },
   
