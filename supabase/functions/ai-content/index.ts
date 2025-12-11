@@ -258,33 +258,13 @@ serve(async (req) => {
 
     const request: AIRequest = await req.json();
     
-    // Try to get API key from database first, then fall back to environment variable
-    let GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    // Use Lovable AI Gateway - no API key setup required
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
-    try {
-      const { data: apiKeyData } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "gemini_api_key")
-        .maybeSingle();
-      
-      if (apiKeyData?.value) {
-        const dbKey = typeof apiKeyData.value === 'string' 
-          ? apiKeyData.value 
-          : (apiKeyData.value as any)?.key;
-        if (dbKey) {
-          GEMINI_API_KEY = dbKey;
-          console.log("Using API key from database");
-        }
-      }
-    } catch (dbError) {
-      console.log("Could not fetch API key from database, using env var");
-    }
-
-    if (!GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "AI service not configured. Please set your Gemini API key in Admin → AI Settings." }),
+        JSON.stringify({ error: "AI service not configured. LOVABLE_API_KEY is missing." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -294,10 +274,10 @@ serve(async (req) => {
 
     console.log("AI Request:", { type: request.type, action: request.action });
 
-    // Call Gemini API directly - using gemini-2.0-flash-exp (current available model)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+    // Call Lovable AI Gateway
+    const lovableAIUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-    console.log("Calling Gemini API...");
+    console.log("Calling Lovable AI Gateway...");
 
     // Add timeout using AbortController
     const controller = new AbortController();
@@ -305,26 +285,25 @@ serve(async (req) => {
 
     let response;
     try {
-      response = await fetch(geminiUrl, {
+      response = await fetch(lovableAIUrl, {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
           "Content-Type": "application/json",
         },
         signal: controller.signal,
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          }
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
         }),
       });
     } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        console.error("Gemini API request timed out");
+        console.error("AI request timed out");
         return new Response(
           JSON.stringify({ error: "Request timed out. Please try again." }),
           { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -334,11 +313,11 @@ serve(async (req) => {
     }
     clearTimeout(timeoutId);
 
-    console.log("Gemini API response status:", response.status);
+    console.log("Lovable AI response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
+      console.error("Lovable AI error:", response.status, errorText);
 
       if (response.status === 429) {
         return new Response(
@@ -347,10 +326,10 @@ serve(async (req) => {
         );
       }
 
-      if (response.status === 403) {
+      if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "API key invalid or quota exceeded." }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "AI usage credits exceeded. Please add credits to your workspace." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
@@ -361,13 +340,13 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("Gemini API response received");
+    console.log("Lovable AI response received");
     
-    // Extract content from Gemini response format
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    // Extract content from OpenAI-compatible response format
+    const content = data.choices?.[0]?.message?.content || "";
 
     if (!content) {
-      console.error("No content in Gemini response:", JSON.stringify(data));
+      console.error("No content in AI response:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ error: "No content generated. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
