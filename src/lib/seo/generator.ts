@@ -11,7 +11,8 @@ export type PageType =
   | 'travel_package' 
   | 'product' 
   | 'story' 
-  | 'event' 
+  | 'event'
+  | 'events'
   | 'static_page' 
   | 'thoughts'
   | 'thought'
@@ -938,6 +939,7 @@ function getPathForType(pageType: PageType): string {
     product: 'products',
     story: 'stories',
     event: 'events',
+    events: 'events',
     static_page: '',
     thoughts: 'thoughts',
     thought: 'thoughts',

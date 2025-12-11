@@ -1916,6 +1916,465 @@ export type Database = {
         }
         Relationships: []
       }
+      event_audit_log: {
+        Row: {
+          action: string
+          after_state: Json | null
+          before_state: Json | null
+          changed_by: string | null
+          created_at: string | null
+          event_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          after_state?: Json | null
+          before_state?: Json | null
+          changed_by?: string | null
+          created_at?: string | null
+          event_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          after_state?: Json | null
+          before_state?: Json | null
+          changed_by?: string | null
+          created_at?: string | null
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_audit_log_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          email: string
+          event_id: string
+          id: string
+          message: string | null
+          name: string
+          occurrence_id: string | null
+          phone: string | null
+          seats_requested: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          email: string
+          event_id: string
+          id?: string
+          message?: string | null
+          name: string
+          occurrence_id?: string | null
+          phone?: string | null
+          seats_requested?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          email?: string
+          event_id?: string
+          id?: string
+          message?: string | null
+          name?: string
+          occurrence_id?: string | null
+          phone?: string | null
+          seats_requested?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_inquiries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_inquiries_occurrence_id_fkey"
+            columns: ["occurrence_id"]
+            isOneToOne: false
+            referencedRelation: "event_occurrences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_occurrences: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          is_cancelled: boolean | null
+          occurrence_end: string | null
+          occurrence_start: string
+          override_description: string | null
+          override_title: string | null
+          override_venue_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          is_cancelled?: boolean | null
+          occurrence_end?: string | null
+          occurrence_start: string
+          override_description?: string | null
+          override_title?: string | null
+          override_venue_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          is_cancelled?: boolean | null
+          occurrence_end?: string | null
+          occurrence_start?: string
+          override_description?: string | null
+          override_title?: string | null
+          override_venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_occurrences_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_occurrences_override_venue_id_fkey"
+            columns: ["override_venue_id"]
+            isOneToOne: false
+            referencedRelation: "event_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_promotions: {
+        Row: {
+          created_at: string | null
+          discount_percent: number | null
+          event_id: string
+          id: string
+          item_id: string
+          item_type: string
+          priority: number | null
+          promo_code: string | null
+          promote: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount_percent?: number | null
+          event_id: string
+          id?: string
+          item_id: string
+          item_type: string
+          priority?: number | null
+          promo_code?: string | null
+          promote?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          discount_percent?: number | null
+          event_id?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          priority?: number | null
+          promo_code?: string | null
+          promote?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_promotions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tag_links: {
+        Row: {
+          event_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tag_links_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_tag_links_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "event_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tags: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      event_venues: {
+        Row: {
+          address: string | null
+          capacity: number | null
+          created_at: string | null
+          district_id: string | null
+          id: string
+          is_active: boolean | null
+          lat: number | null
+          lng: number | null
+          name: string
+          phone: string | null
+          updated_at: string | null
+          village_id: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          capacity?: number | null
+          created_at?: string | null
+          district_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          phone?: string | null
+          updated_at?: string | null
+          village_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          capacity?: number | null
+          created_at?: string | null
+          district_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          phone?: string | null
+          updated_at?: string | null
+          village_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_venues_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_venues_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          capacity: number | null
+          contact_email: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          district_id: string | null
+          end_at: string | null
+          event_type: Database["public"]["Enums"]["event_type"] | null
+          gallery_images: string[] | null
+          id: string
+          is_featured: boolean | null
+          is_free: boolean | null
+          is_recurring: boolean | null
+          map_visible: boolean | null
+          organizer_id: string | null
+          published_at: string | null
+          recurrence_end_at: string | null
+          recurrence_rule: string | null
+          seats_booked: number | null
+          short_description: string | null
+          slug: string
+          start_at: string
+          status: Database["public"]["Enums"]["event_status"] | null
+          tags: string[] | null
+          ticket_price: number | null
+          ticket_url: string | null
+          timezone: string | null
+          title: string
+          updated_at: string | null
+          venue_id: string | null
+          village_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          capacity?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          district_id?: string | null
+          end_at?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          gallery_images?: string[] | null
+          id?: string
+          is_featured?: boolean | null
+          is_free?: boolean | null
+          is_recurring?: boolean | null
+          map_visible?: boolean | null
+          organizer_id?: string | null
+          published_at?: string | null
+          recurrence_end_at?: string | null
+          recurrence_rule?: string | null
+          seats_booked?: number | null
+          short_description?: string | null
+          slug: string
+          start_at: string
+          status?: Database["public"]["Enums"]["event_status"] | null
+          tags?: string[] | null
+          ticket_price?: number | null
+          ticket_url?: string | null
+          timezone?: string | null
+          title: string
+          updated_at?: string | null
+          venue_id?: string | null
+          village_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          capacity?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          district_id?: string | null
+          end_at?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          gallery_images?: string[] | null
+          id?: string
+          is_featured?: boolean | null
+          is_free?: boolean | null
+          is_recurring?: boolean | null
+          map_visible?: boolean | null
+          organizer_id?: string | null
+          published_at?: string | null
+          recurrence_end_at?: string | null
+          recurrence_rule?: string | null
+          seats_booked?: number | null
+          short_description?: string | null
+          slug?: string
+          start_at?: string
+          status?: Database["public"]["Enums"]["event_status"] | null
+          tags?: string[] | null
+          ticket_price?: number | null
+          ticket_url?: string | null
+          timezone?: string | null
+          title?: string
+          updated_at?: string | null
+          venue_id?: string | null
+          village_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "tourism_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "event_venues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       featured_cards: {
         Row: {
           ab_test_tag: string | null
@@ -3959,6 +4418,18 @@ export type Database = {
         | "viewer"
         | "developer"
       district_content_category: "Festival" | "Food" | "Place" | "Culture"
+      event_status: "draft" | "pending" | "published" | "archived" | "cancelled"
+      event_type:
+        | "festival"
+        | "fair"
+        | "cultural"
+        | "religious"
+        | "music"
+        | "food"
+        | "sports"
+        | "workshop"
+        | "exhibition"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4104,6 +4575,19 @@ export const Constants = {
         "developer",
       ],
       district_content_category: ["Festival", "Food", "Place", "Culture"],
+      event_status: ["draft", "pending", "published", "archived", "cancelled"],
+      event_type: [
+        "festival",
+        "fair",
+        "cultural",
+        "religious",
+        "music",
+        "food",
+        "sports",
+        "workshop",
+        "exhibition",
+        "other",
+      ],
     },
   },
 } as const
