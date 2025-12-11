@@ -1094,7 +1094,10 @@ export type Database = {
           event_date: string | null
           id: string
           is_featured: boolean
+          lat: number | null
+          lng: number | null
           location: string | null
+          map_visible: boolean | null
           slug: string
           status: string
           title: string
@@ -1107,7 +1110,10 @@ export type Database = {
           event_date?: string | null
           id?: string
           is_featured?: boolean
+          lat?: number | null
+          lng?: number | null
           location?: string | null
+          map_visible?: boolean | null
           slug: string
           status?: string
           title: string
@@ -1120,7 +1126,10 @@ export type Database = {
           event_date?: string | null
           id?: string
           is_featured?: boolean
+          lat?: number | null
+          lng?: number | null
           location?: string | null
+          map_visible?: boolean | null
           slug?: string
           status?: string
           title?: string
@@ -2258,6 +2267,9 @@ export type Database = {
           id: string
           is_active: boolean
           is_featured: boolean
+          lat: number | null
+          lng: number | null
+          map_visible: boolean | null
           name: string
           price: number
           price_currency: string
@@ -2278,6 +2290,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_featured?: boolean
+          lat?: number | null
+          lng?: number | null
+          map_visible?: boolean | null
           name: string
           price?: number
           price_currency?: string
@@ -2298,6 +2313,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_featured?: boolean
+          lat?: number | null
+          lng?: number | null
+          map_visible?: boolean | null
           name?: string
           price?: number
           price_currency?: string
@@ -2326,6 +2344,168 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      map_highlights: {
+        Row: {
+          center_lat: number | null
+          center_lng: number | null
+          coordinates: Json
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          excerpt: string | null
+          fill_color: string | null
+          geometry_type: string
+          highlight_type: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          linked_districts: string[] | null
+          linked_villages: string[] | null
+          priority: number | null
+          radius_meters: number | null
+          slug: string
+          status: string | null
+          stroke_color: string | null
+          stroke_width: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          center_lat?: number | null
+          center_lng?: number | null
+          coordinates?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          excerpt?: string | null
+          fill_color?: string | null
+          geometry_type?: string
+          highlight_type?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          linked_districts?: string[] | null
+          linked_villages?: string[] | null
+          priority?: number | null
+          radius_meters?: number | null
+          slug: string
+          status?: string | null
+          stroke_color?: string | null
+          stroke_width?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          center_lat?: number | null
+          center_lng?: number | null
+          coordinates?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          excerpt?: string | null
+          fill_color?: string | null
+          geometry_type?: string
+          highlight_type?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          linked_districts?: string[] | null
+          linked_villages?: string[] | null
+          priority?: number | null
+          radius_meters?: number | null
+          slug?: string
+          status?: string | null
+          stroke_color?: string | null
+          stroke_width?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      map_poi_cache: {
+        Row: {
+          cached_at: string | null
+          category: string | null
+          district_id: string | null
+          district_name: string | null
+          entity_id: string
+          entity_type: string
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          lat: number
+          lng: number
+          price_max: number | null
+          price_min: number | null
+          properties: Json | null
+          rating: number | null
+          slug: string | null
+          subcategory: string | null
+          tags: string[] | null
+          title: string
+          village_id: string | null
+          village_name: string | null
+        }
+        Insert: {
+          cached_at?: string | null
+          category?: string | null
+          district_id?: string | null
+          district_name?: string | null
+          entity_id: string
+          entity_type: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          lat: number
+          lng: number
+          price_max?: number | null
+          price_min?: number | null
+          properties?: Json | null
+          rating?: number | null
+          slug?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          title: string
+          village_id?: string | null
+          village_name?: string | null
+        }
+        Update: {
+          cached_at?: string | null
+          category?: string | null
+          district_id?: string | null
+          district_name?: string | null
+          entity_id?: string
+          entity_type?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          lat?: number
+          lng?: number
+          price_max?: number | null
+          price_min?: number | null
+          properties?: Json | null
+          rating?: number | null
+          slug?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          title?: string
+          village_id?: string | null
+          village_name?: string | null
+        }
+        Relationships: []
       }
       map_settings: {
         Row: {
@@ -3041,6 +3221,10 @@ export type Database = {
           is_active: boolean
           is_featured: boolean
           is_sample: boolean
+          lat: number | null
+          lng: number | null
+          map_featured: boolean | null
+          map_visible: boolean | null
           price_unit: string | null
           provider_id: string
           short_description: string | null
@@ -3060,6 +3244,10 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_sample?: boolean
+          lat?: number | null
+          lng?: number | null
+          map_featured?: boolean | null
+          map_visible?: boolean | null
           price_unit?: string | null
           provider_id: string
           short_description?: string | null
@@ -3079,6 +3267,10 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_sample?: boolean
+          lat?: number | null
+          lng?: number | null
+          map_featured?: boolean | null
+          map_visible?: boolean | null
           price_unit?: string | null
           provider_id?: string
           short_description?: string | null
@@ -3124,6 +3316,10 @@ export type Database = {
           is_local: boolean | null
           is_sample: boolean
           is_verified: boolean
+          lat: number | null
+          lng: number | null
+          map_featured: boolean | null
+          map_visible: boolean | null
           name: string
           phone: string | null
           rating: number | null
@@ -3146,6 +3342,10 @@ export type Database = {
           is_local?: boolean | null
           is_sample?: boolean
           is_verified?: boolean
+          lat?: number | null
+          lng?: number | null
+          map_featured?: boolean | null
+          map_visible?: boolean | null
           name: string
           phone?: string | null
           rating?: number | null
@@ -3168,6 +3368,10 @@ export type Database = {
           is_local?: boolean | null
           is_sample?: boolean
           is_verified?: boolean
+          lat?: number | null
+          lng?: number | null
+          map_featured?: boolean | null
+          map_visible?: boolean | null
           name?: string
           phone?: string | null
           rating?: number | null
@@ -3270,11 +3474,15 @@ export type Database = {
           is_active: boolean
           is_featured: boolean
           itinerary: string | null
+          map_featured: boolean | null
+          map_visible: boolean | null
           price_currency: string
           price_per_person: number
           region: string | null
           short_description: string | null
           slug: string
+          start_lat: number | null
+          start_lng: number | null
           starting_point: string | null
           stops: Json | null
           thumbnail_image_url: string | null
@@ -3297,11 +3505,15 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           itinerary?: string | null
+          map_featured?: boolean | null
+          map_visible?: boolean | null
           price_currency?: string
           price_per_person?: number
           region?: string | null
           short_description?: string | null
           slug: string
+          start_lat?: number | null
+          start_lng?: number | null
           starting_point?: string | null
           stops?: Json | null
           thumbnail_image_url?: string | null
@@ -3324,11 +3536,15 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           itinerary?: string | null
+          map_featured?: boolean | null
+          map_visible?: boolean | null
           price_currency?: string
           price_per_person?: number
           region?: string | null
           short_description?: string | null
           slug?: string
+          start_lat?: number | null
+          start_lng?: number | null
           starting_point?: string | null
           stops?: Json | null
           thumbnail_image_url?: string | null
@@ -3601,8 +3817,13 @@ export type Database = {
           history: string | null
           id: string
           introduction: string
+          lat: number | null
           latitude: number | null
+          lng: number | null
           longitude: number | null
+          map_featured: boolean | null
+          map_priority: number | null
+          map_visible: boolean | null
           name: string
           population: number | null
           recipes: string | null
@@ -3626,8 +3847,13 @@ export type Database = {
           history?: string | null
           id?: string
           introduction: string
+          lat?: number | null
           latitude?: number | null
+          lng?: number | null
           longitude?: number | null
+          map_featured?: boolean | null
+          map_priority?: number | null
+          map_visible?: boolean | null
           name: string
           population?: number | null
           recipes?: string | null
@@ -3651,8 +3877,13 @@ export type Database = {
           history?: string | null
           id?: string
           introduction?: string
+          lat?: number | null
           latitude?: number | null
+          lng?: number | null
           longitude?: number | null
+          map_featured?: boolean | null
+          map_priority?: number | null
+          map_visible?: boolean | null
           name?: string
           population?: number | null
           recipes?: string | null
@@ -3701,6 +3932,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      refresh_map_poi_cache: { Args: never; Returns: undefined }
       user_has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
