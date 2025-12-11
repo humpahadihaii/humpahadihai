@@ -273,6 +273,17 @@ const DistrictDetailPage = () => {
     enabled: !!district?.id,
   });
 
+  // SEO metadata using the new SEO engine - must be called before early returns
+  const seoMeta = usePageSEO('district', district ? {
+    name: district.name,
+    slug: district.slug,
+    description: district.overview,
+    overview: district.overview,
+    image: district.banner_image || district.image_url,
+    region: district.region,
+    highlights: district.highlights,
+  } : {});
+
   if (districtLoading) {
     return (
       <div className="min-h-screen">
@@ -299,17 +310,6 @@ const DistrictDetailPage = () => {
       </div>
     );
   }
-
-  // SEO metadata using the new SEO engine
-  const seoMeta = usePageSEO('district', {
-    name: district.name,
-    slug: district.slug,
-    description: district.overview,
-    overview: district.overview,
-    image: district.banner_image || district.image_url,
-    region: district.region,
-    highlights: district.highlights,
-  });
 
   return (
     <div className="min-h-screen bg-background">
