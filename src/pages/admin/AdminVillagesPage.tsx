@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2, FileEdit } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2, FileEdit, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -665,6 +665,14 @@ export default function AdminVillagesPage() {
                           title="Edit Content"
                         >
                           <FileEdit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => navigate(`/admin/villages/${village.id}/economy`)}
+                          title="Local Economy"
+                        >
+                          <Store className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(village)} title="Edit Details">
                           <Pencil className="h-4 w-4" />

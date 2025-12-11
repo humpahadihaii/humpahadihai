@@ -41,6 +41,7 @@ import AdminDistrictsPage from "./pages/admin/AdminDistrictsPage";
 import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
 import AdminVillagesPage from "./pages/admin/AdminVillagesPage";
 import AdminVillageContentPage from "./pages/admin/AdminVillageContentPage";
+import AdminVillageEconomyPage from "./pages/admin/AdminVillageEconomyPage";
 import AdminFestivalsPage from "./pages/admin/AdminFestivalsPage";
 import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
 import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
@@ -153,6 +154,7 @@ const AppContent = () => {
             <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
             <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
             <Route path="/admin/villages/:id/content" element={<AdminRoute><AdminVillageContentPage /></AdminRoute>} />
+            <Route path="/admin/villages/:id/economy" element={<AdminRoute><AdminVillageEconomyPage /></AdminRoute>} />
             <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
             <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
             <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />

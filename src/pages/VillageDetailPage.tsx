@@ -6,7 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Utensils, Landmark, ChevronRight, ArrowLeft } from "lucide-react";
+import { MapPin, Utensils, Landmark, ChevronRight, ArrowLeft, Store, Package, ShoppingBag } from "lucide-react";
+import { useVillageLinkedContent } from "@/hooks/useVillageLinks";
 
 const VillageDetailPage = () => {
   const { slug } = useParams();
@@ -81,6 +82,10 @@ const VillageDetailPage = () => {
     (relatedTravel && relatedTravel.length > 0) || 
     (relatedCulture && relatedCulture.length > 0);
 
+  // Fetch linked marketplace content
+  const { providers, listings, packages, products, isLoading: linkedLoading } = useVillageLinkedContent(village?.id);
+  const hasLinkedContent = providers.length > 0 || listings.length > 0 || packages.length > 0 || products.length > 0;
+
   if (isLoading) {
     return (
       <div className="min-h-screen p-8">
@@ -136,6 +141,7 @@ const VillageDetailPage = () => {
                   <TabsTrigger value="crafts">Handicrafts</TabsTrigger>
                   <TabsTrigger value="stories">Stories</TabsTrigger>
                   <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                  {hasLinkedContent && <TabsTrigger value="local">Local Economy</TabsTrigger>}
                 </TabsList>
 
                 <TabsContent value="introduction" className="space-y-6">
@@ -329,7 +335,7 @@ const VillageDetailPage = () => {
                   <div className="space-y-6">
                     {village?.gallery_images && village.gallery_images.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {village.gallery_images.map((imageUrl, index) => (
+                        {village.gallery_images.map((imageUrl: string, index: number) => (
                           <div key={index} className="overflow-hidden rounded-lg aspect-video">
                             <img
                               src={imageUrl}
@@ -359,6 +365,110 @@ const VillageDetailPage = () => {
                     )}
                   </div>
                 </TabsContent>
+
+                {/* Local Economy Tab - Linked Content */}
+                {hasLinkedContent && (
+                  <TabsContent value="local" className="space-y-6">
+                    {/* Marketplace Listings */}
+                    {listings.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Store className="h-5 w-5" />
+                            Local Stays & Experiences
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {listings.map((listing: any) => (
+                              <Link key={listing.id} to={`/marketplace?listing=${listing.id}`} className="block">
+                                <Card className="hover:shadow-md transition-shadow">
+                                  <CardContent className="p-4 flex gap-4">
+                                    {listing.image_url && (
+                                      <img src={listing.image_url} alt={listing.title} className="w-20 h-20 rounded object-cover" />
+                                    )}
+                                    <div>
+                                      <h4 className="font-semibold">{listing.title}</h4>
+                                      <p className="text-sm text-muted-foreground line-clamp-2">{listing.short_description}</p>
+                                      {listing.base_price && (
+                                        <Badge variant="secondary" className="mt-2">From ₹{listing.base_price}</Badge>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </Link>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Travel Packages */}
+                    {packages.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Package className="h-5 w-5" />
+                            Travel Packages
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {packages.map((pkg: any) => (
+                              <Link key={pkg.id} to={`/travel-packages/${pkg.slug}`} className="block">
+                                <Card className="hover:shadow-md transition-shadow">
+                                  <CardContent className="p-4 flex gap-4">
+                                    {pkg.thumbnail_image_url && (
+                                      <img src={pkg.thumbnail_image_url} alt={pkg.title} className="w-20 h-20 rounded object-cover" />
+                                    )}
+                                    <div>
+                                      <h4 className="font-semibold">{pkg.title}</h4>
+                                      <p className="text-sm text-muted-foreground line-clamp-2">{pkg.short_description}</p>
+                                      {pkg.price_per_person && (
+                                        <Badge variant="secondary" className="mt-2">₹{pkg.price_per_person}/person</Badge>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </Link>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Shop Products */}
+                    {products.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <ShoppingBag className="h-5 w-5" />
+                            Local Products
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {products.map((product: any) => (
+                              <Link key={product.id} to={`/products/${product.slug}`} className="block">
+                                <Card className="hover:shadow-md transition-shadow">
+                                  <CardContent className="p-3">
+                                    {product.thumbnail_image_url && (
+                                      <img src={product.thumbnail_image_url} alt={product.name} className="w-full aspect-square rounded object-cover mb-2" />
+                                    )}
+                                    <h4 className="font-semibold text-sm line-clamp-1">{product.name}</h4>
+                                    {product.price && (
+                                      <p className="text-primary font-bold">₹{product.price}</p>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              </Link>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+                )}
               </Tabs>
             </div>
 
