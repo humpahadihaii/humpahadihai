@@ -182,11 +182,9 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
         bookingData.pincode = formData.pincode || null;
       }
 
-      const { data: bookingResult, error } = await supabase
+      const { error } = await supabase
         .from("bookings")
-        .insert(bookingData as never)
-        .select('id')
-        .single();
+        .insert(bookingData as never);
 
       if (error) throw error;
 
