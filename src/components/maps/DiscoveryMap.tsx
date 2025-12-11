@@ -190,8 +190,9 @@ export const DiscoveryMap: React.FC<DiscoveryMapProps> = ({
         markersRef.current?.addLayer(marker);
       } else {
         // Render POI marker
-        const config = TYPE_CONFIG[poi.type] || TYPE_CONFIG.village;
-        const marker = L.marker([poi.lat, poi.lng], {
+        const poiItem = poi as MapPOI;
+        const config = TYPE_CONFIG[poiItem.type] || TYPE_CONFIG.village;
+        const marker = L.marker([poiItem.lat, poiItem.lng], {
           icon: L.divIcon({
             className: "poi-marker",
             html: `<div style="background-color: ${config.color}; color: white;" class="w-8 h-8 rounded-full flex items-center justify-center shadow-lg transform -translate-x-1/2 -translate-y-1/2">

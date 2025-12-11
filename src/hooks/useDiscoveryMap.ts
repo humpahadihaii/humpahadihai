@@ -448,7 +448,7 @@ export const useMapAdmin = () => {
     mutationFn: async (highlight: Partial<MapHighlight>) => {
       const { data, error } = await supabase
         .from("map_highlights")
-        .insert(highlight)
+        .insert([highlight as any])
         .select()
         .single();
 
