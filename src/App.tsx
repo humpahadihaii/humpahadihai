@@ -74,6 +74,7 @@ import AdminProductCategoriesPage from "./pages/admin/AdminProductCategoriesPage
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
 import AdminAIToolsPage from "./pages/admin/AdminAIToolsPage";
+import AdminAISettingsPage from "./pages/admin/AdminAISettingsPage";
 import AdminPageSettingsPage from "./pages/admin/AdminPageSettingsPage";
 // Admin District Content Pages
 import AdminDistrictPlacesPage from "./pages/admin/AdminDistrictPlacesPage";
@@ -139,6 +140,7 @@ const AppContent = () => {
             <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
             <Route path="/admin" element={<AdminDashboardRoute><AdminDashboard /></AdminDashboardRoute>} />
             <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
+            <Route path="/admin/ai-settings" element={<AdminRoute><AdminAISettingsPage /></AdminRoute>} />
             <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
             <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
             <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />

@@ -258,13 +258,33 @@ serve(async (req) => {
 
     const request: AIRequest = await req.json();
     
-    // Use Gemini API directly
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    // Try to get API key from database first, then fall back to environment variable
+    let GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    
+    try {
+      const { data: apiKeyData } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "gemini_api_key")
+        .maybeSingle();
+      
+      if (apiKeyData?.value) {
+        const dbKey = typeof apiKeyData.value === 'string' 
+          ? apiKeyData.value 
+          : (apiKeyData.value as any)?.key;
+        if (dbKey) {
+          GEMINI_API_KEY = dbKey;
+          console.log("Using API key from database");
+        }
+      }
+    } catch (dbError) {
+      console.log("Could not fetch API key from database, using env var");
+    }
 
     if (!GEMINI_API_KEY) {
       console.error("GEMINI_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "AI service not configured. Please set GEMINI_API_KEY." }),
+        JSON.stringify({ error: "AI service not configured. Please set your Gemini API key in Admin → AI Settings." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
