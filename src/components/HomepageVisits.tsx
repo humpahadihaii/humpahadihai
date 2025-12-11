@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Users, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const COOKIE_NAME = "hp_visit_key";
 const COOKIE_EXPIRY_DAYS = 365;
+
+interface HomepageVisitsProps {
+  showToday?: boolean;
+  className?: string;
+}
 
 function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
@@ -18,9 +24,68 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
 }
 
-export function HomepageVisits() {
+// Animated counter component
+function AnimatedCounter({ value, duration = 1500 }: { value: number; duration?: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const startTime = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (value === 0) {
+      setDisplayValue(0);
+      return;
+    }
+
+    const animate = (timestamp: number) => {
+      if (!startTime.current) startTime.current = timestamp;
+      const progress = Math.min((timestamp - startTime.current) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      setDisplayValue(Math.floor(easeOutQuart * value));
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(value);
+      }
+    };
+
+    startTime.current = null;
+    frameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, [value, duration]);
+
+  return <span>{displayValue.toLocaleString()}</span>;
+}
+
+// Loading skeleton
+function CounterSkeleton() {
+  return (
+    <div className="flex items-center justify-center gap-4 animate-pulse">
+      <div className="flex items-center gap-1.5">
+        <div className="h-4 w-4 bg-white/30 rounded" />
+        <div className="h-4 w-20 bg-white/30 rounded" />
+      </div>
+      <div className="w-px h-4 bg-white/20" />
+      <div className="flex items-center gap-1.5">
+        <div className="h-4 w-4 bg-white/30 rounded" />
+        <div className="h-4 w-16 bg-white/30 rounded" />
+      </div>
+    </div>
+  );
+}
+
+export function HomepageVisits({ showToday = true, className }: HomepageVisitsProps) {
   const [summary, setSummary] = useState<{ total: number; today: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const trackAndFetch = async () => {
@@ -46,14 +111,20 @@ export function HomepageVisits() {
           "homepage-summary"
         );
 
-        if (!summaryError && summaryData) {
+        if (summaryError) {
+          console.error("Summary fetch error:", summaryError);
+          setError(true);
+        } else if (summaryData) {
           setSummary({
             total: summaryData.total || 0,
             today: summaryData.today || 0,
           });
+          // Trigger fade-in animation after data loads
+          setTimeout(() => setIsVisible(true), 100);
         }
-      } catch (error) {
-        console.error("Homepage visits error:", error);
+      } catch (err) {
+        console.error("Homepage visits error:", err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -62,24 +133,64 @@ export function HomepageVisits() {
     trackAndFetch();
   }, []);
 
+  // Show skeleton while loading
   if (loading) {
-    return null; // Don't show anything while loading
+    return (
+      <div 
+        className={cn(
+          "px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20",
+          className
+        )}
+        aria-label="Loading visitor count"
+      >
+        <CounterSkeleton />
+      </div>
+    );
   }
 
-  // Show even if summary is null/zero
-  const total = summary?.total || 0;
-  const today = summary?.today || 0;
+  const total = error ? null : (summary?.total ?? 0);
+  const today = error ? null : (summary?.today ?? 0);
 
   return (
-    <div className="flex items-center justify-center gap-4 text-sm text-white/80">
-      <div className="flex items-center gap-1.5" title="Total visitors">
-        <Users className="h-4 w-4" />
-        <span>{total.toLocaleString()} visitors</span>
-      </div>
-      <div className="w-px h-4 bg-white/40" />
-      <div className="flex items-center gap-1.5" title="Visitors today">
-        <TrendingUp className="h-4 w-4" />
-        <span>{today.toLocaleString()} today</span>
+    <div 
+      className={cn(
+        "px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg",
+        "transition-all duration-500 ease-out",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+        className
+      )}
+      aria-label="Homepage visitor count"
+      role="status"
+    >
+      <div className="flex items-center justify-center gap-3 sm:gap-4 text-sm sm:text-base text-white">
+        {/* Total visitors */}
+        <div className="flex items-center gap-1.5" title="Total visitors">
+          <Users className="h-4 w-4 text-white/90" />
+          <span className="font-medium">
+            Visitors:{" "}
+            <span className="tabular-nums">
+              {total !== null ? <AnimatedCounter value={total} /> : "—"}
+            </span>
+          </span>
+        </div>
+
+        {/* Separator */}
+        {showToday && (
+          <>
+            <span className="text-white/40">•</span>
+            
+            {/* Today's visitors */}
+            <div className="flex items-center gap-1.5" title="Visitors today">
+              <TrendingUp className="h-4 w-4 text-white/90" />
+              <span className="font-medium">
+                Today:{" "}
+                <span className="tabular-nums">
+                  {today !== null ? <AnimatedCounter value={today} duration={1200} /> : "—"}
+                </span>
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
