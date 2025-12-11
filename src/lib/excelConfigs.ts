@@ -433,7 +433,6 @@ export const thoughtsExcelConfig: ExcelConfig = {
     { key: "photo_url", header: "Photo URL" },
     { key: "sentiment", header: "Sentiment" },
     { key: "status", header: "Status" },
-    { key: "likes_count", header: "Likes", type: "number" },
   ],
 };
 

@@ -1,0 +1,2 @@
+-- Add deprecation comment to thought_likes table (table retained for historical data)
+COMMENT ON TABLE public.thought_likes IS 'Deprecated: likes feature removed on 2025-12-11. Table retained for historical data. Do not write to this table.';
