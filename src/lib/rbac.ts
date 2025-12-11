@@ -66,7 +66,8 @@ export type AdminSection =
   | "/admin/products"
   | "/admin/product-orders"
   | "/admin/bookings"
-  | "/admin/page-settings";
+  | "/admin/page-settings"
+  | "/admin/notify-settings";
 
 /**
  * Complete list of all admin sections
@@ -112,6 +113,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   "/admin/product-orders",
   "/admin/bookings",
   "/admin/page-settings",
+  "/admin/notify-settings",
 ];
 
 /**

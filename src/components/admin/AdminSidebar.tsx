@@ -28,6 +28,7 @@ import {
   Plane,
   Store,
   Sparkles,
+  Bell,
   type LucideIcon
 } from "lucide-react";
 
@@ -54,6 +55,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
   
   // Settings
   { name: "Site Settings", href: "/admin/site-settings", icon: Settings, section: "Settings" },
+  { name: "Notify Settings", href: "/admin/notify-settings", icon: Bell },
   
   // Content
   { name: "Content Sections", href: "/admin/content-sections", icon: FileText, section: "Content" },
@@ -105,6 +107,9 @@ const NAVIGATION_ITEMS: NavItem[] = [
   { name: "Product Categories", href: "/admin/product-categories", icon: Package, section: "Store" },
   { name: "Products", href: "/admin/products", icon: Store },
   { name: "Product Orders", href: "/admin/product-orders", icon: ShoppingCart },
+  
+  // Bookings
+  { name: "All Bookings", href: "/admin/bookings", icon: Calendar, section: "Bookings" },
 ];
 
 interface AdminSidebarProps {
