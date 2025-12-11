@@ -86,6 +86,7 @@ const Navigation = () => {
     { name: "Food", path: "/food" },
     { name: "Travel", path: "/travel" },
     { name: "Districts", path: "/districts" },
+    { name: "Events", path: "/events" },
     { name: "Gallery", path: "/gallery" },
     { name: "Marketplace", path: "/marketplace" },
     { name: "Thoughts", path: "/thoughts" },
