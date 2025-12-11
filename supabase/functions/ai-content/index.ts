@@ -258,13 +258,13 @@ serve(async (req) => {
 
     const request: AIRequest = await req.json();
     
-    // Use Lovable AI Gateway (pre-configured, no separate API key needed)
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // Use Gemini API directly
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "AI service not configured. Please contact support." }),
+        JSON.stringify({ error: "AI service not configured. Please set GEMINI_API_KEY." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -274,10 +274,10 @@ serve(async (req) => {
 
     console.log("AI Request:", { type: request.type, action: request.action });
 
-    // Call Lovable AI Gateway (OpenAI-compatible API)
-    const aiGatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    // Call Gemini API directly
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-    console.log("Calling Lovable AI Gateway...");
+    console.log("Calling Gemini API...");
 
     // Add timeout using AbortController
     const controller = new AbortController();
@@ -285,25 +285,26 @@ serve(async (req) => {
 
     let response;
     try {
-      response = await fetch(aiGatewayUrl, {
+      response = await fetch(geminiUrl, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
           "Content-Type": "application/json",
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
+          contents: [{
+            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          }
         }),
       });
     } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        console.error("AI Gateway request timed out");
+        console.error("Gemini API request timed out");
         return new Response(
           JSON.stringify({ error: "Request timed out. Please try again." }),
           { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -313,11 +314,11 @@ serve(async (req) => {
     }
     clearTimeout(timeoutId);
 
-    console.log("AI Gateway response status:", response.status);
+    console.log("Gemini API response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
 
       if (response.status === 429) {
         return new Response(
@@ -326,10 +327,10 @@ serve(async (req) => {
         );
       }
 
-      if (response.status === 402) {
+      if (response.status === 403) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "API key invalid or quota exceeded." }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
@@ -340,10 +341,18 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("AI Gateway response received");
+    console.log("Gemini API response received");
     
-    // Extract content from OpenAI-compatible response format
-    const content = data.choices?.[0]?.message?.content || "";
+    // Extract content from Gemini response format
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    if (!content) {
+      console.error("No content in Gemini response:", JSON.stringify(data));
+      return new Response(
+        JSON.stringify({ error: "No content generated. Please try again." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     return new Response(
       JSON.stringify({ content }),
