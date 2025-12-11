@@ -274,8 +274,8 @@ serve(async (req) => {
 
     console.log("AI Request:", { type: request.type, action: request.action });
 
-    // Call Gemini API directly
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // Call Gemini API directly - using gemini-2.0-flash-exp (current available model)
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
 
     console.log("Calling Gemini API...");
 
