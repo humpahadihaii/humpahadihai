@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Sparkles, AlertTriangle, Loader2, FileEdit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import AIVillageDescription from "@/components/admin/AIVillageDescription";
@@ -70,6 +71,7 @@ interface District {
 }
 
 export default function AdminVillagesPage() {
+  const navigate = useNavigate();
   const [villages, setVillages] = useState<Village[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [loading, setLoading] = useState(true);
@@ -655,11 +657,19 @@ export default function AdminVillagesPage() {
                           {village.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(village)}>
+                      <TableCell className="text-right space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => navigate(`/admin/villages/${village.id}/content`)}
+                          title="Edit Content"
+                        >
+                          <FileEdit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(village)} title="Edit Details">
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(village.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(village.id)} title="Delete">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>

@@ -7,9 +7,10 @@ const corsHeaders = {
 };
 
 interface AIRequest {
-  type: "story" | "travel" | "product" | "promotion" | "seo" | "translate" | "villages";
+  type: "story" | "travel" | "product" | "promotion" | "seo" | "translate" | "villages" | "village";
   action: string;
   inputs: Record<string, string>;
+  input?: Record<string, string>; // Alternative input format
 }
 
 const getSystemPrompt = (type: string) => {
@@ -42,13 +43,19 @@ Translate naturally, not word-for-word.`,
 You are an expert on Uttarakhand geography and settlements. You have deep knowledge of villages, towns, and cities in all 13 districts.
 Provide accurate, verifiable information about settlements. Include a mix of well-known towns and lesser-known villages.
 Focus on authentic Pahadi names and locations.`,
+    village: `${basePrompt}
+You specialize in writing detailed, authentic content about villages in Uttarakhand.
+Include cultural details, local traditions, food specialties, handicrafts, and historical significance.
+Write in an engaging narrative style that brings the village to life for readers.`,
   };
 
   return prompts[type] || basePrompt;
 };
 
 const buildPrompt = (request: AIRequest): string => {
-  const { type, action, inputs } = request;
+  const { type, action, inputs: rawInputs, input } = request;
+  // Support both 'inputs' and 'input' field names
+  const inputs = rawInputs || input || {};
 
   switch (type) {
     case "story":
@@ -208,6 +215,50 @@ Focus on:
 5. Scenic or touristy settlements
 
 Be accurate with names - use authentic local spellings.`;
+
+    case "village":
+      switch (action) {
+        case "generate_section":
+          return inputs.prompt || `Write detailed content about ${inputs.section} for ${inputs.villageName} village in ${inputs.districtName} district, Uttarakhand.`;
+        
+        case "generate_all":
+          return `Write comprehensive content for ${inputs.villageName} village in ${inputs.districtName} district, Uttarakhand, India.
+
+Provide content for each section:
+
+INTRODUCTION:
+(2-3 paragraphs about the village's location, significance, and overview)
+
+HISTORY:
+(2 paragraphs about historical background)
+
+TRADITIONS:
+(2 paragraphs about local customs and cultural practices)
+
+FESTIVALS:
+(List major festivals celebrated with brief descriptions)
+
+FOODS:
+(Describe traditional local cuisine and specialties)
+
+RECIPES:
+(1-2 traditional recipe descriptions)
+
+HANDICRAFTS:
+(Describe local crafts and artisan traditions)
+
+ARTISANS:
+(Information about local craftspeople)
+
+STORIES:
+(Local folklore, legends, or notable stories)
+
+TRAVEL_TIPS:
+(How to reach, best time to visit, accommodation options)`;
+
+        default:
+          return inputs.prompt || "";
+      }
 
     default:
       return inputs.prompt || "";
