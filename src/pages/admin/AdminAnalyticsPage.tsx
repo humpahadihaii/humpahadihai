@@ -7,9 +7,13 @@ import { FunnelBuilder } from "@/components/admin/analytics/FunnelBuilder";
 import { HeatmapViewer } from "@/components/admin/analytics/HeatmapViewer";
 import { RetentionCohorts } from "@/components/admin/analytics/RetentionCohorts";
 import { PathAnalysis } from "@/components/admin/analytics/PathAnalysis";
+import { GeoAnalytics } from "@/components/admin/analytics/GeoAnalytics";
+import { AlertsManager } from "@/components/admin/analytics/AlertsManager";
+import { ScheduledReports } from "@/components/admin/analytics/ScheduledReports";
+import { DataManagement } from "@/components/admin/analytics/DataManagement";
 import { useAuth } from "@/hooks/useAuth";
 import { isSuperAdmin, RBACRole } from "@/lib/rbac";
-import { BarChart3, Shield, Lock, TrendingUp, Workflow, MousePointer2, Users, Route } from "lucide-react";
+import { BarChart3, Shield, Lock, TrendingUp, Workflow, MousePointer2, Users, Route, Globe, Bell, FileText, Database } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function AdminAnalyticsPage() {
@@ -49,6 +53,18 @@ export default function AdminAnalyticsPage() {
               <Users className="h-4 w-4" />
               Retention
             </TabsTrigger>
+            <TabsTrigger value="geo" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Geography
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Alerts
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Reports
+            </TabsTrigger>
             <TabsTrigger value="frontend" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Basic
@@ -60,6 +76,15 @@ export default function AdminAnalyticsPage() {
             >
               <Shield className="h-4 w-4" />
               Backend
+              {!canViewBackend && <Lock className="h-3 w-3 ml-1" />}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="data" 
+              className="flex items-center gap-2"
+              disabled={!canViewBackend}
+            >
+              <Database className="h-4 w-4" />
+              Data
               {!canViewBackend && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
           </TabsList>
@@ -84,6 +109,18 @@ export default function AdminAnalyticsPage() {
             <RetentionCohorts />
           </TabsContent>
 
+          <TabsContent value="geo">
+            <GeoAnalytics />
+          </TabsContent>
+
+          <TabsContent value="alerts">
+            <AlertsManager />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <ScheduledReports />
+          </TabsContent>
+
           <TabsContent value="frontend">
             <FrontendAnalytics />
           </TabsContent>
@@ -98,6 +135,22 @@ export default function AdminAnalyticsPage() {
                   <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
                   <p className="text-muted-foreground text-center max-w-md">
                     Backend analytics contain sensitive admin activity data and are only accessible to Super Admins and Developers.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="data">
+            {canViewBackend ? (
+              <DataManagement />
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <Lock className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+                  <p className="text-muted-foreground text-center max-w-md">
+                    Data management controls are only accessible to Super Admins and Developers.
                   </p>
                 </CardContent>
               </Card>
