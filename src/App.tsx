@@ -67,6 +67,7 @@ import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import ListYourBusinessPage from "./pages/ListYourBusinessPage";
+import MapPage from "./pages/MapPage";
 // Admin Monetization Pages
 import AdminPromotionPackagesPage from "./pages/admin/AdminPromotionPackagesPage";
 import AdminPromotionRequestsPage from "./pages/admin/AdminPromotionRequestsPage";
@@ -90,6 +91,7 @@ import AdminTourismInquiriesPage from "./pages/admin/AdminTourismInquiriesPage";
 import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 import AdminNotifySettingsPage from "./pages/admin/AdminNotifySettingsPage";
 import AdminFeaturedCardsPage from "./pages/admin/AdminFeaturedCardsPage";
+import AdminMapPage from "./pages/admin/AdminMapPage";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +138,7 @@ const AppContent = () => {
             <Route path="/products/:slug" element={<ProductDetailPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
             <Route path="/list-your-business" element={<ListYourBusinessPage />} />
+            <Route path="/map" element={<MapPage />} />
             {/* Auth */}
             <Route path="/login" element={<AuthPage />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -145,6 +148,7 @@ const AppContent = () => {
             <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
             <Route path="/admin/ai-settings" element={<AdminRoute><AdminAISettingsPage /></AdminRoute>} />
             <Route path="/admin/map-settings" element={<AdminRoute><AdminMapSettingsPage /></AdminRoute>} />
+            <Route path="/admin/map" element={<AdminRoute><AdminMapPage /></AdminRoute>} />
             <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
             <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
             <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />
