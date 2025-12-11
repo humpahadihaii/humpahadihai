@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { PenLine } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
@@ -13,9 +14,20 @@ interface ContentListPageProps {
   title: string;
   description: string;
   heroGradient?: string;
+  showSubmitButton?: boolean;
+  submitButtonLabel?: string;
+  submitButtonUrl?: string;
 }
 
-const ContentListPage = ({ contentType, title, description, heroGradient = "from-primary/70 to-secondary/70" }: ContentListPageProps) => {
+const ContentListPage = ({ 
+  contentType, 
+  title, 
+  description, 
+  heroGradient = "from-primary/70 to-secondary/70",
+  showSubmitButton = false,
+  submitButtonLabel = "Submit",
+  submitButtonUrl = "#"
+}: ContentListPageProps) => {
   const { data: items, isLoading } = useQuery({
     queryKey: ["content-items", contentType],
     queryFn: async () => {
@@ -38,9 +50,17 @@ const ContentListPage = ({ contentType, title, description, heroGradient = "from
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
             {title}
           </h1>
-          <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto drop-shadow">
+          <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto drop-shadow mb-6">
             {description}
           </p>
+          {showSubmitButton && (
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold">
+              <Link to={submitButtonUrl}>
+                <PenLine className="mr-2 h-5 w-5" />
+                {submitButtonLabel}
+              </Link>
+            </Button>
+          )}
         </div>
       </section>
 
@@ -63,7 +83,15 @@ const ContentListPage = ({ contentType, title, description, heroGradient = "from
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 <p className="text-lg mb-4">No content available yet.</p>
-                <p>Check back soon for new articles and stories!</p>
+                <p className="mb-6">Check back soon for new articles and stories!</p>
+                {showSubmitButton && (
+                  <Button asChild>
+                    <Link to={submitButtonUrl}>
+                      <PenLine className="mr-2 h-4 w-4" />
+                      {submitButtonLabel}
+                    </Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
