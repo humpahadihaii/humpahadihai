@@ -1676,6 +1676,42 @@ export type Database = {
         }
         Relationships: []
       }
+      geocode_cache: {
+        Row: {
+          address: string
+          created_at: string
+          expires_at: string
+          formatted_address: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          place_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          expires_at?: string
+          formatted_address?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          place_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          expires_at?: string
+          formatted_address?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          place_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homepage_visits: {
         Row: {
           created_at: string
@@ -1821,6 +1857,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      map_settings: {
+        Row: {
+          api_key_status: string | null
+          created_at: string
+          default_lat: number
+          default_lng: number
+          default_zoom: number
+          enable_clustering: boolean
+          enable_street_view: boolean
+          id: string
+          last_api_test: string | null
+          map_style: string | null
+          maps_enabled: boolean
+          show_on_districts: boolean
+          show_on_homepage: boolean
+          show_on_hotels: boolean
+          show_on_marketplace: boolean
+          show_on_travel_packages: boolean
+          show_on_villages: boolean
+          singleton_flag: boolean
+          updated_at: string
+        }
+        Insert: {
+          api_key_status?: string | null
+          created_at?: string
+          default_lat?: number
+          default_lng?: number
+          default_zoom?: number
+          enable_clustering?: boolean
+          enable_street_view?: boolean
+          id?: string
+          last_api_test?: string | null
+          map_style?: string | null
+          maps_enabled?: boolean
+          show_on_districts?: boolean
+          show_on_homepage?: boolean
+          show_on_hotels?: boolean
+          show_on_marketplace?: boolean
+          show_on_travel_packages?: boolean
+          show_on_villages?: boolean
+          singleton_flag?: boolean
+          updated_at?: string
+        }
+        Update: {
+          api_key_status?: string | null
+          created_at?: string
+          default_lat?: number
+          default_lng?: number
+          default_zoom?: number
+          enable_clustering?: boolean
+          enable_street_view?: boolean
+          id?: string
+          last_api_test?: string | null
+          map_style?: string | null
+          maps_enabled?: boolean
+          show_on_districts?: boolean
+          show_on_homepage?: boolean
+          show_on_hotels?: boolean
+          show_on_marketplace?: boolean
+          show_on_travel_packages?: boolean
+          show_on_villages?: boolean
+          singleton_flag?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       media_library: {
         Row: {
