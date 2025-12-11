@@ -155,6 +155,146 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_alert_configs: {
+        Row: {
+          comparison_period: string | null
+          condition: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          metric: string
+          name: string
+          notification_channels: Json | null
+          page_filter: string | null
+          recipient_emails: string[] | null
+          recipient_phones: string[] | null
+          threshold: number
+          updated_at: string | null
+        }
+        Insert: {
+          comparison_period?: string | null
+          condition: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metric: string
+          name: string
+          notification_channels?: Json | null
+          page_filter?: string | null
+          recipient_emails?: string[] | null
+          recipient_phones?: string[] | null
+          threshold: number
+          updated_at?: string | null
+        }
+        Update: {
+          comparison_period?: string | null
+          condition?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metric?: string
+          name?: string
+          notification_channels?: Json | null
+          page_filter?: string | null
+          recipient_emails?: string[] | null
+          recipient_phones?: string[] | null
+          threshold?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      analytics_alert_logs: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_config_id: string | null
+          comparison_value: number | null
+          id: string
+          message: string | null
+          metric_value: number | null
+          notification_status: Json | null
+          threshold_value: number | null
+          triggered_at: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_config_id?: string | null
+          comparison_value?: number | null
+          id?: string
+          message?: string | null
+          metric_value?: number | null
+          notification_status?: Json | null
+          threshold_value?: number | null
+          triggered_at?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_config_id?: string | null
+          comparison_value?: number | null
+          id?: string
+          message?: string | null
+          metric_value?: number | null
+          notification_status?: Json | null
+          threshold_value?: number | null
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_alert_logs_alert_config_id_fkey"
+            columns: ["alert_config_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_alert_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_bigquery_exports: {
+        Row: {
+          bigquery_job_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          date_from: string
+          date_to: string
+          error_message: string | null
+          export_type: string
+          id: string
+          records_exported: number | null
+          status: string | null
+        }
+        Insert: {
+          bigquery_job_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          date_from: string
+          date_to: string
+          error_message?: string | null
+          export_type: string
+          id?: string
+          records_exported?: number | null
+          status?: string | null
+        }
+        Update: {
+          bigquery_job_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          date_from?: string
+          date_to?: string
+          error_message?: string | null
+          export_type?: string
+          id?: string
+          records_exported?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string | null
@@ -253,6 +393,92 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_geo_aggregates: {
+        Row: {
+          aggregate_date: string
+          city: string | null
+          conversions: number | null
+          country: string | null
+          created_at: string | null
+          id: string
+          page_views: number | null
+          sessions: number | null
+          state: string | null
+          unique_visitors: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          aggregate_date: string
+          city?: string | null
+          conversions?: number | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          page_views?: number | null
+          sessions?: number | null
+          state?: string | null
+          unique_visitors?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          aggregate_date?: string
+          city?: string | null
+          conversions?: number | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          page_views?: number | null
+          sessions?: number | null
+          state?: string | null
+          unique_visitors?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      analytics_report_history: {
+        Row: {
+          duration_ms: number | null
+          error_message: string | null
+          executed_at: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          records_count: number | null
+          scheduled_report_id: string | null
+          status: string | null
+        }
+        Insert: {
+          duration_ms?: number | null
+          error_message?: string | null
+          executed_at?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          records_count?: number | null
+          scheduled_report_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          duration_ms?: number | null
+          error_message?: string | null
+          executed_at?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          records_count?: number | null
+          scheduled_report_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_report_history_scheduled_report_id_fkey"
+            columns: ["scheduled_report_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_scheduled_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analytics_retention_cohorts: {
         Row: {
           cohort_date: string
@@ -277,6 +503,81 @@ export type Database = {
           id?: string
           retention_data?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      analytics_scheduled_reports: {
+        Row: {
+          bigquery_dataset: string | null
+          bigquery_table: string | null
+          created_at: string | null
+          created_by: string | null
+          date_range: string | null
+          day_of_month: number | null
+          day_of_week: number | null
+          delivery_method: string | null
+          description: string | null
+          export_format: string | null
+          filters: Json | null
+          id: string
+          is_active: boolean | null
+          last_run_at: string | null
+          name: string
+          next_run_at: string | null
+          recipient_emails: string[] | null
+          report_type: string
+          schedule: string
+          storage_path: string | null
+          time_of_day: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bigquery_dataset?: string | null
+          bigquery_table?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_range?: string | null
+          day_of_month?: number | null
+          day_of_week?: number | null
+          delivery_method?: string | null
+          description?: string | null
+          export_format?: string | null
+          filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          name: string
+          next_run_at?: string | null
+          recipient_emails?: string[] | null
+          report_type: string
+          schedule: string
+          storage_path?: string | null
+          time_of_day?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bigquery_dataset?: string | null
+          bigquery_table?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_range?: string | null
+          day_of_month?: number | null
+          day_of_week?: number | null
+          delivery_method?: string | null
+          description?: string | null
+          export_format?: string | null
+          filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          name?: string
+          next_run_at?: string | null
+          recipient_emails?: string[] | null
+          report_type?: string
+          schedule?: string
+          storage_path?: string | null
+          time_of_day?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
