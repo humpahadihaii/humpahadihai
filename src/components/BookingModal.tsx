@@ -11,7 +11,7 @@ import { format, differenceInDays, startOfDay, isBefore } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BookingContactPrompt } from "@/components/BookingContactPrompt";
+import { PostBookingNotify } from "@/components/PostBookingNotify";
 import { trackBookingSummary } from "@/lib/internalTracker";
 
 type BookingType = "package" | "listing" | "product";
@@ -236,7 +236,7 @@ export function BookingModal({ open, onOpenChange, type, item, source }: Booking
                 : "Thank you! Your booking request has been received. We will contact you soon to confirm."}
             </p>
             
-            <BookingContactPrompt
+            <PostBookingNotify
               booking={{
                 type,
                 itemName: item.title,
