@@ -185,26 +185,47 @@ export type Database = {
       analytics_settings: {
         Row: {
           ad_personalization_enabled: boolean
+          aggregate_retention_days: number | null
           analytics_enabled: boolean
           anonymize_ip: boolean
           created_at: string
+          enable_click_tracking: boolean | null
+          enable_heatmaps: boolean | null
+          enable_scroll_tracking: boolean | null
+          heatmap_sampling_rate: number | null
           id: string
+          opt_out_cookie_name: string | null
+          raw_event_retention_days: number | null
           updated_at: string
         }
         Insert: {
           ad_personalization_enabled?: boolean
+          aggregate_retention_days?: number | null
           analytics_enabled?: boolean
           anonymize_ip?: boolean
           created_at?: string
+          enable_click_tracking?: boolean | null
+          enable_heatmaps?: boolean | null
+          enable_scroll_tracking?: boolean | null
+          heatmap_sampling_rate?: number | null
           id?: string
+          opt_out_cookie_name?: string | null
+          raw_event_retention_days?: number | null
           updated_at?: string
         }
         Update: {
           ad_personalization_enabled?: boolean
+          aggregate_retention_days?: number | null
           analytics_enabled?: boolean
           anonymize_ip?: boolean
           created_at?: string
+          enable_click_tracking?: boolean | null
+          enable_heatmaps?: boolean | null
+          enable_scroll_tracking?: boolean | null
+          heatmap_sampling_rate?: number | null
           id?: string
+          opt_out_cookie_name?: string | null
+          raw_event_retention_days?: number | null
           updated_at?: string
         }
         Relationships: []

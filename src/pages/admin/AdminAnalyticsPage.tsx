@@ -2,9 +2,10 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FrontendAnalytics } from "@/components/admin/analytics/FrontendAnalytics";
 import { BackendAnalytics } from "@/components/admin/analytics/BackendAnalytics";
+import { AdvancedAnalyticsDashboard } from "@/components/admin/analytics/AdvancedAnalyticsDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { isSuperAdmin, RBACRole } from "@/lib/rbac";
-import { BarChart3, Shield, Lock } from "lucide-react";
+import { BarChart3, Shield, Lock, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function AdminAnalyticsPage() {
@@ -19,14 +20,18 @@ export default function AdminAnalyticsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Site performance & admin activity insights</p>
+          <p className="text-muted-foreground">Site performance, visitor insights & admin activity</p>
         </div>
 
-        <Tabs defaultValue="frontend" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+        <Tabs defaultValue="advanced" className="space-y-6">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+            <TabsTrigger value="advanced" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Advanced
+            </TabsTrigger>
             <TabsTrigger value="frontend" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Frontend
+              Basic
             </TabsTrigger>
             <TabsTrigger 
               value="backend" 
@@ -38,6 +43,10 @@ export default function AdminAnalyticsPage() {
               {!canViewBackend && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="advanced">
+            <AdvancedAnalyticsDashboard />
+          </TabsContent>
 
           <TabsContent value="frontend">
             <FrontendAnalytics />
