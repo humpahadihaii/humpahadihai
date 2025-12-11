@@ -10,11 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Loader2, Copy, Check, FileText, Plane, Store, Megaphone, Search, Languages } from "lucide-react";
 import { useAIContent } from "@/hooks/useAIContent";
 import { toast } from "sonner";
+import { AIResultActions } from "@/components/admin/AIResultActions";
+import { AIOutputSchema } from "@/lib/aiSectionMappings";
 
 export default function AdminAIToolsPage() {
   const { generateContent, isLoading } = useAIContent();
   const [copied, setCopied] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, string>>({});
+  const [currentAIOutput, setCurrentAIOutput] = useState<AIOutputSchema | null>(null);
 
   // Story generator state
   const [storyTopic, setStoryTopic] = useState("");
@@ -66,6 +69,16 @@ export default function AdminAIToolsPage() {
         storyExcerpt: result.excerpt || "",
         storyBody: result.body || "",
       });
+      // Set AI output for section actions
+      setCurrentAIOutput({
+        title: result.title,
+        name: result.title,
+        short_description: result.excerpt,
+        long_description: result.body,
+        content: result.body,
+        category: storyCategory,
+        tags: result.tags ? result.tags.split(",").map((t: string) => t.trim()) : [],
+      });
     }
   };
 
@@ -89,6 +102,20 @@ export default function AdminAIToolsPage() {
         travelInclusions: result.inclusions || "",
         travelExclusions: result.exclusions || "",
       });
+      // Set AI output for section actions
+      setCurrentAIOutput({
+        title: travelDestination,
+        name: travelDestination,
+        short_description: result.short_description,
+        long_description: result.full_description,
+        content: result.full_description,
+        destination: travelDestination,
+        difficulty: travelDifficulty,
+        best_season: result.best_season,
+        itinerary: result.itinerary,
+        inclusions: result.inclusions,
+        exclusions: result.exclusions,
+      });
     }
   };
 
@@ -109,6 +136,16 @@ export default function AdminAIToolsPage() {
         productShort: result.short_description || "",
         productFull: result.full_description || "",
         productTags: result.tags || "",
+      });
+      // Set AI output for section actions
+      setCurrentAIOutput({
+        title: productName,
+        name: productName,
+        short_description: result.short_description,
+        long_description: result.full_description,
+        content: result.full_description,
+        category: productCategory,
+        tags: result.tags ? result.tags.split(",").map((t: string) => t.trim()) : [],
       });
     }
   };
@@ -277,6 +314,13 @@ export default function AdminAIToolsPage() {
                     <ResultCard label="Generated Title" value={results.storyTitle || ""} resultKey="storyTitle" />
                     <ResultCard label="Excerpt" value={results.storyExcerpt || ""} resultKey="storyExcerpt" />
                     <ResultCard label="Body Content" value={results.storyBody || ""} resultKey="storyBody" />
+                    
+                    {currentAIOutput && (
+                      <AIResultActions 
+                        aiOutput={currentAIOutput} 
+                        onSuccess={() => setCurrentAIOutput(null)}
+                      />
+                    )}
                   </div>
                 )}
               </CardContent>
