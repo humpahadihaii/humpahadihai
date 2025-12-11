@@ -254,6 +254,189 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_notify_audit: {
+        Row: {
+          after_value: Json | null
+          before_value: Json | null
+          change_type: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          ip: unknown
+          setting_id: string | null
+          template_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          after_value?: Json | null
+          before_value?: Json | null
+          change_type: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          ip?: unknown
+          setting_id?: string | null
+          template_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          after_value?: Json | null
+          before_value?: Json | null
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          ip?: unknown
+          setting_id?: string | null
+          template_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_notify_audit_setting_id_fkey"
+            columns: ["setting_id"]
+            isOneToOne: false
+            referencedRelation: "booking_notify_settings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_notify_audit_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "booking_notify_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_notify_consent: {
+        Row: {
+          booking_id: string
+          consent_at: string
+          consent_ip: unknown
+          consent_ua: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          consent_at?: string
+          consent_ip?: unknown
+          consent_ua?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          consent_at?: string
+          consent_ip?: unknown
+          consent_ua?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      booking_notify_settings: {
+        Row: {
+          admin_fallback_email: string | null
+          admin_fallback_phone: string | null
+          allow_server_fallback: boolean
+          config_version: number
+          created_at: string
+          created_by: string | null
+          default_language: string
+          email_label: string
+          enabled_email: boolean
+          enabled_whatsapp: boolean
+          id: string
+          phone_min_digits: number
+          position_order: Json
+          server_fallback_rate_limit_per_hour: number
+          show_confirm_question: boolean
+          singleton_flag: boolean
+          updated_at: string
+          updated_by: string | null
+          visibility: Json
+          whatsapp_label: string
+        }
+        Insert: {
+          admin_fallback_email?: string | null
+          admin_fallback_phone?: string | null
+          allow_server_fallback?: boolean
+          config_version?: number
+          created_at?: string
+          created_by?: string | null
+          default_language?: string
+          email_label?: string
+          enabled_email?: boolean
+          enabled_whatsapp?: boolean
+          id?: string
+          phone_min_digits?: number
+          position_order?: Json
+          server_fallback_rate_limit_per_hour?: number
+          show_confirm_question?: boolean
+          singleton_flag?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          visibility?: Json
+          whatsapp_label?: string
+        }
+        Update: {
+          admin_fallback_email?: string | null
+          admin_fallback_phone?: string | null
+          allow_server_fallback?: boolean
+          config_version?: number
+          created_at?: string
+          created_by?: string | null
+          default_language?: string
+          email_label?: string
+          enabled_email?: boolean
+          enabled_whatsapp?: boolean
+          id?: string
+          phone_min_digits?: number
+          position_order?: Json
+          server_fallback_rate_limit_per_hour?: number
+          show_confirm_question?: boolean
+          singleton_flag?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          visibility?: Json
+          whatsapp_label?: string
+        }
+        Relationships: []
+      }
+      booking_notify_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          key: string
+          template: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          template: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          template?: string
+          version?: number
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           admin_notes: string | null
