@@ -89,7 +89,8 @@ const NAVIGATION_ITEMS: NavItem[] = [
   { name: "Featured Cards", href: "/admin/featured-cards", icon: Image },
   
   // Submissions
-  { name: "Community Submissions", href: "/admin/community-submissions", icon: Users, section: "Submissions" },
+  { name: "Thoughts Moderation", href: "/admin/thoughts", icon: MessageSquare, section: "Submissions" },
+  { name: "Community Submissions", href: "/admin/community-submissions", icon: Users },
   { name: "Contact Submissions", href: "/admin/submissions", icon: Mail },
   
   // Tourism Marketplace
