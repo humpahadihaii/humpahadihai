@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.analytics-track]
 verify_jwt = false
+
+[functions.analytics-worker]
+verify_jwt = false

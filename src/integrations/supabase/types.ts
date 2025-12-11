@@ -182,6 +182,143 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_funnel_results: {
+        Row: {
+          conversion_rate: number | null
+          created_at: string
+          funnel_id: string | null
+          id: string
+          result_date: string
+          step_results: Json
+          total_sessions: number | null
+        }
+        Insert: {
+          conversion_rate?: number | null
+          created_at?: string
+          funnel_id?: string | null
+          id?: string
+          result_date?: string
+          step_results?: Json
+          total_sessions?: number | null
+        }
+        Update: {
+          conversion_rate?: number | null
+          created_at?: string
+          funnel_id?: string | null
+          id?: string
+          result_date?: string
+          step_results?: Json
+          total_sessions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_funnel_results_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_funnels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_funnels: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          steps?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      analytics_retention_cohorts: {
+        Row: {
+          cohort_date: string
+          cohort_size: number | null
+          created_at: string
+          id: string
+          retention_data: Json
+          updated_at: string
+        }
+        Insert: {
+          cohort_date: string
+          cohort_size?: number | null
+          created_at?: string
+          id?: string
+          retention_data?: Json
+          updated_at?: string
+        }
+        Update: {
+          cohort_date?: string
+          cohort_size?: number | null
+          created_at?: string
+          id?: string
+          retention_data?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      analytics_session_paths: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          entry_page: string | null
+          exit_page: string | null
+          has_conversion: boolean | null
+          id: string
+          is_bounce: boolean | null
+          page_count: number | null
+          path_sequence: string[]
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          entry_page?: string | null
+          exit_page?: string | null
+          has_conversion?: boolean | null
+          id?: string
+          is_bounce?: boolean | null
+          page_count?: number | null
+          path_sequence?: string[]
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          entry_page?: string | null
+          exit_page?: string | null
+          has_conversion?: boolean | null
+          id?: string
+          is_bounce?: boolean | null
+          page_count?: number | null
+          path_sequence?: string[]
+          session_id?: string
+        }
+        Relationships: []
+      }
       analytics_settings: {
         Row: {
           ad_personalization_enabled: boolean
