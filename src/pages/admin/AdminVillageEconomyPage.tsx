@@ -10,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Plus, Star, Link2, Unlink, Search, Package, ShoppingBag, MapPin, Building } from "lucide-react";
+import { ArrowLeft, Plus, Star, Link2, Unlink, Search, Package, ShoppingBag, MapPin, Building, Wand2, Upload, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useVillageLinks, useLinkableItems, ItemType, VillageLink } from "@/hooks/useVillageLinks";
+import { VillageLinkSuggestions } from "@/components/admin/VillageLinkSuggestions";
+import { VillageLinkBulkImport } from "@/components/admin/VillageLinkBulkImport";
+import { VillageLinkAuditLog } from "@/components/admin/VillageLinkAuditLog";
 
 const ITEM_TYPES: ItemType[] = ['provider', 'listing', 'package', 'product'];
 
@@ -23,10 +26,13 @@ const ITEM_TYPE_CONFIG = {
   product: { label: 'Shop Products', icon: ShoppingBag, color: 'bg-orange-500' }
 };
 
+type MainTab = 'items' | 'suggestions' | 'bulk-import' | 'audit';
+
 export default function AdminVillageEconomyPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [village, setVillage] = useState<any>(null);
+  const [mainTab, setMainTab] = useState<MainTab>('items');
   const [activeTab, setActiveTab] = useState<ItemType>('provider');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,7 +111,7 @@ export default function AdminVillageEconomyPage() {
             const config = ITEM_TYPE_CONFIG[type];
             const TypeIcon = config.icon;
             return (
-              <Card key={type} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab(type)}>
+              <Card key={type} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setMainTab('items'); setActiveTab(type); }}>
                 <CardContent className="pt-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -122,7 +128,57 @@ export default function AdminVillageEconomyPage() {
           })}
         </div>
 
-        {/* Main Content Tabs */}
+        {/* Main Navigation Tabs */}
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as MainTab)}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="items" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              Linked Items
+            </TabsTrigger>
+            <TabsTrigger value="suggestions" className="gap-2">
+              <Wand2 className="h-4 w-4" />
+              Auto-Link
+            </TabsTrigger>
+            <TabsTrigger value="bulk-import" className="gap-2">
+              <Upload className="h-4 w-4" />
+              Bulk Import
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="gap-2">
+              <History className="h-4 w-4" />
+              Audit Log
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Suggestions Tab */}
+          <TabsContent value="suggestions">
+            <VillageLinkSuggestions 
+              villageId={id!} 
+              villageName={village.name} 
+              onCommitComplete={refetch}
+            />
+          </TabsContent>
+
+          {/* Bulk Import Tab */}
+          <TabsContent value="bulk-import">
+            <VillageLinkBulkImport 
+              villageId={id!} 
+              villageName={village.name}
+              onImportComplete={refetch}
+            />
+          </TabsContent>
+
+          {/* Audit Log Tab */}
+          <TabsContent value="audit">
+            <VillageLinkAuditLog 
+              villageId={id!}
+              onRollbackComplete={refetch}
+            />
+          </TabsContent>
+
+          {/* Items Tab */}
+          <TabsContent value="items">
+
+        {/* Item Type Sub-Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ItemType)}>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <TabsList>
@@ -265,6 +321,8 @@ export default function AdminVillageEconomyPage() {
               </TabsContent>
             );
           })}
+        </Tabs>
+          </TabsContent>
         </Tabs>
       </div>
     </AdminLayout>
