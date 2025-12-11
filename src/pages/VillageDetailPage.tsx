@@ -139,16 +139,25 @@ const VillageDetailPage = () => {
                 </TabsList>
 
                 <TabsContent value="introduction" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Introduction</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                        {village?.introduction}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {village?.introduction ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Introduction</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                          {village.introduction}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card className="border-dashed">
+                      <CardContent className="py-12 text-center text-muted-foreground">
+                        <p>Introduction content coming soon...</p>
+                        <p className="text-sm mt-2">This village is being documented.</p>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {village?.history && (
                     <Card>
@@ -180,28 +189,37 @@ const VillageDetailPage = () => {
 
                 <TabsContent value="traditions">
                   <div className="space-y-6">
-                    {village?.traditions && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Local Traditions</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                            {village.traditions}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {village?.festivals && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Festivals</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                            {village.festivals}
-                          </p>
+                    {village?.traditions || village?.festivals ? (
+                      <>
+                        {village?.traditions && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Local Traditions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                                {village.traditions}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                        {village?.festivals && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Festivals</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                                {village.festivals}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </>
+                    ) : (
+                      <Card className="border-dashed">
+                        <CardContent className="py-12 text-center text-muted-foreground">
+                          <p>Traditions & festivals content coming soon...</p>
                         </CardContent>
                       </Card>
                     )}
@@ -210,28 +228,37 @@ const VillageDetailPage = () => {
 
                 <TabsContent value="food">
                   <div className="space-y-6">
-                    {village?.foods && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Local Foods</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                            {village.foods}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {village?.recipes && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Traditional Recipes</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                            {village.recipes}
-                          </p>
+                    {village?.foods || village?.recipes ? (
+                      <>
+                        {village?.foods && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Local Foods</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                                {village.foods}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                        {village?.recipes && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Traditional Recipes</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                                {village.recipes}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </>
+                    ) : (
+                      <Card className="border-dashed">
+                        <CardContent className="py-12 text-center text-muted-foreground">
+                          <p>Foods & recipes content coming soon...</p>
                         </CardContent>
                       </Card>
                     )}
@@ -240,28 +267,37 @@ const VillageDetailPage = () => {
 
                 <TabsContent value="crafts">
                   <div className="space-y-6">
-                    {village?.handicrafts && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Handicrafts</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                            {village.handicrafts}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {village?.artisans && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Local Artisans</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                            {village.artisans}
-                          </p>
+                    {village?.handicrafts || village?.artisans ? (
+                      <>
+                        {village?.handicrafts && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Handicrafts</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                                {village.handicrafts}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                        {village?.artisans && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Local Artisans</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                                {village.artisans}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </>
+                    ) : (
+                      <Card className="border-dashed">
+                        <CardContent className="py-12 text-center text-muted-foreground">
+                          <p>Handicrafts content coming soon...</p>
                         </CardContent>
                       </Card>
                     )}
@@ -269,15 +305,21 @@ const VillageDetailPage = () => {
                 </TabsContent>
 
                 <TabsContent value="stories">
-                  {village?.stories && (
+                  {village?.stories ? (
                     <Card>
                       <CardHeader>
-                        <CardTitle>Stories & Quotes</CardTitle>
+                        <CardTitle>Stories & Folklore</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                           {village.stories}
                         </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card className="border-dashed">
+                      <CardContent className="py-12 text-center text-muted-foreground">
+                        <p>Stories & folklore content coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
