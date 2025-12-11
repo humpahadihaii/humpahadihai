@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { PenLine } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import SEOHead from "@/components/SEOHead";
+import { useSEO, PageType } from "@/hooks/useSEO";
 
 type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
 
@@ -28,6 +30,9 @@ const ContentListPage = ({
   submitButtonLabel = "Submit",
   submitButtonUrl = "#"
 }: ContentListPageProps) => {
+  // SEO
+  const seoMeta = useSEO(contentType as PageType, { name: title, description });
+
   const { data: items, isLoading } = useQuery({
     queryKey: ["content-items", contentType],
     queryFn: async () => {
@@ -44,6 +49,8 @@ const ContentListPage = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+      <SEOHead meta={seoMeta} />
+      
       {/* Hero Section */}
       <section className={`relative py-20 px-4 bg-gradient-to-r ${heroGradient}`}>
         <div className="container mx-auto text-center">

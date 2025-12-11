@@ -1,8 +1,13 @@
+# Robots.txt for Hum Pahadi Haii
+# https://humpahadihaii.in
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +15,37 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Pinterest
+Allow: /
+
 User-agent: *
 Allow: /
+Crawl-delay: 2
+
+# Sitemaps
+Sitemap: https://humpahadihaii.in/sitemap-index.xml
+Sitemap: https://humpahadihaii.in/sitemap-villages.xml
+Sitemap: https://humpahadihaii.in/sitemap-districts.xml
+Sitemap: https://humpahadihaii.in/sitemap-marketplace.xml
+Sitemap: https://humpahadihaii.in/sitemap-packages.xml
+Sitemap: https://humpahadihaii.in/sitemap-products.xml
+Sitemap: https://humpahadihaii.in/sitemap-stories.xml
+
+# Disallow admin and internal paths
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /auth
+Disallow: /login
+Disallow: /pending-approval
+
+# Allow important static assets
+Allow: /logo.jpg
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.webp
