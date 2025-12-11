@@ -81,14 +81,17 @@ export function useNearbyVillages(districtId?: string, excludeId?: string, limit
     queryFn: async (): Promise<RelatedItem[]> => {
       if (!districtId) return [];
 
-      const { data } = await supabase
+      // @ts-ignore - Supabase type instantiation too deep
+      const { data, error } = await supabase
         .from('villages')
         .select('id, name, slug, hero_image_url, description')
         .eq('is_active', true)
         .eq('district_id', districtId)
-        .limit(limit + 1) as { data: any[] | null };
+        .limit(limit + 1);
 
-      return (data || [])
+      if (error || !data) return [];
+
+      return (data as any[])
         .filter((v) => v.id !== excludeId)
         .slice(0, limit)
         .map((v) => ({
