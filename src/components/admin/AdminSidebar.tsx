@@ -49,6 +49,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
   
   // AI Tools
   { name: "AI Tools", href: "/admin/ai-tools", icon: Sparkles, section: "AI" },
+  { name: "AI Settings", href: "/admin/ai-settings", icon: Settings },
   
   // User Management
   { name: "User Management", href: "/admin/users", icon: Users, section: "Users" },
