@@ -86,6 +86,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
   { name: "Gallery", href: "/admin/gallery", icon: Image, section: "Media" },
   { name: "Site Images", href: "/admin/site-images", icon: Image },
   { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },
+  { name: "Featured Cards", href: "/admin/featured-cards", icon: Image },
   
   // Submissions
   { name: "Community Submissions", href: "/admin/community-submissions", icon: Users, section: "Submissions" },

@@ -1448,6 +1448,78 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_cards: {
+        Row: {
+          ab_test_tag: string | null
+          created_at: string
+          created_by: string | null
+          cta_label: Json
+          cta_url: Json
+          end_at: string | null
+          gradient_color: string | null
+          icon_name: string | null
+          id: string
+          image_alt: Json | null
+          image_url: string | null
+          is_published: boolean
+          is_sample: boolean
+          order_index: number
+          slug: string
+          start_at: string | null
+          subtitle: Json
+          title: Json
+          updated_at: string
+          updated_by: string | null
+          visible_on_homepage: boolean
+        }
+        Insert: {
+          ab_test_tag?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_label?: Json
+          cta_url?: Json
+          end_at?: string | null
+          gradient_color?: string | null
+          icon_name?: string | null
+          id?: string
+          image_alt?: Json | null
+          image_url?: string | null
+          is_published?: boolean
+          is_sample?: boolean
+          order_index?: number
+          slug: string
+          start_at?: string | null
+          subtitle?: Json
+          title?: Json
+          updated_at?: string
+          updated_by?: string | null
+          visible_on_homepage?: boolean
+        }
+        Update: {
+          ab_test_tag?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_label?: Json
+          cta_url?: Json
+          end_at?: string | null
+          gradient_color?: string | null
+          icon_name?: string | null
+          id?: string
+          image_alt?: Json | null
+          image_url?: string | null
+          is_published?: boolean
+          is_sample?: boolean
+          order_index?: number
+          slug?: string
+          start_at?: string | null
+          subtitle?: Json
+          title?: Json
+          updated_at?: string
+          updated_by?: string | null
+          visible_on_homepage?: boolean
+        }
+        Relationships: []
+      }
       featured_highlights: {
         Row: {
           button_link: string

@@ -1,15 +1,15 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mountain, UtensilsCrossed, Camera, Palmtree, Instagram } from "lucide-react";
+import { Mountain, UtensilsCrossed, Camera, Palmtree } from "lucide-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCMSSettings, useCMSContentSection } from "@/hooks/useCMSSettings";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import heroImageFallback from "@/assets/hero-mountains.jpg";
-import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HomepageVisits } from "@/components/HomepageVisits";
+import { FeaturedCardSection } from "@/components/FeaturedCardSection";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -17,7 +17,6 @@ const HomePage = () => {
   const { data: welcomeSection } = useCMSContentSection("welcome");
   
   const heroImage = settings?.hero_background_image || getImage('hero_banner', heroImageFallback);
-  const instagramBackground = getImage('instagram_cta_background', aipanPatternFallback);
 
   const { data: highlights = [] } = useQuery({
     queryKey: ["featured-highlights"],
@@ -71,7 +70,6 @@ const HomePage = () => {
   const primaryCtaUrl = settings?.primary_cta_url || "/culture";
   const secondaryCtaText = settings?.secondary_cta_text || "View Gallery";
   const secondaryCtaUrl = settings?.secondary_cta_url || "/gallery";
-  const instagramUrl = settings?.instagram_url || "https://instagram.com/hum_pahadi_haii";
 
   return (
     <div className="min-h-screen">
@@ -174,37 +172,8 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* Instagram CTA */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-3xl text-center">
-          <div 
-            className="rounded-2xl p-12 shadow-xl relative overflow-hidden"
-            style={{ 
-              backgroundImage: `url(${instagramBackground})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
-            <div className="absolute inset-0 bg-white/85"></div>
-            <div className="relative z-10">
-              <Instagram className="h-16 w-16 text-secondary mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-primary mb-4">Follow Our Journey</h2>
-              <p className="text-lg text-foreground/80 mb-6">
-                Join our Instagram community for daily stories, authentic recipes, and stunning Pahadi landscapes
-              </p>
-              <Button 
-                size="lg" 
-                asChild 
-                className="bg-secondary hover:bg-secondary/90 text-white shadow-lg"
-              >
-                <a href={instagramUrl} target="_blank" rel="noopener noreferrer">
-                  @hum_pahadi_haii
-                </a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Featured Card Section - CMS Driven */}
+      <FeaturedCardSection slug="follow-our-journey" />
     </div>
   );
 };
