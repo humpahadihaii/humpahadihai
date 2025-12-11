@@ -1421,6 +1421,30 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_visits: {
+        Row: {
+          created_at: string
+          id: string
+          ip: string | null
+          ua: string | null
+          visitor_key: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip?: string | null
+          ua?: string | null
+          visitor_key: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip?: string | null
+          ua?: string | null
+          visitor_key?: string
+        }
+        Relationships: []
+      }
       internal_events: {
         Row: {
           created_at: string
@@ -2623,7 +2647,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      homepage_visits_summary: {
+        Row: {
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_reset_user_password: {

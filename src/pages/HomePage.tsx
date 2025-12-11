@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import heroImageFallback from "@/assets/hero-mountains.jpg";
 import aipanPatternFallback from "@/assets/aipan-pattern.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HomepageVisits } from "@/components/HomepageVisits";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -97,6 +98,9 @@ const HomePage = () => {
             <Button size="lg" variant="outline" asChild className="bg-white/90 hover:bg-white border-white text-primary shadow-lg">
               <Link to={secondaryCtaUrl}>{secondaryCtaText}</Link>
             </Button>
+          </div>
+          <div className="mt-8">
+            <HomepageVisits />
           </div>
         </div>
       </section>
