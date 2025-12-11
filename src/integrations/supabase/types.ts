@@ -1809,6 +1809,7 @@ export type Database = {
           thumbnail_image_url: string | null
           unit_label: string | null
           updated_at: string
+          village_id: string | null
         }
         Insert: {
           category_id?: string | null
@@ -1828,6 +1829,7 @@ export type Database = {
           thumbnail_image_url?: string | null
           unit_label?: string | null
           updated_at?: string
+          village_id?: string | null
         }
         Update: {
           category_id?: string | null
@@ -1847,6 +1849,7 @@ export type Database = {
           thumbnail_image_url?: string | null
           unit_label?: string | null
           updated_at?: string
+          village_id?: string | null
         }
         Relationships: [
           {
@@ -1854,6 +1857,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "local_product_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "local_products_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
             referencedColumns: ["id"]
           },
         ]
@@ -2578,6 +2588,7 @@ export type Database = {
           sort_order: number
           title: string
           updated_at: string
+          village_id: string | null
         }
         Insert: {
           base_price?: number | null
@@ -2596,6 +2607,7 @@ export type Database = {
           sort_order?: number
           title: string
           updated_at?: string
+          village_id?: string | null
         }
         Update: {
           base_price?: number | null
@@ -2614,6 +2626,7 @@ export type Database = {
           sort_order?: number
           title?: string
           updated_at?: string
+          village_id?: string | null
         }
         Relationships: [
           {
@@ -2630,6 +2643,13 @@ export type Database = {
             referencedRelation: "tourism_providers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tourism_listings_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tourism_providers: {
@@ -2642,6 +2662,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_local: boolean | null
           is_sample: boolean
           is_verified: boolean
           name: string
@@ -2663,6 +2684,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_local?: boolean | null
           is_sample?: boolean
           is_verified?: boolean
           name: string
@@ -2684,6 +2706,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_local?: boolean | null
           is_sample?: boolean
           is_verified?: boolean
           name?: string
@@ -2794,9 +2817,11 @@ export type Database = {
           short_description: string | null
           slug: string
           starting_point: string | null
+          stops: Json | null
           thumbnail_image_url: string | null
           title: string
           updated_at: string
+          village_ids: string[] | null
         }
         Insert: {
           best_season?: string | null
@@ -2819,9 +2844,11 @@ export type Database = {
           short_description?: string | null
           slug: string
           starting_point?: string | null
+          stops?: Json | null
           thumbnail_image_url?: string | null
           title: string
           updated_at?: string
+          village_ids?: string[] | null
         }
         Update: {
           best_season?: string | null
@@ -2844,9 +2871,11 @@ export type Database = {
           short_description?: string | null
           slug?: string
           starting_point?: string | null
+          stops?: Json | null
           thumbnail_image_url?: string | null
           title?: string
           updated_at?: string
+          village_ids?: string[] | null
         }
         Relationships: []
       }
@@ -2915,6 +2944,191 @@ export type Database = {
           subject?: string | null
         }
         Relationships: []
+      }
+      village_link_audit: {
+        Row: {
+          action: string
+          after_state: Json | null
+          before_state: Json | null
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          item_id: string
+          item_type: string
+          reason: string | null
+          village_id: string
+        }
+        Insert: {
+          action: string
+          after_state?: Json | null
+          before_state?: Json | null
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          reason?: string | null
+          village_id: string
+        }
+        Update: {
+          action?: string
+          after_state?: Json | null
+          before_state?: Json | null
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          reason?: string | null
+          village_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_link_audit_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      village_link_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          id: string
+          mode: string
+          radius_meters: number | null
+          status: string
+          suggestion_count: number | null
+          village_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          mode: string
+          radius_meters?: number | null
+          status?: string
+          suggestion_count?: number | null
+          village_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          mode?: string
+          radius_meters?: number | null
+          status?: string
+          suggestion_count?: number | null
+          village_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_link_jobs_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      village_link_suggestions: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          id: string
+          item_id: string
+          item_type: string
+          job_id: string | null
+          match_method: string
+          status: string
+          village_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          job_id?: string | null
+          match_method: string
+          status?: string
+          village_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          job_id?: string | null
+          match_method?: string
+          status?: string
+          village_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_link_suggestions_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      village_links: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          item_id: string
+          item_type: string
+          priority: number | null
+          promote: boolean | null
+          status: string
+          updated_at: string | null
+          village_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          priority?: number | null
+          promote?: boolean | null
+          status?: string
+          updated_at?: string | null
+          village_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          priority?: number | null
+          promote?: boolean | null
+          status?: string
+          updated_at?: string | null
+          village_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_links_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       villages: {
         Row: {
