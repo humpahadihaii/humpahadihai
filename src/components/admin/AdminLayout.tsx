@@ -33,10 +33,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     session 
   } = useAuth();
   
-  const { isImpersonating } = useImpersonation();
+  const { isImpersonating, impersonatedUser, impersonatedRoles } = useImpersonation();
 
-  // Convert to RBACRole array
-  const roles = (authRoles || []) as RBACRole[];
+  // Use impersonated user's roles when in impersonation mode, otherwise use actual roles
+  const effectiveRoles: RBACRole[] = isImpersonating && impersonatedRoles.length > 0
+    ? impersonatedRoles
+    : (authRoles || []) as RBACRole[];
 
   const handleSignOut = async () => {
     if (signingOut) return;
@@ -81,17 +83,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has admin panel access
-  if (!hasAdminPanelAccess(roles) && !isSuperAdmin(roles)) {
+  // Check if user has admin panel access (use actual auth roles for this check, not impersonated)
+  const actualRoles = (authRoles || []) as RBACRole[];
+  if (!hasAdminPanelAccess(actualRoles) && !isSuperAdmin(actualRoles)) {
     // If user has no roles, go to pending approval
-    if (roles.length === 0) {
+    if (actualRoles.length === 0) {
       return <Navigate to="/pending-approval" replace />;
     }
     // Otherwise redirect to home
     return <Navigate to="/" replace />;
   }
   
-  console.log("[AdminLayout] Rendering for user:", user?.email, "roles:", roles);
+  console.log("[AdminLayout] Rendering for user:", user?.email, "effective roles:", effectiveRoles, "impersonating:", isImpersonating);
 
   return (
     <div className="flex h-screen w-full overflow-hidden flex-col">
@@ -107,7 +110,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           )}
         >
           <AdminSidebar 
-            roles={roles} 
+            roles={effectiveRoles} 
             collapsed={collapsed} 
           />
           
@@ -159,7 +162,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <SheetContent side="left" className="w-64 p-0">
             <div className="flex h-full flex-col">
               <AdminSidebar 
-                roles={roles} 
+                roles={effectiveRoles} 
                 collapsed={false} 
                 onLinkClick={() => setMobileOpen(false)}
               />

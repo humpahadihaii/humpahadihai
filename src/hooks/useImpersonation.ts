@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { RBACRole, normalizeRoles } from "@/lib/rbac";
 
 interface ImpersonatedUser {
   id: string;
@@ -154,9 +155,18 @@ export function useImpersonation() {
     }
   }, [state.sessionToken, persistState]);
 
+  // Get effective roles based on impersonation state
+  const impersonatedRoles = useMemo((): RBACRole[] => {
+    if (!state.isImpersonating || !state.impersonatedUser) {
+      return [];
+    }
+    return normalizeRoles(state.impersonatedUser.roles);
+  }, [state.isImpersonating, state.impersonatedUser]);
+
   return {
     ...state,
     loading,
+    impersonatedRoles,
     startImpersonation,
     stopImpersonation,
   };
