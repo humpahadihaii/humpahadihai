@@ -85,6 +85,7 @@ import AdminTourismListingsPage from "./pages/admin/AdminTourismListingsPage";
 import AdminTourismInquiriesPage from "./pages/admin/AdminTourismInquiriesPage";
 import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 import AdminNotifySettingsPage from "./pages/admin/AdminNotifySettingsPage";
+import AdminFeaturedCardsPage from "./pages/admin/AdminFeaturedCardsPage";
 
 const queryClient = new QueryClient();
 
@@ -152,6 +153,7 @@ const AppContent = () => {
             <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
             <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
             <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
+            <Route path="/admin/featured-cards" element={<AdminRoute><AdminFeaturedCardsPage /></AdminRoute>} />
             <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
             <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
