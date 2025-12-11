@@ -14,7 +14,6 @@ interface Thought {
   thought: string;
   status: string;
   sentiment: string | null;
-  likes_count: number;
   created_at: string;
 }
 
@@ -106,10 +105,7 @@ const AdminThoughtsPage = () => {
                     <CardTitle>{thought.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">{thought.location}</p>
                   </div>
-                  <div className="flex gap-2">
-                    <Badge>{thought.sentiment || "neutral"}</Badge>
-                    <Badge variant="outline">{thought.likes_count} likes</Badge>
-                  </div>
+                  <Badge>{thought.sentiment || "neutral"}</Badge>
                 </div>
               </CardHeader>
               <CardContent>
