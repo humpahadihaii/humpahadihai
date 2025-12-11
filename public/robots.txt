@@ -1,14 +1,17 @@
 # Robots.txt for Hum Pahadi Haii
 # https://humpahadihaii.in
 
+# Google
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 1
 
+# Bing
 User-agent: Bingbot
 Allow: /
 Crawl-delay: 2
 
+# Social Media Bots
 User-agent: Twitterbot
 Allow: /
 
@@ -21,12 +24,19 @@ Allow: /
 User-agent: Pinterest
 Allow: /
 
+User-agent: WhatsApp
+Allow: /
+
+# All other bots
 User-agent: *
 Allow: /
 Crawl-delay: 2
 
-# Sitemaps
+# Sitemaps - Main Index
 Sitemap: https://humpahadihaii.in/sitemap-index.xml
+
+# Individual Sitemaps
+Sitemap: https://humpahadihaii.in/sitemap-static.xml
 Sitemap: https://humpahadihaii.in/sitemap-villages.xml
 Sitemap: https://humpahadihaii.in/sitemap-districts.xml
 Sitemap: https://humpahadihaii.in/sitemap-marketplace.xml
@@ -41,11 +51,32 @@ Disallow: /api/
 Disallow: /auth
 Disallow: /login
 Disallow: /pending-approval
+Disallow: /my-submissions
+Disallow: /*?*  # Query strings / filtered pages
+Disallow: /*?page=  # Paginated beyond page 1
 
 # Allow important static assets
 Allow: /logo.jpg
-Allow: /*.js
-Allow: /*.css
-Allow: /*.png
-Allow: /*.jpg
-Allow: /*.webp
+Allow: /favicon.ico
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.webp$
+Allow: /*.svg$
+
+# Block AI crawlers (optional - remove if you want AI indexing)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
