@@ -1,20 +1,15 @@
 import { ReactNode, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { 
-  LogOut,
-  ChevronLeft,
-  Menu
-} from "lucide-react";
+import { Navigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 import { performLogout } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { ImpersonationBanner } from "./ImpersonationBanner";
 import { useImpersonation } from "@/hooks/useImpersonation";
-import { AdminSidebar } from "./AdminSidebar";
+import { AppleSidebar } from "./AppleSidebar";
 import { RBACRole, hasAdminPanelAccess, isSuperAdmin } from "@/lib/rbac";
 
 interface AdminLayoutProps {
@@ -57,21 +52,23 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // Show skeleton only if auth is not initialized
   if (!isAuthInitialized) {
-    console.log("[AdminLayout] Auth not initialized, showing skeleton");
     return (
-      <div className="flex h-screen w-full overflow-hidden">
-        <aside className="hidden border-r bg-background md:flex md:flex-col w-64">
-          <div className="flex h-16 items-center border-b px-4">
-            <div className="h-6 w-32 bg-muted animate-pulse rounded" />
-          </div>
-          <div className="flex-1 px-3 py-4 space-y-2">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-8 bg-muted animate-pulse rounded" />
-            ))}
+      <div className="flex h-screen w-full overflow-hidden bg-[hsl(var(--admin-bg))]">
+        <aside className="hidden md:flex w-[260px] border-r border-[hsl(var(--admin-border))] bg-[hsl(var(--admin-sidebar-bg))]">
+          <div className="flex flex-col w-full">
+            <div className="h-14 border-b border-[hsl(var(--admin-border))] px-4 flex items-center">
+              <div className="h-8 w-8 rounded-lg bg-muted animate-pulse" />
+              <div className="ml-2.5 h-5 w-16 rounded bg-muted animate-pulse" />
+            </div>
+            <div className="flex-1 py-4 px-2 space-y-1">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="h-9 bg-muted/50 animate-pulse rounded-lg" />
+              ))}
+            </div>
           </div>
         </aside>
         <main className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
         </main>
       </div>
     );
@@ -79,74 +76,35 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // If no session after initialization, redirect to login
   if (!session) {
-    console.log("[AdminLayout] No session, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has admin panel access (use actual auth roles for this check, not impersonated)
+  // Check if user has admin panel access
   const actualRoles = (authRoles || []) as RBACRole[];
   if (!hasAdminPanelAccess(actualRoles) && !isSuperAdmin(actualRoles)) {
-    // If user has no roles, go to pending approval
     if (actualRoles.length === 0) {
       return <Navigate to="/pending-approval" replace />;
     }
-    // Otherwise redirect to home
     return <Navigate to="/" replace />;
   }
-  
-  console.log("[AdminLayout] Rendering for user:", user?.email, "effective roles:", effectiveRoles, "impersonating:", isImpersonating);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden flex-col">
-      {/* Impersonation Banner - fixed at top */}
+    <div className="flex h-screen w-full overflow-hidden flex-col bg-[hsl(var(--admin-bg))]">
+      {/* Impersonation Banner */}
       <ImpersonationBanner />
       
       <div className={cn("flex flex-1 overflow-hidden", isImpersonating && "pt-0")}>
         {/* Desktop Sidebar */}
-        <aside
-          className={cn(
-            "hidden border-r bg-background transition-all duration-300 md:flex md:flex-col relative",
-            collapsed ? "w-16" : "w-64"
-          )}
-        >
-          <AdminSidebar 
-            roles={effectiveRoles} 
-            collapsed={collapsed} 
+        <div className="hidden md:block relative">
+          <AppleSidebar
+            roles={effectiveRoles}
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed(!collapsed)}
+            email={user?.email}
+            onSignOut={handleSignOut}
+            signingOut={signingOut}
           />
-          
-          <Separator />
-          
-          <div className="p-4 space-y-2">
-            {!collapsed && user && (
-              <p className="text-xs text-muted-foreground truncate px-2">
-                {user.email}
-              </p>
-            )}
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={handleSignOut}
-              disabled={signingOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {!collapsed && (signingOut ? "Signing out..." : "Sign Out")}
-            </Button>
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute -right-4 top-20 z-10 rounded-full border bg-background"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <ChevronLeft
-              className={cn(
-                "h-4 w-4 transition-transform",
-                collapsed && "rotate-180"
-              )}
-            />
-          </Button>
-        </aside>
+        </div>
 
         {/* Mobile Sidebar */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -154,44 +112,29 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-4 top-4 z-50"
+              className="fixed left-4 top-4 z-50 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <div className="flex h-full flex-col">
-              <AdminSidebar 
-                roles={effectiveRoles} 
-                collapsed={false} 
-                onLinkClick={() => setMobileOpen(false)}
-              />
-              
-              <Separator />
-              
-              <div className="p-4 space-y-2">
-                {user && (
-                  <p className="text-xs text-muted-foreground truncate px-2">
-                    {user.email}
-                  </p>
-                )}
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={handleSignOut}
-                  disabled={signingOut}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {signingOut ? "Signing out..." : "Sign Out"}
-                </Button>
-              </div>
-            </div>
+          <SheetContent side="left" className="w-[280px] p-0 border-0">
+            <AppleSidebar
+              roles={effectiveRoles}
+              collapsed={false}
+              onToggleCollapse={() => {}}
+              onLinkClick={() => setMobileOpen(false)}
+              email={user?.email}
+              onSignOut={handleSignOut}
+              signingOut={signingOut}
+            />
           </SheetContent>
         </Sheet>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-6 md:p-8">{children}</div>
+        <main className="flex-1 overflow-y-auto bg-[hsl(var(--admin-bg))]">
+          <div className="container mx-auto p-6 md:p-8 max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>

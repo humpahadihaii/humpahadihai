@@ -1,305 +1,156 @@
 /**
  * Admin Design System - Apple-Style Tokens
  * Single source of truth for admin panel styling
- * 
- * Usage:
- * - Colors: Use CSS variables like var(--admin-surface)
- * - Spacing: 4/8/12/16/24/32/48px scale
- * - Border radius: sm (8px), md (12px), lg (16px), xl (20px)
- * - Shadows: Use soft, layered shadows for depth
- * - Motion: 120-200ms with ease-out curves
  */
 
-@layer base {
-  :root {
-    /* ============================================
-       ADMIN COLOR PALETTE - Light Mode
-       ============================================ */
-    
-    /* Surface colors - translucent for blur effects */
-    --admin-surface: 0 0% 100%;
-    --admin-surface-elevated: 0 0% 100%;
-    --admin-surface-overlay: 0 0% 100% / 0.8;
-    --admin-surface-blur: 0 0% 98% / 0.72;
-    
-    /* Sidebar specific */
-    --admin-sidebar-bg: 220 14% 96%;
-    --admin-sidebar-hover: 220 14% 92%;
-    --admin-sidebar-active: 142 71% 45%;
-    --admin-sidebar-active-bg: 142 71% 45% / 0.12;
-    --admin-sidebar-text: 220 9% 46%;
-    --admin-sidebar-text-active: 142 71% 35%;
-    --admin-sidebar-section-text: 220 9% 56%;
-    --admin-sidebar-border: 220 13% 91%;
-    
-    /* Text hierarchy */
-    --admin-text-primary: 220 9% 12%;
-    --admin-text-secondary: 220 9% 46%;
-    --admin-text-tertiary: 220 9% 64%;
-    --admin-text-disabled: 220 9% 78%;
-    
-    /* Interactive states */
-    --admin-accent: 142 71% 45%;
-    --admin-accent-hover: 142 71% 40%;
-    --admin-accent-subtle: 142 71% 45% / 0.1;
-    
-    /* Status colors */
-    --admin-success: 142 71% 45%;
-    --admin-warning: 38 92% 50%;
-    --admin-error: 0 84% 60%;
-    --admin-info: 217 91% 60%;
-    
-    /* Borders */
-    --admin-border: 220 13% 91%;
-    --admin-border-subtle: 220 13% 95%;
-    
-    /* ============================================
-       SPACING SCALE
-       ============================================ */
-    --admin-space-1: 0.25rem;  /* 4px */
-    --admin-space-2: 0.5rem;   /* 8px */
-    --admin-space-3: 0.75rem;  /* 12px */
-    --admin-space-4: 1rem;     /* 16px */
-    --admin-space-5: 1.5rem;   /* 24px */
-    --admin-space-6: 2rem;     /* 32px */
-    --admin-space-8: 3rem;     /* 48px */
-    
-    /* ============================================
-       TYPOGRAPHY
-       ============================================ */
-    --admin-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    --admin-font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
-    
-    /* Font sizes */
-    --admin-text-xs: 0.6875rem;   /* 11px */
-    --admin-text-sm: 0.8125rem;   /* 13px */
-    --admin-text-base: 0.9375rem; /* 15px */
-    --admin-text-lg: 1.0625rem;   /* 17px */
-    --admin-text-xl: 1.3125rem;   /* 21px */
-    --admin-text-2xl: 1.6875rem;  /* 27px */
-    
-    /* Line heights */
-    --admin-leading-tight: 1.2;
-    --admin-leading-normal: 1.47;
-    --admin-leading-relaxed: 1.6;
-    
-    /* Font weights */
-    --admin-font-regular: 400;
-    --admin-font-medium: 500;
-    --admin-font-semibold: 600;
-    --admin-font-bold: 700;
-    
-    /* ============================================
-       BORDER RADIUS (Apple-style rounded)
-       ============================================ */
-    --admin-radius-sm: 0.5rem;    /* 8px */
-    --admin-radius-md: 0.75rem;   /* 12px */
-    --admin-radius-lg: 1rem;      /* 16px */
-    --admin-radius-xl: 1.25rem;   /* 20px */
-    --admin-radius-full: 9999px;
-    
-    /* ============================================
-       SHADOWS (Soft, layered)
-       ============================================ */
-    --admin-shadow-xs: 0 1px 2px hsl(220 9% 12% / 0.04);
-    --admin-shadow-sm: 0 2px 4px hsl(220 9% 12% / 0.06), 0 1px 2px hsl(220 9% 12% / 0.04);
-    --admin-shadow-md: 0 4px 8px hsl(220 9% 12% / 0.08), 0 2px 4px hsl(220 9% 12% / 0.04);
-    --admin-shadow-lg: 0 8px 16px hsl(220 9% 12% / 0.1), 0 4px 8px hsl(220 9% 12% / 0.06);
-    --admin-shadow-xl: 0 16px 32px hsl(220 9% 12% / 0.12), 0 8px 16px hsl(220 9% 12% / 0.08);
-    
-    /* ============================================
-       MOTION / ANIMATION
-       ============================================ */
-    --admin-duration-fast: 120ms;
-    --admin-duration-normal: 180ms;
-    --admin-duration-slow: 280ms;
-    --admin-duration-slower: 400ms;
-    
-    --admin-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --admin-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-    --admin-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    
-    /* ============================================
-       SIDEBAR DIMENSIONS
-       ============================================ */
-    --admin-sidebar-width-collapsed: 72px;
-    --admin-sidebar-width-expanded: 260px;
-    --admin-header-height: 56px;
-  }
+/* ============================================
+   ADMIN CSS VARIABLES
+   ============================================ */
+
+:root {
+  /* Surface colors */
+  --admin-bg: 220 14% 96%;
+  --admin-surface: 0 0% 100%;
+  --admin-surface-elevated: 0 0% 100%;
+  --admin-surface-blur: 0 0% 98% / 0.72;
   
-  .dark {
-    /* Surface colors - Dark mode */
-    --admin-surface: 220 13% 10%;
-    --admin-surface-elevated: 220 13% 14%;
-    --admin-surface-overlay: 220 13% 10% / 0.9;
-    --admin-surface-blur: 220 13% 12% / 0.8;
-    
-    /* Sidebar specific - Dark */
-    --admin-sidebar-bg: 220 13% 8%;
-    --admin-sidebar-hover: 220 13% 14%;
-    --admin-sidebar-active: 142 71% 55%;
-    --admin-sidebar-active-bg: 142 71% 55% / 0.15;
-    --admin-sidebar-text: 220 9% 68%;
-    --admin-sidebar-text-active: 142 71% 60%;
-    --admin-sidebar-section-text: 220 9% 50%;
-    --admin-sidebar-border: 220 13% 18%;
-    
-    /* Text hierarchy - Dark */
-    --admin-text-primary: 0 0% 98%;
-    --admin-text-secondary: 220 9% 68%;
-    --admin-text-tertiary: 220 9% 50%;
-    --admin-text-disabled: 220 9% 36%;
-    
-    /* Interactive states - Dark */
-    --admin-accent: 142 71% 55%;
-    --admin-accent-hover: 142 71% 60%;
-    --admin-accent-subtle: 142 71% 55% / 0.15;
-    
-    /* Borders - Dark */
-    --admin-border: 220 13% 20%;
-    --admin-border-subtle: 220 13% 16%;
-    
-    /* Shadows - Dark (more subtle) */
-    --admin-shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --admin-shadow-sm: 0 2px 4px hsl(0 0% 0% / 0.25), 0 1px 2px hsl(0 0% 0% / 0.15);
-    --admin-shadow-md: 0 4px 8px hsl(0 0% 0% / 0.3), 0 2px 4px hsl(0 0% 0% / 0.2);
-    --admin-shadow-lg: 0 8px 16px hsl(0 0% 0% / 0.35), 0 4px 8px hsl(0 0% 0% / 0.25);
-    --admin-shadow-xl: 0 16px 32px hsl(0 0% 0% / 0.4), 0 8px 16px hsl(0 0% 0% / 0.3);
-  }
+  /* Sidebar specific */
+  --admin-sidebar-bg: 220 14% 96%;
+  --admin-sidebar-hover: 220 14% 92%;
+  --admin-sidebar-active: 142 71% 45%;
+  --admin-sidebar-active-bg: 142 71% 45% / 0.12;
+  --admin-sidebar-text: 220 9% 46%;
+  --admin-sidebar-text-active: 142 71% 35%;
+  --admin-sidebar-section-text: 220 9% 56%;
+  
+  /* Text hierarchy */
+  --admin-text-primary: 220 9% 12%;
+  --admin-text-secondary: 220 9% 46%;
+  --admin-text-tertiary: 220 9% 64%;
+  
+  /* Interactive states */
+  --admin-accent: 142 71% 45%;
+  --admin-accent-hover: 142 71% 40%;
+  --admin-accent-subtle: 142 71% 45% / 0.1;
+  
+  /* Borders */
+  --admin-border: 220 13% 91%;
+  --admin-border-subtle: 220 13% 95%;
+  
+  /* Spacing */
+  --admin-space-1: 0.25rem;
+  --admin-space-2: 0.5rem;
+  --admin-space-3: 0.75rem;
+  --admin-space-4: 1rem;
+  --admin-space-5: 1.5rem;
+  --admin-space-6: 2rem;
+  
+  /* Typography */
+  --admin-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  --admin-text-xs: 0.6875rem;
+  --admin-text-sm: 0.8125rem;
+  --admin-text-base: 0.9375rem;
+  
+  /* Font weights */
+  --admin-font-regular: 400;
+  --admin-font-medium: 500;
+  --admin-font-semibold: 600;
+  
+  /* Border radius */
+  --admin-radius-sm: 0.5rem;
+  --admin-radius-md: 0.75rem;
+  --admin-radius-lg: 1rem;
+  --admin-radius-full: 9999px;
+  
+  /* Shadows */
+  --admin-shadow-sm: 0 2px 4px hsl(220 9% 12% / 0.06);
+  --admin-shadow-md: 0 4px 8px hsl(220 9% 12% / 0.08);
+  
+  /* Motion */
+  --admin-duration-fast: 120ms;
+  --admin-duration-normal: 180ms;
+  --admin-duration-slow: 280ms;
+  --admin-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --admin-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Sidebar dimensions */
+  --admin-sidebar-collapsed: 72px;
+  --admin-sidebar-expanded: 260px;
+}
+
+.dark {
+  --admin-bg: 220 13% 10%;
+  --admin-surface: 220 13% 10%;
+  --admin-surface-elevated: 220 13% 14%;
+  --admin-surface-blur: 220 13% 12% / 0.8;
+  
+  --admin-sidebar-bg: 220 13% 8%;
+  --admin-sidebar-hover: 220 13% 14%;
+  --admin-sidebar-active: 142 71% 55%;
+  --admin-sidebar-active-bg: 142 71% 55% / 0.15;
+  --admin-sidebar-text: 220 9% 68%;
+  --admin-sidebar-text-active: 142 71% 60%;
+  --admin-sidebar-section-text: 220 9% 50%;
+  
+  --admin-text-primary: 0 0% 98%;
+  --admin-text-secondary: 220 9% 68%;
+  --admin-text-tertiary: 220 9% 50%;
+  
+  --admin-accent: 142 71% 55%;
+  --admin-accent-hover: 142 71% 60%;
+  --admin-accent-subtle: 142 71% 55% / 0.15;
+  
+  --admin-border: 220 13% 20%;
+  --admin-border-subtle: 220 13% 16%;
+  
+  --admin-shadow-sm: 0 2px 4px hsl(0 0% 0% / 0.25);
+  --admin-shadow-md: 0 4px 8px hsl(0 0% 0% / 0.3);
 }
 
 /* ============================================
    ADMIN UTILITY CLASSES
    ============================================ */
 
-/* Glassmorphism effect for sidebar */
+.admin-glass {
+  background: hsl(var(--admin-surface-blur));
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+@supports not (backdrop-filter: blur(20px)) {
   .admin-glass {
-    background: hsl(var(--admin-surface-blur));
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-  }
-  
-  /* Fallback for browsers without backdrop-filter */
-  @supports not (backdrop-filter: blur(20px)) {
-    .admin-glass {
-      background: hsl(var(--admin-sidebar-bg));
-    }
-  }
-  
-  /* Admin card style */
-  .admin-card {
-    background: hsl(var(--admin-surface));
-    border: 1px solid hsl(var(--admin-border));
-    border-radius: var(--admin-radius-lg);
-    box-shadow: var(--admin-shadow-sm);
-  }
-  
-  /* Admin sidebar item */
-  .admin-sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: var(--admin-space-3);
-    padding: var(--admin-space-2) var(--admin-space-3);
-    border-radius: var(--admin-radius-md);
-    font-size: var(--admin-text-sm);
-    font-weight: var(--admin-font-medium);
-    color: hsl(var(--admin-sidebar-text));
-    transition: all var(--admin-duration-normal) var(--admin-ease-out);
-    cursor: pointer;
-  }
-  
-  .admin-sidebar-item:hover {
-    background: hsl(var(--admin-sidebar-hover));
-    transform: translateX(2px);
-  }
-  
-  .admin-sidebar-item.active {
-    background: hsl(var(--admin-sidebar-active-bg));
-    color: hsl(var(--admin-sidebar-text-active));
-    font-weight: var(--admin-font-semibold);
-  }
-  
-  .admin-sidebar-item.active .admin-sidebar-icon {
-    transform: scale(1.05);
-  }
-  
-  /* Admin sidebar section header */
-  .admin-sidebar-section {
-    padding: var(--admin-space-4) var(--admin-space-3) var(--admin-space-2);
-    font-size: var(--admin-text-xs);
-    font-weight: var(--admin-font-semibold);
-    color: hsl(var(--admin-sidebar-section-text));
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  
-  /* Admin icon animations */
-  .admin-sidebar-icon {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-    transition: transform var(--admin-duration-fast) var(--admin-ease-spring);
-  }
-  
-  .admin-sidebar-item:hover .admin-sidebar-icon {
-    transform: scale(1.06) translateY(-1px);
+    background: hsl(var(--admin-sidebar-bg));
   }
 }
 
-/* ============================================
-   ADMIN ANIMATIONS
-   ============================================ */
-
-@layer utilities {
-  /* Sidebar expand/collapse animation */
-  .admin-sidebar-transition {
-    transition: width var(--admin-duration-slow) var(--admin-ease-out),
-                padding var(--admin-duration-slow) var(--admin-ease-out);
-  }
-  
-  /* Fade in animation */
-  .admin-fade-in {
-    animation: adminFadeIn var(--admin-duration-normal) var(--admin-ease-out);
-  }
-  
-  /* Slide in from left */
-  .admin-slide-in-left {
-    animation: adminSlideInLeft var(--admin-duration-slow) var(--admin-ease-out);
-  }
-  
-  /* Scale up animation */
-  .admin-scale-in {
-    animation: adminScaleIn var(--admin-duration-normal) var(--admin-ease-spring);
-  }
+.admin-card {
+  background: hsl(var(--admin-surface));
+  border: 1px solid hsl(var(--admin-border));
+  border-radius: var(--admin-radius-lg);
+  box-shadow: var(--admin-shadow-sm);
 }
 
+/* Sidebar transition */
+.admin-sidebar-transition {
+  transition: width var(--admin-duration-slow) var(--admin-ease-out);
+}
+
+/* Fade animation */
 @keyframes adminFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
+.admin-fade-in {
+  animation: adminFadeIn var(--admin-duration-normal) var(--admin-ease-out);
+}
+
+/* Slide in animation */
 @keyframes adminSlideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes adminScaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.admin-slide-in-left {
+  animation: adminSlideInLeft var(--admin-duration-slow) var(--admin-ease-out);
 }
