@@ -99,6 +99,7 @@ import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 import AdminNotifySettingsPage from "./pages/admin/AdminNotifySettingsPage";
 import AdminFeaturedCardsPage from "./pages/admin/AdminFeaturedCardsPage";
 import AdminMapPage from "./pages/admin/AdminMapPage";
+import AdminMediaImportPage from "./pages/admin/AdminMediaImportPage";
 
 const queryClient = new QueryClient();
 
@@ -210,6 +211,7 @@ const AppContent = () => {
             <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
             <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
             <Route path="/admin/notify-settings" element={<AdminRoute><AdminNotifySettingsPage /></AdminRoute>} />
+            <Route path="/admin/media-import" element={<AdminRoute><AdminMediaImportPage /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

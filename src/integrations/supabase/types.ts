@@ -3047,6 +3047,274 @@ export type Database = {
         }
         Relationships: []
       }
+      media_assets: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string | null
+          created_by: string | null
+          credit: string | null
+          entity_id: string | null
+          entity_type: string | null
+          exif: Json | null
+          filename: string
+          fingerprint: string | null
+          geolat: number | null
+          geolng: number | null
+          height: number | null
+          id: string
+          is_published: boolean | null
+          job_id: string | null
+          mime_type: string | null
+          optimized_paths: Json | null
+          original_filename: string
+          phash: string | null
+          publish_status: string | null
+          size_bytes: number | null
+          storage_path: string
+          tags: string[] | null
+          thumbnail_path: string | null
+          title: string | null
+          updated_at: string | null
+          validation_errors: Json | null
+          validation_status: string | null
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          credit?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          exif?: Json | null
+          filename: string
+          fingerprint?: string | null
+          geolat?: number | null
+          geolng?: number | null
+          height?: number | null
+          id?: string
+          is_published?: boolean | null
+          job_id?: string | null
+          mime_type?: string | null
+          optimized_paths?: Json | null
+          original_filename: string
+          phash?: string | null
+          publish_status?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string | null
+          validation_errors?: Json | null
+          validation_status?: string | null
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          credit?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          exif?: Json | null
+          filename?: string
+          fingerprint?: string | null
+          geolat?: number | null
+          geolng?: number | null
+          height?: number | null
+          id?: string
+          is_published?: boolean | null
+          job_id?: string | null
+          mime_type?: string | null
+          optimized_paths?: Json | null
+          original_filename?: string
+          phash?: string | null
+          publish_status?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string | null
+          validation_errors?: Json | null
+          validation_status?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "media_import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_import_audit: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown
+          job_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown
+          job_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown
+          job_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_import_audit_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "media_import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_import_errors: {
+        Row: {
+          asset_id: string | null
+          created_at: string | null
+          error_code: string | null
+          error_details: Json | null
+          error_message: string
+          error_type: string
+          filename: string
+          id: string
+          is_recoverable: boolean | null
+          job_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string | null
+          error_code?: string | null
+          error_details?: Json | null
+          error_message: string
+          error_type: string
+          filename: string
+          id?: string
+          is_recoverable?: boolean | null
+          job_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string | null
+          error_code?: string | null
+          error_details?: Json | null
+          error_message?: string
+          error_type?: string
+          filename?: string
+          id?: string
+          is_recoverable?: boolean | null
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_import_errors_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_import_errors_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "media_import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_import_jobs: {
+        Row: {
+          committed_at: string | null
+          committed_by: string | null
+          completed_at: string | null
+          created_at: string | null
+          created_by: string
+          csv_mapping: Json | null
+          error_count: number | null
+          id: string
+          processed_files: number | null
+          rolled_back_at: string | null
+          rolled_back_by: string | null
+          settings: Json | null
+          started_at: string | null
+          status: string
+          success_count: number | null
+          total_files: number | null
+          updated_at: string | null
+          warning_count: number | null
+        }
+        Insert: {
+          committed_at?: string | null
+          committed_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by: string
+          csv_mapping?: Json | null
+          error_count?: number | null
+          id?: string
+          processed_files?: number | null
+          rolled_back_at?: string | null
+          rolled_back_by?: string | null
+          settings?: Json | null
+          started_at?: string | null
+          status?: string
+          success_count?: number | null
+          total_files?: number | null
+          updated_at?: string | null
+          warning_count?: number | null
+        }
+        Update: {
+          committed_at?: string | null
+          committed_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string
+          csv_mapping?: Json | null
+          error_count?: number | null
+          id?: string
+          processed_files?: number | null
+          rolled_back_at?: string | null
+          rolled_back_by?: string | null
+          settings?: Json | null
+          started_at?: string | null
+          status?: string
+          success_count?: number | null
+          total_files?: number | null
+          updated_at?: string | null
+          warning_count?: number | null
+        }
+        Relationships: []
+      }
       media_library: {
         Row: {
           alt_text: string | null
