@@ -22,15 +22,16 @@ const IMAGE_SLOTS = [
   { key: "hero_banner", label: "Homepage Hero Banner", description: "Main hero image on homepage" },
   { key: "site_logo", label: "Site Logo", description: "Navigation and branding logo" },
   { key: "about_section_image", label: "About Section Image", description: "Image on About page" },
-  { key: "culture_hero", label: "Culture Page Hero", description: "Hero background for Culture page" },
-  { key: "food_hero", label: "Food Page Hero", description: "Hero background for Food page" },
-  { key: "travel_hero", label: "Travel Page Hero", description: "Hero background for Travel page" },
-  { key: "thoughts_hero", label: "Thoughts Page Hero", description: "Hero background for Thoughts page" },
-  { key: "districts_hero", label: "Districts Page Hero", description: "Hero background for Districts page" },
-  { key: "gallery_hero", label: "Gallery Page Hero", description: "Hero background for Gallery page" },
-  { key: "marketplace_hero", label: "Marketplace Page Hero", description: "Hero background for Marketplace page" },
+  { key: "culture_section_image", label: "Culture Page Hero", description: "Hero background for Culture page" },
+  { key: "food_section_image", label: "Food Page Hero", description: "Hero background for Food page" },
+  { key: "travel_section_image", label: "Travel Page Hero", description: "Hero background for Travel page" },
+  { key: "thoughts_section_image", label: "Thoughts Page Hero", description: "Hero background for Thoughts page" },
+  { key: "districts_section_image", label: "Districts Page Hero", description: "Hero background for Districts page" },
+  { key: "gallery_section_image", label: "Gallery Page Hero", description: "Hero background for Gallery page" },
+  { key: "marketplace_section_image", label: "Marketplace Page Hero", description: "Hero background for Marketplace page" },
   { key: "instagram_cta_background", label: "Instagram CTA Background", description: "Background for social CTA section" },
   { key: "footer_background", label: "Footer Background", description: "Background pattern for footer" },
+  { key: "festival_section_image", label: "Festival Section", description: "Festival celebrations section background" },
 ] as const;
 
 const siteImageSchema = z.object({
