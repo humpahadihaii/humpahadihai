@@ -15,6 +15,7 @@ import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 import VillageMarketplaceSection from "@/components/village/VillageMarketplaceSection";
 import NearbyVillagesSection from "@/components/village/NearbyVillagesSection";
 import StaticMapPreview from "@/components/maps/StaticMapPreview";
+import WeatherWidget from "@/components/weather/WeatherWidget";
 
 const VillageDetailPage = () => {
   const { slug } = useParams();
@@ -405,6 +406,15 @@ const VillageDetailPage = () => {
 
             {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
+              {/* Weather Widget */}
+              {village?.lat && village?.lng && (
+                <WeatherWidget
+                  lat={Number(village.lat)}
+                  lng={Number(village.lng)}
+                  locationName={village.name}
+                />
+              )}
+
               {/* Events Widget */}
               {village?.id && (
                 <EventCalendarWidget 

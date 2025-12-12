@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mountain, UtensilsCrossed, Camera, Palmtree } from "lucide-react";
+import { Mountain, UtensilsCrossed, Camera, Palmtree, Calendar } from "lucide-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCMSSettings, useCMSContentSection } from "@/hooks/useCMSSettings";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { HomepageVisits } from "@/components/HomepageVisits";
 import { FeaturedCardSection } from "@/components/FeaturedCardSection";
 import { SearchTrigger } from "@/components/search";
+import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
+import WeatherWidget from "@/components/weather/WeatherWidget";
+import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -29,6 +32,49 @@ const HomePage = () => {
         .order("order_position", { ascending: true });
 
       if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch upcoming events for homepage widget
+  const { data: upcomingEvents = [], isLoading: eventsLoading } = useQuery({
+    queryKey: ["homepage-events"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select(`
+          id, title, slug, short_description, cover_image_url,
+          start_at, end_at, event_type, is_free, ticket_price,
+          village:villages(id, name, slug)
+        `)
+        .eq("status", "published")
+        .gte("start_at", new Date().toISOString())
+        .order("start_at", { ascending: true })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch a major district for weather (Dehradun as default)
+  const { data: weatherDistrict } = useQuery({
+    queryKey: ["weather-district"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("districts")
+        .select("id, name, latitude, longitude")
+        .eq("name", "Dehradun")
+        .single();
+      if (error) {
+        // Fallback to first district with coordinates
+        const { data: fallback } = await supabase
+          .from("districts")
+          .select("id, name, latitude, longitude")
+          .not("latitude", "is", null)
+          .limit(1)
+          .single();
+        return fallback;
+      }
       return data;
     },
   });
@@ -174,8 +220,41 @@ const HomePage = () => {
               ))}
             </div>
           </div>
-        </section>
+      </section>
       )}
+
+      {/* Festival Spotlight & Events Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Festival Spotlight - Takes 2 columns */}
+            <div className="lg:col-span-2">
+              <FestivalSpotlight limit={3} />
+            </div>
+            
+            {/* Sidebar with Events & Weather */}
+            <div className="space-y-6">
+              {/* Weather Widget */}
+              {weatherDistrict && (
+                <WeatherWidget
+                  lat={Number(weatherDistrict.latitude)}
+                  lng={Number(weatherDistrict.longitude)}
+                  locationName={weatherDistrict.name}
+                />
+              )}
+              
+              {/* Upcoming Events */}
+              <EventCalendarWidget
+                events={upcomingEvents as any}
+                isLoading={eventsLoading}
+                title="Upcoming Events"
+                showViewAll={true}
+                compact={true}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Card Section - CMS Driven */}
       <FeaturedCardSection slug="follow-our-journey" />

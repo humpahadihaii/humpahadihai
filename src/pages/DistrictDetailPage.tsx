@@ -25,6 +25,9 @@ import DistrictMarketplaceSection from "@/components/district/DistrictMarketplac
 import DistrictTravelPackagesSection from "@/components/district/DistrictTravelPackagesSection";
 import DistrictProductsSection from "@/components/district/DistrictProductsSection";
 import OtherDistrictsSection from "@/components/district/OtherDistrictsSection";
+import WeatherWidget from "@/components/weather/WeatherWidget";
+import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
+import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 
 // Lazy load the map component
 const DistrictMap = lazy(() => import("@/components/DistrictMap"));
@@ -447,31 +450,64 @@ const DistrictDetailPage = () => {
       {/* About Section */}
       <section id="about" className="py-16 px-4">
         <div className="container mx-auto">
-          <Card className="border-none shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <BookOpen className="h-6 w-6 text-primary" />
-                About {district.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                {district.overview}
-              </p>
-              {district.cultural_identity && (
-                <div className="mt-6 p-4 bg-secondary/30 rounded-lg">
-                  <p className="font-semibold mb-2">Cultural Identity</p>
-                  <p className="text-muted-foreground">{district.cultural_identity}</p>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main content - 2 columns */}
+            <div className="lg:col-span-2">
+              <Card className="border-none shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                    About {district.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    {district.overview}
+                  </p>
+                  {district.cultural_identity && (
+                    <div className="mt-6 p-4 bg-secondary/30 rounded-lg">
+                      <p className="font-semibold mb-2">Cultural Identity</p>
+                      <p className="text-muted-foreground">{district.cultural_identity}</p>
+                    </div>
+                  )}
+                  {district.famous_specialties && (
+                    <div className="mt-4 p-4 bg-primary/5 rounded-lg">
+                      <p className="font-semibold mb-2">Famous For</p>
+                      <p className="text-muted-foreground">{district.famous_specialties}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Sidebar - 1 column */}
+            <div className="space-y-6">
+              {/* Weather Widget */}
+              {district.latitude && district.longitude && (
+                <WeatherWidget
+                  lat={Number(district.latitude)}
+                  lng={Number(district.longitude)}
+                  locationName={district.name}
+                />
               )}
-              {district.famous_specialties && (
-                <div className="mt-4 p-4 bg-primary/5 rounded-lg">
-                  <p className="font-semibold mb-2">Famous For</p>
-                  <p className="text-muted-foreground">{district.famous_specialties}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              
+              {/* Upcoming Events */}
+              <EventCalendarWidget
+                districtId={district.id}
+                title="Upcoming Events"
+                showViewAll={true}
+                compact={true}
+                limit={3}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Festival Spotlight for this District */}
+      <section className="py-12 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <FestivalSpotlight districtId={district.id} showTitle={true} limit={3} />
         </div>
       </section>
 
