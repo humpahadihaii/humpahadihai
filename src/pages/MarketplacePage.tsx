@@ -46,6 +46,8 @@ interface TourismListing {
     id: string;
     name: string;
     slug: string;
+    latitude: number | null;
+    longitude: number | null;
   } | null;
 }
 
@@ -113,7 +115,7 @@ export default function MarketplacePage() {
         .select(`
           *,
           provider:tourism_providers(id, name, type, phone, email, website_url, is_verified, rating),
-          district:districts(id, name, slug)
+          district:districts(id, name, slug, latitude, longitude)
         `)
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
@@ -446,11 +448,11 @@ export default function MarketplacePage() {
             {viewMode === "map" ? (
               (() => {
                 const mapMarkers: MapMarker[] = (filteredListings || [])
-                  .filter(listing => listing.lat && listing.lng)
+                  .filter(listing => (listing.lat && listing.lng) || (listing.district?.latitude && listing.district?.longitude))
                   .map(listing => ({
                     id: listing.id,
-                    lat: listing.lat!,
-                    lng: listing.lng!,
+                    lat: listing.lat || listing.district?.latitude || 0,
+                    lng: listing.lng || listing.district?.longitude || 0,
                     title: listing.title,
                     description: listing.provider?.name || listing.category,
                     type: "listing" as const,
