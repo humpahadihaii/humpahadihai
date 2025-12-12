@@ -14,6 +14,7 @@ import { FeaturedCardSection } from "@/components/FeaturedCardSection";
 import { SearchTrigger } from "@/components/search";
 import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
 import WeatherWidget from "@/components/weather/WeatherWidget";
+import AllDistrictsWeather from "@/components/weather/AllDistrictsWeather";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 import { useSiteSharePreview } from "@/hooks/useSharePreview";
 
@@ -31,10 +32,16 @@ const HomePage = () => {
   const metaTitle = settings?.meta_title || `${siteName} - ${tagline}`;
   const metaDescription = settings?.meta_description || "Discover Uttarakhand's rich culture, traditional food, festivals, handicrafts, and natural beauty. Explore Pahadi traditions from Garhwal and Kumaon regions.";
   
-  // Share preview from admin settings
+  // Share preview from admin settings - ensure absolute URL for images
   const ogTitle = sharePreview?.default_title || metaTitle;
   const ogDescription = sharePreview?.default_description || metaDescription;
-  const ogImage = sharePreview?.default_image_url || "/logo.jpg";
+  const rawOgImage = sharePreview?.default_image_url;
+  // Ensure og:image is absolute URL (required by social media crawlers)
+  const ogImage = rawOgImage?.startsWith('http') 
+    ? rawOgImage 
+    : rawOgImage 
+      ? `https://humpahadihaii.in${rawOgImage}` 
+      : "https://humpahadihaii.in/logo.jpg";
 
   const { data: highlights = [] } = useQuery({
     queryKey: ["featured-highlights"],
@@ -250,6 +257,13 @@ const HomePage = () => {
           </div>
       </section>
       )}
+
+      {/* All Districts Weather */}
+      <section className="py-8 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <AllDistrictsWeather />
+        </div>
+      </section>
 
       {/* Festival Spotlight & Events Section */}
       <section className="py-16 px-4">

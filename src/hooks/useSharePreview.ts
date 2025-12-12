@@ -50,7 +50,8 @@ export function useSiteSharePreview() {
       const { data, error } = await supabase
         .from('site_share_preview')
         .select('*')
-        .single();
+        .eq('singleton_flag', true)
+        .maybeSingle();
 
       if (error) throw error;
       setSettings(data as unknown as SiteSharePreview);
