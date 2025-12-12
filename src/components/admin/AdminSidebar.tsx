@@ -86,6 +86,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
   
   // Media
   { name: "Gallery", href: "/admin/gallery", icon: Image, section: "Media" },
+  { name: "Bulk Import", href: "/admin/media-import", icon: Image },
   { name: "Site Images", href: "/admin/site-images", icon: Image },
   { name: "Featured Highlights", href: "/admin/featured-highlights", icon: Image },
   { name: "Featured Cards", href: "/admin/featured-cards", icon: Image },
