@@ -15,13 +15,24 @@ interface TrackBookingOptions {
   url: string;
 }
 
+// Get UTM source from URL
+function getUtmSource(): string | null {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('utm_source') || params.get('source') || params.get('ref') || null;
+  } catch {
+    return null;
+  }
+}
+
 // Track page view
 export async function trackPageView(url?: string): Promise<void> {
   try {
     const payload = {
       url: url || window.location.href,
       referrer: document.referrer || null,
-      userAgent: navigator.userAgent
+      userAgent: navigator.userAgent,
+      utmSource: getUtmSource()
     };
 
     await fetch(TRACK_ENDPOINT, {
@@ -66,14 +77,29 @@ export async function trackBookingSummary(options: TrackBookingOptions): Promise
       device = /ipad|tablet/i.test(ua) ? 'tablet' : 'mobile';
     }
 
-    // Categorize referrer
+    // Categorize referrer - check UTM first, then document.referrer
+    const utmSource = getUtmSource();
     let referrer = 'direct';
-    const ref = document.referrer.toLowerCase();
-    if (ref.includes('instagram')) referrer = 'instagram';
-    else if (ref.includes('facebook')) referrer = 'facebook';
-    else if (ref.includes('youtube')) referrer = 'youtube';
-    else if (ref.includes('google')) referrer = 'google';
-    else if (ref) referrer = 'other';
+    
+    if (utmSource) {
+      const utm = utmSource.toLowerCase();
+      if (utm.includes('instagram') || utm === 'ig') referrer = 'instagram';
+      else if (utm.includes('whatsapp') || utm === 'wa') referrer = 'whatsapp';
+      else if (utm.includes('facebook') || utm === 'fb') referrer = 'facebook';
+      else if (utm.includes('youtube') || utm === 'yt') referrer = 'youtube';
+      else if (utm.includes('twitter') || utm === 'x') referrer = 'twitter';
+      else if (utm.includes('google')) referrer = 'google';
+      else referrer = 'other';
+    } else {
+      const ref = document.referrer.toLowerCase();
+      if (ref.includes('instagram')) referrer = 'instagram';
+      else if (ref.includes('whatsapp') || ref.includes('wa.me')) referrer = 'whatsapp';
+      else if (ref.includes('facebook')) referrer = 'facebook';
+      else if (ref.includes('youtube')) referrer = 'youtube';
+      else if (ref.includes('twitter') || ref.includes('x.com')) referrer = 'twitter';
+      else if (ref.includes('google')) referrer = 'google';
+      else if (ref) referrer = 'other';
+    }
 
     await supabase.from('bookings_summary').insert({
       package_id: options.packageId || null,
