@@ -3934,6 +3934,42 @@ export type Database = {
         }
         Relationships: []
       }
+      share_referrals: {
+        Row: {
+          created_at: string | null
+          full_url: string
+          id: string
+          ip_hash: string | null
+          page_id: string | null
+          page_type: string
+          ref_source: string
+          user_agent: string | null
+          visited_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_url: string
+          id?: string
+          ip_hash?: string | null
+          page_id?: string | null
+          page_type: string
+          ref_source: string
+          user_agent?: string | null
+          visited_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_url?: string
+          id?: string
+          ip_hash?: string | null
+          page_id?: string | null
+          page_type?: string
+          ref_source?: string
+          user_agent?: string | null
+          visited_at?: string | null
+        }
+        Relationships: []
+      }
       site_images: {
         Row: {
           category: string
@@ -4024,6 +4060,45 @@ export type Database = {
           referrer?: string | null
           section?: string | null
           url?: string
+        }
+        Relationships: []
+      }
+      social_share_settings: {
+        Row: {
+          button_position: string | null
+          created_at: string | null
+          custom_icons: Json | null
+          default_message: string | null
+          id: string
+          is_enabled: boolean | null
+          share_title: string | null
+          singleton_flag: boolean | null
+          theme: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          button_position?: string | null
+          created_at?: string | null
+          custom_icons?: Json | null
+          default_message?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          share_title?: string | null
+          singleton_flag?: boolean | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          button_position?: string | null
+          created_at?: string | null
+          custom_icons?: Json | null
+          default_message?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          share_title?: string | null
+          singleton_flag?: boolean | null
+          theme?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
