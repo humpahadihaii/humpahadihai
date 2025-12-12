@@ -276,16 +276,23 @@ const DistrictDetailPage = () => {
     return [...newFestivals, ...legacy];
   }, [districtFestivals, legacyFestivalContent]);
 
-  // SEO metadata using the new SEO engine - must be called before early returns
+  // SEO metadata using the new SEO engine with entity-specific overrides
   const seoMeta = usePageSEO('district', district ? {
     name: district.name,
     slug: district.slug,
-    description: district.overview,
-    overview: district.overview,
-    image: district.banner_image || district.image_url,
+    description: district.seo_description || district.overview,
+    overview: district.seo_description || district.overview,
+    image: district.seo_image_url || district.banner_image || district.image_url,
     region: district.region,
     highlights: district.highlights,
   } : {});
+
+  // Prepare share preview overrides from entity SEO fields
+  const sharePreview = district ? {
+    title: district.seo_title || district.name,
+    description: district.seo_description || district.overview?.slice(0, 160),
+    image: district.seo_image_url || district.banner_image || district.image_url,
+  } : undefined;
 
   if (districtLoading) {
     return (
@@ -316,7 +323,7 @@ const DistrictDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead meta={seoMeta} />
+      <SEOHead meta={seoMeta} sharePreview={sharePreview} />
 
       {/* Hero Section - Preload hero image */}
       <section className="relative h-[60vh] overflow-hidden">

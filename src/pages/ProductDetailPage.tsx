@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ShoppingBag, ArrowLeft, Tag, CheckCircle } from "lucide-react";
-import { Helmet } from "react-helmet";
+import SEOHead from "@/components/SEOHead";
+import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 
@@ -92,6 +93,23 @@ const ProductDetailPage = () => {
     }
   };
 
+  // SEO metadata with entity-specific overrides
+  const seoMeta = usePageSEO('product', product ? {
+    name: product.name,
+    title: product.seo_title || product.name,
+    slug: product.slug,
+    description: product.seo_description || product.short_description || product.full_description,
+    image: product.seo_image_url || product.gallery_images?.[0],
+    price: product.price,
+  } : null);
+
+  const sharePreview = product ? {
+    title: product.seo_title || product.name,
+    description: product.seo_description || product.short_description?.slice(0, 160),
+    image: product.seo_image_url || product.gallery_images?.[0],
+    ogType: 'product',
+  } : undefined;
+
   const getStockBadge = (status: string) => {
     switch (status) {
       case "in_stock": return <Badge className="bg-green-100 text-green-800">In Stock</Badge>;
@@ -133,10 +151,7 @@ const ProductDetailPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{product.name} | Pahadi Store | Hum Pahadi Haii</title>
-        <meta name="description" content={product.short_description || `Buy ${product.name} - authentic Pahadi product from Uttarakhand.`} />
-      </Helmet>
+      <SEOHead meta={seoMeta} sharePreview={sharePreview} />
 
       <div className="min-h-screen py-8 px-4">
         <div className="container mx-auto max-w-4xl">
