@@ -33,6 +33,7 @@ interface BrowserData {
 interface DailyVisits {
   date: string;
   visits: number;
+  uniqueVisitors: number;
 }
 
 interface BookingSummaryData {
@@ -153,15 +154,21 @@ export function useInternalAnalytics(dateRange: DateRange) {
           .sort((a, b) => b.count - a.count)
       );
 
-      // Calculate daily visits for chart
-      const dailyCounts: Record<string, number> = {};
+      // Calculate daily visits and unique visitors for chart
+      const dailyCounts: Record<string, { visits: number; ips: Set<string> }> = {};
       visits?.forEach(v => {
         const date = format(new Date(v.created_at), 'yyyy-MM-dd');
-        dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+        if (!dailyCounts[date]) {
+          dailyCounts[date] = { visits: 0, ips: new Set() };
+        }
+        dailyCounts[date].visits += 1;
+        if (v.ip_hash) {
+          dailyCounts[date].ips.add(v.ip_hash);
+        }
       });
       setDailyVisits(
         Object.entries(dailyCounts)
-          .map(([date, visits]) => ({ date, visits }))
+          .map(([date, data]) => ({ date, visits: data.visits, uniqueVisitors: data.ips.size }))
           .sort((a, b) => a.date.localeCompare(b.date))
           .slice(-30) // Last 30 days max
       );

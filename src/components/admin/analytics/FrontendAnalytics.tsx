@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useInternalAnalytics, DateRange } from '@/hooks/useInternalAnalytics';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, LineChart, Line
+  PieChart, Pie, Cell, LineChart, Line, Legend
 } from 'recharts';
 import { 
   Users, Eye, MousePointer, TrendingUp, Monitor, Smartphone, Globe, 
@@ -199,12 +199,22 @@ export function FrontendAnalytics() {
                       borderRadius: '8px'
                     }}
                   />
+                  <Legend />
                   <Line 
                     type="monotone" 
                     dataKey="visits" 
+                    name="Total Visits"
                     stroke="hsl(var(--primary))" 
                     strokeWidth={2}
                     dot={{ fill: 'hsl(var(--primary))' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="uniqueVisitors" 
+                    name="Unique Visitors"
+                    stroke="hsl(142 76% 36%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(142 76% 36%)' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
