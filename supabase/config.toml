@@ -32,3 +32,9 @@ verify_jwt = false
 
 [functions.analytics-export]
 verify_jwt = false
+
+[functions.search]
+verify_jwt = false
+
+[functions.search-index]
+verify_jwt = false
