@@ -8,6 +8,7 @@ import { SearchProvider, SearchModal } from "./components/search";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
+import { QuickAccessBar } from "./components/QuickAccessBar";
 import HomePage from "./pages/HomePage";
 import CulturePage from "./pages/CulturePage";
 import FoodPage from "./pages/FoodPage";
@@ -214,6 +215,7 @@ const AppContent = () => {
           </Routes>
         </main>
         {!isAdminRoute && !isAuthRoute && <Footer />}
+        {!isAdminRoute && !isAuthRoute && <QuickAccessBar />}
       </div>
     </>
   );
