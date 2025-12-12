@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -261,7 +262,10 @@ const TravelPackageDetailPage = () => {
                 <CardTitle>About This Trip</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-line">{pkg.full_description}</p>
+                <div 
+                  className="prose prose-sm max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.full_description) }}
+                />
               </CardContent>
             </Card>
           )}
@@ -273,7 +277,10 @@ const TravelPackageDetailPage = () => {
                 <CardTitle>Itinerary</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-line">{pkg.itinerary}</p>
+                <div 
+                  className="prose prose-sm max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.itinerary) }}
+                />
               </CardContent>
             </Card>
           )}
