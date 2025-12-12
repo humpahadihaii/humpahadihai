@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSiteSharePreview, SiteSharePreview } from "@/hooks/useSharePreview";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { Save, Eye, Globe, MessageCircle, Mail, Twitter, Linkedin, Facebook } from "lucide-react";
 import { toast } from "sonner";
 
@@ -85,27 +86,23 @@ export default function AdminSharePreviewPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Default Title</Label>
-                    <Input
-                      value={form.default_title || ''}
-                      onChange={(e) => setForm({ ...form, default_title: e.target.value })}
-                      placeholder="Hum Pahadi Haii - Celebrating Uttarakhand's Culture"
-                    />
-                    <p className="text-xs text-muted-foreground">Recommended: 50-60 characters</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Default Image URL</Label>
-                    <Input
-                      value={form.default_image_url || ''}
-                      onChange={(e) => setForm({ ...form, default_image_url: e.target.value })}
-                      placeholder="https://..."
-                    />
-                    <p className="text-xs text-muted-foreground">Recommended: 1200x630 pixels</p>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Default Title</Label>
+                  <Input
+                    value={form.default_title || ''}
+                    onChange={(e) => setForm({ ...form, default_title: e.target.value })}
+                    placeholder="Hum Pahadi Haii - Celebrating Uttarakhand's Culture"
+                  />
+                  <p className="text-xs text-muted-foreground">Recommended: 50-60 characters</p>
                 </div>
+
+                <ImageUpload
+                  label="Default Preview Image"
+                  id="default-share-image"
+                  value={form.default_image_url || ''}
+                  onChange={(url) => setForm({ ...form, default_image_url: url })}
+                />
+                <p className="text-xs text-muted-foreground -mt-2">Recommended: 1200x630 pixels for best display on social media</p>
 
                 <div className="space-y-2">
                   <Label>Default Description</Label>
