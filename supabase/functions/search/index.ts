@@ -287,15 +287,18 @@ function buildUrl(contentType: string, slug: string | null, sourceId: string): s
     case "district":
       return `/districts/${slugOrId}`;
     case "provider":
-      return `/marketplace/providers/${slugOrId}`;
+      // Providers don't have a detail page - link to marketplace with filter
+      return `/marketplace?provider=${slugOrId}`;
     case "listing":
-      return `/marketplace/${slugOrId}`;
+      // Listings don't have individual pages - link to marketplace
+      return `/marketplace`;
     case "package":
       return `/travel-packages/${slugOrId}`;
     case "product":
       return `/products/${slugOrId}`;
     case "story":
-      return `/stories/${slugOrId}`;
+      // Stories use /culture/:slug for culture-type stories
+      return `/culture/${slugOrId}`;
     case "event":
       return `/events/${slugOrId}`;
     case "thought":

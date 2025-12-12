@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Search, Filter, MapPin, Star, ArrowRight, Loader2 } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import { Search, Filter, MapPin, Star, ArrowRight } from "lucide-react";
 import { SearchBox } from "@/components/search/SearchBox";
 import { useSearch, SearchFilters, SearchResult } from "@/hooks/useSearch";
 import { Button } from "@/components/ui/button";
@@ -130,7 +128,7 @@ export default function SearchPage() {
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 
-      <Navigation />
+      {/* Navigation is rendered by App.tsx - don't duplicate it here */}
 
       <main className="min-h-screen bg-background">
         {/* Search Header */}
@@ -387,7 +385,7 @@ export default function SearchPage() {
         </div>
       </main>
 
-      <Footer />
+      {/* Footer is rendered by App.tsx - don't duplicate it here */}
     </>
   );
 }
