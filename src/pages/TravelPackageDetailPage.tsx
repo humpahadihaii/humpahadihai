@@ -101,17 +101,24 @@ const TravelPackageDetailPage = () => {
     enabled: !!pkg?.region,
   });
 
-  // SEO metadata - MUST be called before any early returns
+  // SEO metadata with entity-specific overrides
   const seoMeta = usePageSEO('travel_package', pkg ? {
     name: pkg.title,
-    title: pkg.title,
+    title: pkg.seo_title || pkg.title,
     slug: pkg.slug,
-    description: pkg.short_description || pkg.full_description,
-    image: pkg.thumbnail_image_url,
+    description: pkg.seo_description || pkg.short_description || pkg.full_description,
+    image: pkg.seo_image_url || pkg.thumbnail_image_url,
     duration: pkg.duration_days ? `${pkg.duration_days} Days` : undefined,
     price: pkg.price_per_person,
     region: pkg.region,
   } : null);
+
+  // Prepare share preview overrides from entity SEO fields  
+  const sharePreview = pkg ? {
+    title: pkg.seo_title || pkg.title,
+    description: pkg.seo_description || pkg.short_description?.slice(0, 160),
+    image: pkg.seo_image_url || pkg.thumbnail_image_url,
+  } : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +192,7 @@ const TravelPackageDetailPage = () => {
 
   return (
     <>
-      <SEOHead meta={seoMeta} />
+      <SEOHead meta={seoMeta} sharePreview={sharePreview} />
 
       <div className="min-h-screen py-8 px-4">
         <div className="container mx-auto max-w-4xl">

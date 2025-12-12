@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.share-preview]
 verify_jwt = false
+
+[functions.share-settings]
+verify_jwt = false

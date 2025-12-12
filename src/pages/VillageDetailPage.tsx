@@ -97,16 +97,23 @@ const VillageDetailPage = () => {
   // Fetch nearby villages
   const { data: nearbyVillages, isLoading: nearbyLoading } = useNearbyVillages(village?.id, village?.district_id);
 
-  // SEO metadata
+  // SEO metadata with entity-specific overrides
   const seoMeta = usePageSEO('village', village ? {
     name: village.name,
     slug: village.slug,
-    description: village.introduction || village.history,
-    excerpt: village.introduction,
-    image: village.thumbnail_url,
+    description: village.seo_description || village.introduction || village.history,
+    excerpt: village.seo_description || village.introduction,
+    image: village.seo_image_url || village.thumbnail_url,
     district_name: village.districts?.name,
     highlights: village.introduction?.substring(0, 100),
   } : undefined);
+
+  // Prepare share preview overrides from entity SEO fields
+  const sharePreview = village ? {
+    title: village.seo_title || village.name,
+    description: village.seo_description || village.introduction?.slice(0, 160),
+    image: village.seo_image_url || village.thumbnail_url,
+  } : undefined;
 
   if (isLoading) {
     return (
@@ -120,7 +127,7 @@ const VillageDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-      <SEOHead meta={seoMeta} />
+      <SEOHead meta={seoMeta} sharePreview={sharePreview} />
       
       {/* Hero Section */}
       <section className="relative h-96 overflow-hidden">

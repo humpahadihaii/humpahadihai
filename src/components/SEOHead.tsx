@@ -3,7 +3,7 @@ import { SEOMeta, BreadcrumbItem } from "@/lib/seo/generator";
 
 interface SEOHeadProps {
   meta: SEOMeta;
-  // Optional overrides from admin share preview settings
+  // Optional overrides from admin share preview settings or entity SEO fields
   sharePreview?: {
     title?: string;
     description?: string;
@@ -11,17 +11,31 @@ interface SEOHeadProps {
     ogType?: string;
     twitterCard?: string;
     twitterSite?: string;
+    siteName?: string;
+    locale?: string;
   };
+}
+
+// Ensure URL is absolute
+function ensureAbsoluteUrl(url: string | undefined): string {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://humpahadihaii.in';
+  return `${origin}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 export default function SEOHead({ meta, sharePreview }: SEOHeadProps) {
   // Merge share preview overrides with SEO meta
   const ogTitle = sharePreview?.title || meta.ogTitle;
   const ogDescription = sharePreview?.description || meta.ogDescription;
-  const ogImage = sharePreview?.image || meta.ogImage;
+  const ogImage = ensureAbsoluteUrl(sharePreview?.image || meta.ogImage);
   const ogType = sharePreview?.ogType || meta.ogType;
   const twitterCard = sharePreview?.twitterCard || meta.twitterCard;
   const twitterSite = sharePreview?.twitterSite || '@humpahadihaii';
+  const siteName = sharePreview?.siteName || 'Hum Pahadi Haii';
+  const locale = sharePreview?.locale || 'en_IN';
+  const canonical = ensureAbsoluteUrl(meta.canonical);
+  const ogUrl = ensureAbsoluteUrl(meta.ogUrl);
 
   return (
     <Helmet>
@@ -29,7 +43,7 @@ export default function SEOHead({ meta, sharePreview }: SEOHeadProps) {
       <title>{meta.title}</title>
       <meta name="description" content={meta.description} />
       <meta name="keywords" content={meta.keywords} />
-      <link rel="canonical" href={meta.canonical} />
+      <link rel="canonical" href={canonical} />
 
       {/* Indexing Rules */}
       {meta.noIndex ? (
@@ -40,15 +54,15 @@ export default function SEOHead({ meta, sharePreview }: SEOHeadProps) {
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={meta.ogUrl} />
+      <meta property="og:url" content={ogUrl} />
       <meta property="og:title" content={ogTitle} />
       <meta property="og:description" content={ogDescription} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={ogTitle} />
-      <meta property="og:site_name" content="Hum Pahadi Haii" />
-      <meta property="og:locale" content="en_IN" />
+      {ogImage && <meta property="og:image" content={ogImage} />}
+      {ogImage && <meta property="og:image:width" content="1200" />}
+      {ogImage && <meta property="og:image:height" content="630" />}
+      {ogImage && <meta property="og:image:alt" content={ogTitle} />}
+      <meta property="og:site_name" content={siteName} />
+      <meta property="og:locale" content={locale} />
 
       {/* Twitter */}
       <meta name="twitter:card" content={twitterCard} />
@@ -56,11 +70,11 @@ export default function SEOHead({ meta, sharePreview }: SEOHeadProps) {
       <meta name="twitter:creator" content={twitterSite} />
       <meta name="twitter:title" content={ogTitle} />
       <meta name="twitter:description" content={ogDescription} />
-      <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:alt" content={ogTitle} />
+      {ogImage && <meta name="twitter:image" content={ogImage} />}
+      {ogImage && <meta name="twitter:image:alt" content={ogTitle} />}
 
       {/* Additional SEO Tags */}
-      <meta name="author" content="Hum Pahadi Haii" />
+      <meta name="author" content={siteName} />
       <meta name="geo.region" content="IN-UK" />
       <meta name="geo.placename" content="Uttarakhand" />
       <meta name="language" content="English" />
@@ -73,11 +87,11 @@ export default function SEOHead({ meta, sharePreview }: SEOHeadProps) {
             {JSON.stringify(s)}
           </script>
         ))
-      ) : (
+      ) : meta.schema ? (
         <script type="application/ld+json">
           {JSON.stringify(meta.schema)}
         </script>
-      )}
+      ) : null}
     </Helmet>
   );
 }
