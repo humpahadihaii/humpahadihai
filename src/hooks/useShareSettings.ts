@@ -51,11 +51,19 @@ export function useShareSettings() {
   return useQuery({
     queryKey: ['share-settings'],
     queryFn: async (): Promise<ShareSettings> => {
-      const { data, error } = await supabase.functions.invoke('share-settings', {
-        method: 'GET'
-      });
+      // Fetch defaults from site_share_settings directly
+      const { data: settingsData, error } = await supabase
+        .from('site_share_settings')
+        .select('*');
+      
       if (error) throw error;
-      return data as ShareSettings;
+      
+      const result: Record<string, any> = {};
+      settingsData?.forEach((s: { key: string; value: any }) => {
+        result[s.key] = s.value;
+      });
+      
+      return result as ShareSettings;
     }
   });
 }
@@ -69,15 +77,18 @@ export function useUpdateShareSettings() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase.functions.invoke('share-settings', {
-        method: 'PUT',
-        body: { key, value },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
+      // Upsert directly to the database
+      const { error } = await supabase
+        .from('site_share_settings')
+        .upsert({
+          key,
+          value,
+          updated_at: new Date().toISOString(),
+          updated_by: session.user.id
+        }, { onConflict: 'key' });
+      
       if (error) throw error;
-      return data;
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['share-settings'] });
