@@ -13,12 +13,23 @@ import PlacesToVisit from "@/components/PlacesToVisit";
 import FoodAndFestivals from "@/components/FoodAndFestivals";
 import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
+import { 
+  useDistrictHotels, 
+  useDistrictMarketplace, 
+  useDistrictTravelPackages, 
+  useDistrictProducts,
+  useOtherDistricts 
+} from "@/hooks/useDistrictContent";
+import DistrictHotelsSection from "@/components/district/DistrictHotelsSection";
+import DistrictMarketplaceSection from "@/components/district/DistrictMarketplaceSection";
+import DistrictTravelPackagesSection from "@/components/district/DistrictTravelPackagesSection";
+import DistrictProductsSection from "@/components/district/DistrictProductsSection";
+import OtherDistrictsSection from "@/components/district/OtherDistrictsSection";
 
 // Lazy load the map component
 const DistrictMap = lazy(() => import("@/components/DistrictMap"));
 
 type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
-type ContentItem = Database["public"]["Tables"]["content_items"]["Row"];
 type Village = Database["public"]["Tables"]["villages"]["Row"];
 
 const INITIAL_VILLAGES_COUNT = 12;
@@ -162,6 +173,13 @@ const DistrictDetailPage = () => {
     enabled: !!district?.id,
   });
 
+  // New hooks for additional content
+  const { data: hotels, isLoading: hotelsLoading } = useDistrictHotels(district?.id);
+  const { providers, listings, isLoading: marketplaceLoading } = useDistrictMarketplace(district?.id);
+  const { data: travelPackages, isLoading: packagesLoading } = useDistrictTravelPackages(district?.id);
+  const { data: products, isLoading: productsLoading } = useDistrictProducts(district?.id);
+  const { data: otherDistricts, isLoading: otherDistrictsLoading } = useOtherDistricts(district?.id, district?.region);
+
   // Culture content from legacy district_content table
   const cultureContent = useMemo(() => 
     districtContent?.filter(item => item.category === "Culture") || [],
@@ -255,24 +273,6 @@ const DistrictDetailPage = () => {
     return [...newFestivals, ...legacy];
   }, [districtFestivals, legacyFestivalContent]);
 
-  // Fetch additional content_items linked to this district
-  const { data: travelItems } = useQuery({
-    queryKey: ["district-travel", district?.id],
-    queryFn: async () => {
-      if (!district?.id) return [];
-      const { data, error } = await supabase
-        .from("content_items")
-        .select("*")
-        .eq("district_id", district.id)
-        .eq("type", "travel")
-        .eq("status", "published")
-        .limit(4);
-      if (error) throw error;
-      return data as ContentItem[];
-    },
-    enabled: !!district?.id,
-  });
-
   // SEO metadata using the new SEO engine - must be called before early returns
   const seoMeta = usePageSEO('district', district ? {
     name: district.name,
@@ -315,17 +315,27 @@ const DistrictDetailPage = () => {
     <div className="min-h-screen bg-background">
       <SEOHead meta={seoMeta} />
 
-      {/* Hero Section */}
+      {/* Hero Section - Preload hero image */}
       <section className="relative h-[60vh] overflow-hidden">
+        <link rel="preload" as="image" href={district.banner_image || district.image_url || "/placeholder.svg"} />
         <img
           src={district.banner_image || district.image_url || "/placeholder.svg"}
           alt={`${district.name} district landscape`}
           className="w-full h-full object-cover"
           loading="eager"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="container mx-auto">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 text-sm text-foreground/70 mb-4">
+              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+              <ChevronRight className="h-4 w-4" />
+              <Link to="/districts" className="hover:text-foreground transition-colors">Districts</Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-foreground">{district.name}</span>
+            </nav>
             <div className="flex items-center gap-2 mb-4">
               <Badge variant="secondary">Uttarakhand</Badge>
               <Badge variant="outline">{district.region || "Kumaon/Garhwal"}</Badge>
@@ -411,6 +421,16 @@ const DistrictDetailPage = () => {
               <Button variant="ghost" size="sm" asChild>
                 <a href="#heritage">Heritage</a>
               </Button>
+              {hotels && hotels.length > 0 && (
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="#hotels">Hotels</a>
+                </Button>
+              )}
+              {(providers.length > 0 || listings.length > 0) && (
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="#marketplace">Marketplace</a>
+                </Button>
+              )}
               {villages && villages.length > 0 && (
                 <Button variant="ghost" size="sm" asChild>
                   <a href="#villages">Villages</a>
@@ -478,6 +498,36 @@ const DistrictDetailPage = () => {
           }))}
         />
       </div>
+
+      {/* Hotels Section */}
+      <DistrictHotelsSection
+        districtName={district.name}
+        hotels={hotels || []}
+        isLoading={hotelsLoading}
+      />
+
+      {/* Local Marketplace Section */}
+      <DistrictMarketplaceSection
+        districtName={district.name}
+        districtSlug={district.slug}
+        providers={providers}
+        listings={listings}
+        isLoading={marketplaceLoading}
+      />
+
+      {/* Travel Packages Section */}
+      <DistrictTravelPackagesSection
+        districtName={district.name}
+        packages={travelPackages || []}
+        isLoading={packagesLoading}
+      />
+
+      {/* Local Products Section */}
+      <DistrictProductsSection
+        districtName={district.name}
+        products={products || []}
+        isLoading={productsLoading}
+      />
 
       {/* Villages Preview Section */}
       {villages && villages.length > 0 && (
@@ -585,55 +635,15 @@ const DistrictDetailPage = () => {
         </div>
       </section>
 
-      {/* Travel Packages Section */}
-      {travelItems && travelItems.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-3">
-                <MapPin className="h-8 w-8 text-primary" />
-                <div>
-                  <h2 className="text-3xl font-bold">Travel Packages</h2>
-                  <p className="text-muted-foreground">Curated trips in {district.name}</p>
-                </div>
-              </div>
-              <Button variant="outline" asChild>
-                <Link to="/travel">
-                  View All <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {travelItems.map((item) => (
-                <Link key={item.id} to={`/travel/${item.slug}`}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all group h-full">
-                    {item.main_image_url && (
-                      <div className="h-40 overflow-hidden">
-                        <img
-                          src={item.main_image_url}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
-                    <CardHeader className="p-4">
-                      <Badge variant="secondary" className="w-fit mb-2">Travel</Badge>
-                      <CardTitle className="text-base group-hover:text-primary transition-colors">
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Other Districts Section */}
+      <OtherDistrictsSection
+        districts={otherDistricts || []}
+        isLoading={otherDistrictsLoading}
+      />
 
       {/* All Villages Directory */}
       {allVillages && allVillages.length > 0 && (
-        <section id="all-villages" className="py-16 px-4 bg-secondary/10">
+        <section id="all-villages" className="py-16 px-4">
           <div className="container mx-auto">
             <div className="flex items-center gap-3 mb-2">
               <Home className="h-8 w-8 text-primary" />
