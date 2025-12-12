@@ -1,0 +1,229 @@
+import { 
+  LayoutDashboard, 
+  BarChart3,
+  Sparkles,
+  Settings,
+  Users,
+  Map,
+  Bell,
+  FileText,
+  BookOpen,
+  Calendar,
+  Link,
+  Palette,
+  UtensilsCrossed,
+  Plane,
+  MessageSquare,
+  MapPin,
+  Landmark,
+  ChefHat,
+  PartyPopper,
+  Home,
+  Hotel,
+  Sparkle,
+  Star,
+  Image,
+  Upload,
+  ImagePlus,
+  Award,
+  LayoutGrid,
+  MessageCircle,
+  Mail,
+  Building2,
+  List,
+  HelpCircle,
+  Megaphone,
+  Inbox,
+  ClipboardList,
+  Tag,
+  Package,
+  ShoppingCart,
+  CalendarCheck,
+  type LucideIcon
+} from "lucide-react";
+import { RBACRole } from "@/lib/rbac";
+
+export interface SidebarItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  route: string;
+  group: string;
+  order: number;
+  requiredRoles: RBACRole[];
+}
+
+export interface SidebarGroup {
+  id: string;
+  label: string;
+  order: number;
+}
+
+// Icon mapping for dynamic icon resolution
+export const ICON_MAP: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  BarChart3,
+  Sparkles,
+  Settings,
+  Users,
+  Map,
+  Bell,
+  FileText,
+  BookOpen,
+  Calendar,
+  Link,
+  Palette,
+  UtensilsCrossed,
+  Plane,
+  MessageSquare,
+  MapPin,
+  Landmark,
+  ChefHat,
+  PartyPopper,
+  Home,
+  Hotel,
+  Sparkle,
+  Star,
+  Image,
+  Upload,
+  ImagePlus,
+  Award,
+  LayoutGrid,
+  MessageCircle,
+  Mail,
+  Building2,
+  List,
+  HelpCircle,
+  Megaphone,
+  Inbox,
+  ClipboardList,
+  Tag,
+  Package,
+  ShoppingCart,
+  CalendarCheck,
+};
+
+// Static sidebar configuration - matches sidebar.json structure
+export const SIDEBAR_GROUPS: SidebarGroup[] = [
+  { id: "overview", label: "Overview", order: 1 },
+  { id: "ai", label: "AI Tools", order: 2 },
+  { id: "users", label: "Users", order: 3 },
+  { id: "settings", label: "Settings", order: 4 },
+  { id: "content", label: "Content", order: 5 },
+  { id: "content-types", label: "Content Types", order: 6 },
+  { id: "places", label: "Places", order: 7 },
+  { id: "media", label: "Media", order: 8 },
+  { id: "submissions", label: "Submissions", order: 9 },
+  { id: "tourism", label: "Tourism Marketplace", order: 10 },
+  { id: "monetization", label: "Monetization", order: 11 },
+  { id: "travel", label: "Travel", order: 12 },
+  { id: "store", label: "Store", order: 13 },
+  { id: "bookings", label: "Bookings", order: 14 },
+];
+
+export const SIDEBAR_ITEMS: SidebarItem[] = [
+  // Overview
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, route: "/admin", group: "overview", order: 1, requiredRoles: ["super_admin", "admin"] },
+  { id: "analytics", label: "Analytics", icon: BarChart3, route: "/admin/analytics", group: "overview", order: 2, requiredRoles: ["super_admin", "admin", "analytics_viewer"] },
+  
+  // AI Tools
+  { id: "ai-tools", label: "AI Tools", icon: Sparkles, route: "/admin/ai-tools", group: "ai", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "editor"] },
+  { id: "ai-settings", label: "AI Settings", icon: Settings, route: "/admin/ai-settings", group: "ai", order: 2, requiredRoles: ["super_admin", "admin"] },
+  
+  // Users
+  { id: "users", label: "User Management", icon: Users, route: "/admin/users", group: "users", order: 1, requiredRoles: ["super_admin", "admin"] },
+  
+  // Settings
+  { id: "site-settings", label: "Site Settings", icon: Settings, route: "/admin/site-settings", group: "settings", order: 1, requiredRoles: ["super_admin", "admin"] },
+  { id: "map-settings", label: "Map Settings", icon: Map, route: "/admin/map-settings", group: "settings", order: 2, requiredRoles: ["super_admin", "admin"] },
+  { id: "notify-settings", label: "Notify Settings", icon: Bell, route: "/admin/notify-settings", group: "settings", order: 3, requiredRoles: ["super_admin", "admin"] },
+  { id: "page-settings", label: "Page Settings", icon: FileText, route: "/admin/page-settings", group: "settings", order: 4, requiredRoles: ["super_admin", "admin", "seo_manager"] },
+  
+  // Content
+  { id: "content-sections", label: "Content Sections", icon: FileText, route: "/admin/content-sections", group: "content", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "stories", label: "Stories", icon: BookOpen, route: "/admin/stories", group: "content", order: 2, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "author", "content_editor"] },
+  { id: "events", label: "Events", icon: Calendar, route: "/admin/events", group: "content", order: 3, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "pages", label: "Pages", icon: FileText, route: "/admin/pages", group: "content", order: 4, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "footer-links", label: "Footer Links", icon: Link, route: "/admin/footer-links", group: "content", order: 5, requiredRoles: ["super_admin", "admin"] },
+  
+  // Content Types
+  { id: "culture", label: "Culture", icon: Palette, route: "/admin/content/culture", group: "content-types", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "food", label: "Food", icon: UtensilsCrossed, route: "/admin/content/food", group: "content-types", order: 2, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "travel-content", label: "Travel Content", icon: Plane, route: "/admin/content/travel", group: "content-types", order: 3, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "thoughts", label: "Thoughts", icon: MessageSquare, route: "/admin/content/thoughts", group: "content-types", order: 4, requiredRoles: ["super_admin", "admin", "content_manager", "moderator", "content_editor"] },
+  
+  // Places
+  { id: "districts", label: "Districts", icon: MapPin, route: "/admin/districts", group: "places", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "district-content", label: "District Content", icon: FileText, route: "/admin/district-content", group: "places", order: 2, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "district-places", label: "District Places", icon: Landmark, route: "/admin/district-places", group: "places", order: 3, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "district-foods", label: "District Foods", icon: ChefHat, route: "/admin/district-foods", group: "places", order: 4, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "district-festivals", label: "District Festivals", icon: PartyPopper, route: "/admin/district-festivals", group: "places", order: 5, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "villages", label: "Villages", icon: Home, route: "/admin/villages", group: "places", order: 6, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "hotels", label: "Hotels", icon: Hotel, route: "/admin/hotels", group: "places", order: 7, requiredRoles: ["super_admin", "admin", "content_manager", "editor"] },
+  { id: "festivals", label: "Festivals", icon: Sparkle, route: "/admin/festivals", group: "places", order: 8, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
+  { id: "highlights", label: "Highlights", icon: Star, route: "/admin/highlights", group: "places", order: 9, requiredRoles: ["super_admin", "admin", "content_manager", "editor"] },
+  
+  // Media
+  { id: "gallery", label: "Gallery", icon: Image, route: "/admin/gallery", group: "media", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "media_manager"] },
+  { id: "bulk-import", label: "Bulk Import", icon: Upload, route: "/admin/media-import", group: "media", order: 2, requiredRoles: ["super_admin", "admin", "media_manager"] },
+  { id: "site-images", label: "Site Images", icon: ImagePlus, route: "/admin/site-images", group: "media", order: 3, requiredRoles: ["super_admin", "admin", "media_manager"] },
+  { id: "featured-highlights", label: "Featured Highlights", icon: Award, route: "/admin/featured-highlights", group: "media", order: 4, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "featured-cards", label: "Featured Cards", icon: LayoutGrid, route: "/admin/featured-cards", group: "media", order: 5, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  
+  // Submissions
+  { id: "thoughts-moderation", label: "Thoughts Moderation", icon: MessageCircle, route: "/admin/thoughts", group: "submissions", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "moderator", "reviewer"] },
+  { id: "community-submissions", label: "Community Submissions", icon: Users, route: "/admin/community-submissions", group: "submissions", order: 2, requiredRoles: ["super_admin", "admin", "content_manager", "moderator", "reviewer"] },
+  { id: "contact-submissions", label: "Contact Submissions", icon: Mail, route: "/admin/submissions", group: "submissions", order: 3, requiredRoles: ["super_admin", "admin", "support_agent"] },
+  
+  // Tourism Marketplace
+  { id: "providers", label: "Providers", icon: Building2, route: "/admin/tourism-providers", group: "tourism", order: 1, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "listings", label: "Listings", icon: List, route: "/admin/tourism-listings", group: "tourism", order: 2, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "inquiries", label: "Inquiries", icon: HelpCircle, route: "/admin/tourism-inquiries", group: "tourism", order: 3, requiredRoles: ["super_admin", "admin", "support_agent"] },
+  
+  // Monetization
+  { id: "promotion-packages", label: "Promotion Packages", icon: Megaphone, route: "/admin/promotion-packages", group: "monetization", order: 1, requiredRoles: ["super_admin", "admin"] },
+  { id: "promotion-requests", label: "Promotion Requests", icon: Inbox, route: "/admin/promotion-requests", group: "monetization", order: 2, requiredRoles: ["super_admin", "admin"] },
+  
+  // Travel
+  { id: "travel-packages", label: "Travel Packages", icon: Plane, route: "/admin/travel-packages", group: "travel", order: 1, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "travel-requests", label: "Travel Requests", icon: ClipboardList, route: "/admin/travel-requests", group: "travel", order: 2, requiredRoles: ["super_admin", "admin", "support_agent"] },
+  
+  // Store
+  { id: "product-categories", label: "Product Categories", icon: Tag, route: "/admin/product-categories", group: "store", order: 1, requiredRoles: ["super_admin", "admin"] },
+  { id: "products", label: "Products", icon: Package, route: "/admin/products", group: "store", order: 2, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "product-orders", label: "Product Orders", icon: ShoppingCart, route: "/admin/product-orders", group: "store", order: 3, requiredRoles: ["super_admin", "admin", "support_agent"] },
+  
+  // Bookings
+  { id: "all-bookings", label: "All Bookings", icon: CalendarCheck, route: "/admin/bookings", group: "bookings", order: 1, requiredRoles: ["super_admin", "admin", "support_agent"] },
+];
+
+/**
+ * Filter sidebar items based on user roles
+ */
+export function filterItemsByRoles(items: SidebarItem[], userRoles: RBACRole[]): SidebarItem[] {
+  return items.filter(item => 
+    item.requiredRoles.some(role => userRoles.includes(role))
+  );
+}
+
+/**
+ * Group sidebar items by their group
+ */
+export function groupItems(items: SidebarItem[], groups: SidebarGroup[]): Array<{ group: SidebarGroup; items: SidebarItem[] }> {
+  const result: Array<{ group: SidebarGroup; items: SidebarItem[] }> = [];
+  
+  // Sort groups by order
+  const sortedGroups = [...groups].sort((a, b) => a.order - b.order);
+  
+  for (const group of sortedGroups) {
+    const groupItemsList = items
+      .filter(item => item.group === group.id)
+      .sort((a, b) => a.order - b.order);
+    
+    if (groupItemsList.length > 0) {
+      result.push({ group, items: groupItemsList });
+    }
+  }
+  
+  return result;
+}
