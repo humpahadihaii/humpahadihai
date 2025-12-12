@@ -39,6 +39,8 @@ import {
   Package,
   ShoppingCart,
   CalendarCheck,
+  Share2,
+  Eye,
   type LucideIcon
 } from "lucide-react";
 import { RBACRole } from "@/lib/rbac";
@@ -138,6 +140,8 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "map-settings", label: "Map Settings", icon: Map, route: "/admin/map-settings", group: "settings", order: 2, requiredRoles: ["super_admin", "admin"] },
   { id: "notify-settings", label: "Notify Settings", icon: Bell, route: "/admin/notify-settings", group: "settings", order: 3, requiredRoles: ["super_admin", "admin"] },
   { id: "page-settings", label: "Page Settings", icon: FileText, route: "/admin/page-settings", group: "settings", order: 4, requiredRoles: ["super_admin", "admin", "seo_manager"] },
+  { id: "share-settings", label: "Share Settings", icon: Share2, route: "/admin/share-settings", group: "settings", order: 5, requiredRoles: ["super_admin", "admin"] },
+  { id: "share-preview", label: "Link Previews", icon: Eye, route: "/admin/share-preview", group: "settings", order: 6, requiredRoles: ["super_admin", "admin"] },
   
   // Content
   { id: "content-sections", label: "Content Sections", icon: FileText, route: "/admin/content-sections", group: "content", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "editor", "content_editor"] },
