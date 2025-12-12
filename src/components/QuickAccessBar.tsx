@@ -7,16 +7,38 @@ import { useSearchModal } from "@/components/search/SearchContext";
 interface EmergencyContact {
   label: string;
   number: string;
-  type: "police" | "ambulance" | "fire" | "disaster";
+  type: "police" | "ambulance" | "fire" | "disaster" | "rescue" | "helpline";
 }
 
 const EMERGENCY_CONTACTS: EmergencyContact[] = [
+  // National Emergency Numbers
   { label: "Police", number: "100", type: "police" },
   { label: "Ambulance", number: "102", type: "ambulance" },
   { label: "Fire", number: "101", type: "fire" },
-  { label: "Disaster Helpline", number: "1070", type: "disaster" },
-  { label: "Women Helpline", number: "1091", type: "police" },
-  { label: "Tourist Helpline", number: "1363", type: "police" },
+  { label: "Emergency (All)", number: "112", type: "disaster" },
+  
+  // Uttarakhand Specific
+  { label: "SDRF Uttarakhand", number: "1070", type: "rescue" },
+  { label: "Disaster Control Room", number: "0135-2710334", type: "disaster" },
+  { label: "Tourist Helpline UK", number: "1364", type: "helpline" },
+  { label: "Women Helpline", number: "1091", type: "helpline" },
+  { label: "Child Helpline", number: "1098", type: "helpline" },
+  
+  // Medical & Rescue
+  { label: "AIIMS Rishikesh", number: "0135-2462930", type: "ambulance" },
+  { label: "Doon Hospital", number: "0135-2653194", type: "ambulance" },
+  { label: "Road Accident", number: "1073", type: "rescue" },
+  
+  // District Control Rooms
+  { label: "Dehradun Control", number: "0135-2655994", type: "police" },
+  { label: "Nainital Control", number: "05942-235501", type: "police" },
+  { label: "Haridwar Control", number: "01334-226608", type: "police" },
+  { label: "Chamoli Control", number: "01372-252348", type: "police" },
+  
+  // Other Helplines
+  { label: "Electricity Complaint", number: "1912", type: "helpline" },
+  { label: "Forest Fire", number: "1926", type: "fire" },
+  { label: "Anti-Corruption", number: "1031", type: "helpline" },
 ];
 
 export function QuickAccessBar() {
@@ -117,9 +139,9 @@ export function QuickAccessBar() {
           showEmergency ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         )}
       >
-        <div className="bg-card rounded-xl shadow-xl border border-border p-4 max-w-lg mx-auto">
+        <div className="bg-card rounded-xl shadow-xl border border-border p-4 max-w-lg mx-auto max-h-80 overflow-hidden">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-foreground">Emergency Contacts</h3>
+            <h3 className="font-semibold text-foreground">Uttarakhand Emergency Contacts</h3>
             <Button
               variant="ghost"
               size="icon"
@@ -129,18 +151,34 @@ export function QuickAccessBar() {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {EMERGENCY_CONTACTS.map((contact) => (
+          <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+            {EMERGENCY_CONTACTS.map((contact, idx) => (
               <a
-                key={contact.number}
+                key={`${contact.number}-${idx}`}
                 href={`tel:${contact.number}`}
-                className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200"
+                className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200"
               >
-                <div className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <Phone className="h-4 w-4 text-destructive" />
+                <div className={cn(
+                  "h-7 w-7 rounded-full flex items-center justify-center shrink-0",
+                  contact.type === "police" && "bg-blue-500/10",
+                  contact.type === "ambulance" && "bg-green-500/10",
+                  contact.type === "fire" && "bg-orange-500/10",
+                  contact.type === "disaster" && "bg-red-500/10",
+                  contact.type === "rescue" && "bg-yellow-500/10",
+                  contact.type === "helpline" && "bg-purple-500/10"
+                )}>
+                  <Phone className={cn(
+                    "h-3.5 w-3.5",
+                    contact.type === "police" && "text-blue-500",
+                    contact.type === "ambulance" && "text-green-500",
+                    contact.type === "fire" && "text-orange-500",
+                    contact.type === "disaster" && "text-red-500",
+                    contact.type === "rescue" && "text-yellow-600",
+                    contact.type === "helpline" && "text-purple-500"
+                  )} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{contact.label}</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{contact.label}</p>
                   <p className="text-xs text-muted-foreground">{contact.number}</p>
                 </div>
               </a>
