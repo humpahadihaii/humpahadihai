@@ -51,107 +51,214 @@
   margin-top: 0.5rem;
 }
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ============================================
+   DESIGN SYSTEM - Hum Pahadi Haii
+   Visual refresh with enhanced tokens
+   ============================================ */
 
 @layer base {
   :root {
-    --background: 45 25% 97%;
-    --foreground: 120 35% 15%;
+    /* Core Semantic Colors */
+    --background: 48 30% 97%;
+    --foreground: 150 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 120 35% 15%;
+    --card-foreground: 150 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 120 35% 15%;
+    --popover-foreground: 150 25% 12%;
 
-    --primary: 130 45% 28%;
-    --primary-foreground: 45 25% 97%;
+    /* Brand: Pahadi Green */
+    --primary: 145 50% 28%;
+    --primary-foreground: 48 30% 98%;
 
-    --secondary: 25 55% 60%;
+    /* Accent: Warm Terracotta */
+    --secondary: 22 65% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 45 20% 92%;
-    --muted-foreground: 120 15% 45%;
+    /* Muted Surfaces */
+    --muted: 48 25% 93%;
+    --muted-foreground: 150 12% 40%;
 
-    --accent: 35 75% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: Golden Sun */
+    --accent: 38 85% 52%;
+    --accent-foreground: 150 30% 10%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 45 20% 88%;
-    --input: 45 20% 88%;
-    --ring: 130 45% 28%;
+    --border: 48 20% 88%;
+    --input: 48 20% 88%;
+    --ring: 145 50% 35%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
     
-    /* Custom Pahadi Design Tokens */
-    --mountain-green: 130 45% 28%;
-    --forest-deep: 140 50% 20%;
-    --earth-brown: 25 40% 35%;
-    --terracotta: 15 70% 55%;
-    --golden-sun: 45 95% 60%;
-    --snow-white: 0 0% 98%;
+    /* ========== Extended Palette ========== */
     
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(130 45% 28%) 0%, hsl(140 50% 20%) 100%);
-    --gradient-sunrise: linear-gradient(180deg, hsl(35 75% 55%) 0%, hsl(25 55% 60%) 100%);
-    --gradient-mountain: linear-gradient(to bottom, hsl(200 50% 85%) 0%, hsl(45 25% 97%) 100%);
+    /* Brand Colors */
+    --mountain-green: 145 50% 28%;
+    --forest-deep: 150 55% 18%;
+    --earth-brown: 25 45% 32%;
+    --terracotta: 18 70% 52%;
+    --golden-sun: 42 95% 58%;
+    --snow-white: 0 0% 99%;
+    --sky-mist: 200 35% 92%;
     
-    /* Shadows */
-    --shadow-soft: 0 4px 16px hsl(130 45% 28% / 0.1);
-    --shadow-warm: 0 8px 32px hsl(35 75% 55% / 0.15);
+    /* Neutral Scale (warm undertones) */
+    --neutral-50: 48 30% 98%;
+    --neutral-100: 48 25% 95%;
+    --neutral-200: 48 20% 90%;
+    --neutral-300: 48 15% 82%;
+    --neutral-400: 48 10% 62%;
+    --neutral-500: 48 8% 45%;
+    --neutral-600: 48 10% 32%;
+    --neutral-700: 48 12% 22%;
+    --neutral-800: 48 15% 14%;
+    --neutral-900: 48 18% 8%;
     
-    /* Transitions */
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Success / Warning / Info */
+    --success: 145 60% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 18% 8%;
+    --info: 200 85% 45%;
+    --info-foreground: 0 0% 100%;
+    
+    /* ========== Spacing Scale ========== */
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+    
+    /* ========== Typography Scale ========== */
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --font-display: "Playfair Display", Georgia, serif;
+    
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 3rem;        /* 48px */
+    --text-6xl: 3.75rem;     /* 60px */
+    
+    /* Font Weights */
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* Line Heights */
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+    
+    /* ========== Border Radius Tokens ========== */
+    --radius-none: 0;
+    --radius-sm: 0.375rem;   /* 6px */
+    --radius-md: 0.5rem;     /* 8px */
+    --radius-lg: 0.75rem;    /* 12px */
+    --radius-xl: 1rem;       /* 16px */
+    --radius-2xl: 1.5rem;    /* 24px */
+    --radius-full: 9999px;
+    
+    /* ========== Shadows (Elevation) ========== */
+    --shadow-xs: 0 1px 2px 0 hsl(150 25% 12% / 0.03);
+    --shadow-sm: 0 1px 3px 0 hsl(150 25% 12% / 0.05), 0 1px 2px -1px hsl(150 25% 12% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(150 25% 12% / 0.07), 0 2px 4px -2px hsl(150 25% 12% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(150 25% 12% / 0.08), 0 4px 6px -4px hsl(150 25% 12% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(150 25% 12% / 0.1), 0 8px 10px -6px hsl(150 25% 12% / 0.05);
+    --shadow-2xl: 0 25px 50px -12px hsl(150 25% 12% / 0.2);
+    --shadow-inner: inset 0 2px 4px 0 hsl(150 25% 12% / 0.04);
+    
+    /* Colored Shadows */
+    --shadow-primary: 0 4px 14px -3px hsl(145 50% 28% / 0.3);
+    --shadow-accent: 0 4px 14px -3px hsl(38 85% 52% / 0.3);
+    --shadow-warm: 0 8px 24px -4px hsl(22 65% 55% / 0.2);
+    
+    /* ========== Gradients ========== */
+    --gradient-hero: linear-gradient(135deg, hsl(145 50% 28%) 0%, hsl(150 55% 18%) 100%);
+    --gradient-sunrise: linear-gradient(180deg, hsl(38 85% 52%) 0%, hsl(22 65% 55%) 100%);
+    --gradient-mountain: linear-gradient(to bottom, hsl(200 35% 92%) 0%, hsl(48 30% 97%) 100%);
+    --gradient-card-hover: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(48 25% 98%) 100%);
+    --gradient-text-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 90%) 100%);
+    
+    /* ========== Motion / Transitions ========== */
+    --duration-fast: 100ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 500ms;
+    
+    --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    --transition-colors: color var(--duration-normal) var(--ease-default), background-color var(--duration-normal) var(--ease-default), border-color var(--duration-normal) var(--ease-default);
+    --transition-transform: transform var(--duration-normal) var(--ease-out);
+    --transition-shadow: box-shadow var(--duration-normal) var(--ease-default);
+    --transition-all: all var(--duration-normal) var(--ease-default);
 
+    /* Sidebar */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 140 30% 12%;
-    --foreground: 45 25% 97%;
+    --background: 150 25% 8%;
+    --foreground: 48 30% 95%;
 
-    --card: 140 25% 16%;
-    --card-foreground: 45 25% 97%;
+    --card: 150 20% 12%;
+    --card-foreground: 48 30% 95%;
 
-    --popover: 140 25% 16%;
-    --popover-foreground: 45 25% 97%;
+    --popover: 150 20% 12%;
+    --popover-foreground: 48 30% 95%;
 
-    --primary: 130 40% 45%;
-    --primary-foreground: 45 25% 97%;
+    --primary: 145 45% 45%;
+    --primary-foreground: 48 30% 98%;
 
-    --secondary: 25 45% 50%;
+    --secondary: 22 55% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 140 20% 22%;
-    --muted-foreground: 45 15% 70%;
+    --muted: 150 15% 18%;
+    --muted-foreground: 48 15% 65%;
 
-    --accent: 35 65% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 38 75% 50%;
+    --accent-foreground: 150 30% 10%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 140 20% 25%;
-    --input: 140 20% 25%;
-    --ring: 130 40% 55%;
+    --border: 150 15% 22%;
+    --input: 150 15% 22%;
+    --ring: 145 45% 50%;
+    
+    /* Dark mode shadows */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.1);
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.15), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.2), 0 2px 4px -2px hsl(0 0% 0% / 0.15);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.25), 0 4px 6px -4px hsl(0 0% 0% / 0.15);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.3), 0 8px 10px -6px hsl(0 0% 0% / 0.15);
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -165,15 +272,32 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --header-height: 5rem;
+    --header-height: 4.5rem;
   }
 
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* Improved focus styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Skip to content link for accessibility */
+  .skip-to-content {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md;
   }
 
   /* Body scroll lock for modals */
@@ -188,23 +312,127 @@ All colors MUST be HSL.
   .search-modal-portal .site-header {
     display: none !important;
   }
+
+  /* Better image defaults */
+  img {
+    @apply max-w-full h-auto;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+    color: hsl(var(--foreground));
+  }
 }
 
-/* Micro-animations and transitions */
+/* ============================================
+   COMPONENT UTILITIES
+   ============================================ */
+
+@layer components {
+  /* Card hover effect - unified */
+  .card-interactive {
+    @apply bg-card rounded-xl border border-border shadow-sm;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:shadow-lg hover:-translate-y-1 hover:border-primary/20;
+  }
+
+  /* Image container with aspect ratio */
+  .img-container {
+    @apply relative overflow-hidden bg-muted;
+  }
+
+  .img-container img {
+    @apply absolute inset-0 w-full h-full object-cover;
+    @apply transition-transform duration-300 ease-out;
+  }
+
+  .img-container:hover img {
+    @apply scale-105;
+  }
+
+  /* Text truncation utilities */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Badge styles */
+  .badge-primary {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply bg-primary/10 text-primary;
+  }
+
+  .badge-secondary {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply bg-secondary/10 text-secondary;
+  }
+
+  .badge-accent {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply bg-accent/10 text-accent-foreground;
+  }
+
+  /* Section spacing */
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .section-padding-sm {
+    @apply py-8 md:py-12;
+  }
+
+  /* Container width variant */
+  .container-narrow {
+    @apply max-w-4xl mx-auto px-4;
+  }
+
+  .container-wide {
+    @apply max-w-7xl mx-auto px-4;
+  }
+}
+
+/* ============================================
+   MICRO-ANIMATIONS & TRANSITIONS
+   ============================================ */
+
 @layer utilities {
   /* Safe area padding for mobile devices */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Hover card effect */
+  /* Hover card lift effect */
   .hover-lift {
-    @apply transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg;
+    @apply transition-all duration-200 ease-out;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
   }
 
   /* Scale on hover */
   .hover-scale {
-    @apply transition-transform duration-200 ease-out hover:scale-[1.02];
+    @apply transition-transform duration-200 ease-out;
+  }
+  .hover-scale:hover {
+    transform: scale(1.02);
   }
 
   /* Glow effect */
@@ -212,7 +440,12 @@ All colors MUST be HSL.
     @apply transition-shadow duration-200 ease-out;
   }
   .hover-glow:hover {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.15);
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.15);
+  }
+
+  /* Button press effect */
+  .press-effect:active {
+    transform: scale(0.98);
   }
 
   /* Skeleton shimmer */
@@ -220,11 +453,11 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       hsl(var(--muted)) 0%,
-      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted-foreground) / 0.08) 50%,
       hsl(var(--muted)) 100%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    animation: shimmer 1.5s ease-in-out infinite;
   }
 
   /* Page transition */
@@ -246,9 +479,101 @@ All colors MUST be HSL.
   .story-link:hover::after {
     @apply scale-x-100 origin-bottom-left;
   }
+
+  /* Fade in on scroll (for AnimatedSection) */
+  .fade-in-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .fade-in-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Stagger children animation */
+  .stagger-children > * {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: staggerFadeIn 0.4s ease-out forwards;
+  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+  /* Smooth image loading */
+  .img-loading {
+    @apply bg-muted animate-pulse;
+  }
+  .img-loaded {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+
+  @supports not (backdrop-filter: blur(12px)) {
+    .glass {
+      background: hsl(var(--background) / 0.95);
+    }
+  }
 }
 
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes staggerFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ============================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================ */
+
+/* High contrast focus for buttons */
+.btn-focus:focus-visible {
+  @apply ring-2 ring-offset-2 ring-primary;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover {
+    transform: none;
+  }
 }
