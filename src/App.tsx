@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
+import { SearchProvider, SearchModal } from "./components/search";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
@@ -221,7 +222,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AnalyticsProvider>
-          <AppContent />
+          <SearchProvider>
+            <AppContent />
+            <SearchModal />
+          </SearchProvider>
         </AnalyticsProvider>
       </BrowserRouter>
     </TooltipProvider>

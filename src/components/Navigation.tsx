@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, LogIn, Search } from "lucide-react";
+import { Menu, X, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -8,7 +8,7 @@ import { useCMSSettings } from "@/hooks/useCMSSettings";
 import { performLogout } from "@/lib/auth";
 import { toast } from "sonner";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
-import { SearchBox } from "@/components/search/SearchBox";
+import { SearchTrigger } from "@/components/search";
 import { AdminPinModal } from "@/components/AdminPinModal";
 
 // Environment flag for dev/staging - show visible admin login
@@ -106,9 +106,9 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+    <nav className="site-header sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm h-[var(--header-height,5rem)]">
+      <div className="container mx-auto px-4 h-full">
+        <div className="flex items-center justify-between h-full">
           {/* Logo with secret click trigger */}
           <Link 
             to="/" 
@@ -122,9 +122,9 @@ const Navigation = () => {
             </div>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden md:flex flex-1 max-w-md mx-4">
-            <SearchBox />
+          {/* Desktop Search Trigger */}
+          <div className="hidden md:flex items-center">
+            <SearchTrigger variant="button" />
           </div>
 
           {/* Desktop Navigation */}
@@ -168,25 +168,23 @@ const Navigation = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
+          {/* Mobile Search + Menu Buttons */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <SearchTrigger variant="icon" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-2">
-              {/* Mobile Search */}
-              <div className="px-4 pb-3 border-b border-border mb-2">
-                <SearchBox />
-              </div>
+          <div className="lg:hidden py-4 border-t border-border absolute top-[var(--header-height,5rem)] left-0 right-0 bg-background/95 backdrop-blur-sm max-h-[calc(100vh-var(--header-height,5rem))] overflow-y-auto">
+            <div className="container mx-auto px-4 flex flex-col gap-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
