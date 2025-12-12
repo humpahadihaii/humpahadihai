@@ -99,6 +99,18 @@ const TravelPackageDetailPage = () => {
     enabled: !!pkg?.region,
   });
 
+  // SEO metadata - MUST be called before any early returns
+  const seoMeta = usePageSEO('travel_package', pkg ? {
+    name: pkg.title,
+    title: pkg.title,
+    slug: pkg.slug,
+    description: pkg.short_description || pkg.full_description,
+    image: pkg.thumbnail_image_url,
+    duration: pkg.duration_days ? `${pkg.duration_days} Days` : undefined,
+    price: pkg.price_per_person,
+    region: pkg.region,
+  } : null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pkg) return;
@@ -168,18 +180,6 @@ const TravelPackageDetailPage = () => {
       </div>
     );
   }
-
-  // SEO metadata
-  const seoMeta = usePageSEO('travel_package', {
-    name: pkg.title,
-    title: pkg.title,
-    slug: pkg.slug,
-    description: pkg.short_description || pkg.full_description,
-    image: pkg.thumbnail_image_url,
-    duration: pkg.duration_days ? `${pkg.duration_days} Days` : undefined,
-    price: pkg.price_per_person,
-    region: pkg.region,
-  });
 
   return (
     <>
