@@ -29,6 +29,9 @@ interface DistrictFestival {
   image_url: string | null;
   is_active: boolean;
   sort_order: number;
+  start_month: number | null;
+  end_month: number | null;
+  is_spotlight: boolean;
 }
 
 const AdminDistrictFestivalsPage = () => {
@@ -46,6 +49,9 @@ const AdminDistrictFestivalsPage = () => {
     image_url: "",
     is_active: true,
     sort_order: 0,
+    start_month: null as number | null,
+    end_month: null as number | null,
+    is_spotlight: false,
   });
 
   const { data: districts = [] } = useQuery({
@@ -135,6 +141,9 @@ const AdminDistrictFestivalsPage = () => {
       image_url: "",
       is_active: true,
       sort_order: 0,
+      start_month: null,
+      end_month: null,
+      is_spotlight: false,
     });
     setEditingFestival(null);
     setIsDialogOpen(false);
@@ -149,6 +158,9 @@ const AdminDistrictFestivalsPage = () => {
       image_url: festival.image_url || "",
       is_active: festival.is_active,
       sort_order: festival.sort_order,
+      start_month: festival.start_month,
+      end_month: festival.end_month,
+      is_spotlight: festival.is_spotlight || false,
     });
     setIsDialogOpen(true);
   };
@@ -165,6 +177,9 @@ const AdminDistrictFestivalsPage = () => {
       image_url: formData.image_url || null,
       is_active: formData.is_active,
       sort_order: formData.sort_order,
+      start_month: formData.start_month,
+      end_month: formData.end_month,
+      is_spotlight: formData.is_spotlight,
     });
   };
 
@@ -297,6 +312,38 @@ const AdminDistrictFestivalsPage = () => {
                           onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                         />
                         <Label>Active</Label>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Start Month (1-12)</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={12}
+                            value={formData.start_month || ""}
+                            onChange={(e) => setFormData({ ...formData, start_month: e.target.value ? parseInt(e.target.value) : null })}
+                            placeholder="e.g., 1 for January"
+                          />
+                        </div>
+                        <div>
+                          <Label>End Month (1-12)</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={12}
+                            value={formData.end_month || ""}
+                            onChange={(e) => setFormData({ ...formData, end_month: e.target.value ? parseInt(e.target.value) : null })}
+                            placeholder="e.g., 3 for March"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={formData.is_spotlight}
+                          onCheckedChange={(checked) => setFormData({ ...formData, is_spotlight: checked })}
+                        />
+                        <Label>Feature in Spotlight</Label>
+                        <span className="text-xs text-muted-foreground">(Shows on homepage)</span>
                       </div>
                       <Button onClick={handleSubmit} disabled={saveMutation.isPending} className="w-full">
                         {saveMutation.isPending ? "Saving..." : "Save Festival"}

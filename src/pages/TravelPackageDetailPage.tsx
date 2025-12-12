@@ -16,6 +16,7 @@ import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
+import WeatherWidget from "@/components/weather/WeatherWidget";
 
 interface TourismListing {
   id: string;
@@ -254,6 +255,17 @@ const TravelPackageDetailPage = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Weather Widget - if package has start coordinates */}
+          {pkg.start_lat && pkg.start_lng && (
+            <div className="mb-8">
+              <WeatherWidget
+                lat={Number(pkg.start_lat)}
+                lng={Number(pkg.start_lng)}
+                locationName={pkg.destination || pkg.starting_point || pkg.title}
+              />
+            </div>
+          )}
 
           {/* Description */}
           {pkg.full_description && (
