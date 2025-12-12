@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, LogIn } from "lucide-react";
+import { Menu, X, LogOut, LogIn, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -8,6 +8,7 @@ import { useCMSSettings } from "@/hooks/useCMSSettings";
 import { performLogout } from "@/lib/auth";
 import { toast } from "sonner";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
+import { SearchBox } from "@/components/search/SearchBox";
 import { AdminPinModal } from "@/components/AdminPinModal";
 
 // Environment flag for dev/staging - show visible admin login
@@ -121,13 +122,18 @@ const Navigation = () => {
             </div>
           </Link>
 
+          {/* Desktop Search */}
+          <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <SearchBox />
+          </div>
+
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
+            {navItems.slice(0, 8).map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                className={`px-2 py-2 rounded-lg font-medium text-xs transition-all ${
                   isActive(item.path)
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-muted"
@@ -177,6 +183,10 @@ const Navigation = () => {
         {isOpen && (
           <div className="lg:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-2">
+              {/* Mobile Search */}
+              <div className="px-4 pb-3 border-b border-border mb-2">
+                <SearchBox />
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.path}
