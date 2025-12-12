@@ -109,17 +109,14 @@ const DistrictCard = ({ district }: DistrictCardProps) => (
   <Link to={`/districts/${district.slug}`}>
     <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group overflow-hidden">
       <div className="h-48 overflow-hidden bg-muted">
-        {district.image_url ? (
-          <img
-            src={district.image_url}
-            alt={district.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <MapPin className="h-12 w-12 text-muted-foreground/50" />
-          </div>
-        )}
+        <img
+          src={district.image_url || `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`}
+          alt={district.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`;
+          }}
+        />
       </div>
       <CardHeader>
         <div className="flex items-center justify-between">

@@ -505,18 +505,15 @@ export default function MarketplacePage() {
                     }`}
                   >
                     <div className="relative h-48 bg-muted">
-                      {listing.image_url ? (
-                        <img
-                          src={listing.image_url}
-                          alt={listing.title}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                          No Image
-                        </div>
-                      )}
+                      <img
+                        src={listing.image_url || `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`}
+                        alt={listing.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`;
+                        }}
+                      />
                       {listing.is_featured && (
                         <Badge className="absolute top-2 right-2 bg-primary">Featured</Badge>
                       )}
