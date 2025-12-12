@@ -416,7 +416,7 @@ Deno.serve(async (req) => {
 
       let query = supabase
         .from('share_template_audit')
-        .select('*, profiles:changed_by(email, full_name)')
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
 
