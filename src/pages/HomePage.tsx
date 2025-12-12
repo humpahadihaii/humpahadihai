@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mountain, UtensilsCrossed, Camera, Palmtree, Calendar } from "lucide-react";
@@ -14,13 +15,26 @@ import { SearchTrigger } from "@/components/search";
 import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
 import WeatherWidget from "@/components/weather/WeatherWidget";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
+import { useSiteSharePreview } from "@/hooks/useSharePreview";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
   const { data: settings } = useCMSSettings();
   const { data: welcomeSection } = useCMSContentSection("welcome");
+  const { settings: sharePreview } = useSiteSharePreview();
   
   const heroImage = settings?.hero_background_image || getImage('hero_banner', heroImageFallback);
+
+  // Use CMS settings or fallback to defaults
+  const siteName = settings?.site_name || "Hum Pahadi Haii";
+  const tagline = settings?.tagline || "Celebrating Uttarakhand's Culture, Tradition & Heritage";
+  const metaTitle = settings?.meta_title || `${siteName} - ${tagline}`;
+  const metaDescription = settings?.meta_description || "Discover Uttarakhand's rich culture, traditional food, festivals, handicrafts, and natural beauty. Explore Pahadi traditions from Garhwal and Kumaon regions.";
+  
+  // Share preview from admin settings
+  const ogTitle = sharePreview?.default_title || metaTitle;
+  const ogDescription = sharePreview?.default_description || metaDescription;
+  const ogImage = sharePreview?.default_image_url || "/logo.jpg";
 
   const { data: highlights = [] } = useQuery({
     queryKey: ["featured-highlights"],
@@ -110,9 +124,6 @@ const HomePage = () => {
     },
   ];
 
-  // Use CMS settings or fallback to defaults
-  const siteName = settings?.site_name || "Hum Pahadi Haii";
-  const tagline = settings?.tagline || "Celebrating Uttarakhand's Culture, Tradition & Heritage";
   const primaryCtaText = settings?.primary_cta_text || "Explore Culture";
   const primaryCtaUrl = settings?.primary_cta_url || "/culture";
   const secondaryCtaText = settings?.secondary_cta_text || "View Gallery";
@@ -120,6 +131,23 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
+      {/* SEO Meta Tags */}
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://humpahadihaii.in" />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@humpahadihaii" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        <meta name="twitter:image" content={ogImage} />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative h-[70vh] md:h-[85vh] flex items-center justify-center overflow-hidden">
         <div 
