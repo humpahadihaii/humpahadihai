@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSiteSharePreview, SiteSharePreview } from "@/hooks/useSharePreview";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import { Save, Eye, Globe, MessageCircle, Mail, Twitter, Linkedin, Facebook } from "lucide-react";
+import { Save, Eye, Globe, MessageCircle, Mail, Twitter, Linkedin, Facebook, Instagram } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminSharePreviewPage() {
@@ -255,34 +255,28 @@ export default function AdminSharePreviewPage() {
           </TabsContent>
 
           <TabsContent value="preview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {/* Facebook Preview */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Facebook className="h-5 w-5 text-blue-600" />
-                    Facebook Preview
+                    Facebook
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="border rounded-lg overflow-hidden bg-white">
                     {form.default_image_url ? (
-                      <img
-                        src={form.default_image_url}
-                        alt="Preview"
-                        className="w-full h-40 object-cover"
-                      />
+                      <img src={form.default_image_url} alt="Preview" className="w-full h-32 object-cover" />
                     ) : (
-                      <div className="w-full h-40 bg-muted flex items-center justify-center">
+                      <div className="w-full h-32 bg-muted flex items-center justify-center">
                         <Eye className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
-                    <div className="p-3">
+                    <div className="p-2">
                       <p className="text-xs text-muted-foreground uppercase">humpahadihaii.in</p>
-                      <h3 className="font-semibold text-sm line-clamp-2">{form.default_title || 'Page Title'}</h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {form.default_description || 'Page description will appear here...'}
-                      </p>
+                      <h3 className="font-semibold text-sm line-clamp-1">{form.default_title || 'Page Title'}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{form.default_description || 'Description...'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -290,31 +284,52 @@ export default function AdminSharePreviewPage() {
 
               {/* Twitter Preview */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Twitter className="h-5 w-5 text-sky-500" />
-                    X (Twitter) Preview
+                    X (Twitter)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="border rounded-xl overflow-hidden bg-white">
                     {form.default_image_url ? (
-                      <img
-                        src={form.default_image_url}
-                        alt="Preview"
-                        className="w-full h-40 object-cover"
-                      />
+                      <img src={form.default_image_url} alt="Preview" className="w-full h-32 object-cover" />
                     ) : (
-                      <div className="w-full h-40 bg-muted flex items-center justify-center">
+                      <div className="w-full h-32 bg-muted flex items-center justify-center">
                         <Eye className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
-                    <div className="p-3">
-                      <h3 className="font-semibold text-sm line-clamp-2">{form.default_title || 'Page Title'}</h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {form.default_description || 'Page description will appear here...'}
-                      </p>
+                    <div className="p-2">
+                      <h3 className="font-semibold text-sm line-clamp-1">{form.default_title || 'Page Title'}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{form.default_description || 'Description...'}</p>
                       <p className="text-xs text-muted-foreground mt-1">humpahadihaii.in</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Instagram Preview */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Instagram className="h-5 w-5 text-pink-500" />
+                    Instagram
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-0.5 rounded-lg">
+                    <div className="bg-white rounded-lg overflow-hidden">
+                      {form.default_image_url ? (
+                        <img src={form.default_image_url} alt="Preview" className="w-full aspect-square object-cover" />
+                      ) : (
+                        <div className="w-full aspect-square bg-muted flex items-center justify-center">
+                          <Eye className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="p-2">
+                        <p className="text-xs font-semibold">humpahadihaii</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{form.default_description || 'Description...'}</p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -322,32 +337,26 @@ export default function AdminSharePreviewPage() {
 
               {/* WhatsApp Preview */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <MessageCircle className="h-5 w-5 text-green-600" />
-                    WhatsApp Preview
+                    WhatsApp
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-[#e5ddd5] p-3 rounded-lg">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-sm max-w-[280px]">
+                  <div className="bg-[#e5ddd5] p-2 rounded-lg">
+                    <div className="bg-white rounded-lg overflow-hidden shadow-sm">
                       {form.default_image_url ? (
-                        <img
-                          src={form.default_image_url}
-                          alt="Preview"
-                          className="w-full h-32 object-cover"
-                        />
+                        <img src={form.default_image_url} alt="Preview" className="w-full h-28 object-cover" />
                       ) : (
-                        <div className="w-full h-32 bg-muted flex items-center justify-center">
-                          <Eye className="h-8 w-8 text-muted-foreground" />
+                        <div className="w-full h-28 bg-muted flex items-center justify-center">
+                          <Eye className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
                       <div className="p-2">
                         <p className="text-xs text-green-700 font-medium">humpahadihaii.in</p>
-                        <h3 className="font-semibold text-sm line-clamp-2">{form.default_title || 'Page Title'}</h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {form.default_description || 'Page description...'}
-                        </p>
+                        <h3 className="font-semibold text-xs line-clamp-1">{form.default_title || 'Page Title'}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{form.default_description || 'Description...'}</p>
                       </div>
                     </div>
                   </div>
@@ -356,29 +365,43 @@ export default function AdminSharePreviewPage() {
 
               {/* LinkedIn Preview */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Linkedin className="h-5 w-5 text-blue-700" />
-                    LinkedIn Preview
+                    LinkedIn
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="border rounded-lg overflow-hidden bg-white">
                     {form.default_image_url ? (
-                      <img
-                        src={form.default_image_url}
-                        alt="Preview"
-                        className="w-full h-40 object-cover"
-                      />
+                      <img src={form.default_image_url} alt="Preview" className="w-full h-32 object-cover" />
                     ) : (
-                      <div className="w-full h-40 bg-muted flex items-center justify-center">
+                      <div className="w-full h-32 bg-muted flex items-center justify-center">
                         <Eye className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
-                    <div className="p-3 border-t">
-                      <h3 className="font-semibold text-sm line-clamp-2">{form.default_title || 'Page Title'}</h3>
+                    <div className="p-2 border-t">
+                      <h3 className="font-semibold text-sm line-clamp-1">{form.default_title || 'Page Title'}</h3>
                       <p className="text-xs text-muted-foreground">humpahadihaii.in</p>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Email Preview */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Mail className="h-5 w-5 text-orange-500" />
+                    Email
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-lg overflow-hidden bg-white p-3">
+                    <p className="text-xs text-muted-foreground mb-1">Subject:</p>
+                    <p className="text-sm font-medium mb-2">{form.templates?.email_subject || form.default_title || 'Page Title'}</p>
+                    <p className="text-xs text-muted-foreground mb-1">Body:</p>
+                    <p className="text-xs whitespace-pre-wrap line-clamp-4">{form.templates?.email_body || 'Email body content...'}</p>
                   </div>
                 </CardContent>
               </Card>
