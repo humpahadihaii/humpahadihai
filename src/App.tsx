@@ -101,6 +101,7 @@ import AdminFeaturedCardsPage from "./pages/admin/AdminFeaturedCardsPage";
 import AdminMapPage from "./pages/admin/AdminMapPage";
 import AdminMediaImportPage from "./pages/admin/AdminMediaImportPage";
 import AdminShareSettingsPage from "./pages/admin/AdminShareSettingsPage";
+import AdminSharePreviewPage from "./pages/admin/AdminSharePreviewPage";
 import { FloatingShareButton } from "./components/share/FloatingShareButton";
 
 const queryClient = new QueryClient();
@@ -215,6 +216,7 @@ const AppContent = () => {
             <Route path="/admin/notify-settings" element={<AdminRoute><AdminNotifySettingsPage /></AdminRoute>} />
             <Route path="/admin/media-import" element={<AdminRoute><AdminMediaImportPage /></AdminRoute>} />
             <Route path="/admin/share-settings" element={<AdminRoute><AdminShareSettingsPage /></AdminRoute>} />
+            <Route path="/admin/share-preview" element={<AdminRoute><AdminSharePreviewPage /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

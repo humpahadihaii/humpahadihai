@@ -1931,6 +1931,57 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_share_preview: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          image_url: string | null
+          locale: string | null
+          og_type: string | null
+          templates: Json | null
+          title: string | null
+          twitter_card: string | null
+          updated_at: string | null
+          updated_by: string | null
+          use_default: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          image_url?: string | null
+          locale?: string | null
+          og_type?: string | null
+          templates?: Json | null
+          title?: string | null
+          twitter_card?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          use_default?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          image_url?: string | null
+          locale?: string | null
+          og_type?: string | null
+          templates?: Json | null
+          title?: string | null
+          twitter_card?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          use_default?: boolean | null
+        }
+        Relationships: []
+      }
       event_audit_log: {
         Row: {
           action: string
@@ -3934,6 +3985,80 @@ export type Database = {
         }
         Relationships: []
       }
+      share_clicks: {
+        Row: {
+          channel: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_hash: string | null
+          short_link_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_hash?: string | null
+          short_link_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_hash?: string | null
+          short_link_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_clicks_short_link_id_fkey"
+            columns: ["short_link_id"]
+            isOneToOne: false
+            referencedRelation: "short_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      share_preview_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_value: Json | null
+          before_value: Json | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
       share_referrals: {
         Row: {
           created_at: string | null
@@ -3967,6 +4092,42 @@ export type Database = {
           ref_source?: string
           user_agent?: string | null
           visited_at?: string | null
+        }
+        Relationships: []
+      }
+      short_links: {
+        Row: {
+          click_count: number | null
+          created_at: string | null
+          created_by: string | null
+          entity_id: string | null
+          entity_type: string | null
+          hash: string
+          id: string
+          ref: string | null
+          target_url: string
+        }
+        Insert: {
+          click_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          hash: string
+          id?: string
+          ref?: string | null
+          target_url: string
+        }
+        Update: {
+          click_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          hash?: string
+          id?: string
+          ref?: string | null
+          target_url?: string
         }
         Relationships: []
       }
@@ -4021,6 +4182,51 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      site_share_preview: {
+        Row: {
+          created_at: string | null
+          default_description: string
+          default_image_url: string | null
+          default_title: string
+          id: string
+          og_type: string | null
+          singleton_flag: boolean | null
+          templates: Json | null
+          twitter_card: string | null
+          twitter_site: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          default_description?: string
+          default_image_url?: string | null
+          default_title?: string
+          id?: string
+          og_type?: string | null
+          singleton_flag?: boolean | null
+          templates?: Json | null
+          twitter_card?: string | null
+          twitter_site?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          default_description?: string
+          default_image_url?: string | null
+          default_title?: string
+          id?: string
+          og_type?: string | null
+          singleton_flag?: boolean | null
+          templates?: Json | null
+          twitter_card?: string | null
+          twitter_site?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }

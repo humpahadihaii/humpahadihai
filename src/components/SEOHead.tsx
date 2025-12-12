@@ -3,9 +3,26 @@ import { SEOMeta, BreadcrumbItem } from "@/lib/seo/generator";
 
 interface SEOHeadProps {
   meta: SEOMeta;
+  // Optional overrides from admin share preview settings
+  sharePreview?: {
+    title?: string;
+    description?: string;
+    image?: string;
+    ogType?: string;
+    twitterCard?: string;
+    twitterSite?: string;
+  };
 }
 
-export default function SEOHead({ meta }: SEOHeadProps) {
+export default function SEOHead({ meta, sharePreview }: SEOHeadProps) {
+  // Merge share preview overrides with SEO meta
+  const ogTitle = sharePreview?.title || meta.ogTitle;
+  const ogDescription = sharePreview?.description || meta.ogDescription;
+  const ogImage = sharePreview?.image || meta.ogImage;
+  const ogType = sharePreview?.ogType || meta.ogType;
+  const twitterCard = sharePreview?.twitterCard || meta.twitterCard;
+  const twitterSite = sharePreview?.twitterSite || '@humpahadihaii';
+
   return (
     <Helmet>
       {/* Primary Meta Tags */}
@@ -22,23 +39,25 @@ export default function SEOHead({ meta }: SEOHeadProps) {
       )}
 
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content={meta.ogType} />
+      <meta property="og:type" content={ogType} />
       <meta property="og:url" content={meta.ogUrl} />
-      <meta property="og:title" content={meta.ogTitle} />
-      <meta property="og:description" content={meta.ogDescription} />
-      <meta property="og:image" content={meta.ogImage} />
+      <meta property="og:title" content={ogTitle} />
+      <meta property="og:description" content={ogDescription} />
+      <meta property="og:image" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={ogTitle} />
       <meta property="og:site_name" content="Hum Pahadi Haii" />
       <meta property="og:locale" content="en_IN" />
 
       {/* Twitter */}
-      <meta name="twitter:card" content={meta.twitterCard} />
-      <meta name="twitter:site" content="@humpahadihaii" />
-      <meta name="twitter:creator" content="@humpahadihaii" />
-      <meta name="twitter:title" content={meta.twitterTitle} />
-      <meta name="twitter:description" content={meta.twitterDescription} />
-      <meta name="twitter:image" content={meta.twitterImage} />
+      <meta name="twitter:card" content={twitterCard} />
+      <meta name="twitter:site" content={twitterSite} />
+      <meta name="twitter:creator" content={twitterSite} />
+      <meta name="twitter:title" content={ogTitle} />
+      <meta name="twitter:description" content={ogDescription} />
+      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image:alt" content={ogTitle} />
 
       {/* Additional SEO Tags */}
       <meta name="author" content="Hum Pahadi Haii" />
