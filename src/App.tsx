@@ -67,6 +67,8 @@ import TravelPackageDetailPage from "./pages/TravelPackageDetailPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import MarketplacePage from "./pages/MarketplacePage";
+import ProviderDetailPage from "./pages/ProviderDetailPage";
+import ListingDetailPage from "./pages/ListingDetailPage";
 import ListYourBusinessPage from "./pages/ListYourBusinessPage";
 import MapPage from "./pages/MapPage";
 import EventsPage from "./pages/EventsPage";
@@ -141,6 +143,8 @@ const AppContent = () => {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/:slug" element={<ProductDetailPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/providers/:slug" element={<ProviderDetailPage />} />
+            <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/list-your-business" element={<ListYourBusinessPage />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/events" element={<EventsPage />} />
