@@ -1590,36 +1590,45 @@ export type Database = {
           created_at: string
           description: string | null
           district_id: string
+          end_month: number | null
           id: string
           image_url: string | null
           is_active: boolean
+          is_spotlight: boolean | null
           month: string | null
           name: string
           sort_order: number
+          start_month: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           district_id: string
+          end_month?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_spotlight?: boolean | null
           month?: string | null
           name: string
           sort_order?: number
+          start_month?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
           district_id?: string
+          end_month?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_spotlight?: boolean | null
           month?: string | null
           name?: string
           sort_order?: number
+          start_month?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -1729,7 +1738,9 @@ export type Database = {
           district_id: string
           id: string
           image_url: string | null
+          lat: number | null
           latitude: number | null
+          lng: number | null
           location: string | null
           longitude: number | null
           name: string
@@ -1747,7 +1758,9 @@ export type Database = {
           district_id: string
           id?: string
           image_url?: string | null
+          lat?: number | null
           latitude?: number | null
+          lng?: number | null
           location?: string | null
           longitude?: number | null
           name: string
@@ -1765,7 +1778,9 @@ export type Database = {
           district_id?: string
           id?: string
           image_url?: string | null
+          lat?: number | null
           latitude?: number | null
+          lng?: number | null
           location?: string | null
           longitude?: number | null
           name?: string
