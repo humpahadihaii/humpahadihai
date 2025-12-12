@@ -16,6 +16,7 @@ interface ContentListPageProps {
   title: string;
   description: string;
   heroGradient?: string;
+  heroImage?: string;
   showSubmitButton?: boolean;
   submitButtonLabel?: string;
   submitButtonUrl?: string;
@@ -26,6 +27,7 @@ const ContentListPage = ({
   title, 
   description, 
   heroGradient = "from-primary/70 to-secondary/70",
+  heroImage,
   showSubmitButton = false,
   submitButtonLabel = "Submit",
   submitButtonUrl = "#"
@@ -52,7 +54,14 @@ const ContentListPage = ({
       <SEOHead meta={seoMeta} />
       
       {/* Hero Section */}
-      <section className={`relative py-20 px-4 bg-gradient-to-r ${heroGradient}`}>
+      <section 
+        className={`relative py-20 px-4 bg-gradient-to-r ${heroGradient}`}
+        style={heroImage ? { 
+          backgroundImage: `linear-gradient(to right, hsl(var(--primary) / 0.7), hsl(var(--secondary) / 0.7)), url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        } : undefined}
+      >
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
             {title}
