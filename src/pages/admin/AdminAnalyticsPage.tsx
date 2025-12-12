@@ -11,9 +11,10 @@ import { GeoAnalytics } from "@/components/admin/analytics/GeoAnalytics";
 import { AlertsManager } from "@/components/admin/analytics/AlertsManager";
 import { ScheduledReports } from "@/components/admin/analytics/ScheduledReports";
 import { DataManagement } from "@/components/admin/analytics/DataManagement";
+import { ShareInsights } from "@/components/admin/analytics/ShareInsights";
 import { useAuth } from "@/hooks/useAuth";
 import { isSuperAdmin, RBACRole } from "@/lib/rbac";
-import { BarChart3, Shield, Lock, TrendingUp, Workflow, MousePointer2, Users, Route, Globe, Bell, FileText, Database } from "lucide-react";
+import { BarChart3, Shield, Lock, TrendingUp, Workflow, MousePointer2, Users, Route, Globe, Bell, FileText, Database, Share2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function AdminAnalyticsPage() {
@@ -36,6 +37,10 @@ export default function AdminAnalyticsPage() {
             <TabsTrigger value="advanced" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="shares" className="flex items-center gap-2">
+              <Share2 className="h-4 w-4" />
+              Shares
             </TabsTrigger>
             <TabsTrigger value="paths" className="flex items-center gap-2">
               <Route className="h-4 w-4" />
@@ -91,6 +96,10 @@ export default function AdminAnalyticsPage() {
 
           <TabsContent value="advanced">
             <AdvancedAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="shares">
+            <ShareInsights />
           </TabsContent>
 
           <TabsContent value="paths">
