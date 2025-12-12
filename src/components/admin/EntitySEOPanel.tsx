@@ -7,16 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { PlatformPreviewSimulator } from "@/components/admin/PlatformPreviewSimulator";
+import { AutoGenerateButton } from "@/components/admin/AutoGenerateButton";
 import { 
   useEntityShareSettings, 
   useUpdateEntityShareSettings,
   useShareSettings,
   EntityShareSettings
 } from "@/hooks/useShareSettings";
+import { PLATFORM_LIMITS, calculatePreviewScore, Platform } from "@/lib/sharePreviewUtils";
 import { 
-  ChevronDown, Save, Eye, Globe, Sparkles, Facebook, Twitter, 
-  MessageCircle, Linkedin, Instagram, Mail, AlertCircle, CheckCircle2
+  ChevronDown, Save, Globe, Facebook, Twitter, 
+  MessageCircle, Linkedin, Instagram, AlertCircle, CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +34,7 @@ interface EntitySEOPanelProps {
   defaultOpen?: boolean;
 }
 
-const PLATFORMS = [
+const PLATFORMS: { key: Platform; label: string; icon: typeof Facebook; color: string }[] = [
   { key: 'facebook', label: 'Facebook', icon: Facebook, color: 'text-blue-600' },
   { key: 'twitter', label: 'X/Twitter', icon: Twitter, color: 'text-sky-500' },
   { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: 'text-green-600' },
@@ -81,6 +85,14 @@ export function EntitySEOPanel({
     });
   };
 
+  const handleAutoGenerate = (data: { title: string; description: string }) => {
+    setForm(prev => ({
+      ...prev,
+      seo_title: data.title,
+      seo_description: data.description
+    }));
+  };
+
   const getPreviewTitle = () => {
     return form.seo_title || entityTitle || 'Page Title';
   };
@@ -96,6 +108,12 @@ export function EntitySEOPanel({
 
   const titleLength = (form.seo_title || '').length;
   const descLength = (form.seo_description || '').length;
+  
+  const previewScore = calculatePreviewScore(
+    form.seo_title || entityTitle || '',
+    form.seo_description || entityDescription || '',
+    form.seo_image_url || entityImage
+  );
 
   if (!entityId) {
     return (
@@ -122,9 +140,15 @@ export function EntitySEOPanel({
               <CardTitle className="text-base flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 SEO & Share Preview
-                {form.seo_title && form.seo_description && (
+                {previewScore.score >= 80 && (
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                 )}
+                <Badge 
+                  variant={previewScore.score >= 80 ? "default" : previewScore.score >= 50 ? "secondary" : "destructive"}
+                  className="text-xs"
+                >
+                  Score: {previewScore.score}%
+                </Badge>
               </CardTitle>
               <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
             </div>
@@ -136,10 +160,23 @@ export function EntitySEOPanel({
 
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
+            {previewScore.issues.length > 0 && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">Recommendations:</p>
+                <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-0.5">
+                  {previewScore.issues.map((issue, i) => (
+                    <li key={i} className="flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {issue}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
             <Tabs defaultValue="seo" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="seo">SEO Meta</TabsTrigger>
-                <TabsTrigger value="social">Social Preview</TabsTrigger>
+                <TabsTrigger value="social">Platform Overrides</TabsTrigger>
                 <TabsTrigger value="preview">Live Preview</TabsTrigger>
               </TabsList>
 
@@ -192,65 +229,85 @@ export function EntitySEOPanel({
                   value={form.seo_image_url || ''}
                   onChange={(url) => setForm({ ...form, seo_image_url: url })}
                 />
+                
+                <div className="flex gap-2 pt-2">
+                  <AutoGenerateButton
+                    entityTitle={entityTitle || ''}
+                    entityDescription={entityDescription || ''}
+                    onGenerate={handleAutoGenerate}
+                  />
+                  <AutoGenerateButton
+                    entityTitle={entityTitle || ''}
+                    entityDescription={entityDescription || ''}
+                    onGenerate={handleAutoGenerate}
+                    useAI
+                  />
+                </div>
               </TabsContent>
 
               {/* Social Tab */}
               <TabsContent value="social" className="space-y-4 mt-4">
                 <p className="text-sm text-muted-foreground">
-                  Override platform-specific templates. Leave empty to use global defaults.
+                  Override platform-specific templates. Character limits shown per platform.
                 </p>
                 
-                {PLATFORMS.map(({ key, label, icon: Icon, color }) => (
-                  <div key={key} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="flex items-center gap-2">
-                        <Icon className={cn("h-4 w-4", color)} />
-                        {label}
-                      </Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Use defaults</span>
-                        <Switch
-                          checked={useDefaults[key] ?? true}
-                          onCheckedChange={(checked) => {
-                            setUseDefaults({ ...useDefaults, [key]: checked });
-                            if (checked) {
-                              const newTemplates = { ...form.share_templates };
-                              delete newTemplates[key];
-                              setForm({ ...form, share_templates: newTemplates });
-                            }
-                          }}
-                        />
+                {PLATFORMS.map(({ key, label, icon: Icon, color }) => {
+                  const limits = PLATFORM_LIMITS[key];
+                  return (
+                    <div key={key} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2">
+                          <Icon className={cn("h-4 w-4", color)} />
+                          {label}
+                          <span className="text-xs text-muted-foreground">
+                            (Title: {limits.title}, Desc: {limits.description})
+                          </span>
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Use defaults</span>
+                          <Switch
+                            checked={useDefaults[key] ?? true}
+                            onCheckedChange={(checked) => {
+                              setUseDefaults({ ...useDefaults, [key]: checked });
+                              if (checked) {
+                                const newTemplates = { ...form.share_templates };
+                                delete newTemplates[key];
+                                setForm({ ...form, share_templates: newTemplates });
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
+                      
+                      {!useDefaults[key] && (
+                        <div className="grid gap-2 pt-2">
+                          <Input
+                            placeholder="Custom title..."
+                            value={form.share_templates?.[key]?.title_template || ''}
+                            onChange={(e) => setForm({
+                              ...form,
+                              share_templates: {
+                                ...form.share_templates,
+                                [key]: { ...form.share_templates?.[key], title_template: e.target.value }
+                              }
+                            })}
+                          />
+                          <Input
+                            placeholder="Custom description..."
+                            value={form.share_templates?.[key]?.description_template || ''}
+                            onChange={(e) => setForm({
+                              ...form,
+                              share_templates: {
+                                ...form.share_templates,
+                                [key]: { ...form.share_templates?.[key], description_template: e.target.value }
+                              }
+                            })}
+                          />
+                        </div>
+                      )}
                     </div>
-                    
-                    {!useDefaults[key] && (
-                      <div className="grid gap-2 pt-2">
-                        <Input
-                          placeholder="Custom title..."
-                          value={form.share_templates?.[key]?.title_template || ''}
-                          onChange={(e) => setForm({
-                            ...form,
-                            share_templates: {
-                              ...form.share_templates,
-                              [key]: { ...form.share_templates?.[key], title_template: e.target.value }
-                            }
-                          })}
-                        />
-                        <Input
-                          placeholder="Custom description..."
-                          value={form.share_templates?.[key]?.description_template || ''}
-                          onChange={(e) => setForm({
-                            ...form,
-                            share_templates: {
-                              ...form.share_templates,
-                              [key]: { ...form.share_templates?.[key], description_template: e.target.value }
-                            }
-                          })}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </TabsContent>
 
               {/* Preview Tab */}
@@ -258,104 +315,25 @@ export function EntitySEOPanel({
                 {/* Google Search Preview */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Google Search Result</Label>
-                  <div className="border rounded-lg p-4 bg-white">
-                    <p className="text-sm text-blue-700 hover:underline cursor-pointer line-clamp-1">
+                  <div className="border rounded-lg p-4 bg-white dark:bg-gray-900">
+                    <p className="text-sm text-blue-700 dark:text-blue-400 hover:underline cursor-pointer line-clamp-1">
                       {getPreviewTitle()}{globalSettings?.defaults?.title_suffix || ''}
                     </p>
-                    <p className="text-xs text-green-700">humpahadihaii.in › {entityType}s › ...</p>
-                    <p className="text-xs text-gray-600 line-clamp-2 mt-1">
+                    <p className="text-xs text-green-700 dark:text-green-400">humpahadihaii.in › {entityType}s › ...</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                       {getPreviewDescription()}
                     </p>
                   </div>
                 </div>
 
-                {/* Social Preview Cards */}
-                <div className="grid gap-4 md:grid-cols-2">
-                  {/* Facebook */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-1">
-                      <Facebook className="h-3 w-3 text-blue-600" /> Facebook
-                    </Label>
-                    <div className="border rounded-lg overflow-hidden bg-white">
-                      {getPreviewImage() ? (
-                        <img src={getPreviewImage()} alt="Preview" className="w-full h-24 object-cover" />
-                      ) : (
-                        <div className="w-full h-24 bg-muted flex items-center justify-center">
-                          <Eye className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="p-2">
-                        <p className="text-[10px] text-muted-foreground uppercase">humpahadihaii.in</p>
-                        <h3 className="font-semibold text-xs line-clamp-1">{getPreviewTitle()}</h3>
-                        <p className="text-[10px] text-muted-foreground line-clamp-1">{getPreviewDescription()}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Twitter */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-1">
-                      <Twitter className="h-3 w-3 text-sky-500" /> X/Twitter
-                    </Label>
-                    <div className="border rounded-xl overflow-hidden bg-white">
-                      {getPreviewImage() ? (
-                        <img src={getPreviewImage()} alt="Preview" className="w-full h-24 object-cover" />
-                      ) : (
-                        <div className="w-full h-24 bg-muted flex items-center justify-center">
-                          <Eye className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="p-2">
-                        <h3 className="font-semibold text-xs line-clamp-1">{getPreviewTitle()}</h3>
-                        <p className="text-[10px] text-muted-foreground line-clamp-1">{getPreviewDescription()}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">humpahadihaii.in</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* WhatsApp */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-1">
-                      <MessageCircle className="h-3 w-3 text-green-600" /> WhatsApp
-                    </Label>
-                    <div className="bg-[#e5ddd5] p-2 rounded-lg">
-                      <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-                        {getPreviewImage() ? (
-                          <img src={getPreviewImage()} alt="Preview" className="w-full h-20 object-cover" />
-                        ) : (
-                          <div className="w-full h-20 bg-muted flex items-center justify-center">
-                            <Eye className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className="p-2">
-                          <p className="text-[10px] text-green-700 font-medium">humpahadihaii.in</p>
-                          <h3 className="font-semibold text-[10px] line-clamp-1">{getPreviewTitle()}</h3>
-                          <p className="text-[10px] text-muted-foreground line-clamp-1">{getPreviewDescription()}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* LinkedIn */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-1">
-                      <Linkedin className="h-3 w-3 text-blue-700" /> LinkedIn
-                    </Label>
-                    <div className="border rounded-lg overflow-hidden bg-white">
-                      {getPreviewImage() ? (
-                        <img src={getPreviewImage()} alt="Preview" className="w-full h-24 object-cover" />
-                      ) : (
-                        <div className="w-full h-24 bg-muted flex items-center justify-center">
-                          <Eye className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="p-2 border-t">
-                        <h3 className="font-semibold text-xs line-clamp-1">{getPreviewTitle()}</h3>
-                        <p className="text-[10px] text-muted-foreground">humpahadihaii.in</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* Platform Previews */}
+                <PlatformPreviewSimulator
+                  title={getPreviewTitle()}
+                  description={getPreviewDescription()}
+                  image={getPreviewImage()}
+                  siteName={globalSettings?.defaults?.site_name}
+                  titleSuffix={globalSettings?.defaults?.title_suffix}
+                />
               </TabsContent>
             </Tabs>
 
