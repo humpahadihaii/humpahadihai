@@ -36,17 +36,30 @@ function parseUserAgent(ua: string): { device: string; browser: string } {
   return { device, browser };
 }
 
-// Categorize referrer
-function categorizeReferrer(referrer: string | null): string {
+// Categorize referrer - check both referrer and UTM source
+function categorizeReferrer(referrer: string | null, utmSource: string | null): string {
+  // First check UTM source (more reliable for social media)
+  if (utmSource) {
+    const utm = utmSource.toLowerCase();
+    if (utm.includes('instagram') || utm === 'ig') return 'instagram';
+    if (utm.includes('whatsapp') || utm === 'wa') return 'whatsapp';
+    if (utm.includes('facebook') || utm === 'fb') return 'facebook';
+    if (utm.includes('youtube') || utm === 'yt') return 'youtube';
+    if (utm.includes('twitter') || utm === 'x' || utm === 'tw') return 'twitter';
+    if (utm.includes('google')) return 'google';
+    if (utm.includes('linkedin') || utm === 'li') return 'linkedin';
+  }
+  
   if (!referrer) return 'direct';
   const ref = referrer.toLowerCase();
-  if (ref.includes('instagram')) return 'instagram';
-  if (ref.includes('facebook') || ref.includes('fb.')) return 'facebook';
-  if (ref.includes('youtube')) return 'youtube';
-  if (ref.includes('twitter') || ref.includes('x.com')) return 'twitter';
+  if (ref.includes('instagram') || ref.includes('l.instagram')) return 'instagram';
+  if (ref.includes('whatsapp') || ref.includes('wa.me') || ref.includes('api.whatsapp')) return 'whatsapp';
+  if (ref.includes('facebook') || ref.includes('fb.') || ref.includes('l.facebook') || ref.includes('lm.facebook')) return 'facebook';
+  if (ref.includes('youtube') || ref.includes('youtu.be')) return 'youtube';
+  if (ref.includes('twitter') || ref.includes('x.com') || ref.includes('t.co')) return 'twitter';
   if (ref.includes('google')) return 'google';
   if (ref.includes('bing')) return 'bing';
-  if (ref.includes('linkedin')) return 'linkedin';
+  if (ref.includes('linkedin') || ref.includes('lnkd.in')) return 'linkedin';
   return 'other';
 }
 
@@ -63,7 +76,7 @@ serve(async (req) => {
     );
 
     const body = await req.json();
-    const { url, referrer, userAgent, eventName, metadata } = body;
+    const { url, referrer, userAgent, eventName, metadata, utmSource } = body;
 
     // Get client IP from headers (anonymize it)
     const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
@@ -115,7 +128,7 @@ serve(async (req) => {
       .from('site_visits')
       .insert({
         url: url || '/',
-        referrer: categorizeReferrer(referrer),
+        referrer: categorizeReferrer(referrer, utmSource),
         raw_referrer: referrer || null,
         device,
         browser,
