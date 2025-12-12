@@ -1098,6 +1098,11 @@ export type Database = {
           lng: number | null
           location: string | null
           map_visible: boolean | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           slug: string
           status: string
           title: string
@@ -1114,6 +1119,11 @@ export type Database = {
           lng?: number | null
           location?: string | null
           map_visible?: boolean | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug: string
           status?: string
           title: string
@@ -1130,6 +1140,11 @@ export type Database = {
           lng?: number | null
           location?: string | null
           map_visible?: boolean | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug?: string
           status?: string
           title?: string
@@ -1177,6 +1192,11 @@ export type Database = {
           id: string
           meta_description: string | null
           meta_title: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           slug: string
           status: string
           title: string
@@ -1188,6 +1208,11 @@ export type Database = {
           id?: string
           meta_description?: string | null
           meta_title?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug: string
           status?: string
           title: string
@@ -1199,6 +1224,11 @@ export type Database = {
           id?: string
           meta_description?: string | null
           meta_title?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug?: string
           status?: string
           title?: string
@@ -1307,6 +1337,11 @@ export type Database = {
           excerpt: string | null
           id: string
           published_at: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           slug: string
           status: string
           title: string
@@ -1322,6 +1357,11 @@ export type Database = {
           excerpt?: string | null
           id?: string
           published_at?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug: string
           status?: string
           title: string
@@ -1337,6 +1377,11 @@ export type Database = {
           excerpt?: string | null
           id?: string
           published_at?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug?: string
           status?: string
           title?: string
@@ -1878,6 +1923,11 @@ export type Database = {
           overview: string
           population: string | null
           region: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           slug: string
           sort_order: number | null
           status: string | null
@@ -1901,6 +1951,11 @@ export type Database = {
           overview: string
           population?: string | null
           region?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug: string
           sort_order?: number | null
           status?: string | null
@@ -1924,6 +1979,11 @@ export type Database = {
           overview?: string
           population?: string | null
           region?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug?: string
           sort_order?: number | null
           status?: string | null
@@ -2798,6 +2858,11 @@ export type Database = {
           name: string
           price: number
           price_currency: string
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           short_description: string | null
           slug: string
           stock_status: string
@@ -2821,6 +2886,11 @@ export type Database = {
           name: string
           price?: number
           price_currency?: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           short_description?: string | null
           slug: string
           stock_status?: string
@@ -2844,6 +2914,11 @@ export type Database = {
           name?: string
           price?: number
           price_currency?: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           short_description?: string | null
           slug?: string
           stock_status?: string
@@ -4026,6 +4101,42 @@ export type Database = {
           },
         ]
       }
+      share_events: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_hash: string | null
+          platform: string
+          referrer: string | null
+          url: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_hash?: string | null
+          platform: string
+          referrer?: string | null
+          url: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_hash?: string | null
+          platform?: string
+          referrer?: string | null
+          url?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       share_preview_audit: {
         Row: {
           action: string
@@ -4092,6 +4203,39 @@ export type Database = {
           ref_source?: string
           user_agent?: string | null
           visited_at?: string | null
+        }
+        Relationships: []
+      }
+      share_template_audit: {
+        Row: {
+          after_value: Json | null
+          before_value: Json | null
+          change_type: string
+          changed_by: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          after_value?: Json | null
+          before_value?: Json | null
+          change_type: string
+          changed_by?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          after_value?: Json | null
+          before_value?: Json | null
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
         }
         Relationships: []
       }
@@ -4227,6 +4371,30 @@ export type Database = {
           twitter_site?: string | null
           updated_at?: string | null
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      site_share_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
@@ -4402,6 +4570,11 @@ export type Database = {
           name: string
           photo_url: string | null
           sentiment: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           status: string
           thought: string
           updated_at: string
@@ -4417,6 +4590,11 @@ export type Database = {
           name: string
           photo_url?: string | null
           sentiment?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           status?: string
           thought: string
           updated_at?: string
@@ -4432,6 +4610,11 @@ export type Database = {
           name?: string
           photo_url?: string | null
           sentiment?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           status?: string
           thought?: string
           updated_at?: string
@@ -4520,6 +4703,11 @@ export type Database = {
           map_visible: boolean | null
           price_unit: string | null
           provider_id: string
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           short_description: string | null
           sort_order: number
           title: string
@@ -4543,6 +4731,11 @@ export type Database = {
           map_visible?: boolean | null
           price_unit?: string | null
           provider_id: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           short_description?: string | null
           sort_order?: number
           title: string
@@ -4566,6 +4759,11 @@ export type Database = {
           map_visible?: boolean | null
           price_unit?: string | null
           provider_id?: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           short_description?: string | null
           sort_order?: number
           title?: string
@@ -4616,6 +4814,11 @@ export type Database = {
           name: string
           phone: string | null
           rating: number | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           source: string
           type: string
           updated_at: string
@@ -4642,6 +4845,11 @@ export type Database = {
           name: string
           phone?: string | null
           rating?: number | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           source?: string
           type?: string
           updated_at?: string
@@ -4668,6 +4876,11 @@ export type Database = {
           name?: string
           phone?: string | null
           rating?: number | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           source?: string
           type?: string
           updated_at?: string
@@ -4772,6 +4985,11 @@ export type Database = {
           price_currency: string
           price_per_person: number
           region: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           short_description: string | null
           slug: string
           start_lat: number | null
@@ -4803,6 +5021,11 @@ export type Database = {
           price_currency?: string
           price_per_person?: number
           region?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           short_description?: string | null
           slug: string
           start_lat?: number | null
@@ -4834,6 +5057,11 @@ export type Database = {
           price_currency?: string
           price_per_person?: number
           region?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           short_description?: string | null
           slug?: string
           start_lat?: number | null
@@ -5120,6 +5348,11 @@ export type Database = {
           name: string
           population: number | null
           recipes: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
           slug: string
           status: string | null
           stories: string | null
@@ -5150,6 +5383,11 @@ export type Database = {
           name: string
           population?: number | null
           recipes?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug: string
           status?: string | null
           stories?: string | null
@@ -5180,6 +5418,11 @@ export type Database = {
           name?: string
           population?: number | null
           recipes?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
           slug?: string
           status?: string | null
           stories?: string | null
