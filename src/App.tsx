@@ -70,6 +70,7 @@ import ListYourBusinessPage from "./pages/ListYourBusinessPage";
 import MapPage from "./pages/MapPage";
 import EventsPage from "./pages/EventsPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import SearchPage from "./pages/SearchPage";
 // Admin Monetization Pages
 import AdminPromotionPackagesPage from "./pages/admin/AdminPromotionPackagesPage";
 import AdminPromotionRequestsPage from "./pages/admin/AdminPromotionRequestsPage";
@@ -143,6 +144,7 @@ const AppContent = () => {
             <Route path="/map" element={<MapPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
+            <Route path="/search" element={<SearchPage />} />
             {/* Auth */}
             <Route path="/login" element={<AuthPage />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
