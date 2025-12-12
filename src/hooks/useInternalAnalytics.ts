@@ -110,8 +110,11 @@ export function useInternalAnalytics(dateRange: DateRange) {
         created_at: v.created_at
       })));
 
-      // Calculate traffic overview
-      const uniqueIPs = new Set(visits?.map(v => v.ip_hash) || []);
+      // Calculate traffic overview - filter out null/empty ip_hash values
+      const validIPs = (visits || [])
+        .map(v => v.ip_hash)
+        .filter((hash): hash is string => !!hash && hash.trim() !== '');
+      const uniqueIPs = new Set(validIPs);
       setTrafficOverview({
         totalVisits: visits?.length || 0,
         uniqueVisitors: uniqueIPs.size,
