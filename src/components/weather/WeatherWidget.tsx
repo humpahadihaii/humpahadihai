@@ -20,8 +20,8 @@ export default function WeatherWidget({
 }: WeatherWidgetProps) {
   const { data: weather, isLoading, error } = useWeather(lat, lng);
 
-  // Don't render if no coordinates or API key
-  if (!lat || !lng || !import.meta.env.VITE_OPENWEATHER_API_KEY) {
+  // Don't render if no coordinates
+  if (!lat || !lng) {
     return null;
   }
 
