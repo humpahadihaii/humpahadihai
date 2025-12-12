@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Slider } from "@/components/ui/slider";
 import { MapPin, Star, Check, Search, ArrowRight, List, Map as MapIcon, Filter, SlidersHorizontal } from "lucide-react";
+import LeafletMap, { MapMarker } from "@/components/maps/LeafletMap";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingModal } from "@/components/BookingModal";
@@ -29,6 +30,8 @@ interface TourismListing {
   price_unit: string | null;
   image_url: string | null;
   is_featured: boolean;
+  lat: number | null;
+  lng: number | null;
   provider: {
     id: string;
     name: string;
@@ -441,20 +444,42 @@ export default function MarketplacePage() {
             </div>
 
             {viewMode === "map" ? (
-              /* Map View Placeholder - Would integrate with Leaflet/Mapbox */
-              <div className="relative rounded-lg overflow-hidden border bg-muted/20" style={{ height: "500px" }}>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                  <MapIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Map View Coming Soon</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    Interactive map showing all listings with pins. Click on a pin to view details.
-                  </p>
-                  <Button variant="outline" className="mt-4" onClick={() => setViewMode("list")}>
-                    <List className="h-4 w-4 mr-2" />
-                    Switch to List View
-                  </Button>
-                </div>
-              </div>
+              (() => {
+                const mapMarkers: MapMarker[] = (filteredListings || [])
+                  .filter(listing => listing.lat && listing.lng)
+                  .map(listing => ({
+                    id: listing.id,
+                    lat: listing.lat!,
+                    lng: listing.lng!,
+                    title: listing.title,
+                    description: listing.provider?.name || listing.category,
+                    type: "listing" as const,
+                    link: `/listings/${listing.id}`,
+                  }));
+
+                return mapMarkers.length > 0 ? (
+                  <LeafletMap
+                    markers={mapMarkers}
+                    height="500px"
+                    title={`${mapMarkers.length} Listings on Map`}
+                    className="rounded-lg"
+                  />
+                ) : (
+                  <div className="relative rounded-lg overflow-hidden border bg-muted/20" style={{ height: "500px" }}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                      <MapIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Listings with Location Data</h3>
+                      <p className="text-muted-foreground max-w-md">
+                        Listings in this view don't have location coordinates yet.
+                      </p>
+                      <Button variant="outline" className="mt-4" onClick={() => setViewMode("list")}>
+                        <List className="h-4 w-4 mr-2" />
+                        Switch to List View
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()
             ) : isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
