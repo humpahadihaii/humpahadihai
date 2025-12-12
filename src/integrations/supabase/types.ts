@@ -3381,6 +3381,276 @@ export type Database = {
           },
         ]
       }
+      search_documents: {
+        Row: {
+          body_text: string | null
+          category: string | null
+          clicks_count: number | null
+          content_type: string
+          conversions_count: number | null
+          created_at: string | null
+          district_id: string | null
+          district_name: string | null
+          embedding: string | null
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          is_promoted: boolean | null
+          is_published: boolean | null
+          lat: number | null
+          lng: number | null
+          price_max: number | null
+          price_min: number | null
+          rating: number | null
+          search_vector: unknown
+          source_created_at: string | null
+          source_id: string
+          source_updated_at: string | null
+          subtitle: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          url_slug: string | null
+          views_count: number | null
+          village_id: string | null
+          village_name: string | null
+        }
+        Insert: {
+          body_text?: string | null
+          category?: string | null
+          clicks_count?: number | null
+          content_type: string
+          conversions_count?: number | null
+          created_at?: string | null
+          district_id?: string | null
+          district_name?: string | null
+          embedding?: string | null
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_promoted?: boolean | null
+          is_published?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          price_max?: number | null
+          price_min?: number | null
+          rating?: number | null
+          search_vector?: unknown
+          source_created_at?: string | null
+          source_id: string
+          source_updated_at?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          url_slug?: string | null
+          views_count?: number | null
+          village_id?: string | null
+          village_name?: string | null
+        }
+        Update: {
+          body_text?: string | null
+          category?: string | null
+          clicks_count?: number | null
+          content_type?: string
+          conversions_count?: number | null
+          created_at?: string | null
+          district_id?: string | null
+          district_name?: string | null
+          embedding?: string | null
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_promoted?: boolean | null
+          is_published?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          price_max?: number | null
+          price_min?: number | null
+          rating?: number | null
+          search_vector?: unknown
+          source_created_at?: string | null
+          source_id?: string
+          source_updated_at?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          url_slug?: string | null
+          views_count?: number | null
+          village_id?: string | null
+          village_name?: string | null
+        }
+        Relationships: []
+      }
+      search_feedback: {
+        Row: {
+          created_at: string | null
+          document_id: string | null
+          feedback_type: string
+          id: string
+          query_log_id: string | null
+          result_position: number | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id?: string | null
+          feedback_type: string
+          id?: string
+          query_log_id?: string | null
+          result_position?: number | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string | null
+          feedback_type?: string
+          id?: string
+          query_log_id?: string | null
+          result_position?: number | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_feedback_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "search_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_feedback_query_log_id_fkey"
+            columns: ["query_log_id"]
+            isOneToOne: false
+            referencedRelation: "search_query_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_query_logs: {
+        Row: {
+          created_at: string | null
+          filters: Json | null
+          id: string
+          lexical_ms: number | null
+          query_normalized: string | null
+          query_text: string
+          result_ids: string[] | null
+          results_count: number | null
+          session_id: string | null
+          total_ms: number | null
+          user_id: string | null
+          user_location: Json | null
+          vector_ms: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          filters?: Json | null
+          id?: string
+          lexical_ms?: number | null
+          query_normalized?: string | null
+          query_text: string
+          result_ids?: string[] | null
+          results_count?: number | null
+          session_id?: string | null
+          total_ms?: number | null
+          user_id?: string | null
+          user_location?: Json | null
+          vector_ms?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          filters?: Json | null
+          id?: string
+          lexical_ms?: number | null
+          query_normalized?: string | null
+          query_text?: string
+          result_ids?: string[] | null
+          results_count?: number | null
+          session_id?: string | null
+          total_ms?: number | null
+          user_id?: string | null
+          user_location?: Json | null
+          vector_ms?: number | null
+        }
+        Relationships: []
+      }
+      search_suggestions: {
+        Row: {
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          search_count: number | null
+          suggestion_text: string
+          suggestion_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          search_count?: number | null
+          suggestion_text: string
+          suggestion_type: string
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          search_count?: number | null
+          suggestion_text?: string
+          suggestion_type?: string
+        }
+        Relationships: []
+      }
+      search_synonyms: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          language: string | null
+          scope: string | null
+          synonyms: string[]
+          term: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string | null
+          scope?: string | null
+          synonyms: string[]
+          term: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string | null
+          scope?: string | null
+          synonyms?: string[]
+          term?: string
+        }
+        Relationships: []
+      }
       site_images: {
         Row: {
           category: string
@@ -4391,7 +4661,45 @@ export type Database = {
         }
         Returns: boolean
       }
+      hybrid_search: {
+        Args: {
+          content_types?: string[]
+          district_filter?: string
+          lexical_weight?: number
+          match_count?: number
+          max_price?: number
+          min_price?: number
+          promoted_only?: boolean
+          query_embedding?: string
+          query_text: string
+          semantic_weight?: number
+        }
+        Returns: {
+          category: string
+          content_type: string
+          district_name: string
+          excerpt: string
+          final_score: number
+          id: string
+          image_url: string
+          is_featured: boolean
+          is_promoted: boolean
+          lat: number
+          lexical_score: number
+          lng: number
+          price_min: number
+          rating: number
+          semantic_score: number
+          source_id: string
+          subtitle: string
+          title: string
+          url_slug: string
+          village_name: string
+        }[]
+      }
       refresh_map_poi_cache: { Args: never; Returns: undefined }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       user_has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
