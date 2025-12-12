@@ -26,7 +26,7 @@ export function useAnalyticsSummary(startDate: string, endDate: string, pageSlug
   return useQuery({
     queryKey: ['analytics-summary', startDate, endDate, pageSlug],
     queryFn: () => getAnalyticsSummary(startDate, endDate, pageSlug),
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 60 * 1000,
   });
 }
 
@@ -35,7 +35,7 @@ export function useHeatmapData(pageSlug: string, date: string) {
     queryKey: ['analytics-heatmap', pageSlug, date],
     queryFn: () => getHeatmapData(pageSlug, date),
     enabled: !!pageSlug && !!date,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -43,19 +43,26 @@ export function useDailyMetrics(startDate: string, endDate: string) {
   return useQuery({
     queryKey: ['analytics-daily', startDate, endDate],
     queryFn: async (): Promise<DailyMetric[]> => {
-      // Get unique visits per day - use any type assertion for new tables
-      const { data: uniqueData } = await (supabase
-        .from('page_unique_visits' as any)
-        .select('visit_date')
-        .gte('visit_date', startDate)
-        .lte('visit_date', endDate)) as { data: any[] | null };
-
-      // Get events per day
-      const { data: eventsData } = await (supabase
-        .from('analytics_events' as any)
-        .select('event_type, created_at')
+      // Get visits from site_visits table
+      const { data: visitsData } = await supabase
+        .from('site_visits')
+        .select('created_at, ip_hash')
         .gte('created_at', `${startDate}T00:00:00`)
-        .lte('created_at', `${endDate}T23:59:59`)) as { data: any[] | null };
+        .lte('created_at', `${endDate}T23:59:59`);
+
+      // Get page views from page_views table
+      const { data: pageViewsData } = await supabase
+        .from('page_views')
+        .select('page, count, updated_at')
+        .gte('updated_at', `${startDate}T00:00:00`)
+        .lte('updated_at', `${endDate}T23:59:59`);
+
+      // Get bookings for conversions
+      const { data: bookingsData } = await supabase
+        .from('bookings')
+        .select('created_at')
+        .gte('created_at', `${startDate}T00:00:00`)
+        .lte('created_at', `${endDate}T23:59:59`);
 
       // Aggregate by date
       const metrics: Record<string, DailyMetric> = {};
@@ -74,23 +81,40 @@ export function useDailyMetrics(startDate: string, endDate: string) {
         };
       }
 
-      // Count unique visitors
-      (uniqueData || []).forEach(row => {
-        const dateStr = row.visit_date;
+      // Count unique visitors and sessions from site_visits
+      const uniqueByDate: Record<string, Set<string>> = {};
+      (visitsData || []).forEach(row => {
+        const dateStr = row.created_at.split('T')[0];
         if (metrics[dateStr]) {
-          metrics[dateStr].unique_visitors++;
+          metrics[dateStr].sessions++;
+          if (!uniqueByDate[dateStr]) {
+            uniqueByDate[dateStr] = new Set();
+          }
+          uniqueByDate[dateStr].add(row.ip_hash);
         }
       });
 
-      // Count events
-      (eventsData || []).forEach(row => {
+      // Set unique visitors count
+      Object.entries(uniqueByDate).forEach(([date, ips]) => {
+        if (metrics[date]) {
+          metrics[date].unique_visitors = ips.size;
+        }
+      });
+
+      // Aggregate page views (sum of counts)
+      const totalPageViews = (pageViewsData || []).reduce((acc, row) => acc + (row.count || 0), 0);
+      // Distribute proportionally if we have visits
+      const totalVisits = visitsData?.length || 1;
+      Object.keys(metrics).forEach(date => {
+        const dayVisits = metrics[date].sessions;
+        metrics[date].page_views = Math.round((dayVisits / totalVisits) * totalPageViews);
+      });
+
+      // Count conversions
+      (bookingsData || []).forEach(row => {
         const dateStr = row.created_at.split('T')[0];
         if (metrics[dateStr]) {
-          if (row.event_type === 'page_view') {
-            metrics[dateStr].page_views++;
-          } else if (['booking', 'inquiry', 'purchase'].includes(row.event_type)) {
-            metrics[dateStr].conversions++;
-          }
+          metrics[dateStr].conversions++;
         }
       });
 
@@ -104,21 +128,16 @@ export function useTopPages(startDate: string, endDate: string, limit = 10) {
   return useQuery({
     queryKey: ['analytics-top-pages', startDate, endDate, limit],
     queryFn: async () => {
-      const { data } = await (supabase
-        .from('page_unique_visits' as any)
-        .select('page_slug')
-        .gte('visit_date', startDate)
-        .lte('visit_date', endDate)) as { data: any[] | null };
+      const { data } = await supabase
+        .from('page_views')
+        .select('page, count')
+        .order('count', { ascending: false })
+        .limit(limit);
 
-      const counts: Record<string, number> = {};
-      (data || []).forEach(row => {
-        counts[row.page_slug] = (counts[row.page_slug] || 0) + 1;
-      });
-
-      return Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, limit)
-        .map(([page, count]) => ({ page, unique_visitors: count }));
+      return (data || []).map(row => ({
+        page: row.page,
+        unique_visitors: row.count || 0,
+      }));
     },
     staleTime: 60 * 1000,
   });
@@ -128,11 +147,11 @@ export function useDeviceBreakdown(startDate: string, endDate: string) {
   return useQuery({
     queryKey: ['analytics-devices', startDate, endDate],
     queryFn: async () => {
-      const { data } = await (supabase
-        .from('page_unique_visits' as any)
+      const { data } = await supabase
+        .from('site_visits')
         .select('device')
-        .gte('visit_date', startDate)
-        .lte('visit_date', endDate)) as { data: any[] | null };
+        .gte('created_at', `${startDate}T00:00:00`)
+        .lte('created_at', `${endDate}T23:59:59`);
 
       const counts: Record<string, number> = {};
       (data || []).forEach(row => {
@@ -150,11 +169,11 @@ export function useBrowserBreakdown(startDate: string, endDate: string) {
   return useQuery({
     queryKey: ['analytics-browsers', startDate, endDate],
     queryFn: async () => {
-      const { data } = await (supabase
-        .from('page_unique_visits' as any)
+      const { data } = await supabase
+        .from('site_visits')
         .select('browser')
-        .gte('visit_date', startDate)
-        .lte('visit_date', endDate)) as { data: any[] | null };
+        .gte('created_at', `${startDate}T00:00:00`)
+        .lte('created_at', `${endDate}T23:59:59`);
 
       const counts: Record<string, number> = {};
       (data || []).forEach(row => {
@@ -172,11 +191,11 @@ export function useReferrerBreakdown(startDate: string, endDate: string) {
   return useQuery({
     queryKey: ['analytics-referrers', startDate, endDate],
     queryFn: async () => {
-      const { data } = await (supabase
-        .from('page_unique_visits' as any)
+      const { data } = await supabase
+        .from('site_visits')
         .select('referrer')
-        .gte('visit_date', startDate)
-        .lte('visit_date', endDate)) as { data: any[] | null };
+        .gte('created_at', `${startDate}T00:00:00`)
+        .lte('created_at', `${endDate}T23:59:59`);
 
       const counts: Record<string, number> = {};
       (data || []).forEach(row => {
