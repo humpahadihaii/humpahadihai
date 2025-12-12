@@ -162,11 +162,28 @@ All colors MUST be HSL.
 }
 
 @layer base {
+  :root {
+    --header-height: 5rem;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Body scroll lock for modals */
+  body.body-scroll-locked {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Prevent duplicate headers inside search modal portal */
+  .search-modal-portal .site-header {
+    display: none !important;
   }
 }

@@ -10,6 +10,7 @@ import heroImageFallback from "@/assets/hero-mountains.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HomepageVisits } from "@/components/HomepageVisits";
 import { FeaturedCardSection } from "@/components/FeaturedCardSection";
+import { SearchTrigger } from "@/components/search";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -89,7 +90,7 @@ const HomePage = () => {
           <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto drop-shadow">
             {tagline}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" asChild className="bg-secondary hover:bg-secondary/90 text-white shadow-lg">
               <Link to={primaryCtaUrl}>{primaryCtaText}</Link>
             </Button>
@@ -97,7 +98,11 @@ const HomePage = () => {
               <Link to={secondaryCtaUrl}>{secondaryCtaText}</Link>
             </Button>
           </div>
-          <div className="mt-8">
+          {/* Hero Search CTA */}
+          <div className="mt-6">
+            <SearchTrigger variant="hero" />
+          </div>
+          <div className="mt-6">
             <HomepageVisits />
           </div>
         </div>
