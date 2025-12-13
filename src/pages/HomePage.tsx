@@ -155,32 +155,34 @@ const HomePage = () => {
         <meta name="twitter:description" content={ogDescription} />
         <meta name="twitter:image" content={ogImage} />
       </Helmet>
-      {/* Hero Section */}
-      <section className="relative h-[70vh] md:h-[85vh] flex items-center justify-center overflow-hidden">
+
+      {/* Hero Section - Single strong image with dark overlay */}
+      <section className="relative min-h-[75vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${heroImage})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/50 to-background/95"></div>
+          <div className="absolute inset-0 hero-overlay"></div>
         </div>
         
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+        <div className="relative z-10 text-center px-4 sm:px-6 max-w-3xl mx-auto">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-lg leading-tight">
             {siteName}
           </h1>
-          <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto drop-shadow">
+          <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed">
             {tagline}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" asChild className="bg-secondary hover:bg-secondary/90 text-white shadow-lg">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <Button 
+              size="lg" 
+              asChild 
+              className="bg-secondary hover:bg-secondary/90 text-white shadow-lg press-effect min-h-[48px] px-8 text-base font-medium"
+            >
               <Link to={primaryCtaUrl}>{primaryCtaText}</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="bg-white/90 hover:bg-white border-white text-primary shadow-lg">
-              <Link to={secondaryCtaUrl}>{secondaryCtaText}</Link>
             </Button>
           </div>
           {/* Hero Search CTA */}
-          <div className="mt-6">
+          <div className="mt-8">
             <SearchTrigger variant="hero" />
           </div>
           <div className="mt-6">
@@ -190,29 +192,39 @@ const HomePage = () => {
       </section>
 
       {/* Introduction - CMS Driven */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+      <section className="section-padding bg-muted/40">
+        <div className="container-narrow text-center">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-6">
             {welcomeSection?.title || "Welcome to Our Pahadi World"}
           </h2>
-          <p className="text-lg text-foreground/80 leading-relaxed">
-            {welcomeSection?.body || "Hum Pahadi Haii is your digital gateway to the heart of Uttarakhand. We preserve and share the timeless traditions, rich culture, authentic cuisine, and stunning natural beauty of the Garhwal and Kumaon regions. Join us in celebrating the warmth and heritage of the Himalayas."}
+          <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            {welcomeSection?.body || "Hum Pahadi Haii is your digital gateway to the heart of Uttarakhand. We preserve and share the timeless traditions, rich culture, authentic cuisine, and stunning natural beauty of the Garhwal and Kumaon regions."}
           </p>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section className="section-padding">
+        <div className="container-wide">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
-                <CardContent className="p-8">
-                  <feature.icon className={`h-12 w-12 ${feature.color} mb-4`} />
-                  <h3 className="text-2xl font-bold text-primary mb-3">{feature.title}</h3>
-                  <p className="text-foreground/70 mb-6 leading-relaxed">{feature.description}</p>
-                  <Button asChild variant="outline" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <Link to={feature.link}>Learn More</Link>
+              <Card 
+                key={index} 
+                className="group card-interactive bg-card border-border/60 hover:border-primary/20"
+              >
+                <CardContent className="p-6">
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${feature.color} bg-current/10 mb-4`}>
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{feature.description}</p>
+                  <Button 
+                    asChild 
+                    variant="ghost" 
+                    size="sm"
+                    className="p-0 h-auto text-primary hover:text-primary/80 hover:bg-transparent font-medium"
+                  >
+                    <Link to={feature.link}>Learn More →</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -223,15 +235,19 @@ const HomePage = () => {
 
       {/* Featured Content */}
       {highlights.length > 0 && (
-        <section className="py-16 px-4 bg-muted/30">
-          <div className="container mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12">
+        <section className="section-padding bg-muted/40">
+          <div className="container-wide">
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-center text-primary mb-10">
               Featured Highlights
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
               {highlights.map((highlight) => (
-                <div key={highlight.id} className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer">
+                <Link 
+                  key={highlight.id} 
+                  to={highlight.button_link}
+                  className="relative rounded-2xl overflow-hidden group block"
+                >
                   {highlight.image_url && (
                     <img 
                       src={highlight.image_url} 
@@ -239,35 +255,35 @@ const HomePage = () => {
                       loading="lazy" 
                       width="496" 
                       height="320" 
-                      className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500" 
+                      className="w-full h-72 md:h-80 object-cover transition-transform duration-500 group-hover:scale-103" 
                     />
                   )}
-                  <div className={`absolute inset-0 bg-gradient-to-t ${highlight.gradient_color} to-transparent`}>
+                  <div className="absolute inset-0 hero-overlay">
                     <div className="absolute bottom-0 p-6 text-white">
-                      <h3 className="text-2xl font-bold mb-2">{highlight.title}</h3>
-                      <p className="mb-4 opacity-90">{highlight.description}</p>
-                      <Button asChild variant="outline" className="bg-white/90 text-primary hover:bg-white">
-                        <Link to={highlight.button_link}>{highlight.button_text}</Link>
-                      </Button>
+                      <h3 className="font-display text-xl md:text-2xl font-semibold mb-2">{highlight.title}</h3>
+                      <p className="text-sm md:text-base text-white/85 line-clamp-2 mb-3">{highlight.description}</p>
+                      <span className="inline-flex items-center text-sm font-medium text-white/90 group-hover:text-white transition-colors">
+                        {highlight.button_text} →
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
-      </section>
+        </section>
       )}
 
       {/* All Districts Weather */}
-      <section className="py-8 px-4 bg-muted/30">
-        <div className="container mx-auto">
+      <section className="section-padding-sm bg-muted/40">
+        <div className="container-wide">
           <AllDistrictsWeather />
         </div>
       </section>
 
       {/* Festival Spotlight & Events Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
+      <section className="section-padding">
+        <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Festival Spotlight - Takes 2 columns */}
             <div className="lg:col-span-2">
