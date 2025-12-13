@@ -340,10 +340,10 @@ export default function DestinationPlaceDetailPage() {
                       )}
                     </div>
                     <div className="h-[300px] rounded-lg overflow-hidden">
-                      <LeafletMap
-                        center={[place.latitude, place.longitude]}
+                    <LeafletMap
+                        center={{ lat: place.latitude, lng: place.longitude }}
                         zoom={15}
-                        markers={[{ lat: place.latitude, lng: place.longitude, title: place.name }]}
+                        markers={[{ id: place.id, lat: place.latitude, lng: place.longitude, title: place.name }]}
                       />
                     </div>
                   </CardContent>
