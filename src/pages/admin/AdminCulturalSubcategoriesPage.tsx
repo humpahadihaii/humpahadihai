@@ -315,24 +315,14 @@ export default function AdminCulturalSubcategoriesPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Hero Image</Label>
-                <ImageUpload
-                  onUpload={(url) => {
-                    const input = document.querySelector(
-                      'input[name="hero_image"]'
-                    ) as HTMLInputElement;
-                    if (input) input.value = url;
-                  }}
-                  currentImage={editingSubcategory?.hero_image || undefined}
-                />
-                <input
-                  type="hidden"
-                  name="hero_image"
-                  defaultValue={editingSubcategory?.hero_image || ''}
-                />
-              </div>
-
+              <ImageUpload
+                label="Hero Image"
+                id="hero_image"
+                value={editingSubcategory?.hero_image || ""}
+                onChange={(url) => {
+                  setEditingSubcategory(prev => prev ? { ...prev, hero_image: url } : null);
+                }}
+              />
               <div className="space-y-2">
                 <Label htmlFor="sort_order">Sort Order</Label>
                 <Input
