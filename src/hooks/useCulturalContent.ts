@@ -210,6 +210,13 @@ export function useContentSubcategory(
   });
 }
 
+// Extended type for content with relations
+export interface CulturalContentWithRelations extends CulturalContent {
+  category?: ContentCategory;
+  subcategory?: ContentSubcategory | null;
+  district?: { id: string; name: string; slug: string };
+}
+
 // Cultural Content Hooks
 export function useCulturalContents(options?: {
   districtId?: string;
