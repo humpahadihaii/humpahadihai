@@ -7,16 +7,29 @@ const corsHeaders = {
 };
 
 interface AIRequest {
-  type: "story" | "travel" | "product" | "promotion" | "seo" | "translate" | "villages" | "village";
+  type: "story" | "travel" | "product" | "promotion" | "seo" | "translate" | "villages" | "village" | "cultural" | "bulk";
   action: string;
   inputs: Record<string, string>;
-  input?: Record<string, string>; // Alternative input format
+  input?: Record<string, string>;
 }
+
+// Gemini API pricing (as of 2024) - per 1M tokens
+const GEMINI_PRICING = {
+  "gemini-2.5-flash": { input: 0.075, output: 0.30 },
+  "gemini-2.0-pro": { input: 1.25, output: 5.00 },
+  "gemini-1.5-pro": { input: 1.25, output: 5.00 },
+};
+
+const estimateCost = (model: string, inputTokens: number, outputTokens: number): number => {
+  const pricing = GEMINI_PRICING[model as keyof typeof GEMINI_PRICING] || GEMINI_PRICING["gemini-2.5-flash"];
+  return (inputTokens * pricing.input + outputTokens * pricing.output) / 1000000;
+};
 
 const getSystemPrompt = (type: string) => {
   const basePrompt = `You are a content writer for "Hum Pahadi Haii", a platform celebrating Uttarakhand's culture, traditions, food, travel, and heritage. 
 Write in an engaging, warm, and informative tone. Focus on authenticity and cultural richness.
-Always respond with well-structured content that is ready to use. Do not include explanations or meta-commentary.`;
+Always respond with well-structured content that is ready to use. Do not include explanations or meta-commentary.
+Do not use emojis. Do not use markdown unless explicitly requested. Do not fabricate sources or citations.`;
 
   const prompts: Record<string, string> = {
     story: `${basePrompt}
@@ -47,6 +60,9 @@ Focus on authentic Pahadi names and locations.`,
 You specialize in writing detailed, authentic content about villages in Uttarakhand.
 Include cultural details, local traditions, food specialties, handicrafts, and historical significance.
 Write in an engaging narrative style that brings the village to life for readers.`,
+    cultural: `${basePrompt}
+You specialize in writing detailed cultural content about Uttarakhand's traditions, food, festivals, temples, and heritage.
+Provide accurate historical and cultural context. Include local names and terminology.`,
   };
 
   return prompts[type] || basePrompt;
@@ -54,7 +70,6 @@ Write in an engaging narrative style that brings the village to life for readers
 
 const buildPrompt = (request: AIRequest): string => {
   const { type, action, inputs: rawInputs, input } = request;
-  // Support both 'inputs' and 'input' field names
   const inputs = rawInputs || input || {};
 
   switch (type) {
@@ -92,7 +107,6 @@ Provide the expanded version directly.`;
 "${inputs.content}"`;
 
         case "raw":
-          // Direct prompt passthrough for advanced use cases like AI seeding
           return inputs.prompt || "";
 
         default:
@@ -260,6 +274,66 @@ TRAVEL_TIPS:
           return inputs.prompt || "";
       }
 
+    case "cultural":
+      switch (action) {
+        case "generate_overview":
+          return `Write a comprehensive overview for "${inputs.title}" in ${inputs.districtName} district, Uttarakhand.
+Category: ${inputs.category}
+Subcategory: ${inputs.subcategory || "General"}
+
+Provide a 2-3 paragraph introduction covering what it is, its significance, and why it matters to Pahadi culture.`;
+
+        case "generate_history":
+          return `Write the historical background for "${inputs.title}" in Uttarakhand.
+Include origin stories, historical significance, and evolution over time.
+2-3 paragraphs.`;
+
+        case "generate_cultural_significance":
+          return `Explain the cultural significance of "${inputs.title}" in Uttarakhand's Pahadi culture.
+Include its role in local traditions, community life, and identity.
+2-3 paragraphs.`;
+
+        case "generate_faqs":
+          return `Generate 5 frequently asked questions and answers about "${inputs.title}" in Uttarakhand.
+Format as JSON array:
+[
+  {"question": "...", "answer": "..."},
+  ...
+]`;
+
+        case "generate_all":
+          return `Write comprehensive content for "${inputs.title}" - a ${inputs.category} from ${inputs.districtName} district, Uttarakhand.
+
+Provide content for each section:
+
+SHORT_INTRO: (2-3 sentences)
+
+CULTURAL_SIGNIFICANCE: (2 paragraphs)
+
+ORIGIN_HISTORY: (2 paragraphs)
+
+${inputs.category === "Food" ? `
+INGREDIENTS: (list of main ingredients)
+PREPARATION_METHOD: (how it's made)
+TASTE_DESCRIPTION: (what it tastes like)
+CONSUMPTION_OCCASIONS: (when it's typically eaten)
+` : ""}
+
+${inputs.category === "Temple" || inputs.category === "Spiritual" ? `
+SPIRITUAL_SIGNIFICANCE: (religious importance)
+TIMINGS: (visiting hours)
+ENTRY_FEE: (if any)
+DOS_AND_DONTS: (visitor guidelines)
+` : ""}
+
+FUN_FACTS: (3-5 interesting facts)
+
+FAQS: (5 Q&A pairs as JSON array)`;
+
+        default:
+          return inputs.prompt || "";
+      }
+
     default:
       return inputs.prompt || "";
   }
@@ -271,7 +345,7 @@ serve(async (req) => {
   }
 
   try {
-    // SECURITY: Verify authentication before processing
+    // Verify authentication
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       console.error("No authorization header provided");
@@ -281,8 +355,8 @@ serve(async (req) => {
       );
     }
 
-    // Verify the user with Supabase
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     
     if (!supabaseUrl || !supabaseAnonKey) {
@@ -293,9 +367,12 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Use service role for logging, anon key for auth verification
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseService = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
 
     if (authError || !user) {
       console.error("Auth error:", authError?.message || "No user found");
@@ -309,52 +386,101 @@ serve(async (req) => {
 
     const request: AIRequest = await req.json();
     
-    // Use Lovable AI Gateway - no API key setup required
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // Get Gemini API key from Supabase secrets (NOT from database)
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured in secrets");
       return new Response(
-        JSON.stringify({ error: "AI service not configured. LOVABLE_API_KEY is missing." }),
+        JSON.stringify({ error: "Gemini API key not configured. Please add GEMINI_API_KEY in Admin Settings." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Get active model from config
+    let activeModel = "gemini-2.5-flash";
+    try {
+      const { data: configData } = await supabaseService
+        .from("ai_config")
+        .select("setting_value")
+        .eq("setting_key", "active_model")
+        .single();
+      
+      if (configData?.setting_value) {
+        activeModel = JSON.parse(JSON.stringify(configData.setting_value)).replace(/"/g, '');
+      }
+    } catch (configError) {
+      console.log("Using default model:", activeModel);
+    }
+
+    // Check if API is enabled
+    try {
+      const { data: enabledConfig } = await supabaseService
+        .from("ai_config")
+        .select("setting_value")
+        .eq("setting_key", "api_enabled")
+        .single();
+      
+      if (enabledConfig?.setting_value === false || enabledConfig?.setting_value === "false") {
+        return new Response(
+          JSON.stringify({ error: "AI generation is currently disabled by administrator." }),
+          { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } catch (e) {
+      // Continue if config check fails
     }
 
     const systemPrompt = getSystemPrompt(request.type);
     const userPrompt = buildPrompt(request);
 
-    console.log("AI Request:", { type: request.type, action: request.action });
+    console.log("AI Request:", { type: request.type, action: request.action, model: activeModel });
 
-    // Call Lovable AI Gateway
-    const lovableAIUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    // Call Google Gemini API directly
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent`;
 
-    console.log("Calling Lovable AI Gateway...");
+    console.log("Calling Gemini API...");
 
-    // Add timeout using AbortController
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     let response;
+    const startTime = Date.now();
+    
     try {
-      response = await fetch(lovableAIUrl, {
+      response = await fetch(geminiUrl, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
           "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY,
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192,
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
           ],
         }),
       });
     } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        console.error("AI request timed out");
+        // Log failed request
+        await logUsage(supabaseService, user, request, activeModel, 0, 0, "failed", "Request timed out");
         return new Response(
           JSON.stringify({ error: "Request timed out. Please try again." }),
           { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -364,48 +490,68 @@ serve(async (req) => {
     }
     clearTimeout(timeoutId);
 
-    console.log("Lovable AI response status:", response.status);
+    const responseTime = Date.now() - startTime;
+    console.log("Gemini API response status:", response.status, "Time:", responseTime, "ms");
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Lovable AI error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
+
+      let errorMessage = "AI service temporarily unavailable. Please try again.";
+      let logStatus = "failed";
 
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        errorMessage = "Rate limit exceeded. Please wait a moment and try again.";
+        logStatus = "rate_limited";
+      } else if (response.status === 400) {
+        errorMessage = "Invalid request. Please check your input and try again.";
+      } else if (response.status === 403) {
+        errorMessage = "API key invalid or expired. Please check your Gemini API key.";
       }
 
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI usage credits exceeded. Please add credits to your workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      await logUsage(supabaseService, user, request, activeModel, 0, 0, logStatus, errorMessage);
 
       return new Response(
-        JSON.stringify({ error: "AI service temporarily unavailable. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: errorMessage }),
+        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const data = await response.json();
-    console.log("Lovable AI response received");
+    console.log("Gemini API response received");
     
-    // Extract content from OpenAI-compatible response format
-    const content = data.choices?.[0]?.message?.content || "";
+    // Extract content from Gemini response
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    
+    // Extract token usage from response
+    const usageMetadata = data.usageMetadata || {};
+    const inputTokens = usageMetadata.promptTokenCount || 0;
+    const outputTokens = usageMetadata.candidatesTokenCount || 0;
+    const totalTokens = usageMetadata.totalTokenCount || inputTokens + outputTokens;
 
     if (!content) {
       console.error("No content in AI response:", JSON.stringify(data));
+      await logUsage(supabaseService, user, request, activeModel, inputTokens, outputTokens, "failed", "No content generated");
       return new Response(
         JSON.stringify({ error: "No content generated. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Log successful usage
+    await logUsage(supabaseService, user, request, activeModel, inputTokens, outputTokens, "success");
+
     return new Response(
-      JSON.stringify({ content }),
+      JSON.stringify({ 
+        content,
+        usage: {
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          model: activeModel,
+          estimatedCost: estimateCost(activeModel, inputTokens, outputTokens),
+        }
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
@@ -416,3 +562,40 @@ serve(async (req) => {
     );
   }
 });
+
+async function logUsage(
+  supabase: any,
+  user: any,
+  request: AIRequest,
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  status: string,
+  errorMessage?: string
+) {
+  try {
+    const estimatedCost = estimateCost(model, inputTokens, outputTokens);
+    
+    await supabase.from("ai_usage_logs").insert({
+      user_id: user.id,
+      user_email: user.email,
+      action_type: `${request.type}_${request.action}`,
+      content_type: request.type,
+      model_used: model,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      total_tokens: inputTokens + outputTokens,
+      estimated_cost_usd: estimatedCost,
+      status,
+      error_message: errorMessage || null,
+      request_metadata: {
+        action: request.action,
+        inputs_keys: Object.keys(request.inputs || request.input || {}),
+      },
+    });
+    
+    console.log("Usage logged:", { model, tokens: inputTokens + outputTokens, cost: estimatedCost, status });
+  } catch (logError) {
+    console.error("Failed to log usage:", logError);
+  }
+}

@@ -155,6 +155,144 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_bulk_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_log: Json | null
+          estimated_cost_usd: number | null
+          failed_items: number
+          id: string
+          job_type: string
+          processed_items: number
+          status: string
+          successful_items: number
+          target_ids: string[]
+          target_section: string
+          total_items: number
+          total_tokens_used: number
+          updated_at: string
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_log?: Json | null
+          estimated_cost_usd?: number | null
+          failed_items?: number
+          id?: string
+          job_type: string
+          processed_items?: number
+          status?: string
+          successful_items?: number
+          target_ids?: string[]
+          target_section: string
+          total_items?: number
+          total_tokens_used?: number
+          updated_at?: string
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_log?: Json | null
+          estimated_cost_usd?: number | null
+          failed_items?: number
+          id?: string
+          job_type?: string
+          processed_items?: number
+          status?: string
+          successful_items?: number
+          target_ids?: string[]
+          target_section?: string
+          total_items?: number
+          total_tokens_used?: number
+          updated_at?: string
+          user_email?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_config: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_usage_logs: {
+        Row: {
+          action_type: string
+          content_type: string | null
+          created_at: string
+          error_message: string | null
+          estimated_cost_usd: number | null
+          id: string
+          input_tokens: number | null
+          model_used: string
+          output_tokens: number | null
+          request_metadata: Json | null
+          status: string
+          total_tokens: number | null
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          content_type?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_cost_usd?: number | null
+          id?: string
+          input_tokens?: number | null
+          model_used?: string
+          output_tokens?: number | null
+          request_metadata?: Json | null
+          status?: string
+          total_tokens?: number | null
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          content_type?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_cost_usd?: number | null
+          id?: string
+          input_tokens?: number | null
+          model_used?: string
+          output_tokens?: number | null
+          request_metadata?: Json | null
+          status?: string
+          total_tokens?: number | null
+          user_email?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       analytics_alert_configs: {
         Row: {
           comparison_period: string | null
