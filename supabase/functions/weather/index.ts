@@ -28,15 +28,23 @@ serve(async (req) => {
       );
     }
 
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric`
-    );
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric`;
+    console.log("Fetching weather from:", url.replace(apiKey, "***"));
+    
+    const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch weather data");
+      const errorText = await response.text();
+      console.error("OpenWeather API error:", response.status, errorText);
+      throw new Error(`Failed to fetch weather data: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("OpenWeather response for", data.name, ":", JSON.stringify({
+      temp: data.main.temp,
+      feels_like: data.main.feels_like,
+      description: data.weather[0]?.description
+    }));
 
     const weatherData = {
       temp: Math.round(data.main.temp),
