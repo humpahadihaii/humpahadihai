@@ -1586,6 +1586,214 @@ export type Database = {
         }
         Relationships: []
       }
+      destination_guides: {
+        Row: {
+          best_time_to_visit: string | null
+          created_at: string
+          created_by: string | null
+          district_id: string | null
+          hero_image: string | null
+          id: string
+          ideal_duration: string | null
+          is_featured: boolean | null
+          latitude: number | null
+          local_customs_etiquette: string | null
+          local_people_culture: string | null
+          longitude: number | null
+          name: string
+          region: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
+          short_introduction: string | null
+          slug: string
+          sort_order: number | null
+          status: string
+          temperature_info: Json | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          best_time_to_visit?: string | null
+          created_at?: string
+          created_by?: string | null
+          district_id?: string | null
+          hero_image?: string | null
+          id?: string
+          ideal_duration?: string | null
+          is_featured?: boolean | null
+          latitude?: number | null
+          local_customs_etiquette?: string | null
+          local_people_culture?: string | null
+          longitude?: number | null
+          name: string
+          region?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          short_introduction?: string | null
+          slug: string
+          sort_order?: number | null
+          status?: string
+          temperature_info?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          best_time_to_visit?: string | null
+          created_at?: string
+          created_by?: string | null
+          district_id?: string | null
+          hero_image?: string | null
+          id?: string
+          ideal_duration?: string | null
+          is_featured?: boolean | null
+          latitude?: number | null
+          local_customs_etiquette?: string | null
+          local_people_culture?: string | null
+          longitude?: number | null
+          name?: string
+          region?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          short_introduction?: string | null
+          slug?: string
+          sort_order?: number | null
+          status?: string
+          temperature_info?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_guides_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destination_places: {
+        Row: {
+          approx_duration: string | null
+          best_visiting_time: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          destination_id: string
+          entry_fee: string | null
+          google_maps_url: string | null
+          historical_significance: string | null
+          how_to_reach: Json | null
+          id: string
+          image_gallery: string[] | null
+          is_highlighted: boolean | null
+          latitude: number | null
+          local_customs_rituals: string | null
+          longitude: number | null
+          main_image: string | null
+          name: string
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
+          short_summary: string | null
+          slug: string
+          sort_order: number | null
+          spiritual_significance: string | null
+          status: string
+          things_to_do: string[] | null
+          timings: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          approx_duration?: string | null
+          best_visiting_time?: string | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          destination_id: string
+          entry_fee?: string | null
+          google_maps_url?: string | null
+          historical_significance?: string | null
+          how_to_reach?: Json | null
+          id?: string
+          image_gallery?: string[] | null
+          is_highlighted?: boolean | null
+          latitude?: number | null
+          local_customs_rituals?: string | null
+          longitude?: number | null
+          main_image?: string | null
+          name: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          short_summary?: string | null
+          slug: string
+          sort_order?: number | null
+          spiritual_significance?: string | null
+          status?: string
+          things_to_do?: string[] | null
+          timings?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          approx_duration?: string | null
+          best_visiting_time?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          destination_id?: string
+          entry_fee?: string | null
+          google_maps_url?: string | null
+          historical_significance?: string | null
+          how_to_reach?: Json | null
+          id?: string
+          image_gallery?: string[] | null
+          is_highlighted?: boolean | null
+          latitude?: number | null
+          local_customs_rituals?: string | null
+          longitude?: number | null
+          main_image?: string | null
+          name?: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          short_summary?: string | null
+          slug?: string
+          sort_order?: number | null
+          spiritual_significance?: string | null
+          status?: string
+          things_to_do?: string[] | null
+          timings?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_places_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destination_guides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       district_content: {
         Row: {
           category: Database["public"]["Enums"]["district_content_category"]
