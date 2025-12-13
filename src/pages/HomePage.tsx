@@ -211,7 +211,7 @@ const HomePage = () => {
 
           {/* Internal Links - District Links for SEO */}
           <div className="mt-12 pt-8 border-t border-border/50">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Explore Uttarakhand Districts</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Explore Uttarakhand Places</h3>
             <div className="flex flex-wrap gap-3">
               <Link to="/districts/almora" className="text-primary hover:text-primary/80 hover:underline text-sm">
                 Culture of Almora District
