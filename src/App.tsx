@@ -107,6 +107,13 @@ import DestinationGuidePage from "./pages/DestinationGuidePage";
 import DestinationPlaceDetailPage from "./pages/DestinationPlaceDetailPage";
 import AdminDestinationGuidesPage from "./pages/admin/AdminDestinationGuidesPage";
 import AdminDestinationPlacesPage from "./pages/admin/AdminDestinationPlacesPage";
+// Cultural Content System
+import CulturalCategoryPage from "./pages/CulturalCategoryPage";
+import CulturalSubcategoryPage from "./pages/CulturalSubcategoryPage";
+import CulturalContentDetailPage from "./pages/CulturalContentDetailPage";
+import AdminCulturalCategoriesPage from "./pages/admin/AdminCulturalCategoriesPage";
+import AdminCulturalSubcategoriesPage from "./pages/admin/AdminCulturalSubcategoriesPage";
+import AdminCulturalContentPage from "./pages/admin/AdminCulturalContentPage";
 
 const queryClient = new QueryClient();
 
@@ -163,6 +170,10 @@ const AppContent = () => {
             <Route path="/destinations" element={<DistrictsPage />} />
             <Route path="/destinations/:slug" element={<DestinationGuidePage />} />
             <Route path="/destinations/:slug/:placeSlug" element={<DestinationPlaceDetailPage />} />
+            {/* Cultural Content System - Multi-level hierarchy */}
+            <Route path="/districts/:districtSlug/:categorySlug" element={<CulturalCategoryPage />} />
+            <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug" element={<CulturalSubcategoryPage />} />
+            <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug/:contentSlug" element={<CulturalContentDetailPage />} />
             {/* Auth */}
             <Route path="/login" element={<AuthPage />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -228,6 +239,10 @@ const AppContent = () => {
             {/* Destination Guides Admin */}
             <Route path="/admin/destination-guides" element={<AdminRoute><AdminDestinationGuidesPage /></AdminRoute>} />
             <Route path="/admin/destination-guides/:destinationId/places" element={<AdminRoute><AdminDestinationPlacesPage /></AdminRoute>} />
+            {/* Cultural Content Admin */}
+            <Route path="/admin/cultural-categories" element={<AdminRoute><AdminCulturalCategoriesPage /></AdminRoute>} />
+            <Route path="/admin/cultural-subcategories" element={<AdminRoute><AdminCulturalSubcategoriesPage /></AdminRoute>} />
+            <Route path="/admin/cultural-content" element={<AdminRoute><AdminCulturalContentPage /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
