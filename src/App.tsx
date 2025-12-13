@@ -103,6 +103,10 @@ import AdminMediaImportPage from "./pages/admin/AdminMediaImportPage";
 import AdminShareSettingsPage from "./pages/admin/AdminShareSettingsPage";
 import AdminSharePreviewPage from "./pages/admin/AdminSharePreviewPage";
 import { FloatingShareButton } from "./components/share/FloatingShareButton";
+import DestinationGuidePage from "./pages/DestinationGuidePage";
+import DestinationPlaceDetailPage from "./pages/DestinationPlaceDetailPage";
+import AdminDestinationGuidesPage from "./pages/admin/AdminDestinationGuidesPage";
+import AdminDestinationPlacesPage from "./pages/admin/AdminDestinationPlacesPage";
 
 const queryClient = new QueryClient();
 
@@ -155,6 +159,10 @@ const AppContent = () => {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
             <Route path="/search" element={<SearchPage />} />
+            {/* Destination Guides */}
+            <Route path="/destinations" element={<DistrictsPage />} />
+            <Route path="/destinations/:slug" element={<DestinationGuidePage />} />
+            <Route path="/destinations/:slug/:placeSlug" element={<DestinationPlaceDetailPage />} />
             {/* Auth */}
             <Route path="/login" element={<AuthPage />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -217,6 +225,9 @@ const AppContent = () => {
             <Route path="/admin/media-import" element={<AdminRoute><AdminMediaImportPage /></AdminRoute>} />
             <Route path="/admin/share-settings" element={<AdminRoute><AdminShareSettingsPage /></AdminRoute>} />
             <Route path="/admin/share-preview" element={<AdminRoute><AdminSharePreviewPage /></AdminRoute>} />
+            {/* Destination Guides Admin */}
+            <Route path="/admin/destination-guides" element={<AdminRoute><AdminDestinationGuidesPage /></AdminRoute>} />
+            <Route path="/admin/destination-guides/:destinationId/places" element={<AdminRoute><AdminDestinationPlacesPage /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
