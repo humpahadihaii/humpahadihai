@@ -166,6 +166,13 @@ export default function AdminDistrictContentPage() {
   const addNewItem = () => {
     const currentItems = form.getValues("items");
     form.setValue("items", [...currentItems, { title: "", description: "", image_url: "", google_map_link: "" }]);
+    // Scroll to bottom after adding item
+    setTimeout(() => {
+      const scrollContainer = document.querySelector('[data-scroll-container]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }, 100);
   };
 
   const removeItem = (index: number) => {
@@ -281,7 +288,7 @@ export default function AdminDistrictContentPage() {
                         </div>
 
                         {/* Middle Section: Scrollable Item Cards */}
-                        <div className="flex-1 overflow-y-auto py-4 space-y-6">
+                        <div data-scroll-container className="flex-1 overflow-y-auto py-4 space-y-6 max-h-[50vh]">
                           {form.watch("items").map((_, index) => (
                             <div key={index} className="p-4 border rounded-lg bg-muted/30 space-y-4 relative">
                               <div className="flex justify-between items-center mb-2">
