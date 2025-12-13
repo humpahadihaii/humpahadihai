@@ -3,8 +3,11 @@ import { Users, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-const COOKIE_NAME = "hp_visit_key";
+const VISITOR_COOKIE = "hp_visitor_id";
+const SESSION_COOKIE = "hp_session_id";
+const DEVICE_COOKIE = "hp_device_id";
 const COOKIE_EXPIRY_DAYS = 365;
+const SESSION_EXPIRY_HOURS = 24;
 
 interface HomepageVisitsProps {
   showToday?: boolean;
@@ -22,6 +25,44 @@ function setCookie(name: string, value: string, days: number) {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function setSessionCookie(name: string, value: string, hours: number) {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
+// Generate a unique device fingerprint based on browser characteristics
+function generateDeviceFingerprint(): string {
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + "x" + screen.height,
+    screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || "unknown",
+    navigator.platform || "unknown",
+  ];
+  
+  // Simple hash function for fingerprint
+  const str = components.join("|");
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return "d_" + Math.abs(hash).toString(36) + "_" + Date.now().toString(36);
+}
+
+// Generate unique IDs
+function generateVisitorId(): string {
+  return "v_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 15);
+}
+
+function generateSessionId(): string {
+  return "s_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 10);
 }
 
 // Animated counter component
@@ -90,20 +131,46 @@ export function HomepageVisits({ showToday = true, className }: HomepageVisitsPr
   useEffect(() => {
     const trackAndFetch = async () => {
       try {
-        // Get or create visitor key from cookie
-        let visitorKey = getCookie(COOKIE_NAME);
+        // Get or create visitor ID (persistent across sessions)
+        let visitorId = getCookie(VISITOR_COOKIE);
+        if (!visitorId) {
+          visitorId = generateVisitorId();
+          setCookie(VISITOR_COOKIE, visitorId, COOKIE_EXPIRY_DAYS);
+        }
+
+        // Get or create session ID (expires after 24 hours of inactivity)
+        let sessionId = getCookie(SESSION_COOKIE);
+        if (!sessionId) {
+          sessionId = generateSessionId();
+        }
+        // Refresh session cookie on each visit
+        setSessionCookie(SESSION_COOKIE, sessionId, SESSION_EXPIRY_HOURS);
+
+        // Get or create device fingerprint (persistent)
+        let deviceId = getCookie(DEVICE_COOKIE);
+        if (!deviceId) {
+          deviceId = generateDeviceFingerprint();
+          setCookie(DEVICE_COOKIE, deviceId, COOKIE_EXPIRY_DAYS);
+        }
         
-        // Track visit
+        // Track visit with all identifiers
         const { data: trackData, error: trackError } = await supabase.functions.invoke(
           "homepage-track",
           {
-            body: { visitorKey },
+            body: { 
+              visitorId,
+              sessionId,
+              deviceId,
+              screenResolution: `${screen.width}x${screen.height}`,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              language: navigator.language,
+            },
           }
         );
 
-        if (!trackError && trackData?.visitorKey) {
-          // Save or update the visitor key cookie
-          setCookie(COOKIE_NAME, trackData.visitorKey, COOKIE_EXPIRY_DAYS);
+        if (!trackError && trackData?.visitorId) {
+          // Update visitor ID if server provides one
+          setCookie(VISITOR_COOKIE, trackData.visitorId, COOKIE_EXPIRY_DAYS);
         }
 
         // Fetch summary

@@ -45,7 +45,16 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-function generateVisitorKey(): string {
+// Hash IP for privacy (SHA-256)
+async function hashIP(ip: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(ip + "_hp_salt_v1");
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").substring(0, 32);
+}
+
+function generateVisitorId(): string {
   return `v_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 }
 
@@ -79,44 +88,73 @@ serve(async (req) => {
 
     // Soft check referer (allow if not set or includes our domain)
     if (referer && !referer.includes("humpahadihaii") && !referer.includes("localhost") && !referer.includes("lovable")) {
-      // Still allow but log suspicious
       console.log("Suspicious referer:", referer);
     }
 
     const body = await req.json().catch(() => ({}));
-    let visitorKey = body.visitorKey;
     
-    // Generate visitor key if not provided
-    if (!visitorKey) {
-      visitorKey = generateVisitorKey();
+    // Get visitor identifiers from client
+    let visitorId = body.visitorId;
+    const sessionId = body.sessionId || null;
+    const deviceId = body.deviceId || null;
+    const screenResolution = body.screenResolution || null;
+    const timezone = body.timezone || null;
+    const language = body.language || null;
+    
+    // Generate visitor ID if not provided
+    if (!visitorId) {
+      visitorId = generateVisitorId();
     }
+
+    // Hash the IP for privacy
+    const ipHash = await hashIP(ip);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check if already visited today
+    // Check if already visited today using visitor_id OR (ip_hash + device_id combination)
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
-    const { data: existingVisit } = await supabase
+    // Check by visitor_id first
+    const { data: existingByVisitor } = await supabase
       .from("homepage_visits")
       .select("id")
-      .eq("visitor_key", visitorKey)
+      .eq("visitor_key", visitorId)
       .gte("created_at", todayStart.toISOString())
       .limit(1)
       .single();
 
+    // Also check by IP hash + device combination for more accurate deduplication
+    let existingByFingerprint = null;
+    if (deviceId && !existingByVisitor) {
+      const { data } = await supabase
+        .from("homepage_visits")
+        .select("id")
+        .eq("ip", ipHash)
+        .eq("device_id", deviceId)
+        .gte("created_at", todayStart.toISOString())
+        .limit(1)
+        .single();
+      existingByFingerprint = data;
+    }
+
     let counted = false;
     
-    if (!existingVisit) {
-      // Insert new visit
+    if (!existingByVisitor && !existingByFingerprint) {
+      // Insert new visit with all tracking data
       const { error } = await supabase
         .from("homepage_visits")
         .insert({
-          visitor_key: visitorKey,
-          ip: ip,
-          ua: ua.substring(0, 500), // Limit UA length
+          visitor_key: visitorId,
+          ip: ipHash,
+          ua: ua.substring(0, 500),
+          session_id: sessionId,
+          device_id: deviceId,
+          screen_resolution: screenResolution,
+          timezone: timezone,
+          language: language,
         });
 
       if (error) {
@@ -127,7 +165,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ ok: true, visitorKey, counted }),
+      JSON.stringify({ ok: true, visitorId, counted }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
