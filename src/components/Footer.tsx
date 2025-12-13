@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Mail, Facebook, Youtube, MapPin, Phone, ArrowRight } from "lucide-react";
+import { Instagram, Mail, Facebook, Youtube, MapPin, Phone, ArrowRight, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useCMSSettings, useCMSFooterLinks } from "@/hooks/useCMSSettings";
 
 const Footer = () => {
@@ -185,6 +185,28 @@ const Footer = () => {
                   aria-label="Subscribe on YouTube"
                 >
                   <Youtube className="h-5 w-5" />
+                </a>
+              )}
+              {settings?.twitter_url && (
+                <a
+                  href={settings.twitter_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors duration-200"
+                  aria-label="Follow us on X (Twitter)"
+                >
+                  <Twitter className="h-5 w-5" />
+                </a>
+              )}
+              {settings?.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${settings.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors duration-200"
+                  aria-label="Chat on WhatsApp"
+                >
+                  <MessageCircle className="h-5 w-5" />
                 </a>
               )}
               <a
