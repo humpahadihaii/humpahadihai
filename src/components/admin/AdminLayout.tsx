@@ -11,6 +11,8 @@ import { ImpersonationBanner } from "./ImpersonationBanner";
 import { useImpersonation } from "@/hooks/useImpersonation";
 import { AppleSidebar } from "./AppleSidebar";
 import { RBACRole, hasAdminPanelAccess, isSuperAdmin } from "@/lib/rbac";
+import { AdminSearchProvider } from "./AdminSearchContext";
+import { AdminSearchModal } from "./AdminSearchModal";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -89,54 +91,68 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden flex-col bg-[hsl(var(--admin-bg))]">
-      {/* Impersonation Banner */}
-      <ImpersonationBanner />
-      
-      <div className={cn("flex flex-1 overflow-hidden", isImpersonating && "pt-0")}>
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block relative">
-          <AppleSidebar
-            roles={effectiveRoles}
-            collapsed={collapsed}
-            onToggleCollapse={() => setCollapsed(!collapsed)}
-            email={user?.email}
-            onSignOut={handleSignOut}
-            signingOut={signingOut}
-          />
-        </div>
-
-        {/* Mobile Sidebar */}
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="fixed left-4 top-4 z-50 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] p-0 border-0">
+    <AdminSearchProvider>
+      <div className="flex h-screen w-full overflow-hidden flex-col bg-[hsl(var(--admin-bg))]">
+        {/* Impersonation Banner */}
+        <ImpersonationBanner />
+        
+        <div className={cn("flex flex-1 overflow-hidden", isImpersonating && "pt-0")}>
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block relative">
             <AppleSidebar
               roles={effectiveRoles}
-              collapsed={false}
-              onToggleCollapse={() => {}}
-              onLinkClick={() => setMobileOpen(false)}
+              collapsed={collapsed}
+              onToggleCollapse={() => setCollapsed(!collapsed)}
               email={user?.email}
               onSignOut={handleSignOut}
               signingOut={signingOut}
             />
-          </SheetContent>
-        </Sheet>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-[hsl(var(--admin-bg))]">
-          <div className="container mx-auto p-6 md:p-8 max-w-7xl">
-            {children}
           </div>
-        </main>
+
+          {/* Mobile Sidebar */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="fixed left-4 top-4 z-50 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] p-0 border-0">
+              <AppleSidebar
+                roles={effectiveRoles}
+                collapsed={false}
+                onToggleCollapse={() => {}}
+                onLinkClick={() => setMobileOpen(false)}
+                email={user?.email}
+                onSignOut={handleSignOut}
+                signingOut={signingOut}
+              />
+            </SheetContent>
+          </Sheet>
+
+          {/* Main Content */}
+          <main className="flex-1 overflow-y-auto bg-[hsl(var(--admin-bg))]">
+            <div className="container mx-auto p-6 md:p-8 max-w-7xl">
+              {children}
+            </div>
+          </main>
+        </div>
+
+        {/* Global Search Modal */}
+        <AdminSearchModalWrapper />
       </div>
-    </div>
+    </AdminSearchProvider>
   );
 }
+
+// Wrapper component to use the search context
+function AdminSearchModalWrapper() {
+  const { isOpen, close } = useAdminSearchModal();
+  return <AdminSearchModal isOpen={isOpen} onClose={close} />;
+}
+
+// Need to import this after defining the component
+import { useAdminSearchModal } from "./AdminSearchContext";
