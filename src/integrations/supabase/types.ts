@@ -1494,6 +1494,77 @@ export type Database = {
         }
         Relationships: []
       }
+      content_categories: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          district_id: string | null
+          hero_image: string | null
+          icon: string | null
+          id: string
+          name: string
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
+          slug: string
+          sort_order: number | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string | null
+          hero_image?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          slug: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string | null
+          hero_image?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          slug?: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_categories_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_items: {
         Row: {
           author_id: string | null
@@ -1553,6 +1624,65 @@ export type Database = {
           },
         ]
       }
+      content_subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          hero_image: string | null
+          icon: string | null
+          id: string
+          name: string
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_title: string | null
+          slug: string
+          sort_order: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          hero_image?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_title?: string | null
+          slug: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          hero_image?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_title?: string | null
+          slug?: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "content_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_versions: {
         Row: {
           change_description: string | null
@@ -1585,6 +1715,169 @@ export type Database = {
           version_number?: number
         }
         Relationships: []
+      }
+      cultural_content: {
+        Row: {
+          category_id: string
+          consumption_occasions: string | null
+          created_at: string
+          created_by: string | null
+          cultural_significance: string | null
+          district_id: string
+          dos_and_donts: string | null
+          entry_fee: string | null
+          famous_places: Json | null
+          faqs: Json | null
+          fun_facts: string | null
+          google_maps_url: string | null
+          hero_image: string | null
+          historical_significance: string | null
+          how_to_reach: Json | null
+          id: string
+          image_gallery: string[] | null
+          ingredients: Json | null
+          is_featured: boolean | null
+          is_highlighted: boolean | null
+          latitude: number | null
+          local_customs: string | null
+          longitude: number | null
+          origin_history: string | null
+          preparation_method: string | null
+          price_range: string | null
+          seo_description: string | null
+          seo_image_url: string | null
+          seo_schema: Json | null
+          seo_title: string | null
+          share_templates: Json | null
+          shelf_life_tips: string | null
+          short_intro: string | null
+          slug: string
+          sort_order: number | null
+          spiritual_significance: string | null
+          status: string
+          subcategory_id: string | null
+          taste_description: string | null
+          things_to_do: string[] | null
+          timings: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category_id: string
+          consumption_occasions?: string | null
+          created_at?: string
+          created_by?: string | null
+          cultural_significance?: string | null
+          district_id: string
+          dos_and_donts?: string | null
+          entry_fee?: string | null
+          famous_places?: Json | null
+          faqs?: Json | null
+          fun_facts?: string | null
+          google_maps_url?: string | null
+          hero_image?: string | null
+          historical_significance?: string | null
+          how_to_reach?: Json | null
+          id?: string
+          image_gallery?: string[] | null
+          ingredients?: Json | null
+          is_featured?: boolean | null
+          is_highlighted?: boolean | null
+          latitude?: number | null
+          local_customs?: string | null
+          longitude?: number | null
+          origin_history?: string | null
+          preparation_method?: string | null
+          price_range?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          shelf_life_tips?: string | null
+          short_intro?: string | null
+          slug: string
+          sort_order?: number | null
+          spiritual_significance?: string | null
+          status?: string
+          subcategory_id?: string | null
+          taste_description?: string | null
+          things_to_do?: string[] | null
+          timings?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category_id?: string
+          consumption_occasions?: string | null
+          created_at?: string
+          created_by?: string | null
+          cultural_significance?: string | null
+          district_id?: string
+          dos_and_donts?: string | null
+          entry_fee?: string | null
+          famous_places?: Json | null
+          faqs?: Json | null
+          fun_facts?: string | null
+          google_maps_url?: string | null
+          hero_image?: string | null
+          historical_significance?: string | null
+          how_to_reach?: Json | null
+          id?: string
+          image_gallery?: string[] | null
+          ingredients?: Json | null
+          is_featured?: boolean | null
+          is_highlighted?: boolean | null
+          latitude?: number | null
+          local_customs?: string | null
+          longitude?: number | null
+          origin_history?: string | null
+          preparation_method?: string | null
+          price_range?: string | null
+          seo_description?: string | null
+          seo_image_url?: string | null
+          seo_schema?: Json | null
+          seo_title?: string | null
+          share_templates?: Json | null
+          shelf_life_tips?: string | null
+          short_intro?: string | null
+          slug?: string
+          sort_order?: number | null
+          spiritual_significance?: string | null
+          status?: string
+          subcategory_id?: string | null
+          taste_description?: string | null
+          things_to_do?: string[] | null
+          timings?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cultural_content_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "content_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cultural_content_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cultural_content_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "content_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       destination_guides: {
         Row: {
