@@ -2,6 +2,17 @@
   "rewrites": [
     {
       "source": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|Discordbot|Googlebot|bingbot|Pinterest|vkShare).*"
+        }
+      ],
+      "destination": "https://qxeodogwbdndgfslbyej.supabase.co/functions/v1/og-meta/resolve?url=https://humpahadihaii.in/$1"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/"
     }
   ],
