@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -98,6 +99,28 @@ const GalleryPage = () => {
               )}
             </TabsContent>
           </Tabs>
+
+          {/* Related Pages - SEO Internal Linking */}
+          <div className="mt-12 pt-8 border-t border-border/50">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Related Pages</h3>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              <Link to="/districts/pithoragarh" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Pithoragarh District Culture
+              </Link>
+              <Link to="/districts/almora" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Almora Heritage & Traditions
+              </Link>
+              <Link to="/culture" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Traditional Kumaoni Attire
+              </Link>
+              <Link to="/culture" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Garhwali Folk Traditions
+              </Link>
+              <Link to="/food" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Pahadi Food Photography
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

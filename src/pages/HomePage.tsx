@@ -208,8 +208,50 @@ const HomePage = () => {
               </Card>
             ))}
           </div>
+
+          {/* Internal Links - District Links for SEO */}
+          <div className="mt-12 pt-8 border-t border-border/50">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Explore Uttarakhand Districts</h3>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/districts/almora" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Culture of Almora District
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/districts/pithoragarh" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Pithoragarh Traditions & Heritage
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/districts/chamoli" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Chamoli District Cultural Life
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/districts/nainital" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Nainital Lake District
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/districts/bageshwar" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Bageshwar Heritage Sites
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/districts/tehri-garhwal" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Tehri Garhwal Culture
+              </Link>
+            </div>
+          </div>
+
+          {/* Culture & Gallery Links */}
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+            <Link to="/culture" className="text-primary hover:text-primary/80 hover:underline text-sm font-medium">
+              Garhwali and Kumaoni Folk Traditions →
+            </Link>
+            <Link to="/food" className="text-primary hover:text-primary/80 hover:underline text-sm font-medium">
+              Traditional Pahadi Cuisine →
+            </Link>
+            <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm font-medium">
+              Uttarakhand Culture Photo Gallery →
+            </Link>
+          </div>
         </div>
-      </section>
 
       {/* Featured Content */}
       {highlights.length > 0 && (
@@ -251,6 +293,7 @@ const HomePage = () => {
           </div>
         </section>
       )}
+      </section>
 
       {/* All Districts Weather - with hover effects */}
       <section className="section-padding-sm bg-muted/40">

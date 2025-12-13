@@ -149,6 +149,25 @@ const ContentListPage = ({
               ))}
             </div>
           )}
+
+          {/* Internal Links - SEO */}
+          <div className="mt-12 pt-8 border-t border-border/50">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Explore More</h3>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              <Link to="/districts/almora" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Almora District Cultural Practices
+              </Link>
+              <Link to="/districts/pithoragarh" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Pithoragarh Traditional Lifestyle
+              </Link>
+              <Link to="/districts/chamoli" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                Chamoli Folk Traditions
+              </Link>
+              <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                View {title} Photo Gallery →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
