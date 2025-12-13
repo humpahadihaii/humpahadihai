@@ -298,10 +298,10 @@ export default function DestinationGuidePage() {
             <section className="mb-12">
               <h2 className="text-2xl font-bold mb-6">Location</h2>
               <div className="h-[400px] rounded-lg overflow-hidden border">
-                <LeafletMap
-                  center={[destination.latitude, destination.longitude]}
+              <LeafletMap
+                  center={{ lat: destination.latitude, lng: destination.longitude }}
                   zoom={12}
-                  markers={[{ lat: destination.latitude, lng: destination.longitude, title: destination.name }]}
+                  markers={[{ id: destination.id, lat: destination.latitude, lng: destination.longitude, title: destination.name }]}
                 />
               </div>
             </section>
