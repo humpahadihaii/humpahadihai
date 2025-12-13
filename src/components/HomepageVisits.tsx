@@ -33,7 +33,7 @@ function setSessionCookie(name: string, value: string, hours: number) {
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
 }
 
-// Generate a unique device fingerprint based on browser characteristics
+// Generate a stable device fingerprint based on browser characteristics (no timestamp!)
 function generateDeviceFingerprint(): string {
   const components = [
     navigator.userAgent,
@@ -45,18 +45,18 @@ function generateDeviceFingerprint(): string {
     navigator.platform || "unknown",
   ];
   
-  // Simple hash function for fingerprint
+  // Simple hash function for fingerprint - STABLE, no random/time component
   const str = components.join("|");
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
-  return "d_" + Math.abs(hash).toString(36) + "_" + Date.now().toString(36);
+  return "d_" + Math.abs(hash).toString(36);
 }
 
-// Generate unique IDs
+// Generate unique visitor ID (only called once, then stored in cookie)
 function generateVisitorId(): string {
   return "v_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 15);
 }
