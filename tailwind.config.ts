@@ -80,10 +80,12 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        display: ["Playfair Display", "Georgia", "serif"],
+        display: ["Poppins", "system-ui", "sans-serif"],
       },
       fontSize: {
         "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
+        "base": ["1rem", { lineHeight: "1.7" }],
+        "lg": ["1.125rem", { lineHeight: "1.7" }],
       },
       spacing: {
         "4.5": "1.125rem",

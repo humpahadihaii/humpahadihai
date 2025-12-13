@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, LogOut, LogIn, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,11 +23,21 @@ const SHOW_ADMIN_LOGIN = import.meta.env.VITE_SHOW_ADMIN_LOGIN === "true";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { getImage } = useSiteImages();
   const { data: settings } = useCMSSettings();
   const { isAuthenticated, isAdmin } = useAuth();
+  
+  // Handle scroll effect for header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   
   // Secret logo click trigger state
   const clickCountRef = useRef(0);
@@ -121,10 +131,10 @@ const Navigation = () => {
   const NavLink = ({ item }: { item: { name: string; path: string } }) => (
     <Link
       to={item.path}
-      className={`px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+      className={`px-3 py-2 rounded-lg font-medium text-sm transition-all duration-150 tap-target flex items-center ${
         isActive(item.path)
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-foreground/80 hover:text-foreground hover:bg-muted"
+          ? "bg-primary text-primary-foreground"
+          : "text-foreground/75 hover:text-foreground hover:bg-muted/80"
       }`}
     >
       {item.name}
@@ -138,30 +148,29 @@ const Navigation = () => {
         Skip to main content
       </a>
       
-      <nav className="site-header sticky top-0 z-50 glass border-b border-border/50 h-[var(--header-height)]">
-        <div className="container mx-auto px-4 h-full">
+      <nav className={`site-header sticky top-0 z-50 glass border-b border-border/40 h-[var(--header-height)] transition-shadow duration-200 ${isScrolled ? 'header-scrolled' : ''}`}>
+        <div className="container mx-auto px-4 sm:px-6 h-full">
           <div className="flex items-center justify-between h-full gap-4">
             {/* Logo with secret click trigger */}
             <Link 
               to="/" 
-              className="flex items-center gap-3 hover:opacity-90 transition-opacity shrink-0"
+              className="flex items-center gap-2.5 hover:opacity-90 transition-opacity shrink-0"
               onClick={handleLogoClick}
             >
               <img 
                 src={logo} 
                 alt={`${siteName} Logo`} 
-                width="48" 
-                height="48" 
-                className="h-11 w-11 md:h-12 md:w-12 rounded-full object-cover ring-2 ring-primary/10" 
+                width="40" 
+                height="40" 
+                className="h-9 w-9 md:h-10 md:w-10 rounded-full object-cover ring-2 ring-primary/10" 
               />
               <div className="hidden sm:block">
-                <h1 className="text-base md:text-lg font-bold text-primary leading-tight">{siteName}</h1>
-                <p className="text-xs text-muted-foreground">Uttarakhand Heritage</p>
+                <span className="text-sm md:text-base font-display font-semibold text-primary leading-tight">{siteName}</span>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-0.5">
               {primaryNavItems.map((item) => (
                 <NavLink key={item.path} item={item} />
               ))}

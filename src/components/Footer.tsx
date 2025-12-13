@@ -31,16 +31,16 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-primary text-primary-foreground pb-24 md:pb-4">
+    <footer className="bg-primary text-primary-foreground pb-24 md:pb-6">
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      <div className="container-wide py-14 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="font-display text-xl md:text-2xl font-bold mb-4">
+            <h3 className="font-display text-xl font-semibold mb-4">
               {settings?.site_name || "Hum Pahadi Haii"}
             </h3>
-            <p className="text-sm text-primary-foreground/85 leading-relaxed mb-6">
+            <p className="text-sm text-primary-foreground/80 leading-relaxed mb-6">
               {settings?.tagline || "Celebrating Uttarakhand's rich culture, traditions, and heritage through stories, food, and breathtaking landscapes."}
             </p>
             
