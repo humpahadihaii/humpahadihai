@@ -86,14 +86,14 @@ serve(async (req) => {
       );
     }
 
-    // Soft check referer (allow if not set or includes our domain)
+    // Soft check referer
     if (referer && !referer.includes("humpahadihaii") && !referer.includes("localhost") && !referer.includes("lovable")) {
       console.log("Suspicious referer:", referer);
     }
 
     const body = await req.json().catch(() => ({}));
     
-    // Get visitor identifiers from client
+    // Get identifiers from client
     let visitorId = body.visitorId;
     const sessionId = body.sessionId || null;
     const deviceId = body.deviceId || null;
@@ -113,11 +113,30 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check if already visited today using visitor_id OR (ip_hash + device_id combination)
+    // Get today's date boundary
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
-    // Check by visitor_id first
+    // PRIMARY DEDUPLICATION: Check by IP hash first (most reliable)
+    // This catches same visitor even if cookies are cleared
+    const { data: existingByIP } = await supabase
+      .from("homepage_visits")
+      .select("id")
+      .eq("ip", ipHash)
+      .gte("created_at", todayStart.toISOString())
+      .limit(1)
+      .single();
+
+    // If already visited from this IP today, don't count again
+    if (existingByIP) {
+      console.log("Already visited today (IP match):", ipHash.substring(0, 8));
+      return new Response(
+        JSON.stringify({ ok: true, visitorId, counted: false, reason: "already_visited_today" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // SECONDARY CHECK: By visitor_id cookie (for cases where IP might change but cookie persists)
     const { data: existingByVisitor } = await supabase
       .from("homepage_visits")
       .select("id")
@@ -126,46 +145,59 @@ serve(async (req) => {
       .limit(1)
       .single();
 
-    // Also check by IP hash + device combination for more accurate deduplication
-    let existingByFingerprint = null;
-    if (deviceId && !existingByVisitor) {
-      const { data } = await supabase
+    if (existingByVisitor) {
+      console.log("Already visited today (cookie match):", visitorId.substring(0, 10));
+      return new Response(
+        JSON.stringify({ ok: true, visitorId, counted: false, reason: "already_visited_today" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // TERTIARY CHECK: By device fingerprint (for same device, different browser/incognito)
+    if (deviceId) {
+      const { data: existingByDevice } = await supabase
         .from("homepage_visits")
         .select("id")
-        .eq("ip", ipHash)
         .eq("device_id", deviceId)
         .gte("created_at", todayStart.toISOString())
         .limit(1)
         .single();
-      existingByFingerprint = data;
-    }
 
-    let counted = false;
-    
-    if (!existingByVisitor && !existingByFingerprint) {
-      // Insert new visit with all tracking data
-      const { error } = await supabase
-        .from("homepage_visits")
-        .insert({
-          visitor_key: visitorId,
-          ip: ipHash,
-          ua: ua.substring(0, 500),
-          session_id: sessionId,
-          device_id: deviceId,
-          screen_resolution: screenResolution,
-          timezone: timezone,
-          language: language,
-        });
-
-      if (error) {
-        console.error("Insert error:", error);
-      } else {
-        counted = true;
+      if (existingByDevice) {
+        console.log("Already visited today (device match):", deviceId.substring(0, 10));
+        return new Response(
+          JSON.stringify({ ok: true, visitorId, counted: false, reason: "already_visited_today" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
     }
 
+    // New unique visitor today - insert record
+    const { error } = await supabase
+      .from("homepage_visits")
+      .insert({
+        visitor_key: visitorId,
+        ip: ipHash,
+        ua: ua.substring(0, 500),
+        session_id: sessionId,
+        device_id: deviceId,
+        screen_resolution: screenResolution,
+        timezone: timezone,
+        language: language,
+      });
+
+    if (error) {
+      console.error("Insert error:", error);
+      return new Response(
+        JSON.stringify({ ok: false, error: "Database error" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    console.log("New visitor counted:", ipHash.substring(0, 8), visitorId.substring(0, 10));
+    
     return new Response(
-      JSON.stringify({ ok: true, visitorId, counted }),
+      JSON.stringify({ ok: true, visitorId, counted: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
