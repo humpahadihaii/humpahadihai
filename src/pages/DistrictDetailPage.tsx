@@ -818,6 +818,65 @@ const DistrictDetailPage = () => {
           </div>
         </section>
       )}
+
+      {/* Related Culture & Regions - SEO Internal Linking */}
+      <section className="py-12 px-4 bg-muted/30 border-t">
+        <div className="container mx-auto">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Related Culture & Regions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Culture Links */}
+            <div className="bg-background rounded-lg p-6 border">
+              <h3 className="font-semibold text-foreground mb-4">Culture & Traditions</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/culture" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                    {district.region === "Kumaon" ? "Kumaoni Cultural Traditions" : "Garhwali Folk Traditions"}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/food" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                    Traditional Food of {district.name}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Gallery Link */}
+            <div className="bg-background rounded-lg p-6 border">
+              <h3 className="font-semibold text-foreground mb-4">Photo Gallery</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                    Cultural Images from {district.name} District
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                    Uttarakhand Heritage Photos
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Nearby Districts */}
+            <div className="bg-background rounded-lg p-6 border">
+              <h3 className="font-semibold text-foreground mb-4">Explore Nearby</h3>
+              <ul className="space-y-2">
+                {otherDistricts?.slice(0, 3).map((otherDist) => (
+                  <li key={otherDist.id}>
+                    <Link 
+                      to={`/districts/${otherDist.slug}`} 
+                      className="text-primary hover:text-primary/80 hover:underline text-sm"
+                    >
+                      Explore {otherDist.name} District Culture
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

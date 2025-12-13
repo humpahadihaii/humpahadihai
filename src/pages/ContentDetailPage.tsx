@@ -54,6 +54,21 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
     enabled: !!item?.district_id,
   });
 
+  // Fetch districts for "Where This Tradition Is Practiced" section
+  const { data: allDistricts } = useQuery({
+    queryKey: ["districts-for-linking"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("districts")
+        .select("id, name, slug, region")
+        .eq("status", "published")
+        .order("name")
+        .limit(6);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen p-8">
@@ -181,6 +196,37 @@ const ContentDetailPage = ({ contentType }: ContentDetailPageProps) => {
                     </Card>
                   </Link>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Where This Tradition Is Practiced - SEO Internal Linking */}
+          {allDistricts && allDistricts.length > 0 && (
+            <div className="mt-12 pt-8 border-t">
+              <h3 className="text-xl font-bold mb-4">Where This Tradition Is Practiced</h3>
+              <p className="text-muted-foreground mb-4 text-sm">
+                Explore the districts of Uttarakhand where you can experience authentic {contentType} traditions:
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {allDistricts.slice(0, 4).map((dist) => (
+                  <Link 
+                    key={dist.id}
+                    to={`/districts/${dist.slug}`}
+                    className="text-primary hover:text-primary/80 hover:underline"
+                  >
+                    {dist.name} District Cultural Practices
+                  </Link>
+                ))}
+              </div>
+              
+              {/* Gallery Link */}
+              <div className="mt-6">
+                <Link 
+                  to="/gallery" 
+                  className="text-primary font-medium hover:text-primary/80 hover:underline"
+                >
+                  View {contentType.charAt(0).toUpperCase() + contentType.slice(1)} Photo Gallery →
+                </Link>
               </div>
             </div>
           )}

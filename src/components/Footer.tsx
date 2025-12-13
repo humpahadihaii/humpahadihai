@@ -23,6 +23,22 @@ const Footer = () => {
     { name: "Marketplace", path: "/marketplace" },
   ];
 
+  // District links for SEO internal linking
+  const districtLinks = [
+    { name: "Almora District", path: "/districts/almora" },
+    { name: "Pithoragarh District", path: "/districts/pithoragarh" },
+    { name: "Chamoli District", path: "/districts/chamoli" },
+    { name: "Bageshwar District", path: "/districts/bageshwar" },
+    { name: "Nainital District", path: "/districts/nainital" },
+  ];
+
+  // Culture links for SEO internal linking
+  const cultureLinks = [
+    { name: "Uttarakhand Traditions", path: "/culture" },
+    { name: "Folk Culture", path: "/culture" },
+    { name: "Traditional Food", path: "/food" },
+  ];
+
   const legalLinksData = [
     { name: "Privacy Policy", path: "/privacy-policy" },
     { name: "Terms & Conditions", path: "/terms" },
@@ -76,11 +92,11 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal Links */}
+          {/* District Links - SEO Internal Linking */}
           <div>
-            <h4 className="font-semibold text-base mb-4">Legal</h4>
+            <h4 className="font-semibold text-base mb-4">Popular Districts</h4>
             <ul className="space-y-2.5">
-              {legalLinksData.map((link) => (
+              {districtLinks.map((link) => (
                 <li key={link.path}>
                   <Link 
                     to={link.path} 
@@ -90,6 +106,47 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          {/* Legal & Culture Links */}
+          <div>
+            <h4 className="font-semibold text-base mb-4">Culture & Legal</h4>
+            <ul className="space-y-2.5">
+              {cultureLinks.map((link) => (
+                <li key={link.path + link.name}>
+                  <Link 
+                    to={link.path} 
+                    className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200 inline-block"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+              <li className="border-t border-primary-foreground/15 pt-2 mt-2">
+                <Link 
+                  to="/privacy-policy" 
+                  className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200 inline-block"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/terms" 
+                  className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200 inline-block"
+                >
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/contact" 
+                  className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200 inline-block"
+                >
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
 
