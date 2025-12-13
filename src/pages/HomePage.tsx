@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mountain, UtensilsCrossed, Camera, Palmtree, Calendar } from "lucide-react";
+import { Mountain, UtensilsCrossed, Camera, Palmtree } from "lucide-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCMSSettings, useCMSContentSection } from "@/hooks/useCMSSettings";
 import { useQuery } from "@tanstack/react-query";
@@ -13,10 +13,10 @@ import { HomepageVisits } from "@/components/HomepageVisits";
 import { FeaturedCardSection } from "@/components/FeaturedCardSection";
 import { SearchTrigger } from "@/components/search";
 import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
-
 import AllDistrictsWeather from "@/components/weather/AllDistrictsWeather";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 import { useSiteSharePreview } from "@/hooks/useSharePreview";
+import { FeaturedContentSection } from "@/components/home/FeaturedContentSection";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -252,8 +252,37 @@ const HomePage = () => {
             </Link>
           </div>
         </div>
+      </section>
 
-      {/* Featured Content */}
+      {/* Dynamic Featured Content Sections */}
+      <section className="section-padding bg-muted/40">
+        <div className="container-wide">
+          <FeaturedContentSection sectionKey="cultural_highlight" variant="hero" />
+        </div>
+      </section>
+
+      <section className="section-padding">
+        <div className="container-wide">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <FeaturedContentSection sectionKey="local_food" variant="card" limit={3} />
+            <FeaturedContentSection sectionKey="spiritual" variant="card" limit={3} />
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-muted/40">
+        <div className="container-wide">
+          <FeaturedContentSection sectionKey="nature" variant="hero" />
+        </div>
+      </section>
+
+      <section className="section-padding">
+        <div className="container-wide">
+          <FeaturedContentSection sectionKey="districts" variant="card" />
+        </div>
+      </section>
+
+      {/* Legacy Featured Highlights */}
       {highlights.length > 0 && (
         <section className="section-padding bg-muted/40">
           <div className="container-wide">
@@ -293,7 +322,6 @@ const HomePage = () => {
           </div>
         </section>
       )}
-      </section>
 
       {/* All Districts Weather - with hover effects */}
       <section className="section-padding-sm bg-muted/40">

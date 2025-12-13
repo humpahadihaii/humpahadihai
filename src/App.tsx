@@ -114,6 +114,7 @@ import CulturalContentDetailPage from "./pages/CulturalContentDetailPage";
 import AdminCulturalCategoriesPage from "./pages/admin/AdminCulturalCategoriesPage";
 import AdminCulturalSubcategoriesPage from "./pages/admin/AdminCulturalSubcategoriesPage";
 import AdminCulturalContentPage from "./pages/admin/AdminCulturalContentPage";
+import AdminFeaturedContentPage from "./pages/admin/AdminFeaturedContentPage";
 
 const queryClient = new QueryClient();
 
@@ -201,6 +202,7 @@ const AppContent = () => {
             <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
             <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
             <Route path="/admin/featured-cards" element={<AdminRoute><AdminFeaturedCardsPage /></AdminRoute>} />
+            <Route path="/admin/featured-content" element={<AdminRoute><AdminFeaturedContentPage /></AdminRoute>} />
             <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
             <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />

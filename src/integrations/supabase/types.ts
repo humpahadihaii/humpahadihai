@@ -3074,6 +3074,121 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_content_config: {
+        Row: {
+          auto_rotation_enabled: boolean
+          created_at: string
+          id: string
+          items_per_section: number
+          last_rotation_at: string | null
+          rotation_frequency: string
+          singleton_flag: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_rotation_enabled?: boolean
+          created_at?: string
+          id?: string
+          items_per_section?: number
+          last_rotation_at?: string | null
+          rotation_frequency?: string
+          singleton_flag?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_rotation_enabled?: boolean
+          created_at?: string
+          id?: string
+          items_per_section?: number
+          last_rotation_at?: string | null
+          rotation_frequency?: string
+          singleton_flag?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      featured_content_history: {
+        Row: {
+          content_id: string
+          created_at: string
+          featured_date: string
+          id: string
+          section_key: string
+          was_manual: boolean
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          featured_date?: string
+          id?: string
+          section_key: string
+          was_manual?: boolean
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          featured_date?: string
+          id?: string
+          section_key?: string
+          was_manual?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_content_history_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "cultural_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      featured_content_slots: {
+        Row: {
+          content_id: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          is_manual: boolean
+          priority: number
+          section_key: string
+          start_date: string | null
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_manual?: boolean
+          priority?: number
+          section_key: string
+          start_date?: string | null
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_manual?: boolean
+          priority?: number
+          section_key?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_content_slots_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "cultural_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       featured_highlights: {
         Row: {
           button_link: string
