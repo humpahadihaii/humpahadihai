@@ -2,17 +2,16 @@ import { ReactNode, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { performLogout } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { ImpersonationBanner } from "./ImpersonationBanner";
 import { useImpersonation } from "@/hooks/useImpersonation";
 import { AppleSidebar } from "./AppleSidebar";
 import { RBACRole, hasAdminPanelAccess, isSuperAdmin } from "@/lib/rbac";
-import { AdminSearchProvider } from "./AdminSearchContext";
+import { AdminSearchProvider, useAdminSearchModal } from "./AdminSearchContext";
 import { AdminSearchModal } from "./AdminSearchModal";
+import { AdminHeader } from "./AdminHeader";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -111,15 +110,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
           {/* Mobile Sidebar */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="fixed left-4 top-4 z-50 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
             <SheetContent side="left" className="w-[280px] p-0 border-0">
               <AppleSidebar
                 roles={effectiveRoles}
@@ -133,12 +123,23 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </SheetContent>
           </Sheet>
 
-          {/* Main Content */}
-          <main className="flex-1 overflow-y-auto bg-[hsl(var(--admin-bg))]">
-            <div className="container mx-auto p-6 md:p-8 max-w-7xl">
-              {children}
-            </div>
-          </main>
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Header with Search */}
+            <AdminHeader 
+              email={user?.email}
+              onMobileMenuClick={() => setMobileOpen(true)}
+              onSignOut={handleSignOut}
+              signingOut={signingOut}
+            />
+            
+            {/* Main Content */}
+            <main className="flex-1 overflow-y-auto bg-[hsl(var(--admin-bg))]">
+              <div className="container mx-auto p-6 md:p-8 max-w-7xl">
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
 
         {/* Global Search Modal */}
@@ -153,6 +154,3 @@ function AdminSearchModalWrapper() {
   const { isOpen, close } = useAdminSearchModal();
   return <AdminSearchModal isOpen={isOpen} onClose={close} />;
 }
-
-// Need to import this after defining the component
-import { useAdminSearchModal } from "./AdminSearchContext";
