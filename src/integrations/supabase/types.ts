@@ -2768,22 +2768,37 @@ export type Database = {
       homepage_visits: {
         Row: {
           created_at: string
+          device_id: string | null
           id: string
           ip: string | null
+          language: string | null
+          screen_resolution: string | null
+          session_id: string | null
+          timezone: string | null
           ua: string | null
           visitor_key: string
         }
         Insert: {
           created_at?: string
+          device_id?: string | null
           id?: string
           ip?: string | null
+          language?: string | null
+          screen_resolution?: string | null
+          session_id?: string | null
+          timezone?: string | null
           ua?: string | null
           visitor_key: string
         }
         Update: {
           created_at?: string
+          device_id?: string | null
           id?: string
           ip?: string | null
+          language?: string | null
+          screen_resolution?: string | null
+          session_id?: string | null
+          timezone?: string | null
           ua?: string | null
           visitor_key?: string
         }
