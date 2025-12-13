@@ -380,6 +380,15 @@
       "required_roles": ["super_admin", "admin", "content_manager"]
     },
     {
+      "id": "featured-content",
+      "label": "Featured Content",
+      "icon": "Sparkles",
+      "route": "/admin/featured-content",
+      "group": "media",
+      "order": 6,
+      "required_roles": ["super_admin", "admin"]
+    },
+    {
       "id": "thoughts-moderation",
       "label": "Thoughts Moderation",
       "icon": "MessageCircle",
