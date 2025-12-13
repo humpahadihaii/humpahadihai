@@ -13,7 +13,7 @@ import {
 import { useLocation, Link } from "react-router-dom";
 import { useMemo } from "react";
 import { SIDEBAR_ITEMS } from "./AppleSidebar";
-
+import { useAdminSearchModal } from "./AdminSearchContext";
 interface AdminHeaderProps {
   email?: string;
   onMobileMenuClick?: () => void;
@@ -28,6 +28,7 @@ export function AdminHeader({
   signingOut 
 }: AdminHeaderProps) {
   const location = useLocation();
+  const { open: openSearch } = useAdminSearchModal();
   
   // Get current page title from sidebar config
   const pageTitle = useMemo(() => {
@@ -117,15 +118,19 @@ export function AdminHeader({
         {/* Search button */}
         <Button
           variant="ghost"
-          size="icon"
+          onClick={openSearch}
           className={cn(
-            "h-9 w-9 rounded-lg",
+            "h-9 px-3 rounded-lg gap-2",
             "text-[hsl(var(--admin-text-secondary))]",
             "hover:text-[hsl(var(--admin-text-primary))]",
             "hover:bg-[hsl(var(--admin-sidebar-hover))]"
           )}
         >
-          <Search className="h-4.5 w-4.5" />
+          <Search className="h-4 w-4" />
+          <span className="hidden sm:inline text-sm">Search</span>
+          <kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border border-[hsl(var(--admin-border))] bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
+            ⌘K
+          </kbd>
         </Button>
 
         {/* Notifications button */}
