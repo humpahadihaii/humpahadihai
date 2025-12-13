@@ -13,7 +13,7 @@ import { HomepageVisits } from "@/components/HomepageVisits";
 import { FeaturedCardSection } from "@/components/FeaturedCardSection";
 import { SearchTrigger } from "@/components/search";
 import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
-import WeatherWidget from "@/components/weather/WeatherWidget";
+
 import AllDistrictsWeather from "@/components/weather/AllDistrictsWeather";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 import { useSiteSharePreview } from "@/hooks/useSharePreview";
@@ -77,28 +77,6 @@ const HomePage = () => {
     },
   });
 
-  // Fetch a major district for weather (Dehradun as default)
-  const { data: weatherDistrict } = useQuery({
-    queryKey: ["weather-district"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("districts")
-        .select("id, name, latitude, longitude")
-        .eq("name", "Dehradun")
-        .single();
-      if (error) {
-        // Fallback to first district with coordinates
-        const { data: fallback } = await supabase
-          .from("districts")
-          .select("id, name, latitude, longitude")
-          .not("latitude", "is", null)
-          .limit(1)
-          .single();
-        return fallback;
-      }
-      return data;
-    },
-  });
 
   const features = [
     {
@@ -274,7 +252,7 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* All Districts Weather */}
+      {/* All Districts Weather - with hover effects */}
       <section className="section-padding-sm bg-muted/40">
         <div className="container-wide">
           <AllDistrictsWeather />
@@ -290,17 +268,8 @@ const HomePage = () => {
               <FestivalSpotlight limit={3} />
             </div>
             
-            {/* Sidebar with Events & Weather */}
+            {/* Sidebar with Events only */}
             <div className="space-y-6">
-              {/* Weather Widget */}
-              {weatherDistrict && (
-                <WeatherWidget
-                  lat={Number(weatherDistrict.latitude)}
-                  lng={Number(weatherDistrict.longitude)}
-                  locationName={weatherDistrict.name}
-                />
-              )}
-              
               {/* Upcoming Events */}
               <EventCalendarWidget
                 events={upcomingEvents as any}
