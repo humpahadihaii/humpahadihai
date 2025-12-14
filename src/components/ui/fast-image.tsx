@@ -8,11 +8,14 @@ interface FastImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   containerClassName?: string;
   priority?: boolean;
   aspectRatio?: string;
+  width?: number;
+  height?: number;
 }
 
 /**
  * FastImage - Optimized image component with instant loading feel
  * Uses native lazy loading, decoding async, and smooth fade-in
+ * Priority images are eager-loaded with high fetchPriority
  */
 export const FastImage = memo(function FastImage({
   src,
@@ -21,6 +24,8 @@ export const FastImage = memo(function FastImage({
   containerClassName,
   priority = false,
   aspectRatio,
+  width,
+  height,
   ...props
 }: FastImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -43,18 +48,24 @@ export const FastImage = memo(function FastImage({
     setIsLoaded(true);
   }, []);
 
+  // Calculate container styles to prevent layout shift
+  const containerStyle: React.CSSProperties = {
+    ...(aspectRatio ? { aspectRatio } : {}),
+    ...(width && height ? { width, height } : {}),
+  };
+
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-muted/50",
+        "relative overflow-hidden bg-muted/30",
         containerClassName
       )}
-      style={aspectRatio ? { aspectRatio } : undefined}
+      style={containerStyle}
     >
-      {/* Lightweight skeleton - no animation until needed */}
+      {/* Skeleton placeholder - reserves layout space */}
       {!isLoaded && (
         <div
-          className="absolute inset-0 bg-muted animate-pulse"
+          className="absolute inset-0 bg-muted skeleton-shimmer"
           aria-hidden="true"
         />
       )}
@@ -72,12 +83,14 @@ export const FastImage = memo(function FastImage({
         src={src}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
-        decoding="async"
+        decoding={priority ? "sync" : "async"}
         fetchPriority={priority ? "high" : "auto"}
         onLoad={handleLoad}
         onError={handleError}
+        width={width}
+        height={height}
         className={cn(
-          "transition-opacity duration-300",
+          "transition-opacity duration-200",
           isLoaded && !hasError ? "opacity-100" : "opacity-0",
           className
         )}
@@ -88,13 +101,14 @@ export const FastImage = memo(function FastImage({
 });
 
 /**
- * CardImage - Image optimized for cards with aspect ratio
+ * CardImage - Image optimized for cards with fixed aspect ratio to prevent CLS
  */
 export const CardImage = memo(function CardImage({
   src,
   alt,
   className,
   aspectRatio = "16/9",
+  priority = false,
   ...props
 }: FastImageProps) {
   return (
@@ -102,10 +116,72 @@ export const CardImage = memo(function CardImage({
       src={src}
       alt={alt}
       aspectRatio={aspectRatio}
+      priority={priority}
       className={cn("w-full h-full object-cover", className)}
       containerClassName="w-full"
       {...props}
     />
+  );
+});
+
+/**
+ * HeroImage - High priority image for above-the-fold hero sections
+ * Always eager loaded with high priority
+ */
+export const HeroImage = memo(function HeroImage({
+  src,
+  alt,
+  className,
+  overlay = true,
+  children,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  overlay?: boolean;
+  children?: React.ReactNode;
+}) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoaded(true);
+    }
+  }, [src]);
+
+  return (
+    <div className={cn("relative overflow-hidden", className)}>
+      {/* Skeleton background for instant visual */}
+      <div 
+        className={cn(
+          "absolute inset-0 bg-primary/20 transition-opacity duration-300",
+          isLoaded ? "opacity-0" : "opacity-100"
+        )} 
+      />
+      
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
+        onLoad={() => setIsLoaded(true)}
+        className={cn(
+          "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+          isLoaded ? "opacity-100" : "opacity-0"
+        )}
+      />
+      
+      {overlay && (
+        <div className="absolute inset-0 hero-overlay" aria-hidden="true" />
+      )}
+      
+      {children && (
+        <div className="relative z-10">{children}</div>
+      )}
+    </div>
   );
 });
 
@@ -126,7 +202,7 @@ export const ThumbnailImage = memo(function ThumbnailImage({
       width={size}
       height={size}
       className={cn("w-full h-full object-cover rounded", className)}
-      containerClassName={`w-[${size}px] h-[${size}px] rounded flex-shrink-0`}
+      containerClassName="rounded flex-shrink-0"
       style={{ width: size, height: size }}
       {...props}
     />
