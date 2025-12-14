@@ -47,6 +47,8 @@ const ContentListPage = ({
       if (error) throw error;
       return data as ContentItem[];
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   return (
