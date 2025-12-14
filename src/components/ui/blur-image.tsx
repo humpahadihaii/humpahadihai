@@ -26,7 +26,7 @@ export function BlurImage({
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for lazy loading
+  // Intersection Observer for lazy loading - increased rootMargin for earlier loading
   useEffect(() => {
     if (priority || isInView) return;
 
@@ -37,7 +37,7 @@ export function BlurImage({
           observer.disconnect();
         }
       },
-      { rootMargin: "100px" }
+      { rootMargin: "400px" } // Load images 400px before they enter viewport
     );
 
     if (containerRef.current) {
