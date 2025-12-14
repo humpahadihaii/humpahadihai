@@ -19,6 +19,8 @@ import { useSiteSharePreview } from "@/hooks/useSharePreview";
 import { FeaturedContentSection } from "@/components/home/FeaturedContentSection";
 import { useHomepageCTAs } from "@/hooks/useHomepageCTAs";
 import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/home/CTASection";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { FadeInSection } from "@/components/PageWrapper";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -168,17 +170,24 @@ const HomePage = () => {
       {/* Below Hero CTAs */}
       <BelowHeroCTAs ctas={belowHeroCtas} />
 
+      {/* Recently Viewed - only shows if user has history */}
+      <div className="container-wide py-6">
+        <RecentlyViewed variant="horizontal" maxItems={6} />
+      </div>
+
       {/* Introduction - CMS Driven */}
-      <section className="section-padding bg-muted/40">
-        <div className="container-narrow text-center">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-6">
-            {welcomeSection?.title || "Welcome to Our Pahadi World"}
-          </h2>
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            {welcomeSection?.body || "Hum Pahadi Haii is your digital gateway to the heart of Uttarakhand. We preserve and share the timeless traditions, rich culture, authentic cuisine, and stunning natural beauty of the Garhwal and Kumaon regions."}
-          </p>
-        </div>
-      </section>
+      <FadeInSection>
+        <section className="section-padding bg-muted/40">
+          <div className="container-narrow text-center">
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-6">
+              {welcomeSection?.title || "Welcome to Our Pahadi World"}
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              {welcomeSection?.body || "Hum Pahadi Haii is your digital gateway to the heart of Uttarakhand. We preserve and share the timeless traditions, rich culture, authentic cuisine, and stunning natural beauty of the Garhwal and Kumaon regions."}
+            </p>
+          </div>
+        </section>
+      </FadeInSection>
 
       {/* Features Grid */}
       <section className="section-padding">
