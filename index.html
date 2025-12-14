@@ -40,27 +40,42 @@
     <link rel="icon" type="image/jpeg" href="/logo.jpg" />
     <link rel="canonical" href="https://humpahadihaii.in/" />
     
-    <!-- DNS Prefetch for external resources -->
+    <!-- DNS Prefetch & Preconnect for critical resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="dns-prefetch" href="https://qxeodogwbdndgfslbyej.supabase.co">
-    
-    <!-- Preconnect for fonts (critical) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://qxeodogwbdndgfslbyej.supabase.co" crossorigin>
     
-    <!-- Preload critical font -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap"></noscript>
+    <!-- Preload critical font (display font for hero) -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v21/pxiByp8kv8JHgFVrLCz7Z1xlEw.woff2" as="font" type="font/woff2" crossorigin>
     
-    <!-- Load Inter font with lower priority -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"></noscript>
+    <!-- Load fonts with font-display: swap -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
 
-    <!-- Critical CSS to prevent flash -->
+    <!-- Critical CSS - Inlined for instant FCP -->
     <style>
-      body{margin:0;background:#f8f7f4}
+      /* Reset & Base */
+      *,*::before,*::after{box-sizing:border-box}
+      body{margin:0;background:#f8f7f4;font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
       #root{min-height:100vh;background:#f8f7f4}
+      
+      /* Hero section critical styles */
+      .hero-critical{min-height:75vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#2a5a4a}
+      .hero-critical img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+      .hero-critical::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.65))}
+      .hero-text-critical{position:relative;z-index:10;text-align:center;color:#fff;padding:1rem}
+      .hero-text-critical h1{font-family:Poppins,system-ui,sans-serif;font-size:clamp(2.25rem,5vw,4.5rem);font-weight:700;margin:0 0 1rem;line-height:1.1}
+      .hero-text-critical p{font-size:clamp(1rem,2vw,1.5rem);opacity:.9;max-width:600px;margin:0 auto 2rem}
+      
+      /* Navigation critical */
+      .nav-critical{position:sticky;top:0;z-index:50;height:4rem;background:rgba(248,247,244,.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.08)}
+      
+      /* Loading skeleton */
+      .skeleton{background:linear-gradient(90deg,#e8e6e3 25%,#f0eeec 50%,#e8e6e3 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+      @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     </style>
   </head>
 
