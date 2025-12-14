@@ -3,22 +3,45 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AnalyticsProvider } from "./components/AnalyticsProvider";
-import { CookieConsentProvider } from "./components/cookie";
-import { SearchProvider, SearchModal } from "./components/search";
-import { ReadingModeProvider } from "./components/ReadingModeToggle";
-import ScrollToTop from "./components/ScrollToTop";
-import Navigation from "./components/Navigation";
-import Footer from "./components/Footer";
-import { AdminToolbar } from "./components/AdminToolbar";
-import { QuickAccessBar } from "./components/QuickAccessBar";
-import { FloatingShareButton } from "./components/share/FloatingShareButton";
 import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cn } from "@/lib/utils";
+import { createDeferredComponent, DeferredRender } from "./components/DeferredComponent";
 
-// Critical pages and route guards loaded eagerly for fast initial render
+// Critical components loaded eagerly
+import Navigation from "./components/Navigation";
+import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
+
+// Deferred non-critical components (load after first paint)
+const DeferredAnalyticsProvider = createDeferredComponent(
+  () => import("./components/AnalyticsProvider").then(m => ({ default: m.AnalyticsProvider })),
+  { delay: 500 }
+);
+const DeferredCookieConsentProvider = createDeferredComponent(
+  () => import("./components/cookie").then(m => ({ default: m.CookieConsentProvider })),
+  { delay: 300 }
+);
+const DeferredAdminToolbar = createDeferredComponent(
+  () => import("./components/AdminToolbar").then(m => ({ default: m.AdminToolbar })),
+  { delay: 1000 }
+);
+const DeferredFloatingShareButton = createDeferredComponent(
+  () => import("./components/share/FloatingShareButton").then(m => ({ default: m.FloatingShareButton })),
+  { delay: 800 }
+);
+const DeferredQuickAccessBar = createDeferredComponent(
+  () => import("./components/QuickAccessBar").then(m => ({ default: m.QuickAccessBar })),
+  { delay: 600 }
+);
+
+// Lazy load search components (used on interaction)
+const SearchProvider = lazy(() => import("./components/search").then(m => ({ default: m.SearchProvider })));
+const SearchModal = lazy(() => import("./components/search").then(m => ({ default: m.SearchModal })));
+const ReadingModeProvider = lazy(() => import("./components/ReadingModeToggle").then(m => ({ default: m.ReadingModeProvider })));
+
+// Critical pages loaded eagerly for fast initial render
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
 import AdminRoute from "./components/AdminRoute";
@@ -321,7 +344,7 @@ const AppContent = memo(() => {
     <>
       <ScrollToTop />
       <GlobalProgressLoader />
-      <AdminToolbar />
+      <DeferredAdminToolbar />
       <div className="flex flex-col min-h-screen">
         {/* Hide Navigation on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Navigation />}
@@ -451,25 +474,39 @@ const AppContent = memo(() => {
         </main>
         {/* Hide Footer on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Footer />}
-        {/* Floating Share Button only on public pages */}
-        {!isAdminRoute && !isAuthRoute && <FloatingShareButton />}
-        {/* Quick Access Bar only on public pages */}
-        {!isAdminRoute && !isAuthRoute && <QuickAccessBar />}
+        {/* Floating Share Button only on public pages - deferred */}
+        {!isAdminRoute && !isAuthRoute && <DeferredFloatingShareButton />}
+        {/* Quick Access Bar only on public pages - deferred */}
+        {!isAdminRoute && !isAuthRoute && <DeferredQuickAccessBar />}
       </div>
-      <SearchModal />
+      <Suspense fallback={null}>
+        <SearchModal />
+      </Suspense>
     </>
   );
 });
 AppContent.displayName = "AppContent";
+
+// Simple wrapper for deferred providers that don't need router context
+const DeferredProviders = memo(({ children }: { children: React.ReactNode }) => {
+  return (
+    <DeferredCookieConsentProvider>
+      <DeferredAnalyticsProvider>
+        {children}
+      </DeferredAnalyticsProvider>
+    </DeferredCookieConsentProvider>
+  );
+});
+DeferredProviders.displayName = "DeferredProviders";
 
 const App = () => (
   <BrowserRouter>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <ReadingModeProvider>
-            <CookieConsentProvider>
-              <AnalyticsProvider>
+          <Suspense fallback={null}>
+            <ReadingModeProvider>
+              <Suspense fallback={null}>
                 <SearchProvider>
                   <Toaster />
                   <Sonner />
@@ -477,9 +514,9 @@ const App = () => (
                     <AppContent />
                   </ErrorBoundary>
                 </SearchProvider>
-              </AnalyticsProvider>
-            </CookieConsentProvider>
-          </ReadingModeProvider>
+              </Suspense>
+            </ReadingModeProvider>
+          </Suspense>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
