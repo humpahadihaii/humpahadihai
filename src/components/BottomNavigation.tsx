@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchModal } from "@/components/search/SearchContext";
 import { getWeatherIconUrl } from "@/hooks/useWeather";
+import { RouteLocationSelector } from "@/components/routes/RouteLocationSelector";
 
 interface DistrictWeather {
   id: string;
@@ -195,23 +196,8 @@ export function BottomNavigation() {
 
       {/* Routes Modal */}
       {activeModal === "routes" && (
-        <div className="fixed bottom-16 left-4 right-4 bg-background rounded-2xl shadow-xl z-50 max-h-[60vh] overflow-hidden md:hidden animate-in slide-in-from-bottom-4 duration-200">
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h3 className="font-display text-lg font-semibold">Popular Routes</h3>
-            <button onClick={closeModal} className="p-1 rounded-full hover:bg-muted">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="p-4 overflow-y-auto max-h-[calc(60vh-60px)]">
-            <div className="space-y-3">
-              {POPULAR_ROUTES.map((route, i) => (
-                <div key={i} className="bg-muted/50 rounded-xl p-3 border border-border/50">
-                  <p className="font-medium text-sm">{route.name}</p>
-                  <p className="text-xs text-muted-foreground">{route.via}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="fixed bottom-16 left-4 right-4 bg-background rounded-2xl shadow-xl z-50 max-h-[70vh] overflow-hidden md:hidden animate-in slide-in-from-bottom-4 duration-200">
+          <RouteLocationSelector onClose={closeModal} />
         </div>
       )}
 
