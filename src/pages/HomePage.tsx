@@ -17,6 +17,8 @@ import AllDistrictsWeather from "@/components/weather/AllDistrictsWeather";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 import { useSiteSharePreview } from "@/hooks/useSharePreview";
 import { FeaturedContentSection } from "@/components/home/FeaturedContentSection";
+import { useHomepageCTAs } from "@/hooks/useHomepageCTAs";
+import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/home/CTASection";
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -109,10 +111,11 @@ const HomePage = () => {
     },
   ];
 
-  const primaryCtaText = settings?.primary_cta_text || "Explore Culture";
-  const primaryCtaUrl = settings?.primary_cta_url || "/culture";
-  const secondaryCtaText = settings?.secondary_cta_text || "View Gallery";
-  const secondaryCtaUrl = settings?.secondary_cta_url || "/gallery";
+  // Fetch dynamic CTAs
+  const { data: heroCtas = [] } = useHomepageCTAs("hero");
+  const { data: belowHeroCtas = [] } = useHomepageCTAs("below_hero");
+  const { data: midPageCtas = [] } = useHomepageCTAs("mid_page");
+  const { data: footerCtas = [] } = useHomepageCTAs("footer_cta");
 
   return (
     <div className="min-h-screen">
@@ -150,15 +153,8 @@ const HomePage = () => {
           <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed">
             {tagline}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Button 
-              size="lg" 
-              asChild 
-              className="bg-secondary hover:bg-secondary/90 text-white shadow-lg press-effect min-h-[48px] px-8 text-base font-medium"
-            >
-              <Link to={primaryCtaUrl}>{primaryCtaText}</Link>
-            </Button>
-          </div>
+          {/* Dynamic Hero CTAs */}
+          <HeroCTAs ctas={heroCtas} />
           {/* Hero Search CTA */}
           <div className="mt-8">
             <SearchTrigger variant="hero" />
@@ -168,6 +164,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Below Hero CTAs */}
+      <BelowHeroCTAs ctas={belowHeroCtas} />
 
       {/* Introduction - CMS Driven */}
       <section className="section-padding bg-muted/40">
@@ -282,6 +281,9 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Mid-Page CTA Banner */}
+      <MidPageCTA ctas={midPageCtas} />
+
       {/* Legacy Featured Highlights */}
       {highlights.length > 0 && (
         <section className="section-padding bg-muted/40">
@@ -356,6 +358,9 @@ const HomePage = () => {
 
       {/* Featured Card Section - CMS Driven */}
       <FeaturedCardSection slug="follow-our-journey" />
+
+      {/* Footer CTA Section */}
+      <FooterCTA ctas={footerCtas} />
     </div>
   );
 };

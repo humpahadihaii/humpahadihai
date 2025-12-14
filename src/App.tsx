@@ -86,6 +86,7 @@ import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
 import AdminAIToolsPage from "./pages/admin/AdminAIToolsPage";
 import AdminAISettingsPage from "./pages/admin/AdminAISettingsPage";
 import AdminBulkAIPage from "./pages/admin/AdminBulkAIPage";
+import AdminHomepageCTAsPage from "./pages/admin/AdminHomepageCTAsPage";
 import AdminPageSettingsPage from "./pages/admin/AdminPageSettingsPage";
 import AdminMapSettingsPage from "./pages/admin/AdminMapSettingsPage";
 // Admin District Content Pages
@@ -185,6 +186,7 @@ const AppContent = () => {
             <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
             <Route path="/admin/ai-settings" element={<AdminRoute><AdminAISettingsPage /></AdminRoute>} />
             <Route path="/admin/bulk-ai" element={<AdminRoute><AdminBulkAIPage /></AdminRoute>} />
+            <Route path="/admin/homepage-ctas" element={<AdminRoute><AdminHomepageCTAsPage /></AdminRoute>} />
             <Route path="/admin/map-settings" element={<AdminRoute><AdminMapSettingsPage /></AdminRoute>} />
             <Route path="/admin/map" element={<AdminRoute><AdminMapPage /></AdminRoute>} />
             <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />

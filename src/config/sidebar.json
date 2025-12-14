@@ -164,6 +164,15 @@
       "required_roles": ["super_admin", "admin", "seo_manager"]
     },
     {
+      "id": "homepage-ctas",
+      "label": "Homepage CTAs",
+      "icon": "MousePointerClick",
+      "route": "/admin/homepage-ctas",
+      "group": "settings",
+      "order": 5,
+      "required_roles": ["super_admin", "admin", "content_manager"]
+    },
+    {
       "id": "share-settings",
       "label": "Share Settings",
       "icon": "Share2",
