@@ -397,336 +397,328 @@ export default function CulturalContentDetailPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Main Content Area */}
-          <article className="lg:col-span-2 space-y-10">
+      {/* Warm cultural background with subtle texture */}
+      <main className="bg-gradient-to-b from-amber-50/30 via-background to-background dark:from-amber-950/10 dark:via-background">
+        <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            {/* Main Content Area - Constrained reading width */}
+            <article className="lg:col-span-8 xl:col-span-7 space-y-12 md:space-y-16">
             
-            {/* Section 1: Cultural & Social Significance */}
-            {shouldShow('cultural_significance', content.cultural_significance) && (
-              <ContentSection
-                icon={<Heart className="h-5 w-5" />}
-                title="Cultural & Social Significance"
-              >
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {content.cultural_significance}
-                </p>
-              </ContentSection>
-            )}
+              {/* Section 1: Cultural & Social Significance */}
+              {shouldShow('cultural_significance', content.cultural_significance) && (
+                <ContentSection
+                  icon={<Heart className="h-5 w-5" />}
+                  title="Cultural & Social Significance"
+                >
+                  <ArticleText>{content.cultural_significance}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 2: Origin & Historical Background */}
-            {shouldShow('origin_history', content.origin_history) && (
-              <ContentSection
-                icon={<BookOpen className="h-5 w-5" />}
-                title="Origin & Historical Background"
-              >
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {content.origin_history}
-                </p>
-              </ContentSection>
-            )}
+              {/* Section 2: Origin & Historical Background */}
+              {shouldShow('origin_history', content.origin_history) && (
+                <ContentSection
+                  icon={<BookOpen className="h-5 w-5" />}
+                  title="Origin & Historical Background"
+                >
+                  <ArticleText>{content.origin_history}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 3: Spiritual Significance (temples, spiritual places) */}
-            {shouldShow('spiritual_significance', content.spiritual_significance) && (
-              <ContentSection
-                icon={<Sparkles className="h-5 w-5" />}
-                title="Spiritual Significance"
-              >
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {content.spiritual_significance}
-                </p>
-              </ContentSection>
-            )}
+              {/* Section 3: Spiritual Significance (temples, spiritual places) */}
+              {shouldShow('spiritual_significance', content.spiritual_significance) && (
+                <ContentSection
+                  icon={<Sparkles className="h-5 w-5" />}
+                  title="Spiritual Significance"
+                >
+                  <ArticleText>{content.spiritual_significance}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 4: Historical Significance */}
-            {shouldShow('historical_significance', content.historical_significance) && (
-              <ContentSection
-                icon={<BookOpen className="h-5 w-5" />}
-                title="Historical Significance"
-              >
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {content.historical_significance}
-                </p>
-              </ContentSection>
-            )}
+              {/* Section 4: Historical Significance */}
+              {shouldShow('historical_significance', content.historical_significance) && (
+                <ContentSection
+                  icon={<BookOpen className="h-5 w-5" />}
+                  title="Historical Significance"
+                >
+                  <ArticleText>{content.historical_significance}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 5: Ingredients (food only) */}
-            {shouldShow('ingredients', ingredients) && ingredients.length > 0 && (
-              <ContentSection
-                icon={<Utensils className="h-5 w-5" />}
-                title="Traditional Ingredients"
-              >
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {ingredients.map((ingredient: string, index: number) => (
-                    <li key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                      <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                      <span className="text-foreground">{ingredient}</span>
-                    </li>
-                  ))}
-                </ul>
-              </ContentSection>
-            )}
+              {/* Section 5: Ingredients (food only) */}
+              {shouldShow('ingredients', ingredients) && ingredients.length > 0 && (
+                <ContentSection
+                  icon={<Utensils className="h-5 w-5" />}
+                  title="Traditional Ingredients"
+                >
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {ingredients.map((ingredient: string, index: number) => (
+                      <li key={index} className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border/40 shadow-sm">
+                        <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                        <span className="text-foreground font-medium">{ingredient}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </ContentSection>
+              )}
 
-            {/* Section 6: Traditional Preparation / Practices */}
-            {shouldShow('preparation_method', content.preparation_method) && (
-              <ContentSection
-                icon={<Utensils className="h-5 w-5" />}
-                title="Traditional Preparation Method"
-              >
-                <div className="prose max-w-none text-muted-foreground">
-                  <p className="whitespace-pre-line leading-relaxed">{content.preparation_method}</p>
-                </div>
-              </ContentSection>
-            )}
+              {/* Section 6: Traditional Preparation / Practices */}
+              {shouldShow('preparation_method', content.preparation_method) && (
+                <ContentSection
+                  icon={<Utensils className="h-5 w-5" />}
+                  title="Traditional Preparation Method"
+                >
+                  <ArticleText>{content.preparation_method}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 7: Taste & Texture (food) */}
-            {shouldShow('taste_description', content.taste_description) && (
-              <ContentSection
-                icon={<Sparkles className="h-5 w-5" />}
-                title="Taste & Texture Profile"
-              >
-                <p className="text-muted-foreground leading-relaxed">{content.taste_description}</p>
-              </ContentSection>
-            )}
+              {/* Section 7: Taste & Texture (food) */}
+              {shouldShow('taste_description', content.taste_description) && (
+                <ContentSection
+                  icon={<Sparkles className="h-5 w-5" />}
+                  title="Taste & Texture Profile"
+                >
+                  <ArticleText>{content.taste_description}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 8: Local Customs & Rituals */}
-            {shouldShow('local_customs', content.local_customs) && (
-              <ContentSection
-                icon={<Users className="h-5 w-5" />}
-                title="Local Customs & Rituals"
-              >
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {content.local_customs}
-                </p>
-              </ContentSection>
-            )}
+              {/* Section 8: Local Customs & Rituals */}
+              {shouldShow('local_customs', content.local_customs) && (
+                <ContentSection
+                  icon={<Users className="h-5 w-5" />}
+                  title="Local Customs & Rituals"
+                >
+                  <ArticleText>{content.local_customs}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 9: Things to Do */}
-            {shouldShow('things_to_do', thingsToDo) && thingsToDo.length > 0 && (
-              <ContentSection
-                icon={<Compass className="h-5 w-5" />}
-                title="Things to Do & Experience"
-              >
-                <ul className="space-y-3">
-                  {thingsToDo.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium shrink-0 mt-0.5">
-                        {index + 1}
-                      </span>
-                      <span className="text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </ContentSection>
-            )}
+              {/* Section 9: Things to Do */}
+              {shouldShow('things_to_do', thingsToDo) && thingsToDo.length > 0 && (
+                <ContentSection
+                  icon={<Compass className="h-5 w-5" />}
+                  title="Things to Do & Experience"
+                >
+                  <ul className="space-y-4">
+                    {thingsToDo.map((item, index) => (
+                      <li key={index} className="flex items-start gap-4">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-semibold shrink-0 mt-0.5">
+                          {index + 1}
+                        </span>
+                        <span className="text-foreground/80 text-base leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </ContentSection>
+              )}
 
-            {/* Section 10: Best Time / When to Enjoy */}
-            {shouldShow('consumption_occasions', content.consumption_occasions) && (
-              <ContentSection
-                icon={<Calendar className="h-5 w-5" />}
-                title={category.slug === 'local-food' ? 'When & How to Enjoy' : 'Best Time to Visit'}
-              >
-                <p className="text-muted-foreground leading-relaxed">{content.consumption_occasions}</p>
-              </ContentSection>
-            )}
+              {/* Section 10: Best Time / When to Enjoy */}
+              {shouldShow('consumption_occasions', content.consumption_occasions) && (
+                <ContentSection
+                  icon={<Calendar className="h-5 w-5" />}
+                  title={category.slug === 'local-food' ? 'When & How to Enjoy' : 'Best Time to Visit'}
+                >
+                  <ArticleText>{content.consumption_occasions}</ArticleText>
+                </ContentSection>
+              )}
 
-            {/* Section 11: Famous Places to Experience */}
-            {famousPlaces.length > 0 && (
-              <ContentSection
-                icon={<MapPin className="h-5 w-5" />}
-                title="Where to Experience"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {famousPlaces.map((place: any, index: number) => (
-                    <Card key={index} className="border-border/50">
-                      <CardContent className="p-4">
-                        <h4 className="font-semibold text-foreground">{place.name}</h4>
-                        {place.address && (
-                          <p className="text-sm text-muted-foreground mt-1">{place.address}</p>
-                        )}
-                        {place.maps_url && (
-                          <a
-                            href={place.maps_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-                          >
-                            <MapPin className="h-3 w-3" />
-                            View on Map
-                          </a>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ContentSection>
-            )}
+              {/* Section 11: Famous Places to Experience */}
+              {famousPlaces.length > 0 && (
+                <ContentSection
+                  icon={<MapPin className="h-5 w-5" />}
+                  title="Where to Experience"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {famousPlaces.map((place: any, index: number) => (
+                      <Card key={index} className="border-border/40 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                        <CardContent className="p-5">
+                          <h4 className="font-semibold text-foreground text-base">{place.name}</h4>
+                          {place.address && (
+                            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{place.address}</p>
+                          )}
+                          {place.maps_url && (
+                            <a
+                              href={place.maps_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mt-3 font-medium"
+                            >
+                              <MapPin className="h-3.5 w-3.5" />
+                              View on Map
+                            </a>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ContentSection>
+              )}
 
-            {/* Section 12: How to Reach */}
-            {howToReach && (
-              <ContentSection
-                icon={<Compass className="h-5 w-5" />}
-                title="How to Reach"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {howToReach.by_air && (
-                    <InfoCard title="By Air" content={howToReach.by_air} />
-                  )}
-                  {howToReach.by_rail && (
-                    <InfoCard title="By Rail" content={howToReach.by_rail} />
-                  )}
-                  {howToReach.by_road && (
-                    <InfoCard title="By Road" content={howToReach.by_road} />
-                  )}
-                </div>
-              </ContentSection>
-            )}
+              {/* Section 12: How to Reach */}
+              {howToReach && (
+                <ContentSection
+                  icon={<Compass className="h-5 w-5" />}
+                  title="How to Reach"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {howToReach.by_air && (
+                      <InfoCard title="By Air" content={howToReach.by_air} />
+                    )}
+                    {howToReach.by_rail && (
+                      <InfoCard title="By Rail" content={howToReach.by_rail} />
+                    )}
+                    {howToReach.by_road && (
+                      <InfoCard title="By Road" content={howToReach.by_road} />
+                    )}
+                  </div>
+                </ContentSection>
+              )}
 
-            {/* Section 13: Do's & Don'ts */}
-            {shouldShow('dos_and_donts', content.dos_and_donts) && (
-              <ContentSection
-                icon={<ShieldCheck className="h-5 w-5" />}
-                title="Tourist Tips & Local Advice"
-              >
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-lg p-5">
-                  <p className="text-foreground whitespace-pre-line leading-relaxed">
-                    {content.dos_and_donts}
-                  </p>
-                </div>
-              </ContentSection>
-            )}
+              {/* Section 13: Do's & Don'ts */}
+              {shouldShow('dos_and_donts', content.dos_and_donts) && (
+                <ContentSection
+                  icon={<ShieldCheck className="h-5 w-5" />}
+                  title="Tourist Tips & Local Advice"
+                >
+                  <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 rounded-xl p-6">
+                    <ArticleText className="!text-foreground/90">{content.dos_and_donts}</ArticleText>
+                  </div>
+                </ContentSection>
+              )}
 
-            {/* Section 14: Fun Facts */}
-            {shouldShow('fun_facts', content.fun_facts) && (
-              <ContentSection
-                icon={<Lightbulb className="h-5 w-5" />}
-                title="Fun Facts & Folklore"
-              >
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-5">
-                  <p className="text-foreground whitespace-pre-line leading-relaxed">
-                    {content.fun_facts}
-                  </p>
-                </div>
-              </ContentSection>
-            )}
+              {/* Section 14: Fun Facts */}
+              {shouldShow('fun_facts', content.fun_facts) && (
+                <ContentSection
+                  icon={<Lightbulb className="h-5 w-5" />}
+                  title="Fun Facts & Folklore"
+                >
+                  <div className="bg-primary/5 border border-primary/15 rounded-xl p-6">
+                    <ArticleText className="!text-foreground/90">{content.fun_facts}</ArticleText>
+                  </div>
+                </ContentSection>
+              )}
 
-            {/* Section 15: FAQs */}
-            {faqs.length > 0 && (
-              <ContentSection
-                icon={<HelpCircle className="h-5 w-5" />}
-                title="Frequently Asked Questions"
-              >
-                <Accordion type="single" collapsible className="w-full">
-                  {faqs.map((faq: any, index: number) => (
-                    <AccordionItem key={index} value={`faq-${index}`} className="border-border/50">
-                      <AccordionTrigger className="text-left hover:text-primary">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </ContentSection>
-            )}
-          </article>
-
-          {/* Sidebar */}
-          <aside className="space-y-6">
-            {/* Quick Info Card */}
-            <Card className="sticky top-24">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Info className="h-5 w-5" />
-                  Quick Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {content.price_range && (
-                  <QuickInfoRow
-                    icon={<IndianRupee className="h-4 w-4" />}
-                    label="Price Range"
-                    value={content.price_range}
-                  />
-                )}
-                {content.timings && (
-                  <QuickInfoRow
-                    icon={<Clock className="h-4 w-4" />}
-                    label="Timings"
-                    value={content.timings}
-                  />
-                )}
-                {content.entry_fee && (
-                  <QuickInfoRow
-                    icon={<IndianRupee className="h-4 w-4" />}
-                    label="Entry Fee"
-                    value={content.entry_fee}
-                  />
-                )}
-                {content.shelf_life_tips && (
-                  <QuickInfoRow
-                    icon={<Clock className="h-4 w-4" />}
-                    label="Shelf Life & Travel Tips"
-                    value={content.shelf_life_tips}
-                  />
-                )}
-
-                <Separator />
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">District</p>
-                  <Link
-                    to={`/districts/${district.slug}`}
-                    className="font-medium text-primary hover:underline flex items-center gap-1"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    {district.name}
-                  </Link>
-                </div>
-
-                {content.google_maps_url && (
-                  <>
-                    <Separator />
-                    <Button asChild className="w-full">
-                      <a
-                        href={content.google_maps_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+              {/* Section 15: FAQs */}
+              {faqs.length > 0 && (
+                <ContentSection
+                  icon={<HelpCircle className="h-5 w-5" />}
+                  title="Frequently Asked Questions"
+                >
+                  <Accordion type="single" collapsible className="w-full space-y-3">
+                    {faqs.map((faq: any, index: number) => (
+                      <AccordionItem 
+                        key={index} 
+                        value={`faq-${index}`} 
+                        className="border border-border/40 rounded-xl px-5 bg-card/50 data-[state=open]:bg-card shadow-sm"
                       >
-                        <MapPin className="h-4 w-4 mr-2" />
-                        View on Google Maps
-                        <ExternalLink className="h-3 w-3 ml-2" />
-                      </a>
+                        <AccordionTrigger className="text-left hover:text-primary py-4 text-base font-medium hover:no-underline">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-4">
+                          <p className="text-muted-foreground leading-relaxed text-[15px]">{faq.answer}</p>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </ContentSection>
+              )}
+            </article>
+
+            {/* Sidebar - Contained width on large screens */}
+            <aside className="lg:col-span-4 xl:col-span-5 space-y-6 lg:max-w-sm xl:max-w-md lg:ml-auto">
+              {/* Quick Info Card */}
+              <Card className="sticky top-24 border-border/40 shadow-sm">
+                <CardHeader className="pb-4 border-b border-border/30">
+                  <CardTitle className="text-lg flex items-center gap-2.5">
+                    <span className="p-2 rounded-lg bg-primary/10 text-primary">
+                      <Info className="h-4 w-4" />
+                    </span>
+                    Quick Info
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-5 space-y-5">
+                  {content.price_range && (
+                    <QuickInfoRow
+                      icon={<IndianRupee className="h-4 w-4" />}
+                      label="Price Range"
+                      value={content.price_range}
+                    />
+                  )}
+                  {content.timings && (
+                    <QuickInfoRow
+                      icon={<Clock className="h-4 w-4" />}
+                      label="Timings"
+                      value={content.timings}
+                    />
+                  )}
+                  {content.entry_fee && (
+                    <QuickInfoRow
+                      icon={<IndianRupee className="h-4 w-4" />}
+                      label="Entry Fee"
+                      value={content.entry_fee}
+                    />
+                  )}
+                  {content.shelf_life_tips && (
+                    <QuickInfoRow
+                      icon={<Clock className="h-4 w-4" />}
+                      label="Shelf Life & Travel Tips"
+                      value={content.shelf_life_tips}
+                    />
+                  )}
+
+                  <Separator className="!my-4" />
+
+                  <div>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1.5">District</p>
+                    <Link
+                      to={`/districts/${district.slug}`}
+                      className="font-semibold text-primary hover:underline flex items-center gap-1.5"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      {district.name}
+                    </Link>
+                  </div>
+
+                  {content.google_maps_url && (
+                    <>
+                      <Separator className="!my-4" />
+                      <Button asChild className="w-full">
+                        <a
+                          href={content.google_maps_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          View on Google Maps
+                          <ExternalLink className="h-3 w-3 ml-2" />
+                        </a>
+                      </Button>
+                    </>
+                  )}
+
+                  <Separator className="!my-4" />
+
+                  <div>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">Share this page</p>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: content.title,
+                            text: content.short_intro || metaDescription,
+                            url: window.location.href,
+                          });
+                        } else {
+                          navigator.clipboard.writeText(window.location.href);
+                        }
+                      }}
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share Now
                     </Button>
-                  </>
-                )}
-
-                <Separator />
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-3">Share this page</p>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: content.title,
-                          text: content.short_intro || metaDescription,
-                          url: window.location.href,
-                        });
-                      } else {
-                        navigator.clipboard.writeText(window.location.href);
-                      }
-                    }}
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
 
             {/* Related Content - Same Subcategory */}
             {relatedFromSubcategory.length > 0 && (
@@ -748,34 +740,37 @@ export default function CulturalContentDetailPage() {
                 categorySlug={category.slug}
               />
             )}
-          </aside>
+            </aside>
+          </div>
         </div>
 
         {/* Related Content from Same District */}
         {relatedFromDistrict.length > 0 && (
-          <section className="mt-16 border-t pt-10">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <TreePine className="h-6 w-6 text-primary" />
-              Explore More in {district.name}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {relatedFromDistrict.map((item) => (
-                <RelatedCard
-                  key={item.id}
-                  item={item}
-                  districtSlug={district.slug}
-                />
-              ))}
-            </div>
-            <div className="text-center mt-8">
-              <Button variant="outline" asChild>
-                <Link to={`/districts/${district.slug}`}>
-                  View All in {district.name}
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
-            </div>
-          </section>
+          <div className="container mx-auto px-4 pb-16">
+            <section className="border-t border-border/40 pt-12">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-3">
+                <TreePine className="h-7 w-7 text-primary" />
+                Explore More in {district.name}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {relatedFromDistrict.map((item) => (
+                  <RelatedCard
+                    key={item.id}
+                    item={item}
+                    districtSlug={district.slug}
+                  />
+                ))}
+              </div>
+              <div className="text-center mt-10">
+                <Button variant="outline" size="lg" asChild>
+                  <Link to={`/districts/${district.slug}`}>
+                    View All in {district.name}
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          </div>
         )}
       </main>
 
@@ -784,7 +779,24 @@ export default function CulturalContentDetailPage() {
   );
 }
 
-// Reusable Section Component
+// Article Text Component - Enhanced typography for reading
+function ArticleText({ 
+  children, 
+  className = '' 
+}: { 
+  children: React.ReactNode; 
+  className?: string;
+}) {
+  return (
+    <div className={`prose prose-lg max-w-none ${className}`}>
+      <p className="text-foreground/80 text-[17px] md:text-lg leading-[1.8] md:leading-[1.85] whitespace-pre-line tracking-[-0.01em]">
+        {children}
+      </p>
+    </div>
+  );
+}
+
+// Reusable Section Component with improved hierarchy
 function ContentSection({
   icon,
   title,
@@ -795,12 +807,20 @@ function ContentSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="scroll-mt-24" id={title.toLowerCase().replace(/\s+/g, '-')}>
-      <h2 className="text-xl md:text-2xl font-bold mb-4 flex items-center gap-3 text-foreground">
-        <span className="p-2 rounded-lg bg-primary/10 text-primary">{icon}</span>
-        {title}
+    <section 
+      className="scroll-mt-24 relative" 
+      id={title.toLowerCase().replace(/\s+/g, '-')}
+    >
+      {/* Subtle section separator */}
+      <div className="absolute -left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent hidden lg:block" />
+      
+      <h2 className="text-xl md:text-2xl lg:text-[1.65rem] font-bold mb-5 md:mb-6 flex items-center gap-3 text-foreground">
+        <span className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">{icon}</span>
+        <span className="leading-tight">{title}</span>
       </h2>
-      {children}
+      <div className="pl-0 lg:pl-1">
+        {children}
+      </div>
     </section>
   );
 }
@@ -816,22 +836,22 @@ function QuickInfoRow({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="text-muted-foreground shrink-0 mt-0.5">{icon}</span>
+    <div className="flex items-start gap-3.5">
+      <span className="text-primary/70 shrink-0 mt-0.5">{icon}</span>
       <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-medium text-foreground text-sm">{value}</p>
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+        <p className="font-medium text-foreground text-sm mt-0.5">{value}</p>
       </div>
     </div>
   );
 }
 
-// Info Card for How to Reach
+// Info Card for How to Reach - Enhanced styling
 function InfoCard({ title, content }: { title: string; content: string }) {
   return (
-    <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-      <h4 className="font-semibold text-foreground mb-2">{title}</h4>
-      <p className="text-sm text-muted-foreground">{content}</p>
+    <div className="p-5 rounded-xl bg-card border border-border/40 shadow-sm hover:shadow-md transition-shadow">
+      <h4 className="font-semibold text-foreground mb-2.5 text-base">{title}</h4>
+      <p className="text-sm text-muted-foreground leading-relaxed">{content}</p>
     </div>
   );
 }
