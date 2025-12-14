@@ -68,7 +68,8 @@ export type AdminSection =
   | "/admin/bookings"
   | "/admin/page-settings"
   | "/admin/notify-settings"
-  | "/admin/homepage-ctas";
+  | "/admin/homepage-ctas"
+  | "/admin/cookie-consent";
 
 /**
  * Complete list of all admin sections
@@ -116,6 +117,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   "/admin/page-settings",
   "/admin/notify-settings",
   "/admin/homepage-ctas",
+  "/admin/cookie-consent",
 ];
 
 /**

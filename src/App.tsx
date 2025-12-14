@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
+import { CookieConsentProvider } from "./components/cookie";
 import { SearchProvider, SearchModal } from "./components/search";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
@@ -117,6 +118,7 @@ import AdminCulturalCategoriesPage from "./pages/admin/AdminCulturalCategoriesPa
 import AdminCulturalSubcategoriesPage from "./pages/admin/AdminCulturalSubcategoriesPage";
 import AdminCulturalContentPage from "./pages/admin/AdminCulturalContentPage";
 import AdminFeaturedContentPage from "./pages/admin/AdminFeaturedContentPage";
+import AdminCookieConsentPage from "./pages/admin/AdminCookieConsentPage";
 
 const queryClient = new QueryClient();
 
@@ -249,6 +251,7 @@ const AppContent = () => {
             <Route path="/admin/cultural-categories" element={<AdminRoute><AdminCulturalCategoriesPage /></AdminRoute>} />
             <Route path="/admin/cultural-subcategories" element={<AdminRoute><AdminCulturalSubcategoriesPage /></AdminRoute>} />
             <Route path="/admin/cultural-content" element={<AdminRoute><AdminCulturalContentPage /></AdminRoute>} />
+            <Route path="/admin/cookie-consent" element={<AdminRoute><AdminCookieConsentPage /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -267,12 +270,14 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AnalyticsProvider>
-          <SearchProvider>
-            <AppContent />
-            <SearchModal />
-          </SearchProvider>
-        </AnalyticsProvider>
+        <CookieConsentProvider>
+          <AnalyticsProvider>
+            <SearchProvider>
+              <AppContent />
+              <SearchModal />
+            </SearchProvider>
+          </AnalyticsProvider>
+        </CookieConsentProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
