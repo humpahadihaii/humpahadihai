@@ -21,7 +21,8 @@ export const useSiteImages = () => {
   const { data: images = {} } = useQuery({
     queryKey: ['site-images'],
     queryFn: fetchSiteImages,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes - images rarely change
+    gcTime: 60 * 60 * 1000, // 1 hour garbage collection
     refetchOnWindowFocus: false,
   });
 
