@@ -619,6 +619,87 @@
 }
 
 /* ============================================
+   READING MODE STYLES
+   ============================================ */
+
+/* Reading mode - distraction-free layout */
+body.reading-mode {
+  --reading-font-size: 100%;
+}
+
+body.reading-mode .reading-mode-content {
+  @apply mx-auto max-w-3xl px-6;
+  font-size: var(--reading-font-size, 100%);
+  line-height: 1.85;
+}
+
+body.reading-mode .reading-mode-content h1,
+body.reading-mode .reading-mode-content h2,
+body.reading-mode .reading-mode-content h3 {
+  @apply mt-8 mb-4;
+}
+
+body.reading-mode .reading-mode-content p {
+  @apply mb-6;
+}
+
+body.reading-mode .reading-mode-content img {
+  @apply my-8 rounded-xl;
+}
+
+/* Hide distracting elements in reading mode */
+body.reading-mode .site-header,
+body.reading-mode footer,
+body.reading-mode .floating-share-button,
+body.reading-mode .quick-access-bar {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+body.reading-mode .site-header:hover,
+body.reading-mode footer:hover {
+  opacity: 1;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+/* Hide scrollbar for recently viewed carousel */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar for content areas */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* ============================================
    ACCESSIBILITY IMPROVEMENTS
    ============================================ */
 

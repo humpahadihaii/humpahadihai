@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
 import { CookieConsentProvider } from "./components/cookie";
 import { SearchProvider, SearchModal } from "./components/search";
+import { ReadingModeProvider } from "./components/ReadingModeToggle";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
@@ -272,10 +273,12 @@ const App = () => (
       <BrowserRouter>
         <CookieConsentProvider>
           <AnalyticsProvider>
-            <SearchProvider>
-              <AppContent />
-              <SearchModal />
-            </SearchProvider>
+            <ReadingModeProvider>
+              <SearchProvider>
+                <AppContent />
+                <SearchModal />
+              </SearchProvider>
+            </ReadingModeProvider>
           </AnalyticsProvider>
         </CookieConsentProvider>
       </BrowserRouter>
