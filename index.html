@@ -69,28 +69,20 @@
       .hero-text p{font-size:clamp(1rem,2vw,1.5rem);opacity:.9;max-width:600px;margin:0 auto}
       .loading-pulse{animation:pulse 2s infinite}
       @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-      #root:empty::before{content:'';display:block}
-      #root:empty .hero-shell{display:flex}
+      #static-hero{position:fixed;inset:0;z-index:9999}
+      .hero-shell.hidden{display:none}
     </style>
   </head>
 
   <body>
-    <!-- Static shell for instant FCP -->
-    <div id="root">
-      <div class="hero-shell" id="static-hero">
-        <div class="hero-text">
-          <h1>Hum Pahadi Haii</h1>
-          <p class="loading-pulse">Celebrating Uttarakhand's Culture, Tradition & Heritage</p>
-        </div>
+    <!-- Static shell for instant FCP - outside #root to avoid React conflicts -->
+    <div class="hero-shell" id="static-hero">
+      <div class="hero-text">
+        <h1>Hum Pahadi Haii</h1>
+        <p class="loading-pulse">Celebrating Uttarakhand's Culture, Tradition & Heritage</p>
       </div>
     </div>
-    <script>
-      // Remove static shell once React mounts
-      window.__removeStaticHero = function() {
-        var el = document.getElementById('static-hero');
-        if (el) el.remove();
-      };
-    </script>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
