@@ -24,6 +24,8 @@ const GalleryPage = () => {
       if (error) throw error;
       return data as GalleryItem[];
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const categories = Array.from(new Set(galleryItems?.map(item => item.category.toLowerCase()) || []));

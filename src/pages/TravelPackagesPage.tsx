@@ -70,6 +70,8 @@ const TravelPackagesPage = () => {
       if (error) throw error;
       return data as TravelPackage[];
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: staysListings = [], isLoading: staysLoading } = useQuery({
@@ -90,6 +92,8 @@ const TravelPackagesPage = () => {
       if (error) throw error;
       return data as TourismListing[];
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const filteredPackages = packages.filter((pkg) => {
