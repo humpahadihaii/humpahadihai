@@ -90,8 +90,13 @@ export function useInternalAnalytics(dateRange: DateRange) {
     try {
       const dateFilter = getDateFilter();
 
-      // Fetch site visits
-      let visitsQuery = supabase.from('site_visits').select('*').order('created_at', { ascending: false });
+      // Fetch site visits - ONLY select needed columns for performance
+      let visitsQuery = supabase
+        .from('site_visits')
+        .select('id, url, section, referrer, raw_referrer, device, browser, ip_hash, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1000); // Cap at 1000 records for performance
+      
       if (dateFilter) {
         visitsQuery = visitsQuery.gte('created_at', dateFilter);
       }
@@ -196,8 +201,11 @@ export function useInternalAnalytics(dateRange: DateRange) {
         .limit(10);
       setPagePerformance(pageViews?.map(p => ({ page: p.page, count: p.count })) || []);
 
-      // Fetch booking summary
-      let bookingsQuery = supabase.from('bookings_summary').select('*');
+      // Fetch booking summary - only needed columns
+      let bookingsQuery = supabase
+        .from('bookings_summary')
+        .select('booking_type, created_at')
+        .limit(500);
       if (dateFilter) {
         bookingsQuery = bookingsQuery.gte('created_at', dateFilter);
       }
