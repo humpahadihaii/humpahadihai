@@ -332,24 +332,20 @@
     display: none !important;
   }
 
-  /* Better image defaults with lazy load optimization */
+  /* Better image defaults - instant display with native lazy loading */
   img {
     @apply max-w-full h-auto;
+    content-visibility: auto;
   }
 
+  /* Native lazy loading - browser handles visibility */
   img[loading="lazy"] {
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
+    background-color: hsl(var(--muted));
   }
 
-  img[loading="lazy"].loaded,
-  img:not([loading="lazy"]) {
-    opacity: 1;
-  }
-
-  /* Auto-add loaded class via JS */
-  img[loading="lazy"][src]:not([src=""]) {
-    opacity: 1;
+  /* Decode async optimization */
+  img[decoding="async"] {
+    will-change: opacity;
   }
 
   /* Selection color */
