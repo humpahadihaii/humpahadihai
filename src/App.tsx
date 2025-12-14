@@ -304,10 +304,10 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ReadingModeProvider>
-          <CookieConsentProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <CookieConsentProvider>
               <AnalyticsProvider>
                 <SearchProvider>
                   <ErrorBoundary>
@@ -315,8 +315,8 @@ const App = () => (
                   </ErrorBoundary>
                 </SearchProvider>
               </AnalyticsProvider>
-            </BrowserRouter>
-          </CookieConsentProvider>
+            </CookieConsentProvider>
+          </BrowserRouter>
         </ReadingModeProvider>
       </TooltipProvider>
     </QueryClientProvider>
