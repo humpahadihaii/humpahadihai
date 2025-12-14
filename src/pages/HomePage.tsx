@@ -17,6 +17,7 @@ import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/hom
 import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
 import { SectionErrorBoundary } from "@/components/ErrorBoundary";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 // Import FeaturedCardSection directly for faster loading (above fold)
 import { FeaturedCardSection } from "@/components/FeaturedCardSection";
@@ -414,6 +415,20 @@ const HomePage = () => {
 
       {/* Footer CTA */}
       <FooterCTA ctas={footerCtas} />
+
+      {/* Weather Section for Desktop */}
+      <SectionErrorBoundary>
+        <section className="section-padding bg-muted/40 hidden md:block">
+          <div className="container-wide">
+            <Suspense fallback={<WeatherSkeleton />}>
+              <AllDistrictsWeather />
+            </Suspense>
+          </div>
+        </section>
+      </SectionErrorBoundary>
+
+      {/* Bottom Navigation for Mobile */}
+      <BottomNavigation />
     </div>
   );
 };
