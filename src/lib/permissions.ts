@@ -41,7 +41,8 @@ export type PermissionKey =
   | "tourismProviders"
   | "tourismListings"
   | "tourismInquiries"
-  | "mediaImport";
+  | "mediaImport"
+  | "homepageCTAs";
 
 export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   dashboard: ["super_admin", "admin"],
@@ -85,6 +86,7 @@ export const PERMISSIONS: Record<PermissionKey, UserRole[]> = {
   tourismListings: ["super_admin", "admin", "content_manager"],
   tourismInquiries: ["super_admin", "admin", "content_manager", "support_agent"],
   mediaImport: ["super_admin", "admin", "content_manager"],
+  homepageCTAs: ["super_admin", "admin", "content_manager"],
 };
 
 // Helper to check if a user can use AI features
