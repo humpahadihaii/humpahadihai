@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, X, FileText, MapPin, Folder, Tag, Image, Package, Building, Calendar, BookOpen } from "lucide-react";
+import { Search, X, FileText, MapPin, Folder, Tag, Package, Building, Calendar, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ const TYPE_ICONS: Record<AdminSearchResult["type"], React.ReactNode> = {
   listing: <Building className="h-4 w-4" />,
   package: <Package className="h-4 w-4" />,
   product: <Package className="h-4 w-4" />,
+  "admin-page": <Settings className="h-4 w-4" />,
 };
 
 const TYPE_COLORS: Record<AdminSearchResult["type"], string> = {
@@ -39,6 +40,7 @@ const TYPE_COLORS: Record<AdminSearchResult["type"], string> = {
   listing: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
   package: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
   product: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  "admin-page": "bg-violet-500/10 text-violet-600 dark:text-violet-400",
 };
 
 export function AdminSearchModal({ isOpen, onClose }: AdminSearchModalProps) {
