@@ -3,66 +3,28 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback, ReactNode } from "react";
+import { AnalyticsProvider } from "./components/AnalyticsProvider";
+import { CookieConsentProvider } from "./components/cookie";
+import { SearchProvider, SearchModal } from "./components/search";
+import { ReadingModeProvider } from "./components/ReadingModeToggle";
+import ScrollToTop from "./components/ScrollToTop";
+import Navigation from "./components/Navigation";
+import Footer from "./components/Footer";
+import { AdminToolbar } from "./components/AdminToolbar";
+import { QuickAccessBar } from "./components/QuickAccessBar";
+import { FloatingShareButton } from "./components/share/FloatingShareButton";
+import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cn } from "@/lib/utils";
-import { createDeferredComponent } from "./components/DeferredComponent";
 
-// ============================================
-// CRITICAL: Providers must be EAGERLY imported
-// Never lazy-load or defer context providers
-// ============================================
-import { CookieConsentProvider } from "./components/cookie";
-import { AnalyticsProvider } from "./components/AnalyticsProvider";
-import { SearchProvider, SearchModal } from "./components/search";
-import { ReadingModeProvider } from "./components/ReadingModeToggle";
-
-// Critical layout components loaded eagerly
-import Navigation from "./components/Navigation";
-import Footer from "./components/Footer";
-import ScrollToTop from "./components/ScrollToTop";
-
-// Deferred NON-PROVIDER components (load after first paint)
-// These are UI components, NOT context providers
-const DeferredAdminToolbar = createDeferredComponent(
-  () => import("./components/AdminToolbar").then(m => ({ default: m.AdminToolbar })),
-  { delay: 1000 }
-);
-const DeferredFloatingShareButton = createDeferredComponent(
-  () => import("./components/share/FloatingShareButton").then(m => ({ default: m.FloatingShareButton })),
-  { delay: 800 }
-);
-const DeferredQuickAccessBar = createDeferredComponent(
-  () => import("./components/QuickAccessBar").then(m => ({ default: m.QuickAccessBar })),
-  { delay: 600 }
-);
-
-// Critical pages loaded eagerly for fast initial render
+// Critical pages and route guards loaded eagerly for fast initial render
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
 import AdminRoute from "./components/AdminRoute";
 import AdminDashboardRoute from "./components/AdminDashboardRoute";
 import PendingApprovalRoute from "./components/PendingApprovalRoute";
 
-// Safe provider wrapper - ensures app renders even if a provider fails
-const SafeProvider = memo(({ 
-  children, 
-  Provider, 
-  name 
-}: { 
-  children: ReactNode; 
-  Provider: React.ComponentType<{ children: ReactNode }>; 
-  name: string;
-}) => {
-  try {
-    return <Provider>{children}</Provider>;
-  } catch (error) {
-    console.error(`Provider ${name} failed to initialize:`, error);
-    return <>{children}</>;
-  }
-});
-SafeProvider.displayName = "SafeProvider";
 // Lazy load all other pages for code splitting
 const CulturePage = lazy(() => import("./pages/CulturePage"));
 const FoodPage = lazy(() => import("./pages/FoodPage"));
@@ -359,7 +321,7 @@ const AppContent = memo(() => {
     <>
       <ScrollToTop />
       <GlobalProgressLoader />
-      <DeferredAdminToolbar />
+      <AdminToolbar />
       <div className="flex flex-col min-h-screen">
         {/* Hide Navigation on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Navigation />}
@@ -489,41 +451,35 @@ const AppContent = memo(() => {
         </main>
         {/* Hide Footer on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Footer />}
-        {/* Floating Share Button only on public pages - deferred */}
-        {!isAdminRoute && !isAuthRoute && <DeferredFloatingShareButton />}
-        {/* Quick Access Bar only on public pages - deferred */}
-        {!isAdminRoute && !isAuthRoute && <DeferredQuickAccessBar />}
+        {/* Floating Share Button only on public pages */}
+        {!isAdminRoute && !isAuthRoute && <FloatingShareButton />}
+        {/* Quick Access Bar only on public pages */}
+        {!isAdminRoute && !isAuthRoute && <QuickAccessBar />}
       </div>
-      <Suspense fallback={null}>
-        <SearchModal />
-      </Suspense>
+      <SearchModal />
     </>
   );
 });
 AppContent.displayName = "AppContent";
 
-// ============================================
-// App root with stable provider hierarchy
-// Order: Router → Query → UI → Cookie → Analytics → Search → Reading → App
-// ============================================
 const App = () => (
   <BrowserRouter>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <CookieConsentProvider>
-            <AnalyticsProvider>
-              <SearchProvider>
-                <ReadingModeProvider>
+          <ReadingModeProvider>
+            <CookieConsentProvider>
+              <AnalyticsProvider>
+                <SearchProvider>
                   <Toaster />
                   <Sonner />
                   <ErrorBoundary>
                     <AppContent />
                   </ErrorBoundary>
-                </ReadingModeProvider>
-              </SearchProvider>
-            </AnalyticsProvider>
-          </CookieConsentProvider>
+                </SearchProvider>
+              </AnalyticsProvider>
+            </CookieConsentProvider>
+          </ReadingModeProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>

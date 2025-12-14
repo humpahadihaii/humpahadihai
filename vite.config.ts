@@ -20,60 +20,23 @@ export default defineConfig(({ mode }) => ({
     target: "es2020",
     // Enable minification
     minify: "esbuild",
-    // Chunk splitting for better caching with content hashing
+    // Chunk splitting for better caching
     rollupOptions: {
       output: {
-        // Ensure unique chunk names with content hash for cache busting
-        chunkFileNames: "assets/[name]-[hash].js",
-        entryFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
-        manualChunks: (id) => {
-          // Core React vendor bundle
-          if (id.includes("node_modules/react") || 
-              id.includes("node_modules/react-dom") || 
-              id.includes("node_modules/react-router-dom")) {
-            return "react-vendor";
-          }
-          // UI component library
-          if (id.includes("node_modules/@radix-ui")) {
-            return "ui-vendor";
-          }
-          // Data fetching
-          if (id.includes("node_modules/@tanstack/react-query")) {
-            return "query-vendor";
-          }
-          // Supabase client
-          if (id.includes("node_modules/@supabase")) {
-            return "supabase";
-          }
-          // Heavy chart library - load separately
-          if (id.includes("node_modules/recharts")) {
-            return "charts";
-          }
-          // Map libraries - load separately
-          if (id.includes("node_modules/leaflet") || id.includes("node_modules/react-leaflet")) {
-            return "maps";
-          }
-          // Rich text editor - load separately
-          if (id.includes("node_modules/react-quill") || id.includes("node_modules/quill")) {
-            return "editor";
-          }
-          // Admin-only pages bundled together
-          if (id.includes("/pages/admin/") || id.includes("/components/admin/")) {
-            return "admin";
-          }
+        manualChunks: {
+          // Vendor chunks for better caching
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "ui-vendor": ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tooltip", "@radix-ui/react-popover"],
+          "query-vendor": ["@tanstack/react-query"],
+          "supabase": ["@supabase/supabase-js"],
         },
       },
     },
     // Increase chunk size warning limit
-    chunkSizeWarningLimit: 600,
-    // Enable source maps only in dev
-    sourcemap: mode === "development",
+    chunkSizeWarningLimit: 500,
   },
   // Optimize deps
   optimizeDeps: {
     include: ["react", "react-dom", "react-router-dom", "@tanstack/react-query"],
-    // Exclude heavy deps from pre-bundling
-    exclude: ["recharts", "react-quill"],
   },
 }));
