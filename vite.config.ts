@@ -20,9 +20,13 @@ export default defineConfig(({ mode }) => ({
     target: "es2020",
     // Enable minification
     minify: "esbuild",
-    // Chunk splitting for better caching
+    // Chunk splitting for better caching with content hashing
     rollupOptions: {
       output: {
+        // Ensure unique chunk names with content hash for cache busting
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash].[ext]",
         manualChunks: (id) => {
           // Core React vendor bundle
           if (id.includes("node_modules/react") || 
