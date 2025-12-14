@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
 import { CookieConsentProvider } from "./components/cookie";
@@ -13,9 +13,10 @@ import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
 import { QuickAccessBar } from "./components/QuickAccessBar";
 import { FloatingShareButton } from "./components/share/FloatingShareButton";
-import { Suspense, lazy, memo } from "react";
+import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { cn } from "@/lib/utils";
 
 // Critical pages and route guards loaded eagerly for fast initial render
 import HomePage from "./pages/HomePage";
@@ -137,8 +138,162 @@ const queryClient = new QueryClient({
   },
 });
 
-// Minimal loading fallback
-const PageLoader = memo(() => (
+// Circular progress loader with percentage - hybrid approach
+const CircularProgressLoader = memo(({ progress, isVisible }: { progress: number; isVisible: boolean }) => {
+  if (!isVisible && progress >= 100) return null;
+
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  return (
+    <div
+      className={cn(
+        "fixed inset-0 z-[9999] flex items-center justify-center",
+        "bg-background/70 backdrop-blur-sm",
+        "transition-opacity duration-500 ease-out",
+        !isVisible && "opacity-0 pointer-events-none"
+      )}
+      role="progressbar"
+      aria-valuenow={progress}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Loading page"
+    >
+      <div className="relative w-20 h-20">
+        {/* Background track */}
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={5} />
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke="hsl(var(--primary))"
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="transition-[stroke-dashoffset] duration-200 ease-out"
+          />
+        </svg>
+        {/* Spinning accent overlay */}
+        <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 100 100" style={{ animationDuration: "1.5s" }}>
+          <defs>
+            <linearGradient id="spinnerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke="url(#spinnerGrad)"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeDasharray={`${circumference * 0.25} ${circumference * 0.75}`}
+          />
+        </svg>
+        {/* Percentage text */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-base font-semibold text-foreground tabular-nums">{progress}%</span>
+        </div>
+      </div>
+    </div>
+  );
+});
+CircularProgressLoader.displayName = "CircularProgressLoader";
+
+// Hook for hybrid progress tracking
+function useHybridProgress() {
+  const [progress, setProgress] = useState(5);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isComplete, setIsComplete] = useState(false);
+  const isFetching = useIsFetching();
+  const location = useLocation();
+  const startTimeRef = useRef(Date.now());
+  const frameRef = useRef<number | null>(null);
+  const prevPathRef = useRef(location.pathname);
+
+  // Reset on route change
+  useEffect(() => {
+    if (location.pathname !== prevPathRef.current) {
+      prevPathRef.current = location.pathname;
+      startTimeRef.current = Date.now();
+      setProgress(5);
+      setIsVisible(true);
+      setIsComplete(false);
+    }
+  }, [location.pathname]);
+
+  const calculateTarget = useCallback(() => {
+    let target = 25; // Route rendered = 25%
+    
+    // Data fetching status (up to +45%)
+    if (isFetching === 0) {
+      target += 45;
+    } else {
+      target += Math.min(20, 45 * (1 - Math.min(isFetching, 5) / 5));
+    }
+    
+    // Time-based fallback (ensures progress never stalls)
+    const elapsed = Date.now() - startTimeRef.current;
+    const timeBasedMin = Math.min(10 + elapsed / 60, 92);
+    target = Math.max(target, timeBasedMin);
+    
+    // Cap at 95% until data is ready
+    return isFetching === 0 ? 100 : Math.min(target, 95);
+  }, [isFetching]);
+
+  // Animation loop
+  useEffect(() => {
+    const animate = () => {
+      if (isComplete) return;
+      
+      const target = calculateTarget();
+      setProgress(prev => {
+        const remaining = target - prev;
+        const step = Math.max(0.4, remaining * 0.07);
+        const next = Math.min(prev + step, target);
+        
+        if (next >= 100) {
+          setIsComplete(true);
+          return 100;
+        }
+        return next;
+      });
+      
+      frameRef.current = requestAnimationFrame(animate);
+    };
+    
+    frameRef.current = requestAnimationFrame(animate);
+    return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
+  }, [calculateTarget, isComplete]);
+
+  // Fade out after completion
+  useEffect(() => {
+    if (isComplete) {
+      const timer = setTimeout(() => setIsVisible(false), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [isComplete]);
+
+  // Fallback: force completion after 8s
+  useEffect(() => {
+    const fallback = setTimeout(() => {
+      setProgress(100);
+      setIsComplete(true);
+    }, 8000);
+    return () => clearTimeout(fallback);
+  }, [location.pathname]);
+
+  return { progress: Math.round(progress), isVisible };
+}
+
+// Minimal skeleton fallback for Suspense
+const SuspenseFallback = memo(() => (
   <div className="min-h-[50vh] flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md px-4">
       <Skeleton className="h-8 w-3/4 mx-auto" />
@@ -147,7 +302,14 @@ const PageLoader = memo(() => (
     </div>
   </div>
 ));
-PageLoader.displayName = "PageLoader";
+SuspenseFallback.displayName = "SuspenseFallback";
+
+// Global progress loader component
+const GlobalProgressLoader = memo(() => {
+  const { progress, isVisible } = useHybridProgress();
+  return <CircularProgressLoader progress={progress} isVisible={isVisible} />;
+});
+GlobalProgressLoader.displayName = "GlobalProgressLoader";
 
 // Component to conditionally render layout based on route
 const AppContent = memo(() => {
@@ -158,12 +320,13 @@ const AppContent = memo(() => {
   return (
     <>
       <ScrollToTop />
+      <GlobalProgressLoader />
       <AdminToolbar />
       <div className="flex flex-col min-h-screen">
         {/* Hide Navigation on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Navigation />}
         <main className="flex-grow">
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<SuspenseFallback />}>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/culture" element={<CulturePage />} />
