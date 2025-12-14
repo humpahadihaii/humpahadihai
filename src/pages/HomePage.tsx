@@ -1,4 +1,4 @@
-import { lazy, Suspense, memo, useMemo } from "react";
+import { lazy, Suspense, memo, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mountain, UtensilsCrossed, Camera, Palmtree } from "lucide-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCMSSettings, useCMSContentSection } from "@/hooks/useCMSSettings";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import heroImageFallback from "@/assets/hero-mountains.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,9 +18,11 @@ import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
 import { SectionErrorBoundary } from "@/components/ErrorBoundary";
 
-// Lazy load ALL below-fold components for reduced initial JS bundle - with safe fallbacks
+// Import FeaturedCardSection directly for faster loading (above fold)
+import { FeaturedCardSection } from "@/components/FeaturedCardSection";
+
+// Lazy load truly below-fold components only
 const HomepageVisits = lazy(() => import("@/components/HomepageVisits").then(m => ({ default: m.HomepageVisits })).catch(() => ({ default: () => null })));
-const FeaturedCardSection = lazy(() => import("@/components/FeaturedCardSection").then(m => ({ default: m.FeaturedCardSection })).catch(() => ({ default: () => null })));
 const FestivalSpotlight = lazy(() => import("@/components/festivals/FestivalSpotlight").catch(() => ({ default: () => null })));
 const AllDistrictsWeather = lazy(() => import("@/components/weather/AllDistrictsWeather").catch(() => ({ default: () => null })));
 const EventCalendarWidget = lazy(() => import("@/components/events/EventCalendarWidget").catch(() => ({ default: () => null })));
@@ -64,10 +66,42 @@ const DISTRICT_LINKS = [
 ] as const;
 
 const HomePage = () => {
+  const queryClient = useQueryClient();
   const { getImage } = useSiteImages();
   const { data: settings } = useCMSSettings();
   const { data: welcomeSection } = useCMSContentSection("welcome");
   const { settings: sharePreview } = useSiteSharePreview();
+  
+  // Prefetch featured content immediately on mount
+  useEffect(() => {
+    // Prefetch featured cards
+    queryClient.prefetchQuery({
+      queryKey: ["public-featured-cards", "en"],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("featured_cards")
+          .select("id, slug, title, subtitle, cta_label, cta_url, image_url, image_alt, icon_name, gradient_color, order_index")
+          .eq("is_published", true)
+          .eq("visible_on_homepage", true)
+          .order("order_index", { ascending: true })
+          .limit(4);
+        return data;
+      },
+    });
+    // Prefetch highlights
+    queryClient.prefetchQuery({
+      queryKey: ["featured-highlights"],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("featured_highlights")
+          .select("id, title, description, button_text, button_link, image_url, order_position")
+          .eq("status", "published")
+          .order("order_position", { ascending: true })
+          .limit(4);
+        return data;
+      },
+    });
+  }, [queryClient]);
   
   // Memoize hero image to prevent recalculation
   const heroImage = useMemo(() => 
@@ -100,7 +134,7 @@ const HomePage = () => {
     return { ogTitle, ogDescription, ogImage };
   }, [sharePreview, metaTitle, metaDescription]);
 
-  // Defer non-critical queries with longer stale times
+  // Featured highlights - load eagerly with reduced stale time
   const { data: highlights = [] } = useQuery({
     queryKey: ["featured-highlights"],
     queryFn: async () => {
@@ -113,8 +147,9 @@ const HomePage = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 1000 * 60 * 15, // 15 min - increased
-    gcTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 5, // 5 min (reduced)
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
   });
 
   // Defer events query with enabled flag
@@ -300,10 +335,10 @@ const HomePage = () => {
       {/* Mid-Page CTA */}
       <MidPageCTA ctas={midPageCtas} />
 
-      {/* Legacy Featured Highlights - Lazy with larger margin */}
+      {/* Featured Highlights - Render immediately (data prefetched) */}
       {Array.isArray(highlights) && highlights.length > 0 && (
-        <SectionErrorBoundary>
-          <LazySection className="section-padding bg-muted/40" minHeight="300px" rootMargin="400px">
+        <FadeInSection>
+          <section className="section-padding bg-muted/40">
             <div className="container-wide">
               <h2 className="font-display text-2xl md:text-3xl font-semibold text-center text-primary mb-10">Featured Highlights</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
@@ -331,8 +366,8 @@ const HomePage = () => {
                 ))}
               </div>
             </div>
-          </LazySection>
-        </SectionErrorBoundary>
+          </section>
+        </FadeInSection>
       )}
 
       {/* Weather - Deferred significantly (heavy component) */}
