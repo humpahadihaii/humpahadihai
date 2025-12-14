@@ -20,6 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import { usePlaceGuideByDistrict } from "@/hooks/usePlaceGuide";
 import SEOHead from "@/components/SEOHead";
 import LeafletMap from "@/components/maps/LeafletMap";
+import { generateMeta } from "@/lib/seo/generator";
+
 
 export default function PlaceGuidePage() {
   const { categorySlug, districtSlug, placeSlug } = useParams();
@@ -58,13 +60,25 @@ export default function PlaceGuidePage() {
   const howToReach = guide.how_to_reach as { by_air?: string; by_rail?: string; by_road?: string } | null;
   const emergencyInfo = guide.emergency_info as { police?: string; hospital?: string; fire?: string; ambulance?: string } | null;
 
+  const seoMeta = generateMeta("village", {
+    name: guide.name,
+    title: guide.name,
+    description: guide.short_description || `Complete travel guide to ${guide.name} in ${guide.district?.name || 'Uttarakhand'}`,
+    image: guide.cover_image || undefined,
+    district_name: guide.district?.name,
+  });
+
+  const mapMarkers = guide.latitude && guide.longitude ? [{
+    id: guide.id,
+    lat: Number(guide.latitude),
+    lng: Number(guide.longitude),
+    title: guide.name,
+    type: "place" as const,
+  }] : undefined;
+
   return (
     <>
-      <SEOHead
-        title={`${guide.name} Travel Guide | Hum Pahadi Haii`}
-        description={guide.short_description || `Complete travel guide to ${guide.name} in ${guide.district?.name || 'Uttarakhand'}`}
-        canonicalUrl={`/routes/${categorySlug}/${districtSlug}/${placeSlug}`}
-      />
+      <SEOHead meta={seoMeta} />
 
       <div className="min-h-screen bg-background pb-24">
         {/* Breadcrumbs */}
@@ -337,7 +351,7 @@ export default function PlaceGuidePage() {
           </Card>
 
           {/* Map */}
-          {guide.latitude && guide.longitude && (
+          {mapMarkers && mapMarkers.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-lg">
@@ -362,14 +376,10 @@ export default function PlaceGuidePage() {
               <CardContent>
                 <div className="h-64 rounded-lg overflow-hidden">
                   <LeafletMap
-                    center={[Number(guide.latitude), Number(guide.longitude)]}
+                    center={{ lat: mapMarkers[0].lat, lng: mapMarkers[0].lng }}
                     zoom={13}
-                    markers={[
-                      {
-                        position: [Number(guide.latitude), Number(guide.longitude)],
-                        popup: guide.name,
-                      },
-                    ]}
+                    markers={mapMarkers}
+                    height="100%"
                   />
                 </div>
               </CardContent>
