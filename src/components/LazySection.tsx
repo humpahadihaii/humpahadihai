@@ -18,23 +18,20 @@ export function LazySection({
   children,
   fallback,
   className = "",
-  rootMargin = "200px",
-  minHeight = "200px",
+  rootMargin = "400px", // Increased for earlier loading
+  minHeight = "100px", // Reduced minimum height
 }: LazySectionProps) {
   const [ref, isInViewport] = useInViewport<HTMLDivElement>({
     rootMargin,
     triggerOnce: true,
   });
 
+  // Always render children immediately if already in viewport or close
   return (
     <div ref={ref} className={className} style={{ minHeight: isInViewport ? "auto" : minHeight }}>
-      {isInViewport ? (
-        <Suspense fallback={fallback || <SectionSkeleton />}>
-          {children}
-        </Suspense>
-      ) : (
-        fallback || <SectionSkeleton />
-      )}
+      <Suspense fallback={fallback || <SectionSkeleton />}>
+        {isInViewport ? children : (fallback || <SectionSkeleton />)}
+      </Suspense>
     </div>
   );
 }
