@@ -96,6 +96,7 @@ const DestinationPlaceDetailPage = lazyWithRetry(() => import("./pages/Destinati
 const CulturalCategoryPage = lazyWithRetry(() => import("./pages/CulturalCategoryPage"));
 const CulturalSubcategoryPage = lazyWithRetry(() => import("./pages/CulturalSubcategoryPage"));
 const CulturalContentDetailPage = lazyWithRetry(() => import("./pages/CulturalContentDetailPage"));
+const PlaceGuidePage = lazyWithRetry(() => import("./pages/PlaceGuidePage"));
 
 // Admin pages - lazy loaded with retry logic
 const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"));
@@ -389,6 +390,8 @@ const AppContent = memo(() => {
               <Route path="/districts/:districtSlug/:categorySlug" element={<CulturalCategoryPage />} />
               <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug" element={<CulturalSubcategoryPage />} />
               <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug/:contentSlug" element={<CulturalContentDetailPage />} />
+              {/* Route Explorer - Place Guides */}
+              <Route path="/routes/:categorySlug/:districtSlug/:placeSlug" element={<PlaceGuidePage />} />
               {/* Auth */}
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchModal } from "@/components/search/SearchContext";
 import { getWeatherIconUrl } from "@/hooks/useWeather";
-import { RouteLocationSelector } from "@/components/routes/RouteLocationSelector";
+import { RouteExplorer } from "@/components/routes/RouteExplorer";
 
 interface DistrictWeather {
   id: string;
@@ -24,17 +24,9 @@ const EMERGENCY_NUMBERS = [
   { name: "Tourist Helpline", number: "1363" },
 ];
 
-const POPULAR_ROUTES = [
-  { name: "Delhi to Dehradun", via: "via Meerut, Muzaffarnagar" },
-  { name: "Delhi to Nainital", via: "via Moradabad, Rampur" },
-  { name: "Delhi to Rishikesh", via: "via Roorkee" },
-  { name: "Dehradun to Mussoorie", via: "35 km, 1.5 hrs" },
-  { name: "Kathgodam to Almora", via: "90 km, 3 hrs" },
-  { name: "Haridwar to Kedarnath", via: "via Rudraprayag" },
-];
-
 export function BottomNavigation() {
   const [activeModal, setActiveModal] = useState<"weather" | "routes" | "emergency" | "details" | null>(null);
+  const [showRouteExplorer, setShowRouteExplorer] = useState(false);
   const { openSearch } = useSearchModal();
 
   // Fetch districts for weather
@@ -95,6 +87,11 @@ export function BottomNavigation() {
 
   const closeModal = () => setActiveModal(null);
 
+  const handleRoutesClick = () => {
+    setShowRouteExplorer(true);
+    setActiveModal(null);
+  };
+
   return (
     <>
       {/* Bottom Navigation Bar */}
@@ -119,9 +116,9 @@ export function BottomNavigation() {
           </button>
           
           <button
-            onClick={() => setActiveModal("routes")}
+            onClick={handleRoutesClick}
             className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-              activeModal === "routes" ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"
+              showRouteExplorer ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"
             }`}
           >
             <MapPinned className="h-5 w-5" />
@@ -204,12 +201,11 @@ export function BottomNavigation() {
         </div>
       )}
 
-      {/* Routes Modal */}
-      {activeModal === "routes" && (
-        <div className="fixed bottom-16 left-4 right-4 bg-background rounded-2xl shadow-xl z-50 max-h-[70vh] overflow-hidden md:hidden animate-in slide-in-from-bottom-4 duration-200">
-          <RouteLocationSelector onClose={closeModal} />
-        </div>
-      )}
+      {/* Route Explorer - Full Screen */}
+      <RouteExplorer 
+        isOpen={showRouteExplorer} 
+        onClose={() => setShowRouteExplorer(false)} 
+      />
 
       {/* Details Modal */}
       {activeModal === "details" && (
