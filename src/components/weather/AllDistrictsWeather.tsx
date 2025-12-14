@@ -41,38 +41,72 @@ export default function AllDistrictsWeather() {
     queryFn: async () => {
       if (!districts?.length) return [];
       
-      const weatherPromises = districts
-        .filter(d => d.latitude && d.longitude)
-        .map(async (district) => {
-          try {
-            const { data, error } = await supabase.functions.invoke("weather", {
-              body: { lat: district.latitude, lng: district.longitude },
-            });
-            if (error) throw error;
-            return {
-              id: district.id,
-              name: district.name,
-              temp: data.temp,
-              feels_like: data.feels_like,
-              temp_min: data.temp_min,
-              temp_max: data.temp_max,
-              description: data.description,
-              icon: data.icon,
-              humidity: data.humidity,
-              wind_speed: data.wind_speed,
-              sunrise: data.sunrise,
-              sunset: data.sunset,
-            } as DistrictWeather;
-          } catch {
-            return null;
-          }
+      // Batch weather requests - send all at once to edge function
+      const validDistricts = districts.filter(d => d.latitude && d.longitude);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke("weather", {
+          body: { 
+            batch: true,
+            locations: validDistricts.map(d => ({
+              id: d.id,
+              name: d.name,
+              lat: d.latitude,
+              lng: d.longitude
+            }))
+          },
         });
-
-      const results = await Promise.all(weatherPromises);
-      return results.filter(Boolean) as DistrictWeather[];
+        
+        if (error) throw error;
+        
+        // If batch mode supported, return directly
+        if (Array.isArray(data)) {
+          return data as DistrictWeather[];
+        }
+        
+        // Fallback: single request (old behavior) - but limit concurrency
+        const results: DistrictWeather[] = [];
+        const batchSize = 4; // Process 4 at a time instead of all 13
+        
+        for (let i = 0; i < validDistricts.length; i += batchSize) {
+          const batch = validDistricts.slice(i, i + batchSize);
+          const batchResults = await Promise.all(
+            batch.map(async (district) => {
+              try {
+                const { data: weatherResp, error: weatherErr } = await supabase.functions.invoke("weather", {
+                  body: { lat: district.latitude, lng: district.longitude },
+                });
+                if (weatherErr) throw weatherErr;
+                return {
+                  id: district.id,
+                  name: district.name,
+                  temp: weatherResp.temp,
+                  feels_like: weatherResp.feels_like,
+                  temp_min: weatherResp.temp_min,
+                  temp_max: weatherResp.temp_max,
+                  description: weatherResp.description,
+                  icon: weatherResp.icon,
+                  humidity: weatherResp.humidity,
+                  wind_speed: weatherResp.wind_speed,
+                  sunrise: weatherResp.sunrise,
+                  sunset: weatherResp.sunset,
+                } as DistrictWeather;
+              } catch {
+                return null;
+              }
+            })
+          );
+          results.push(...batchResults.filter(Boolean) as DistrictWeather[]);
+        }
+        
+        return results;
+      } catch {
+        return [];
+      }
     },
     enabled: !!districts?.length,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 20, // 20 minutes cache
+    gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
   });
 
   const hoveredWeather = weatherData?.find(w => w.id === hoveredDistrict);

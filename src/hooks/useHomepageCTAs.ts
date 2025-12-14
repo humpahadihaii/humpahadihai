@@ -43,6 +43,7 @@ export const CTA_SIZES: { value: CTASize; label: string }[] = [
   { value: "lg", label: "Large" },
 ];
 
+// Single query for a specific position
 export const useHomepageCTAs = (position?: CTAPosition) => {
   return useQuery({
     queryKey: ["homepage-ctas", position],
@@ -61,7 +62,34 @@ export const useHomepageCTAs = (position?: CTAPosition) => {
       if (error) throw error;
       return data as HomepageCTA[];
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 10, // 10 minutes cache
+    gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
+  });
+};
+
+// Optimized: Fetch ALL CTAs at once and group by position
+export const useAllHomepageCTAsGrouped = () => {
+  return useQuery({
+    queryKey: ["homepage-ctas-grouped"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("homepage_ctas")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order");
+
+      if (error) throw error;
+      
+      const ctas = data as HomepageCTA[];
+      return {
+        hero: ctas.filter(c => c.position === "hero"),
+        below_hero: ctas.filter(c => c.position === "below_hero"),
+        mid_page: ctas.filter(c => c.position === "mid_page"),
+        footer_cta: ctas.filter(c => c.position === "footer_cta"),
+      };
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes cache
+    gcTime: 1000 * 60 * 30,
   });
 };
 

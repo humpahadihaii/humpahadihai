@@ -42,7 +42,8 @@ export const useCMSSettings = () => {
       if (error) throw error;
       return data as CMSSiteSettings | null;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes - site settings rarely change
+    gcTime: 1000 * 60 * 60, // 1 hour garbage collection
   });
 };
 
@@ -88,7 +89,8 @@ export const useCMSContentSection = (slug: string) => {
       if (error) throw error;
       return data as CMSContentSection | null;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
   });
 };
 

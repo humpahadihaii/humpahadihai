@@ -17,7 +17,7 @@ import AllDistrictsWeather from "@/components/weather/AllDistrictsWeather";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 import { useSiteSharePreview } from "@/hooks/useSharePreview";
 import { FeaturedContentSection } from "@/components/home/FeaturedContentSection";
-import { useHomepageCTAs } from "@/hooks/useHomepageCTAs";
+import { useAllHomepageCTAsGrouped } from "@/hooks/useHomepageCTAs";
 import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/home/CTASection";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { FadeInSection } from "@/components/PageWrapper";
@@ -113,11 +113,12 @@ const HomePage = () => {
     },
   ];
 
-  // Fetch dynamic CTAs
-  const { data: heroCtas = [] } = useHomepageCTAs("hero");
-  const { data: belowHeroCtas = [] } = useHomepageCTAs("below_hero");
-  const { data: midPageCtas = [] } = useHomepageCTAs("mid_page");
-  const { data: footerCtas = [] } = useHomepageCTAs("footer_cta");
+  // Fetch ALL CTAs in a single query - then use grouped results
+  const { data: ctasGrouped } = useAllHomepageCTAsGrouped();
+  const heroCtas = ctasGrouped?.hero || [];
+  const belowHeroCtas = ctasGrouped?.below_hero || [];
+  const midPageCtas = ctasGrouped?.mid_page || [];
+  const footerCtas = ctasGrouped?.footer_cta || [];
 
   return (
     <div className="min-h-screen">

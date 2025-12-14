@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -39,14 +40,13 @@ export interface EntitySharePreview {
   updated_at: string;
 }
 
-// Fetch site-wide share preview defaults
+// Fetch site-wide share preview defaults - OPTIMIZED with React Query
 export function useSiteSharePreview() {
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<SiteSharePreview | null>(null);
-
-  const fetchSettings = async () => {
-    setLoading(true);
-    try {
+  const queryClient = useQueryClient();
+  
+  const { data: settings, isLoading: loading, refetch } = useQuery({
+    queryKey: ['site-share-preview'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('site_share_preview')
         .select('*')
@@ -54,13 +54,11 @@ export function useSiteSharePreview() {
         .maybeSingle();
 
       if (error) throw error;
-      setSettings(data as unknown as SiteSharePreview);
-    } catch (error) {
-      console.error('Error fetching site share preview:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data as unknown as SiteSharePreview | null;
+    },
+    staleTime: 1000 * 60 * 15, // 15 minutes cache
+    gcTime: 1000 * 60 * 60, // 1 hour garbage collection
+  });
 
   const updateSettings = async (updates: Partial<SiteSharePreview>): Promise<boolean> => {
     try {
@@ -74,7 +72,7 @@ export function useSiteSharePreview() {
 
       if (error) throw error;
       toast.success('Share preview settings updated');
-      await fetchSettings();
+      queryClient.invalidateQueries({ queryKey: ['site-share-preview'] });
       return true;
     } catch (error) {
       console.error('Error updating site share preview:', error);
@@ -83,11 +81,7 @@ export function useSiteSharePreview() {
     }
   };
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  return { loading, settings, updateSettings, refetch: fetchSettings };
+  return { loading, settings: settings || null, updateSettings, refetch };
 }
 
 // Fetch entity-specific share preview
