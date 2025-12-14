@@ -11,7 +11,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
-import { QuickAccessBar } from "./components/QuickAccessBar";
+import { BottomNavigation } from "./components/BottomNavigation";
 import { FloatingShareButton } from "./components/share/FloatingShareButton";
 import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback, ComponentType } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -471,8 +471,8 @@ const AppContent = memo(() => {
         {!isAdminRoute && !isAuthRoute && <Footer />}
         {/* Floating Share Button only on public pages */}
         {!isAdminRoute && !isAuthRoute && <FloatingShareButton />}
-        {/* Quick Access Bar only on public pages */}
-        {!isAdminRoute && !isAuthRoute && <QuickAccessBar />}
+        {/* Bottom Navigation only on public pages (mobile) */}
+        {!isAdminRoute && !isAuthRoute && <BottomNavigation />}
       </div>
       <SearchModal />
     </>
