@@ -473,6 +473,202 @@
   .tap-target {
     @apply min-h-[44px] min-w-[44px];
   }
+
+  /* ============================================
+     RESPONSIVE LOCKING SYSTEM
+     Centralized breakpoints and responsive utilities
+     ============================================ */
+
+  /* Responsive container - auto-scales with viewport */
+  .responsive-container {
+    @apply w-full mx-auto;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  @media (min-width: 640px) {
+    .responsive-container {
+      @apply px-6;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .responsive-container {
+      @apply px-8;
+    }
+  }
+
+  /* Responsive grid - locked breakpoint behavior */
+  .responsive-grid {
+    @apply grid gap-4;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-grid {
+      @apply gap-5;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .responsive-grid {
+      @apply gap-6;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Responsive flex - stacks on mobile, row on larger */
+  .responsive-flex {
+    @apply flex flex-col;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-flex {
+      @apply flex-row flex-wrap;
+    }
+  }
+
+  /* Responsive text sizing - locked */
+  .responsive-heading-xl {
+    @apply text-2xl leading-tight;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-heading-xl {
+      @apply text-3xl;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-heading-xl {
+      @apply text-4xl;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .responsive-heading-xl {
+      @apply text-5xl;
+    }
+  }
+
+  .responsive-heading-lg {
+    @apply text-xl leading-tight;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-heading-lg {
+      @apply text-2xl;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-heading-lg {
+      @apply text-3xl;
+    }
+  }
+
+  /* Responsive section padding - locked */
+  .responsive-section {
+    @apply py-10;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-section {
+      @apply py-12;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-section {
+      @apply py-16;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .responsive-section {
+      @apply py-20;
+    }
+  }
+
+  /* Hero responsive sizing - locked */
+  .responsive-hero {
+    @apply py-12 px-4;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-hero {
+      @apply py-16 px-6;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-hero {
+      @apply py-20;
+    }
+  }
+
+  /* Prevent horizontal overflow on all devices */
+  .no-overflow-x {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Responsive spacing utilities */
+  .responsive-gap {
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-gap {
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-gap {
+      gap: 1.5rem;
+    }
+  }
+
+  /* Responsive card sizing */
+  .responsive-card {
+    @apply w-full;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-card {
+      @apply w-auto;
+    }
+  }
+
+  /* Text responsive utilities */
+  .responsive-text-base {
+    @apply text-sm;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-text-base {
+      @apply text-base;
+    }
+  }
+
+  .responsive-text-lg {
+    @apply text-base;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-text-lg {
+      @apply text-lg;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-text-lg {
+      @apply text-xl;
+    }
+  }
 }
 
 /* ============================================

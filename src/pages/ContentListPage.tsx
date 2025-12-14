@@ -50,27 +50,27 @@ const ContentListPage = ({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 no-overflow-x">
       <SEOHead meta={seoMeta} />
       
       {/* Hero Section */}
       <section 
-        className={`relative py-20 px-4 bg-gradient-to-r ${heroGradient}`}
+        className={`relative responsive-hero bg-gradient-to-r ${heroGradient}`}
         style={heroImage ? { 
           backgroundImage: `linear-gradient(to right, hsl(var(--primary) / 0.7), hsl(var(--secondary) / 0.7)), url(${heroImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         } : undefined}
       >
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+        <div className="responsive-container max-w-7xl text-center">
+          <h1 className="responsive-heading-xl font-bold text-white mb-4 sm:mb-6 drop-shadow-lg">
             {title}
           </h1>
-          <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto drop-shadow mb-6">
+          <p className="responsive-text-lg text-white/95 max-w-3xl mx-auto drop-shadow mb-4 sm:mb-6 px-2">
             {description}
           </p>
           {showSubmitButton && (
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold">
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold w-full sm:w-auto">
               <Link to={submitButtonUrl}>
                 <PenLine className="mr-2 h-5 w-5" />
                 {submitButtonLabel}
@@ -81,13 +81,13 @@ const ContentListPage = ({
       </section>
 
       {/* Content Grid */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-7xl">
+      <section className="responsive-section px-4 sm:px-6 lg:px-8">
+        <div className="responsive-container max-w-7xl">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="responsive-grid">
               {[...Array(6)].map((_, i) => (
-                <Card key={i}>
-                  <Skeleton className="h-48 w-full rounded-t-lg" />
+                <Card key={i} className="responsive-card">
+                  <Skeleton className="h-40 sm:h-48 w-full rounded-t-lg" />
                   <CardHeader>
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-4 w-full mt-2" />
@@ -96,12 +96,12 @@ const ContentListPage = ({
               ))}
             </div>
           ) : items && items.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <p className="text-lg mb-4">No content available yet.</p>
-                <p className="mb-6">Check back soon for new articles and stories!</p>
+            <Card className="responsive-card">
+              <CardContent className="py-8 sm:py-12 text-center text-muted-foreground">
+                <p className="responsive-text-lg mb-4">No content available yet.</p>
+                <p className="mb-6 text-sm sm:text-base">Check back soon for new articles and stories!</p>
                 {showSubmitButton && (
-                  <Button asChild>
+                  <Button asChild className="w-full sm:w-auto">
                     <Link to={submitButtonUrl}>
                       <PenLine className="mr-2 h-4 w-4" />
                       {submitButtonLabel}
@@ -111,12 +111,12 @@ const ContentListPage = ({
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="responsive-grid">
               {items?.map((item) => (
-                <Link key={item.id} to={`/${contentType}/${item.slug}`}>
-                  <Card className="h-full hover:shadow-xl transition-shadow cursor-pointer">
+                <Link key={item.id} to={`/${contentType}/${item.slug}`} className="block">
+                  <Card className="h-full hover:shadow-xl transition-shadow cursor-pointer responsive-card">
                     {item.main_image_url && (
-                      <div className="h-48 overflow-hidden rounded-t-lg">
+                      <div className="h-40 sm:h-48 overflow-hidden rounded-t-lg">
                         <img
                           src={item.main_image_url}
                           alt={item.title}
@@ -125,17 +125,17 @@ const ContentListPage = ({
                         />
                       </div>
                     )}
-                    <CardHeader>
-                      <CardTitle className="line-clamp-2">{item.title}</CardTitle>
+                    <CardHeader className="p-4 sm:p-6">
+                      <CardTitle className="line-clamp-2 text-base sm:text-lg">{item.title}</CardTitle>
                       {item.excerpt && (
-                        <CardDescription className="line-clamp-2">
+                        <CardDescription className="line-clamp-2 text-sm">
                           {item.excerpt}
                         </CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0">
                       {item.published_at && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {new Date(item.published_at).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'long',
@@ -151,19 +151,19 @@ const ContentListPage = ({
           )}
 
           {/* Internal Links - SEO */}
-          <div className="mt-12 pt-8 border-t border-border/50">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Explore More</h3>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <Link to="/districts/almora" className="text-primary hover:text-primary/80 hover:underline text-sm">
+          <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-border/50">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Explore More</h3>
+            <div className="responsive-flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2">
+              <Link to="/districts/almora" className="text-primary hover:text-primary/80 hover:underline text-xs sm:text-sm">
                 Almora District Cultural Practices
               </Link>
-              <Link to="/districts/pithoragarh" className="text-primary hover:text-primary/80 hover:underline text-sm">
+              <Link to="/districts/pithoragarh" className="text-primary hover:text-primary/80 hover:underline text-xs sm:text-sm">
                 Pithoragarh Traditional Lifestyle
               </Link>
-              <Link to="/districts/chamoli" className="text-primary hover:text-primary/80 hover:underline text-sm">
+              <Link to="/districts/chamoli" className="text-primary hover:text-primary/80 hover:underline text-xs sm:text-sm">
                 Chamoli Folk Traditions
               </Link>
-              <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
+              <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-xs sm:text-sm">
                 View {title} Photo Gallery →
               </Link>
             </div>
