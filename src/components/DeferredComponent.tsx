@@ -1,4 +1,39 @@
-import { lazy, Suspense, useState, useEffect, ComponentType, memo } from "react";
+import { lazy, Suspense, useState, useEffect, ComponentType, memo, Component, ReactNode, ErrorInfo } from "react";
+
+/**
+ * Error boundary for catching chunk loading failures
+ */
+class ChunkErrorBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback?: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Log chunk loading errors but don't crash the app
+    console.warn("[DeferredComponent] Chunk load failed:", error.message);
+    
+    // If it's a chunk loading error, try to recover by reloading
+    if (error.message?.includes("Loading chunk") || error.message?.includes("Failed to fetch")) {
+      console.warn("[DeferredComponent] Chunk loading failed, component will be skipped");
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Return fallback or nothing - don't crash the app
+      return this.props.fallback ?? null;
+    }
+    return this.props.children;
+  }
+}
 
 /**
  * Defers loading and rendering of non-critical components until:
@@ -7,6 +42,9 @@ import { lazy, Suspense, useState, useEffect, ComponentType, memo } from "react"
  * 3. Or after a timeout fallback
  * 
  * Perfect for: analytics, share buttons, toolbars, widgets
+ * 
+ * IMPORTANT: Includes chunk error recovery - if a chunk fails to load,
+ * the component is gracefully skipped without crashing the app.
  */
 
 interface DeferredOptions {
@@ -16,18 +54,42 @@ interface DeferredOptions {
   useIdle?: boolean;
   /** Timeout for idle callback (default: 2000ms) */
   idleTimeout?: number;
+  /** Fallback if chunk fails to load */
+  errorFallback?: ReactNode;
 }
 
 /**
  * Creates a deferred lazy component that loads after first paint
+ * with robust error handling for chunk loading failures
  */
 export function createDeferredComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   options: DeferredOptions = {}
 ): ComponentType<React.ComponentProps<T>> {
-  const { delay = 0, useIdle = true, idleTimeout = 2000 } = options;
+  const { delay = 0, useIdle = true, idleTimeout = 2000, errorFallback = null } = options;
   
-  const LazyComponent = lazy(importFn);
+  // Wrap import with retry logic for chunk loading failures
+  const retryImport = async (): Promise<{ default: T }> => {
+    try {
+      return await importFn();
+    } catch (error: any) {
+      // If chunk failed, wait and retry once
+      if (error.message?.includes("Loading chunk") || error.message?.includes("Failed to fetch")) {
+        console.warn("[DeferredComponent] Retrying chunk load...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+          return await importFn();
+        } catch (retryError) {
+          console.error("[DeferredComponent] Chunk load retry failed:", retryError);
+          // Return empty component to prevent crash
+          return { default: (() => null) as any };
+        }
+      }
+      throw error;
+    }
+  };
+  
+  const LazyComponent = lazy(retryImport);
   
   return memo(function DeferredWrapper(props: React.ComponentProps<T>) {
     const [shouldRender, setShouldRender] = useState(false);
@@ -67,9 +129,11 @@ export function createDeferredComponent<T extends ComponentType<any>>(
     if (!shouldRender) return null;
     
     return (
-      <Suspense fallback={null}>
-        <LazyComponent {...props} />
-      </Suspense>
+      <ChunkErrorBoundary fallback={errorFallback}>
+        <Suspense fallback={null}>
+          <LazyComponent {...props} />
+        </Suspense>
+      </ChunkErrorBoundary>
     );
   });
 }

@@ -6,10 +6,50 @@ import "./index.css";
 // Global error handler for uncaught errors
 window.onerror = (message, source, lineno, colno, error) => {
   console.error("[GlobalError]", { message, source, lineno, colno, error });
+  
+  // Handle chunk loading failures - reload the page to get fresh assets
+  const errorMessage = String(message || error?.message || "");
+  if (
+    errorMessage.includes("Loading chunk") ||
+    errorMessage.includes("Failed to fetch dynamically imported module") ||
+    errorMessage.includes("Importing a module script failed")
+  ) {
+    console.warn("[ChunkError] Detected stale chunk, attempting recovery...");
+    // Clear any cached modules and reload
+    if ("caches" in window) {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
+    // Reload after a brief delay to allow cache clearing
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+    return true; // Prevent default error handling
+  }
 };
 
 window.onunhandledrejection = (event) => {
   console.error("[UnhandledPromise]", event.reason);
+  
+  // Handle chunk loading failures in promises
+  const reason = String(event.reason?.message || event.reason || "");
+  if (
+    reason.includes("Loading chunk") ||
+    reason.includes("Failed to fetch dynamically imported module") ||
+    reason.includes("Importing a module script failed")
+  ) {
+    console.warn("[ChunkError] Detected stale chunk in promise, attempting recovery...");
+    event.preventDefault();
+    if ("caches" in window) {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  }
 };
 
 const container = document.getElementById("root");
