@@ -12,120 +12,144 @@ import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
 import { QuickAccessBar } from "./components/QuickAccessBar";
-import HomePage from "./pages/HomePage";
-import CulturePage from "./pages/CulturePage";
-import FoodPage from "./pages/FoodPage";
-import TravelPage from "./pages/TravelPage";
-import DistrictsPage from "./pages/DistrictsPage";
-import DistrictDetailPage from "./pages/DistrictDetailPage";
-import VillageDetailPage from "./pages/VillageDetailPage";
-import GalleryPage from "./pages/GalleryPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import TermsPage from "./pages/TermsPage";
-import DisclaimerPage from "./pages/DisclaimerPage";
-import AuthPage from "./pages/AuthPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminRoute from "./components/AdminRoute";
-import AdminDashboardRoute from "./components/AdminDashboardRoute";
-import ThoughtsPage from "./pages/ThoughtsPage";
-import SubmitThoughtPage from "./pages/SubmitThoughtPage";
-import SubmitStoryPage from "./pages/SubmitStoryPage";
-import MySubmissionsPage from "./pages/MySubmissionsPage";
-import ContentDetailPage from "./pages/ContentDetailPage";
-import AdminThoughtsPage from "./pages/AdminThoughtsPage";
-import AdminSubmissionsPage from "./pages/AdminSubmissionsPage";
-import AdminCommunitySubmissionsPage from "./pages/admin/AdminCommunitySubmissionsPage";
-import AdminCulturePage from "./pages/admin/AdminCulturePage";
-import AdminFoodContentPage from "./pages/admin/AdminFoodContentPage";
-import AdminTravelContentPage from "./pages/admin/AdminTravelContentPage";
-import AdminThoughtsContentPage from "./pages/admin/AdminThoughtsContentPage";
-import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
-import AdminDistrictsPage from "./pages/admin/AdminDistrictsPage";
-import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
-import AdminVillagesPage from "./pages/admin/AdminVillagesPage";
-import AdminVillageContentPage from "./pages/admin/AdminVillageContentPage";
-import AdminVillageEconomyPage from "./pages/admin/AdminVillageEconomyPage";
-import AdminFestivalsPage from "./pages/admin/AdminFestivalsPage";
-import AdminGalleryPage from "./pages/admin/AdminGalleryPage";
-import AdminSiteImagesPage from "./pages/admin/AdminSiteImagesPage";
-import AdminHighlightsPage from "./pages/admin/AdminHighlightsPage";
-import AdminDistrictContentPage from "./pages/admin/AdminDistrictContentPage";
-import AdminFeaturedHighlightsPage from "./pages/admin/AdminFeaturedHighlightsPage";
-// AdminApprovalsPage and AdminRoleManagementPage merged into AdminUserManagementPage
-import AdminUserManagementPage from "./pages/admin/AdminUserManagementPage";
-import AdminSiteSettingsPage from "./pages/admin/AdminSiteSettingsPage";
-import AdminStoriesPage from "./pages/admin/AdminStoriesPage";
-import AdminEventsPage from "./pages/admin/AdminEventsPage";
-import AdminPagesPage from "./pages/admin/AdminPagesPage";
-import AdminFooterLinksPage from "./pages/admin/AdminFooterLinksPage";
-import AdminContentSectionsPage from "./pages/admin/AdminContentSectionsPage";
-import PendingApprovalRoute from "./components/PendingApprovalRoute";
-import NotFound from "./pages/NotFound";
-import UnauthorizedPage from "./pages/admin/UnauthorizedPage";
-// Monetization & New Features
-import PromotionsPage from "./pages/PromotionsPage";
-import TravelPackagesPage from "./pages/TravelPackagesPage";
-import TravelPackageDetailPage from "./pages/TravelPackageDetailPage";
-import ProductsPage from "./pages/ProductsPage";
-import ProductDetailPage from "./pages/ProductDetailPage";
-import MarketplacePage from "./pages/MarketplacePage";
-import ProviderDetailPage from "./pages/ProviderDetailPage";
-import ListingDetailPage from "./pages/ListingDetailPage";
-import ListYourBusinessPage from "./pages/ListYourBusinessPage";
-import MapPage from "./pages/MapPage";
-import EventsPage from "./pages/EventsPage";
-import EventDetailPage from "./pages/EventDetailPage";
-import SearchPage from "./pages/SearchPage";
-// Admin Monetization Pages
-import AdminPromotionPackagesPage from "./pages/admin/AdminPromotionPackagesPage";
-import AdminPromotionRequestsPage from "./pages/admin/AdminPromotionRequestsPage";
-import AdminTravelPackagesPage from "./pages/admin/AdminTravelPackagesPage";
-import AdminTravelRequestsPage from "./pages/admin/AdminTravelRequestsPage";
-import AdminProductCategoriesPage from "./pages/admin/AdminProductCategoriesPage";
-import AdminProductsPage from "./pages/admin/AdminProductsPage";
-import AdminProductOrdersPage from "./pages/admin/AdminProductOrdersPage";
-import AdminAIToolsPage from "./pages/admin/AdminAIToolsPage";
-import AdminAISettingsPage from "./pages/admin/AdminAISettingsPage";
-import AdminBulkAIPage from "./pages/admin/AdminBulkAIPage";
-import AdminHomepageCTAsPage from "./pages/admin/AdminHomepageCTAsPage";
-import AdminPageSettingsPage from "./pages/admin/AdminPageSettingsPage";
-import AdminMapSettingsPage from "./pages/admin/AdminMapSettingsPage";
-// Admin District Content Pages
-import AdminDistrictPlacesPage from "./pages/admin/AdminDistrictPlacesPage";
-import AdminDistrictFoodsPage from "./pages/admin/AdminDistrictFoodsPage";
-import AdminDistrictFestivalsPage from "./pages/admin/AdminDistrictFestivalsPage";
-// Admin Tourism Marketplace Pages
-import AdminTourismProvidersPage from "./pages/admin/AdminTourismProvidersPage";
-import AdminTourismListingsPage from "./pages/admin/AdminTourismListingsPage";
-import AdminTourismInquiriesPage from "./pages/admin/AdminTourismInquiriesPage";
-import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
-import AdminNotifySettingsPage from "./pages/admin/AdminNotifySettingsPage";
-import AdminFeaturedCardsPage from "./pages/admin/AdminFeaturedCardsPage";
-import AdminMapPage from "./pages/admin/AdminMapPage";
-import AdminMediaImportPage from "./pages/admin/AdminMediaImportPage";
-import AdminShareSettingsPage from "./pages/admin/AdminShareSettingsPage";
-import AdminSharePreviewPage from "./pages/admin/AdminSharePreviewPage";
 import { FloatingShareButton } from "./components/share/FloatingShareButton";
-import DestinationGuidePage from "./pages/DestinationGuidePage";
-import DestinationPlaceDetailPage from "./pages/DestinationPlaceDetailPage";
-import AdminDestinationGuidesPage from "./pages/admin/AdminDestinationGuidesPage";
-import AdminDestinationPlacesPage from "./pages/admin/AdminDestinationPlacesPage";
-// Cultural Content System
-import CulturalCategoryPage from "./pages/CulturalCategoryPage";
-import CulturalSubcategoryPage from "./pages/CulturalSubcategoryPage";
-import CulturalContentDetailPage from "./pages/CulturalContentDetailPage";
-import AdminCulturalCategoriesPage from "./pages/admin/AdminCulturalCategoriesPage";
-import AdminCulturalSubcategoriesPage from "./pages/admin/AdminCulturalSubcategoriesPage";
-import AdminCulturalContentPage from "./pages/admin/AdminCulturalContentPage";
-import AdminFeaturedContentPage from "./pages/admin/AdminFeaturedContentPage";
-import AdminCookieConsentPage from "./pages/admin/AdminCookieConsentPage";
+import { Suspense, lazy, memo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const queryClient = new QueryClient();
+// Critical pages loaded eagerly for fast initial render
+import HomePage from "./pages/HomePage";
+import NotFound from "./pages/NotFound";
+
+// Lazy load all other pages for code splitting
+const CulturePage = lazy(() => import("./pages/CulturePage"));
+const FoodPage = lazy(() => import("./pages/FoodPage"));
+const TravelPage = lazy(() => import("./pages/TravelPage"));
+const DistrictsPage = lazy(() => import("./pages/DistrictsPage"));
+const DistrictDetailPage = lazy(() => import("./pages/DistrictDetailPage"));
+const VillageDetailPage = lazy(() => import("./pages/VillageDetailPage"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const DisclaimerPage = lazy(() => import("./pages/DisclaimerPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const ThoughtsPage = lazy(() => import("./pages/ThoughtsPage"));
+const SubmitThoughtPage = lazy(() => import("./pages/SubmitThoughtPage"));
+const SubmitStoryPage = lazy(() => import("./pages/SubmitStoryPage"));
+const MySubmissionsPage = lazy(() => import("./pages/MySubmissionsPage"));
+const ContentDetailPage = lazy(() => import("./pages/ContentDetailPage"));
+const PromotionsPage = lazy(() => import("./pages/PromotionsPage"));
+const TravelPackagesPage = lazy(() => import("./pages/TravelPackagesPage"));
+const TravelPackageDetailPage = lazy(() => import("./pages/TravelPackageDetailPage"));
+const ProductsPage = lazy(() => import("./pages/ProductsPage"));
+const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage"));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const ProviderDetailPage = lazy(() => import("./pages/ProviderDetailPage"));
+const ListingDetailPage = lazy(() => import("./pages/ListingDetailPage"));
+const ListYourBusinessPage = lazy(() => import("./pages/ListYourBusinessPage"));
+const MapPage = lazy(() => import("./pages/MapPage"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const EventDetailPage = lazy(() => import("./pages/EventDetailPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const DestinationGuidePage = lazy(() => import("./pages/DestinationGuidePage"));
+const DestinationPlaceDetailPage = lazy(() => import("./pages/DestinationPlaceDetailPage"));
+const CulturalCategoryPage = lazy(() => import("./pages/CulturalCategoryPage"));
+const CulturalSubcategoryPage = lazy(() => import("./pages/CulturalSubcategoryPage"));
+const CulturalContentDetailPage = lazy(() => import("./pages/CulturalContentDetailPage"));
+
+// Admin pages - lazy loaded as separate chunk
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminRoute = lazy(() => import("./components/AdminRoute"));
+const AdminDashboardRoute = lazy(() => import("./components/AdminDashboardRoute"));
+const PendingApprovalRoute = lazy(() => import("./components/PendingApprovalRoute"));
+const UnauthorizedPage = lazy(() => import("./pages/admin/UnauthorizedPage"));
+const AdminThoughtsPage = lazy(() => import("./pages/AdminThoughtsPage"));
+const AdminSubmissionsPage = lazy(() => import("./pages/AdminSubmissionsPage"));
+const AdminCommunitySubmissionsPage = lazy(() => import("./pages/admin/AdminCommunitySubmissionsPage"));
+const AdminCulturePage = lazy(() => import("./pages/admin/AdminCulturePage"));
+const AdminFoodContentPage = lazy(() => import("./pages/admin/AdminFoodContentPage"));
+const AdminTravelContentPage = lazy(() => import("./pages/admin/AdminTravelContentPage"));
+const AdminThoughtsContentPage = lazy(() => import("./pages/admin/AdminThoughtsContentPage"));
+const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
+const AdminDistrictsPage = lazy(() => import("./pages/admin/AdminDistrictsPage"));
+const AdminHotelsPage = lazy(() => import("./pages/admin/AdminHotelsPage"));
+const AdminVillagesPage = lazy(() => import("./pages/admin/AdminVillagesPage"));
+const AdminVillageContentPage = lazy(() => import("./pages/admin/AdminVillageContentPage"));
+const AdminVillageEconomyPage = lazy(() => import("./pages/admin/AdminVillageEconomyPage"));
+const AdminFestivalsPage = lazy(() => import("./pages/admin/AdminFestivalsPage"));
+const AdminGalleryPage = lazy(() => import("./pages/admin/AdminGalleryPage"));
+const AdminSiteImagesPage = lazy(() => import("./pages/admin/AdminSiteImagesPage"));
+const AdminHighlightsPage = lazy(() => import("./pages/admin/AdminHighlightsPage"));
+const AdminDistrictContentPage = lazy(() => import("./pages/admin/AdminDistrictContentPage"));
+const AdminFeaturedHighlightsPage = lazy(() => import("./pages/admin/AdminFeaturedHighlightsPage"));
+const AdminUserManagementPage = lazy(() => import("./pages/admin/AdminUserManagementPage"));
+const AdminSiteSettingsPage = lazy(() => import("./pages/admin/AdminSiteSettingsPage"));
+const AdminStoriesPage = lazy(() => import("./pages/admin/AdminStoriesPage"));
+const AdminEventsPage = lazy(() => import("./pages/admin/AdminEventsPage"));
+const AdminPagesPage = lazy(() => import("./pages/admin/AdminPagesPage"));
+const AdminFooterLinksPage = lazy(() => import("./pages/admin/AdminFooterLinksPage"));
+const AdminContentSectionsPage = lazy(() => import("./pages/admin/AdminContentSectionsPage"));
+const AdminPromotionPackagesPage = lazy(() => import("./pages/admin/AdminPromotionPackagesPage"));
+const AdminPromotionRequestsPage = lazy(() => import("./pages/admin/AdminPromotionRequestsPage"));
+const AdminTravelPackagesPage = lazy(() => import("./pages/admin/AdminTravelPackagesPage"));
+const AdminTravelRequestsPage = lazy(() => import("./pages/admin/AdminTravelRequestsPage"));
+const AdminProductCategoriesPage = lazy(() => import("./pages/admin/AdminProductCategoriesPage"));
+const AdminProductsPage = lazy(() => import("./pages/admin/AdminProductsPage"));
+const AdminProductOrdersPage = lazy(() => import("./pages/admin/AdminProductOrdersPage"));
+const AdminAIToolsPage = lazy(() => import("./pages/admin/AdminAIToolsPage"));
+const AdminAISettingsPage = lazy(() => import("./pages/admin/AdminAISettingsPage"));
+const AdminBulkAIPage = lazy(() => import("./pages/admin/AdminBulkAIPage"));
+const AdminHomepageCTAsPage = lazy(() => import("./pages/admin/AdminHomepageCTAsPage"));
+const AdminPageSettingsPage = lazy(() => import("./pages/admin/AdminPageSettingsPage"));
+const AdminMapSettingsPage = lazy(() => import("./pages/admin/AdminMapSettingsPage"));
+const AdminDistrictPlacesPage = lazy(() => import("./pages/admin/AdminDistrictPlacesPage"));
+const AdminDistrictFoodsPage = lazy(() => import("./pages/admin/AdminDistrictFoodsPage"));
+const AdminDistrictFestivalsPage = lazy(() => import("./pages/admin/AdminDistrictFestivalsPage"));
+const AdminTourismProvidersPage = lazy(() => import("./pages/admin/AdminTourismProvidersPage"));
+const AdminTourismListingsPage = lazy(() => import("./pages/admin/AdminTourismListingsPage"));
+const AdminTourismInquiriesPage = lazy(() => import("./pages/admin/AdminTourismInquiriesPage"));
+const AdminBookingsPage = lazy(() => import("./pages/admin/AdminBookingsPage"));
+const AdminNotifySettingsPage = lazy(() => import("./pages/admin/AdminNotifySettingsPage"));
+const AdminFeaturedCardsPage = lazy(() => import("./pages/admin/AdminFeaturedCardsPage"));
+const AdminMapPage = lazy(() => import("./pages/admin/AdminMapPage"));
+const AdminMediaImportPage = lazy(() => import("./pages/admin/AdminMediaImportPage"));
+const AdminShareSettingsPage = lazy(() => import("./pages/admin/AdminShareSettingsPage"));
+const AdminSharePreviewPage = lazy(() => import("./pages/admin/AdminSharePreviewPage"));
+const AdminDestinationGuidesPage = lazy(() => import("./pages/admin/AdminDestinationGuidesPage"));
+const AdminDestinationPlacesPage = lazy(() => import("./pages/admin/AdminDestinationPlacesPage"));
+const AdminCulturalCategoriesPage = lazy(() => import("./pages/admin/AdminCulturalCategoriesPage"));
+const AdminCulturalSubcategoriesPage = lazy(() => import("./pages/admin/AdminCulturalSubcategoriesPage"));
+const AdminCulturalContentPage = lazy(() => import("./pages/admin/AdminCulturalContentPage"));
+const AdminFeaturedContentPage = lazy(() => import("./pages/admin/AdminFeaturedContentPage"));
+const AdminCookieConsentPage = lazy(() => import("./pages/admin/AdminCookieConsentPage"));
+
+// Optimized QueryClient with better caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Minimal loading fallback
+const PageLoader = memo(() => (
+  <div className="min-h-[50vh] flex items-center justify-center">
+    <div className="space-y-4 w-full max-w-md px-4">
+      <Skeleton className="h-8 w-3/4 mx-auto" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-5/6" />
+    </div>
+  </div>
+));
+PageLoader.displayName = "PageLoader";
 
 // Component to conditionally render layout based on route
-const AppContent = () => {
+const AppContent = memo(() => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isAuthRoute = location.pathname === "/login" || location.pathname === "/auth" || location.pathname === "/pending-approval";
@@ -138,152 +162,158 @@ const AppContent = () => {
         {/* Hide Navigation on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Navigation />}
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/culture" element={<CulturePage />} />
-            <Route path="/culture/:slug" element={<ContentDetailPage contentType="culture" />} />
-            <Route path="/food" element={<FoodPage />} />
-            <Route path="/food/:slug" element={<ContentDetailPage contentType="food" />} />
-            <Route path="/travel" element={<TravelPage />} />
-            <Route path="/travel/:slug" element={<ContentDetailPage contentType="travel" />} />
-            <Route path="/districts" element={<DistrictsPage />} />
-            <Route path="/districts/:slug" element={<DistrictDetailPage />} />
-            <Route path="/villages/:slug" element={<VillageDetailPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/disclaimer" element={<DisclaimerPage />} />
-            <Route path="/thoughts" element={<ThoughtsPage />} />
-            <Route path="/thoughts/:slug" element={<ContentDetailPage contentType="thought" />} />
-            <Route path="/submit-thought" element={<SubmitThoughtPage />} />
-            <Route path="/submit-story" element={<SubmitStoryPage />} />
-            <Route path="/my-submissions" element={<MySubmissionsPage />} />
-            {/* Monetization & New Features */}
-            <Route path="/promotions" element={<PromotionsPage />} />
-            <Route path="/travel-packages" element={<TravelPackagesPage />} />
-            <Route path="/travel-packages/:slug" element={<TravelPackageDetailPage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/products/:slug" element={<ProductDetailPage />} />
-            <Route path="/marketplace" element={<MarketplacePage />} />
-            <Route path="/providers/:slug" element={<ProviderDetailPage />} />
-            <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/list-your-business" element={<ListYourBusinessPage />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/events/:slug" element={<EventDetailPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            {/* Destination Guides */}
-            <Route path="/destinations" element={<DistrictsPage />} />
-            <Route path="/destinations/:slug" element={<DestinationGuidePage />} />
-            <Route path="/destinations/:slug/:placeSlug" element={<DestinationPlaceDetailPage />} />
-            {/* Cultural Content System - Multi-level hierarchy */}
-            <Route path="/districts/:districtSlug/:categorySlug" element={<CulturalCategoryPage />} />
-            <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug" element={<CulturalSubcategoryPage />} />
-            <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug/:contentSlug" element={<CulturalContentDetailPage />} />
-            {/* Auth */}
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/auth" element={<Navigate to="/login" replace />} />
-            <Route path="/pending-approval" element={<PendingApprovalRoute />} />
-            <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="/admin" element={<AdminDashboardRoute><AdminDashboard /></AdminDashboardRoute>} />
-            <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
-            <Route path="/admin/ai-settings" element={<AdminRoute><AdminAISettingsPage /></AdminRoute>} />
-            <Route path="/admin/bulk-ai" element={<AdminRoute><AdminBulkAIPage /></AdminRoute>} />
-            <Route path="/admin/homepage-ctas" element={<AdminRoute><AdminHomepageCTAsPage /></AdminRoute>} />
-            <Route path="/admin/map-settings" element={<AdminRoute><AdminMapSettingsPage /></AdminRoute>} />
-            <Route path="/admin/map" element={<AdminRoute><AdminMapPage /></AdminRoute>} />
-            <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
-            <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
-            <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />
-            <Route path="/admin/content/thoughts" element={<AdminRoute><AdminThoughtsContentPage /></AdminRoute>} />
-            <Route path="/admin/community-submissions" element={<AdminRoute><AdminCommunitySubmissionsPage /></AdminRoute>} />
-            <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
-            <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
-            <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
-            <Route path="/admin/villages/:id/content" element={<AdminRoute><AdminVillageContentPage /></AdminRoute>} />
-            <Route path="/admin/villages/:id/economy" element={<AdminRoute><AdminVillageEconomyPage /></AdminRoute>} />
-            <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
-            <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
-            <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
-            <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
-            <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
-            <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
-            <Route path="/admin/featured-cards" element={<AdminRoute><AdminFeaturedCardsPage /></AdminRoute>} />
-            <Route path="/admin/featured-content" element={<AdminRoute><AdminFeaturedContentPage /></AdminRoute>} />
-            <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
-            <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
-            <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
-            {/* Approvals and Roles now merged into /admin/users */}
-            <Route path="/admin/approvals" element={<Navigate to="/admin/users" replace />} />
-            <Route path="/admin/roles" element={<Navigate to="/admin/users" replace />} />
-            <Route path="/admin/users" element={<AdminRoute><AdminUserManagementPage /></AdminRoute>} />
-            <Route path="/admin/site-settings" element={<AdminRoute><AdminSiteSettingsPage /></AdminRoute>} />
-            <Route path="/admin/stories" element={<AdminRoute><AdminStoriesPage /></AdminRoute>} />
-            <Route path="/admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
-            <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
-            <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
-            <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
-            {/* Admin District Content Routes */}
-            <Route path="/admin/district-places" element={<AdminRoute><AdminDistrictPlacesPage /></AdminRoute>} />
-            <Route path="/admin/district-foods" element={<AdminRoute><AdminDistrictFoodsPage /></AdminRoute>} />
-            <Route path="/admin/district-festivals" element={<AdminRoute><AdminDistrictFestivalsPage /></AdminRoute>} />
-            {/* Admin Tourism Marketplace Routes */}
-            <Route path="/admin/tourism-providers" element={<AdminRoute><AdminTourismProvidersPage /></AdminRoute>} />
-            <Route path="/admin/tourism-listings" element={<AdminRoute><AdminTourismListingsPage /></AdminRoute>} />
-            <Route path="/admin/tourism-inquiries" element={<AdminRoute><AdminTourismInquiriesPage /></AdminRoute>} />
-            {/* Admin Monetization Routes */}
-            <Route path="/admin/promotion-packages" element={<AdminRoute><AdminPromotionPackagesPage /></AdminRoute>} />
-            <Route path="/admin/promotion-requests" element={<AdminRoute><AdminPromotionRequestsPage /></AdminRoute>} />
-            <Route path="/admin/travel-packages" element={<AdminRoute><AdminTravelPackagesPage /></AdminRoute>} />
-            <Route path="/admin/travel-requests" element={<AdminRoute><AdminTravelRequestsPage /></AdminRoute>} />
-            <Route path="/admin/product-categories" element={<AdminRoute><AdminProductCategoriesPage /></AdminRoute>} />
-            <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
-            <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
-            <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
-            <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
-            <Route path="/admin/notify-settings" element={<AdminRoute><AdminNotifySettingsPage /></AdminRoute>} />
-            <Route path="/admin/media-import" element={<AdminRoute><AdminMediaImportPage /></AdminRoute>} />
-            <Route path="/admin/share-settings" element={<AdminRoute><AdminShareSettingsPage /></AdminRoute>} />
-            <Route path="/admin/share-preview" element={<AdminRoute><AdminSharePreviewPage /></AdminRoute>} />
-            {/* Destination Guides Admin */}
-            <Route path="/admin/destination-guides" element={<AdminRoute><AdminDestinationGuidesPage /></AdminRoute>} />
-            <Route path="/admin/destination-guides/:destinationId/places" element={<AdminRoute><AdminDestinationPlacesPage /></AdminRoute>} />
-            {/* Cultural Content Admin */}
-            <Route path="/admin/cultural-categories" element={<AdminRoute><AdminCulturalCategoriesPage /></AdminRoute>} />
-            <Route path="/admin/cultural-subcategories" element={<AdminRoute><AdminCulturalSubcategoriesPage /></AdminRoute>} />
-            <Route path="/admin/cultural-content" element={<AdminRoute><AdminCulturalContentPage /></AdminRoute>} />
-            <Route path="/admin/cookie-consent" element={<AdminRoute><AdminCookieConsentPage /></AdminRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/culture" element={<CulturePage />} />
+              <Route path="/culture/:slug" element={<ContentDetailPage contentType="culture" />} />
+              <Route path="/food" element={<FoodPage />} />
+              <Route path="/food/:slug" element={<ContentDetailPage contentType="food" />} />
+              <Route path="/travel" element={<TravelPage />} />
+              <Route path="/travel/:slug" element={<ContentDetailPage contentType="travel" />} />
+              <Route path="/districts" element={<DistrictsPage />} />
+              <Route path="/districts/:slug" element={<DistrictDetailPage />} />
+              <Route path="/villages/:slug" element={<VillageDetailPage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/disclaimer" element={<DisclaimerPage />} />
+              <Route path="/thoughts" element={<ThoughtsPage />} />
+              <Route path="/thoughts/:slug" element={<ContentDetailPage contentType="thought" />} />
+              <Route path="/submit-thought" element={<SubmitThoughtPage />} />
+              <Route path="/submit-story" element={<SubmitStoryPage />} />
+              <Route path="/my-submissions" element={<MySubmissionsPage />} />
+              {/* Monetization & New Features */}
+              <Route path="/promotions" element={<PromotionsPage />} />
+              <Route path="/travel-packages" element={<TravelPackagesPage />} />
+              <Route path="/travel-packages/:slug" element={<TravelPackageDetailPage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/products/:slug" element={<ProductDetailPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/providers/:slug" element={<ProviderDetailPage />} />
+              <Route path="/listings/:id" element={<ListingDetailPage />} />
+              <Route path="/list-your-business" element={<ListYourBusinessPage />} />
+              <Route path="/map" element={<MapPage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/:slug" element={<EventDetailPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              {/* Destination Guides */}
+              <Route path="/destinations" element={<DistrictsPage />} />
+              <Route path="/destinations/:slug" element={<DestinationGuidePage />} />
+              <Route path="/destinations/:slug/:placeSlug" element={<DestinationPlaceDetailPage />} />
+              {/* Cultural Content System - Multi-level hierarchy */}
+              <Route path="/districts/:districtSlug/:categorySlug" element={<CulturalCategoryPage />} />
+              <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug" element={<CulturalSubcategoryPage />} />
+              <Route path="/districts/:districtSlug/:categorySlug/:subcategorySlug/:contentSlug" element={<CulturalContentDetailPage />} />
+              {/* Auth */}
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/auth" element={<Navigate to="/login" replace />} />
+              <Route path="/pending-approval" element={<PendingApprovalRoute />} />
+              <Route path="/admin/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="/admin" element={<AdminDashboardRoute><AdminDashboard /></AdminDashboardRoute>} />
+              <Route path="/admin/ai-tools" element={<AdminRoute><AdminAIToolsPage /></AdminRoute>} />
+              <Route path="/admin/ai-settings" element={<AdminRoute><AdminAISettingsPage /></AdminRoute>} />
+              <Route path="/admin/bulk-ai" element={<AdminRoute><AdminBulkAIPage /></AdminRoute>} />
+              <Route path="/admin/homepage-ctas" element={<AdminRoute><AdminHomepageCTAsPage /></AdminRoute>} />
+              <Route path="/admin/map-settings" element={<AdminRoute><AdminMapSettingsPage /></AdminRoute>} />
+              <Route path="/admin/map" element={<AdminRoute><AdminMapPage /></AdminRoute>} />
+              <Route path="/admin/content/culture" element={<AdminRoute><AdminCulturePage /></AdminRoute>} />
+              <Route path="/admin/content/food" element={<AdminRoute><AdminFoodContentPage /></AdminRoute>} />
+              <Route path="/admin/content/travel" element={<AdminRoute><AdminTravelContentPage /></AdminRoute>} />
+              <Route path="/admin/content/thoughts" element={<AdminRoute><AdminThoughtsContentPage /></AdminRoute>} />
+              <Route path="/admin/community-submissions" element={<AdminRoute><AdminCommunitySubmissionsPage /></AdminRoute>} />
+              <Route path="/admin/districts" element={<AdminRoute><AdminDistrictsPage /></AdminRoute>} />
+              <Route path="/admin/district-content" element={<AdminRoute><AdminDistrictContentPage /></AdminRoute>} />
+              <Route path="/admin/villages" element={<AdminRoute><AdminVillagesPage /></AdminRoute>} />
+              <Route path="/admin/villages/:id/content" element={<AdminRoute><AdminVillageContentPage /></AdminRoute>} />
+              <Route path="/admin/villages/:id/economy" element={<AdminRoute><AdminVillageEconomyPage /></AdminRoute>} />
+              <Route path="/admin/hotels" element={<AdminRoute><AdminHotelsPage /></AdminRoute>} />
+              <Route path="/admin/festivals" element={<AdminRoute><AdminFestivalsPage /></AdminRoute>} />
+              <Route path="/admin/gallery" element={<AdminRoute><AdminGalleryPage /></AdminRoute>} />
+              <Route path="/admin/site-images" element={<AdminRoute><AdminSiteImagesPage /></AdminRoute>} />
+              <Route path="/admin/highlights" element={<AdminRoute><AdminHighlightsPage /></AdminRoute>} />
+              <Route path="/admin/featured-highlights" element={<AdminRoute><AdminFeaturedHighlightsPage /></AdminRoute>} />
+              <Route path="/admin/featured-cards" element={<AdminRoute><AdminFeaturedCardsPage /></AdminRoute>} />
+              <Route path="/admin/featured-content" element={<AdminRoute><AdminFeaturedContentPage /></AdminRoute>} />
+              <Route path="/admin/thoughts" element={<AdminRoute><AdminThoughtsPage /></AdminRoute>} />
+              <Route path="/admin/submissions" element={<AdminRoute><AdminSubmissionsPage /></AdminRoute>} />
+              <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
+              {/* Approvals and Roles now merged into /admin/users */}
+              <Route path="/admin/approvals" element={<Navigate to="/admin/users" replace />} />
+              <Route path="/admin/roles" element={<Navigate to="/admin/users" replace />} />
+              <Route path="/admin/users" element={<AdminRoute><AdminUserManagementPage /></AdminRoute>} />
+              <Route path="/admin/site-settings" element={<AdminRoute><AdminSiteSettingsPage /></AdminRoute>} />
+              <Route path="/admin/stories" element={<AdminRoute><AdminStoriesPage /></AdminRoute>} />
+              <Route path="/admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
+              <Route path="/admin/pages" element={<AdminRoute><AdminPagesPage /></AdminRoute>} />
+              <Route path="/admin/footer-links" element={<AdminRoute><AdminFooterLinksPage /></AdminRoute>} />
+              <Route path="/admin/content-sections" element={<AdminRoute><AdminContentSectionsPage /></AdminRoute>} />
+              {/* Admin District Content Routes */}
+              <Route path="/admin/district-places" element={<AdminRoute><AdminDistrictPlacesPage /></AdminRoute>} />
+              <Route path="/admin/district-foods" element={<AdminRoute><AdminDistrictFoodsPage /></AdminRoute>} />
+              <Route path="/admin/district-festivals" element={<AdminRoute><AdminDistrictFestivalsPage /></AdminRoute>} />
+              {/* Admin Tourism Marketplace Routes */}
+              <Route path="/admin/tourism-providers" element={<AdminRoute><AdminTourismProvidersPage /></AdminRoute>} />
+              <Route path="/admin/tourism-listings" element={<AdminRoute><AdminTourismListingsPage /></AdminRoute>} />
+              <Route path="/admin/tourism-inquiries" element={<AdminRoute><AdminTourismInquiriesPage /></AdminRoute>} />
+              {/* Admin Monetization Routes */}
+              <Route path="/admin/promotion-packages" element={<AdminRoute><AdminPromotionPackagesPage /></AdminRoute>} />
+              <Route path="/admin/promotion-requests" element={<AdminRoute><AdminPromotionRequestsPage /></AdminRoute>} />
+              <Route path="/admin/travel-packages" element={<AdminRoute><AdminTravelPackagesPage /></AdminRoute>} />
+              <Route path="/admin/travel-requests" element={<AdminRoute><AdminTravelRequestsPage /></AdminRoute>} />
+              <Route path="/admin/product-categories" element={<AdminRoute><AdminProductCategoriesPage /></AdminRoute>} />
+              <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
+              <Route path="/admin/product-orders" element={<AdminRoute><AdminProductOrdersPage /></AdminRoute>} />
+              <Route path="/admin/page-settings" element={<AdminRoute><AdminPageSettingsPage /></AdminRoute>} />
+              <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
+              <Route path="/admin/notify-settings" element={<AdminRoute><AdminNotifySettingsPage /></AdminRoute>} />
+              <Route path="/admin/media-import" element={<AdminRoute><AdminMediaImportPage /></AdminRoute>} />
+              <Route path="/admin/share-settings" element={<AdminRoute><AdminShareSettingsPage /></AdminRoute>} />
+              <Route path="/admin/share-preview" element={<AdminRoute><AdminSharePreviewPage /></AdminRoute>} />
+              {/* Destination Guides Admin */}
+              <Route path="/admin/destination-guides" element={<AdminRoute><AdminDestinationGuidesPage /></AdminRoute>} />
+              <Route path="/admin/destination-places" element={<AdminRoute><AdminDestinationPlacesPage /></AdminRoute>} />
+              {/* Cultural Content Admin */}
+              <Route path="/admin/cultural-categories" element={<AdminRoute><AdminCulturalCategoriesPage /></AdminRoute>} />
+              <Route path="/admin/cultural-subcategories" element={<AdminRoute><AdminCulturalSubcategoriesPage /></AdminRoute>} />
+              <Route path="/admin/cultural-content" element={<AdminRoute><AdminCulturalContentPage /></AdminRoute>} />
+              {/* Cookie Consent Admin */}
+              <Route path="/admin/cookie-consent" element={<AdminRoute><AdminCookieConsentPage /></AdminRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </main>
+        {/* Hide Footer on admin and auth routes */}
         {!isAdminRoute && !isAuthRoute && <Footer />}
-        {!isAdminRoute && !isAuthRoute && <QuickAccessBar />}
+        {/* Floating Share Button only on public pages */}
         {!isAdminRoute && !isAuthRoute && <FloatingShareButton />}
+        {/* Quick Access Bar only on public pages */}
+        {!isAdminRoute && !isAuthRoute && <QuickAccessBar />}
       </div>
+      <SearchModal />
     </>
   );
-};
+});
+AppContent.displayName = "AppContent";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+      <ReadingModeProvider>
         <CookieConsentProvider>
-          <AnalyticsProvider>
-            <ReadingModeProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AnalyticsProvider>
               <SearchProvider>
                 <AppContent />
-                <SearchModal />
               </SearchProvider>
-            </ReadingModeProvider>
-          </AnalyticsProvider>
+            </AnalyticsProvider>
+          </BrowserRouter>
         </CookieConsentProvider>
-      </BrowserRouter>
+      </ReadingModeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
