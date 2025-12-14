@@ -15,28 +15,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    // Target modern browsers for smaller bundles
-    target: "es2020",
-    // Enable minification
-    minify: "esbuild",
-    // Chunk splitting for better caching
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Vendor chunks for better caching
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "ui-vendor": ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tooltip", "@radix-ui/react-popover"],
-          "query-vendor": ["@tanstack/react-query"],
-          "supabase": ["@supabase/supabase-js"],
-        },
-      },
-    },
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 500,
-  },
-  // Optimize deps
-  optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom", "@tanstack/react-query"],
-  },
 }));
