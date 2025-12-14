@@ -72,6 +72,8 @@ export default function EventsPage() {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch districts for filter
@@ -86,6 +88,8 @@ export default function EventsPage() {
       if (error) throw error;
       return data;
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch featured events
@@ -108,6 +112,8 @@ export default function EventsPage() {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Calendar helpers

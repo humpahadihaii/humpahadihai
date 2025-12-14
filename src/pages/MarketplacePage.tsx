@@ -105,6 +105,8 @@ export default function MarketplacePage() {
       if (error) throw error;
       return data as District[];
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: listings, isLoading } = useQuery({
@@ -132,6 +134,8 @@ export default function MarketplacePage() {
       if (error) throw error;
       return data as TourismListing[];
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: featuredProviders } = useQuery({
@@ -147,6 +151,8 @@ export default function MarketplacePage() {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const filteredListings = listings
