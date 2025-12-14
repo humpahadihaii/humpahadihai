@@ -485,31 +485,39 @@ export default function MarketplacePage() {
             ) : isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <Card key={i}>
-                    <Skeleton className="h-48 w-full rounded-t-lg" />
-                    <CardContent className="p-4">
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-full mb-1" />
+                  <Card key={i} className="overflow-hidden">
+                    {/* Fixed aspect ratio skeleton to prevent CLS */}
+                    <div className="aspect-video bg-muted skeleton-shimmer" />
+                    <CardContent className="p-4 space-y-3">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-2/3" />
+                      <div className="flex justify-between items-center pt-2">
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-9 w-24" />
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : filteredListings && filteredListings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredListings.map((listing) => (
+                {filteredListings.map((listing, index) => (
                   <Card
                     key={listing.id}
                     className={`overflow-hidden hover:shadow-lg transition-shadow ${
                       listing.is_featured ? "ring-2 ring-primary" : ""
                     }`}
                   >
-                    <div className="relative h-48 bg-muted">
+                    {/* Fixed aspect ratio container to prevent CLS */}
+                    <div className="relative aspect-video bg-muted">
                       <img
                         src={listing.image_url || `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`}
                         alt={listing.title}
                         className="w-full h-full object-cover"
-                        loading="lazy"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        decoding={index < 3 ? "sync" : "async"}
+                        fetchPriority={index < 3 ? "high" : "auto"}
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`;
                         }}
