@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/hom
 import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
 
-// Lazy load below-fold components
+// Lazy load ALL below-fold components for reduced initial JS bundle
 const HomepageVisits = lazy(() => import("@/components/HomepageVisits").then(m => ({ default: m.HomepageVisits })));
 const FeaturedCardSection = lazy(() => import("@/components/FeaturedCardSection").then(m => ({ default: m.FeaturedCardSection })));
 const FestivalSpotlight = lazy(() => import("@/components/festivals/FestivalSpotlight"));
@@ -26,21 +26,41 @@ const EventCalendarWidget = lazy(() => import("@/components/events/EventCalendar
 const FeaturedContentSection = lazy(() => import("@/components/home/FeaturedContentSection").then(m => ({ default: m.FeaturedContentSection })));
 const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed").then(m => ({ default: m.RecentlyViewed })));
 
-// Skeleton components for Suspense fallbacks
-const CardSkeleton = () => (
+// Memoized skeleton components for better performance
+const CardSkeleton = memo(() => (
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
     {[1, 2, 3].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
   </div>
-);
+));
+CardSkeleton.displayName = "CardSkeleton";
 
-const WeatherSkeleton = () => (
+const WeatherSkeleton = memo(() => (
   <div className="rounded-xl border border-border/50 p-4">
     <Skeleton className="h-6 w-48 mb-4" />
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3">
       {Array(7).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
     </div>
   </div>
-);
+));
+WeatherSkeleton.displayName = "WeatherSkeleton";
+
+// Static features data - defined outside component to prevent recreation
+const FEATURES = [
+  { icon: Mountain, title: "Culture & Traditions", description: "Explore the vibrant festivals, folk music, and traditional crafts of Garhwal and Kumaon regions.", link: "/culture", color: "text-primary" },
+  { icon: UtensilsCrossed, title: "Food Trails", description: "Discover authentic Pahadi cuisine, from Kafuli to Bal Mithai, and traditional cooking methods.", link: "/food", color: "text-secondary" },
+  { icon: Palmtree, title: "Travel & Nature", description: "Journey through Char Dham, hidden valleys, breathtaking treks, and pristine mountain landscapes.", link: "/travel", color: "text-accent" },
+  { icon: Camera, title: "Photo Gallery", description: "Experience Uttarakhand through stunning photography of festivals, people, nature, and heritage.", link: "/gallery", color: "text-secondary" },
+] as const;
+
+// Static district links - outside component
+const DISTRICT_LINKS = [
+  { to: "/districts/almora", text: "Culture of Almora District" },
+  { to: "/districts/pithoragarh", text: "Pithoragarh Traditions & Heritage" },
+  { to: "/districts/chamoli", text: "Chamoli District Cultural Life" },
+  { to: "/districts/nainital", text: "Nainital Lake District" },
+  { to: "/districts/bageshwar", text: "Bageshwar Heritage Sites" },
+  { to: "/districts/tehri-garhwal", text: "Tehri Garhwal Culture" },
+] as const;
 
 const HomePage = () => {
   const { getImage } = useSiteImages();
@@ -48,32 +68,38 @@ const HomePage = () => {
   const { data: welcomeSection } = useCMSContentSection("welcome");
   const { settings: sharePreview } = useSiteSharePreview();
   
-  const heroImage = settings?.hero_background_image || getImage('hero_banner', heroImageFallback);
+  // Memoize hero image to prevent recalculation
+  const heroImage = useMemo(() => 
+    settings?.hero_background_image || getImage('hero_banner', heroImageFallback),
+    [settings?.hero_background_image, getImage]
+  );
 
-  // Remove static hero shell on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.__removeStaticHero) {
-      window.__removeStaticHero();
-    }
-  }, []);
-
-  // CMS settings with fallbacks
-  const siteName = settings?.site_name || "Hum Pahadi Haii";
-  const tagline = settings?.tagline || "Celebrating Uttarakhand's Culture, Tradition & Heritage";
-  const metaTitle = settings?.meta_title || `${siteName} - ${tagline}`;
-  const metaDescription = settings?.meta_description || "Discover Uttarakhand's rich culture, traditional food, festivals, handicrafts, and natural beauty. Explore Pahadi traditions from Garhwal and Kumaon regions.";
+  // Memoize CMS settings with fallbacks
+  const { siteName, tagline, metaTitle, metaDescription } = useMemo(() => {
+    const name = settings?.site_name || "Hum Pahadi Haii";
+    const tag = settings?.tagline || "Celebrating Uttarakhand's Culture, Tradition & Heritage";
+    return {
+      siteName: name,
+      tagline: tag,
+      metaTitle: settings?.meta_title || `${name} - ${tag}`,
+      metaDescription: settings?.meta_description || "Discover Uttarakhand's rich culture, traditional food, festivals, handicrafts, and natural beauty. Explore Pahadi traditions from Garhwal and Kumaon regions.",
+    };
+  }, [settings]);
   
-  // Share preview
-  const ogTitle = sharePreview?.default_title || metaTitle;
-  const ogDescription = sharePreview?.default_description || metaDescription;
-  const rawOgImage = sharePreview?.default_image_url;
-  const ogImage = rawOgImage?.startsWith('http') 
-    ? rawOgImage 
-    : rawOgImage 
-      ? `https://humpahadihaii.in${rawOgImage}` 
-      : "https://humpahadihaii.in/logo.jpg";
+  // Share preview memoization
+  const ogMeta = useMemo(() => {
+    const ogTitle = sharePreview?.default_title || metaTitle;
+    const ogDescription = sharePreview?.default_description || metaDescription;
+    const rawOgImage = sharePreview?.default_image_url;
+    const ogImage = rawOgImage?.startsWith('http') 
+      ? rawOgImage 
+      : rawOgImage 
+        ? `https://humpahadihaii.in${rawOgImage}` 
+        : "https://humpahadihaii.in/logo.jpg";
+    return { ogTitle, ogDescription, ogImage };
+  }, [sharePreview, metaTitle, metaDescription]);
 
-  // Defer non-critical queries
+  // Defer non-critical queries with longer stale times
   const { data: highlights = [] } = useQuery({
     queryKey: ["featured-highlights"],
     queryFn: async () => {
@@ -86,17 +112,17 @@ const HomePage = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 1000 * 60 * 10, // 10 min
-    gcTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 15, // 15 min - increased
+    gcTime: 1000 * 60 * 60, // 1 hour
   });
 
-  // Defer events query - only fetch when needed
+  // Defer events query with enabled flag
   const { data: upcomingEvents = [], isLoading: eventsLoading } = useQuery({
     queryKey: ["homepage-events"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select(`id, title, slug, short_description, cover_image_url, start_at, end_at, event_type, is_free, village:villages(id, name, slug)`)
+        .select(`id, title, slug, short_description, cover_image_url, start_at, end_at, event_type, is_free`)
         .eq("status", "published")
         .gte("start_at", new Date().toISOString())
         .order("start_at", { ascending: true })
@@ -104,16 +130,9 @@ const HomePage = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 15,
+    gcTime: 1000 * 60 * 60,
   });
-
-  const features = [
-    { icon: Mountain, title: "Culture & Traditions", description: "Explore the vibrant festivals, folk music, and traditional crafts of Garhwal and Kumaon regions.", link: "/culture", color: "text-primary" },
-    { icon: UtensilsCrossed, title: "Food Trails", description: "Discover authentic Pahadi cuisine, from Kafuli to Bal Mithai, and traditional cooking methods.", link: "/food", color: "text-secondary" },
-    { icon: Palmtree, title: "Travel & Nature", description: "Journey through Char Dham, hidden valleys, breathtaking treks, and pristine mountain landscapes.", link: "/travel", color: "text-accent" },
-    { icon: Camera, title: "Photo Gallery", description: "Experience Uttarakhand through stunning photography of festivals, people, nature, and heritage.", link: "/gallery", color: "text-secondary" },
-  ];
 
   const { data: ctasGrouped } = useAllHomepageCTAsGrouped();
   const heroCtas = ctasGrouped?.hero || [];
@@ -128,20 +147,20 @@ const HomePage = () => {
         <meta name="description" content={metaDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://humpahadihaii.in" />
-        <meta property="og:title" content={ogTitle} />
-        <meta property="og:description" content={ogDescription} />
-        <meta property="og:image" content={ogImage} />
+        <meta property="og:title" content={ogMeta.ogTitle} />
+        <meta property="og:description" content={ogMeta.ogDescription} />
+        <meta property="og:image" content={ogMeta.ogImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={ogTitle} />
-        <meta name="twitter:description" content={ogDescription} />
-        <meta name="twitter:image" content={ogImage} />
-        {/* Preload hero image for LCP */}
+        <meta name="twitter:title" content={ogMeta.ogTitle} />
+        <meta name="twitter:description" content={ogMeta.ogDescription} />
+        <meta name="twitter:image" content={ogMeta.ogImage} />
+        {/* Preload hero image for LCP optimization */}
         <link rel="preload" as="image" href={heroImage} />
       </Helmet>
 
-      {/* Hero Section - Critical for LCP */}
+      {/* Hero Section - Critical for LCP, optimized for performance */}
       <section className="relative min-h-[75vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img 
@@ -149,10 +168,12 @@ const HomePage = () => {
             alt="Uttarakhand Mountains" 
             className="w-full h-full object-cover"
             fetchPriority="high"
-            decoding="async"
-            style={{ contentVisibility: 'auto' }}
+            decoding="sync"
+            loading="eager"
+            width="1920"
+            height="1080"
           />
-          <div className="absolute inset-0 hero-overlay"></div>
+          <div className="absolute inset-0 hero-overlay" />
         </div>
         
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-3xl mx-auto">
@@ -167,7 +188,7 @@ const HomePage = () => {
             <SearchTrigger variant="hero" />
           </div>
           <div className="mt-6">
-            <Suspense fallback={<Skeleton className="h-8 w-32 mx-auto" />}>
+            <Suspense fallback={null}>
               <HomepageVisits />
             </Suspense>
           </div>
@@ -196,11 +217,11 @@ const HomePage = () => {
         </section>
       </FadeInSection>
 
-      {/* Features Grid */}
+      {/* Features Grid - Critical above fold */}
       <section className="section-padding">
         <div className="container-wide">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
+            {FEATURES.map((feature, index) => (
               <Card key={index} className="group card-interactive bg-card border-border/60 hover:border-primary/20">
                 <CardContent className="p-6">
                   <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${feature.color} bg-current/10 mb-4`}>
@@ -216,18 +237,11 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Internal Links */}
+          {/* Internal Links - SEO optimized */}
           <div className="mt-12 pt-8 border-t border-border/50">
             <h3 className="text-lg font-semibold text-foreground mb-4">Explore Uttarakhand Places</h3>
             <div className="flex flex-wrap gap-3">
-              {[
-                { to: "/districts/almora", text: "Culture of Almora District" },
-                { to: "/districts/pithoragarh", text: "Pithoragarh Traditions & Heritage" },
-                { to: "/districts/chamoli", text: "Chamoli District Cultural Life" },
-                { to: "/districts/nainital", text: "Nainital Lake District" },
-                { to: "/districts/bageshwar", text: "Bageshwar Heritage Sites" },
-                { to: "/districts/tehri-garhwal", text: "Tehri Garhwal Culture" },
-              ].map((link, i) => (
+              {DISTRICT_LINKS.map((link, i) => (
                 <span key={link.to} className="contents">
                   {i > 0 && <span className="text-muted-foreground">•</span>}
                   <Link to={link.to} className="text-primary hover:text-primary/80 hover:underline text-sm">{link.text}</Link>
@@ -244,14 +258,14 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Dynamic Featured Content - Lazy loaded */}
-      <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>}>
+      {/* Dynamic Featured Content - Lazy loaded with larger margins */}
+      <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
         <div className="container-wide">
           <FeaturedContentSection sectionKey="cultural_highlight" variant="hero" />
         </div>
       </LazySection>
 
-      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>}>
+      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
         <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <FeaturedContentSection sectionKey="local_food" variant="card" limit={3} />
@@ -260,13 +274,13 @@ const HomePage = () => {
         </div>
       </LazySection>
 
-      <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>}>
+      <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
         <div className="container-wide">
           <FeaturedContentSection sectionKey="nature" variant="hero" />
         </div>
       </LazySection>
 
-      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>}>
+      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
         <div className="container-wide">
           <FeaturedContentSection sectionKey="districts" variant="card" />
         </div>
@@ -275,16 +289,24 @@ const HomePage = () => {
       {/* Mid-Page CTA */}
       <MidPageCTA ctas={midPageCtas} />
 
-      {/* Legacy Featured Highlights */}
+      {/* Legacy Featured Highlights - Lazy with larger margin */}
       {highlights.length > 0 && (
-        <LazySection className="section-padding bg-muted/40" minHeight="300px">
+        <LazySection className="section-padding bg-muted/40" minHeight="300px" rootMargin="400px">
           <div className="container-wide">
             <h2 className="font-display text-2xl md:text-3xl font-semibold text-center text-primary mb-10">Featured Highlights</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
               {highlights.map((highlight) => (
                 <Link key={highlight.id} to={highlight.button_link} className="relative rounded-2xl overflow-hidden group block">
                   {highlight.image_url && (
-                    <img src={highlight.image_url} alt={highlight.title} loading="lazy" width="496" height="320" className="w-full h-72 md:h-80 object-cover transition-transform duration-500 group-hover:scale-103" />
+                    <img 
+                      src={highlight.image_url} 
+                      alt={highlight.title} 
+                      loading="lazy" 
+                      decoding="async"
+                      width="496" 
+                      height="320" 
+                      className="w-full h-72 md:h-80 object-cover transition-transform duration-500 group-hover:scale-103" 
+                    />
                   )}
                   <div className="absolute inset-0 hero-overlay">
                     <div className="absolute bottom-0 p-6 text-white">
@@ -300,15 +322,15 @@ const HomePage = () => {
         </LazySection>
       )}
 
-      {/* Weather - Lazy loaded (below fold) */}
-      <LazySection className="section-padding-sm bg-muted/40" fallback={<div className="container-wide"><WeatherSkeleton /></div>}>
+      {/* Weather - Deferred significantly (heavy component) */}
+      <LazySection className="section-padding-sm bg-muted/40" fallback={<div className="container-wide"><WeatherSkeleton /></div>} rootMargin="500px">
         <div className="container-wide">
           <AllDistrictsWeather />
         </div>
       </LazySection>
 
-      {/* Festival & Events - Lazy */}
-      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>}>
+      {/* Festival & Events - Lazy with large margin */}
+      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="400px">
         <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
@@ -321,8 +343,8 @@ const HomePage = () => {
         </div>
       </LazySection>
 
-      {/* Featured Card Section */}
-      <LazySection minHeight="200px">
+      {/* Featured Card Section - Very low priority */}
+      <LazySection minHeight="200px" rootMargin="500px">
         <FeaturedCardSection slug="follow-our-journey" />
       </LazySection>
 
@@ -332,11 +354,4 @@ const HomePage = () => {
   );
 };
 
-// Add type for window
-declare global {
-  interface Window {
-    __removeStaticHero?: () => void;
-  }
-}
-
-export default HomePage;
+export default memo(HomePage);
