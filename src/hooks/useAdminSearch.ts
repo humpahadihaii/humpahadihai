@@ -282,7 +282,7 @@ export function useAdminSearch() {
     } finally {
       setIsSearching(false);
     }
-  }, [accessibleConfigs]);
+  }, [accessibleConfigs, accessibleAdminPages]);
 
   // Trigger search when debounced query changes
   useMemo(() => {
