@@ -339,11 +339,16 @@
 
   img[loading="lazy"] {
     opacity: 0;
-    transition: opacity 0.4s ease-out;
+    transition: opacity 0.3s ease-out;
   }
 
   img[loading="lazy"].loaded,
   img:not([loading="lazy"]) {
+    opacity: 1;
+  }
+
+  /* Auto-add loaded class via JS */
+  img[loading="lazy"][src]:not([src=""]) {
     opacity: 1;
   }
 

@@ -87,6 +87,8 @@ export default function EventCalendarWidget({
       return data as Event[];
     },
     enabled: !propEvents && (!!villageId || !!districtId),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 
   const events = propEvents || fetchedEvents || [];
