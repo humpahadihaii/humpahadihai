@@ -7,13 +7,33 @@ import { useDebounce } from "@/hooks/useDebounce";
 export interface AdminSearchResult {
   id: string;
   title: string;
-  type: "district" | "village" | "category" | "subcategory" | "content" | "story" | "event" | "page" | "provider" | "listing" | "package" | "product";
+  type: "district" | "village" | "category" | "subcategory" | "content" | "story" | "event" | "page" | "provider" | "listing" | "package" | "product" | "admin-page";
   typeLabel: string;
   parentInfo?: string;
   status?: string;
   route: string;
   matchContext?: string;
 }
+
+interface AdminPageConfig {
+  id: string;
+  title: string;
+  keywords: string[];
+  route: string;
+  requiredSection: string;
+}
+
+const ADMIN_PAGES: AdminPageConfig[] = [
+  { id: "cookie-consent", title: "Cookie Consent Settings", keywords: ["cookie", "consent", "gdpr", "privacy", "banner"], route: "/admin/cookie-consent", requiredSection: "/admin/cookie-consent" },
+  { id: "site-settings", title: "Site Settings", keywords: ["site", "settings", "configuration", "config"], route: "/admin/site-settings", requiredSection: "/admin/site-settings" },
+  { id: "homepage-ctas", title: "Homepage CTAs", keywords: ["cta", "call to action", "homepage", "buttons"], route: "/admin/homepage-ctas", requiredSection: "/admin/homepage-ctas" },
+  { id: "analytics", title: "Analytics Dashboard", keywords: ["analytics", "stats", "statistics", "visitors", "traffic"], route: "/admin/analytics", requiredSection: "/admin/analytics" },
+  { id: "user-management", title: "User Management", keywords: ["users", "user", "management", "roles", "permissions"], route: "/admin/users", requiredSection: "/admin/users" },
+  { id: "map-settings", title: "Map Settings", keywords: ["map", "maps", "location", "coordinates"], route: "/admin/map-settings", requiredSection: "/admin/map-settings" },
+  { id: "share-settings", title: "Share Settings", keywords: ["share", "social", "preview", "og", "opengraph"], route: "/admin/share-settings", requiredSection: "/admin/share-settings" },
+  { id: "ai-settings", title: "AI Settings", keywords: ["ai", "artificial intelligence", "gemini", "api key"], route: "/admin/ai-settings", requiredSection: "/admin/ai-settings" },
+  { id: "notify-settings", title: "Notification Settings", keywords: ["notify", "notification", "whatsapp", "email", "booking"], route: "/admin/notify-settings", requiredSection: "/admin/notify-settings" },
+];
 
 interface SearchConfig {
   table: string;
@@ -164,6 +184,16 @@ export function useAdminSearch() {
     );
   }, [roles]);
 
+  // Filter admin pages based on user's role permissions
+  const accessibleAdminPages = useMemo(() => {
+    if (isSuperAdmin(roles as RBACRole[])) {
+      return ADMIN_PAGES;
+    }
+    return ADMIN_PAGES.filter(page => 
+      canAccessSection(roles as RBACRole[], page.requiredSection)
+    );
+  }, [roles]);
+
   const search = useCallback(async (searchTerm: string) => {
     if (!searchTerm || searchTerm.length < 2) {
       setResults([]);
@@ -212,6 +242,22 @@ export function useAdminSearch() {
       
       // Flatten and dedupe results
       resultsArrays.forEach(arr => allResults.push(...arr));
+
+      // Add matching admin pages
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      accessibleAdminPages.forEach(page => {
+        const matchesTitle = page.title.toLowerCase().includes(lowerSearchTerm);
+        const matchesKeyword = page.keywords.some(kw => kw.toLowerCase().includes(lowerSearchTerm));
+        if (matchesTitle || matchesKeyword) {
+          allResults.push({
+            id: page.id,
+            title: page.title,
+            type: "admin-page",
+            typeLabel: "Settings",
+            route: page.route,
+          });
+        }
+      });
 
       // Sort by relevance (exact match first, then partial)
       const lowerQuery = searchTerm.toLowerCase();
