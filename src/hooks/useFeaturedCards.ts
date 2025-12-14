@@ -46,15 +46,17 @@ export function usePublicFeaturedCards(locale: string = 'en') {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("featured_cards")
-        .select("*")
+        .select("id, slug, title, subtitle, cta_label, cta_url, image_url, image_alt, icon_name, gradient_color, order_index")
         .eq("is_published", true)
         .eq("visible_on_homepage", true)
-        .order("order_index", { ascending: true });
+        .order("order_index", { ascending: true })
+        .limit(4);
 
       if (error) throw error;
       return data as FeaturedCard[];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 }
 

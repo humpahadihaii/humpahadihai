@@ -224,3 +224,5 @@ export function FeaturedContentSection({
     </div>
   );
 }
+
+export default FeaturedContentSection;
