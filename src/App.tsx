@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 // Retry wrapper for dynamic imports - handles stale chunk failures
 function lazyWithRetry<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
-  retries = 2
+  retries = 1 // Reduced retries for faster failure
 ): React.LazyExoticComponent<T> {
   return lazy(async () => {
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -32,8 +32,8 @@ function lazyWithRetry<T extends ComponentType<any>>(
           /Loading chunk|Failed to fetch dynamically imported module/.test(error.message);
         
         if (isChunkError && attempt < retries) {
-          // Wait briefly then retry
-          await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+          // Short wait then retry
+          await new Promise(resolve => setTimeout(resolve, 300));
           continue;
         }
         
@@ -165,14 +165,15 @@ const AdminContentPage = lazyWithRetry(() => import("./pages/admin/AdminContentP
 const PendingApprovalPage = lazyWithRetry(() => import("./pages/PendingApprovalPage"));
 const CMSPageView = lazyWithRetry(() => import("./pages/CMSPageView"));
 
-// Optimized QueryClient with better caching
+// Optimized QueryClient with aggressive caching for faster loads
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 30 * 60 * 1000, // 30 minutes
-      retry: 1,
+      staleTime: 10 * 60 * 1000, // 10 minutes - longer cache
+      gcTime: 60 * 60 * 1000, // 1 hour
+      retry: 0, // No retries for faster failure
       refetchOnWindowFocus: false,
+      refetchOnMount: false, // Don't refetch if data exists
     },
   },
 });
@@ -310,13 +311,12 @@ function useHybridProgress() {
   return { progress: Math.round(progress), isVisible };
 }
 
-// Minimal skeleton fallback for Suspense
+// Minimal skeleton fallback for Suspense - reduced height for faster perceived load
 const SuspenseFallback = memo(() => (
-  <div className="min-h-[50vh] flex items-center justify-center">
-    <div className="space-y-4 w-full max-w-md px-4">
-      <Skeleton className="h-8 w-3/4 mx-auto" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-5/6" />
+  <div className="min-h-[30vh] flex items-center justify-center">
+    <div className="space-y-3 w-full max-w-sm px-4">
+      <Skeleton className="h-6 w-2/3 mx-auto" />
+      <Skeleton className="h-3 w-full" />
     </div>
   </div>
 ));

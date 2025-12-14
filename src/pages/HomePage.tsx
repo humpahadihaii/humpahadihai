@@ -234,11 +234,13 @@ const HomePage = () => {
       {/* Below Hero CTAs - Above fold */}
       <BelowHeroCTAs ctas={belowHeroCtas} />
 
-      {/* Recently Viewed - Lazy */}
+      {/* Recently Viewed - Render directly */}
       <SectionErrorBoundary>
-        <LazySection className="container-wide py-6" minHeight="0px" rootMargin="50px">
-          <RecentlyViewed variant="horizontal" maxItems={6} />
-        </LazySection>
+        <div className="container-wide py-6">
+          <Suspense fallback={null}>
+            <RecentlyViewed variant="horizontal" maxItems={6} />
+          </Suspense>
+        </div>
       </SectionErrorBoundary>
 
       {/* Introduction - CMS Driven (Above fold on most screens) */}
@@ -296,40 +298,48 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Dynamic Featured Content - Lazy loaded with larger margins */}
+      {/* Dynamic Featured Content - Render immediately without LazySection delays */}
       <SectionErrorBoundary>
-        <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+        <section className="section-padding bg-muted/40">
           <div className="container-wide">
-            <FeaturedContentSection sectionKey="cultural_highlight" variant="hero" />
+            <Suspense fallback={<CardSkeleton />}>
+              <FeaturedContentSection sectionKey="cultural_highlight" variant="hero" />
+            </Suspense>
           </div>
-        </LazySection>
+        </section>
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>
-        <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+        <section className="section-padding">
           <div className="container-wide">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <FeaturedContentSection sectionKey="local_food" variant="card" limit={3} />
-              <FeaturedContentSection sectionKey="spiritual" variant="card" limit={3} />
-            </div>
+            <Suspense fallback={<CardSkeleton />}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <FeaturedContentSection sectionKey="local_food" variant="card" limit={3} />
+                <FeaturedContentSection sectionKey="spiritual" variant="card" limit={3} />
+              </div>
+            </Suspense>
           </div>
-        </LazySection>
+        </section>
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>
-        <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+        <section className="section-padding bg-muted/40">
           <div className="container-wide">
-            <FeaturedContentSection sectionKey="nature" variant="hero" />
+            <Suspense fallback={<CardSkeleton />}>
+              <FeaturedContentSection sectionKey="nature" variant="hero" />
+            </Suspense>
           </div>
-        </LazySection>
+        </section>
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>
-        <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+        <section className="section-padding">
           <div className="container-wide">
-            <FeaturedContentSection sectionKey="districts" variant="card" />
+            <Suspense fallback={<CardSkeleton />}>
+              <FeaturedContentSection sectionKey="districts" variant="card" />
+            </Suspense>
           </div>
-        </LazySection>
+        </section>
       </SectionErrorBoundary>
 
       {/* Mid-Page CTA */}
