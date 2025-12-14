@@ -178,7 +178,7 @@
       "icon": "Share2",
       "route": "/admin/share-settings",
       "group": "settings",
-      "order": 5,
+      "order": 6,
       "required_roles": ["super_admin", "admin"]
     },
     {
@@ -187,7 +187,16 @@
       "icon": "Eye",
       "route": "/admin/share-preview",
       "group": "settings",
-      "order": 6,
+      "order": 7,
+      "required_roles": ["super_admin", "admin"]
+    },
+    {
+      "id": "cookie-consent",
+      "label": "Cookie Consent",
+      "icon": "Cookie",
+      "route": "/admin/cookie-consent",
+      "group": "settings",
+      "order": 8,
       "required_roles": ["super_admin", "admin"]
     },
     {

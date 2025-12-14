@@ -1854,6 +1854,108 @@ export type Database = {
         }
         Relationships: []
       }
+      cookie_consent_settings: {
+        Row: {
+          accept_all_text: string | null
+          banner_description: string | null
+          banner_position: string | null
+          banner_title: string | null
+          categories: Json | null
+          consent_expiry_days: number | null
+          cookie_policy_url: string | null
+          created_at: string | null
+          force_reconsent: boolean | null
+          id: string
+          manage_text: string | null
+          policy_version: number | null
+          privacy_policy_url: string | null
+          reject_all_text: string | null
+          save_text: string | null
+          singleton_flag: boolean | null
+          theme: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accept_all_text?: string | null
+          banner_description?: string | null
+          banner_position?: string | null
+          banner_title?: string | null
+          categories?: Json | null
+          consent_expiry_days?: number | null
+          cookie_policy_url?: string | null
+          created_at?: string | null
+          force_reconsent?: boolean | null
+          id?: string
+          manage_text?: string | null
+          policy_version?: number | null
+          privacy_policy_url?: string | null
+          reject_all_text?: string | null
+          save_text?: string | null
+          singleton_flag?: boolean | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accept_all_text?: string | null
+          banner_description?: string | null
+          banner_position?: string | null
+          banner_title?: string | null
+          categories?: Json | null
+          consent_expiry_days?: number | null
+          cookie_policy_url?: string | null
+          created_at?: string | null
+          force_reconsent?: boolean | null
+          id?: string
+          manage_text?: string | null
+          policy_version?: number | null
+          privacy_policy_url?: string | null
+          reject_all_text?: string | null
+          save_text?: string | null
+          singleton_flag?: boolean | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      cookie_consent_stats: {
+        Row: {
+          accepted_all: number | null
+          analytics_accepted: number | null
+          consent_date: string
+          created_at: string | null
+          customized: number | null
+          id: string
+          marketing_accepted: number | null
+          preferences_accepted: number | null
+          rejected_all: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepted_all?: number | null
+          analytics_accepted?: number | null
+          consent_date?: string
+          created_at?: string | null
+          customized?: number | null
+          id?: string
+          marketing_accepted?: number | null
+          preferences_accepted?: number | null
+          rejected_all?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepted_all?: number | null
+          analytics_accepted?: number | null
+          consent_date?: string
+          created_at?: string | null
+          customized?: number | null
+          id?: string
+          marketing_accepted?: number | null
+          preferences_accepted?: number | null
+          rejected_all?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cultural_content: {
         Row: {
           category_id: string
@@ -6323,6 +6425,10 @@ export type Database = {
           url_slug: string
           village_name: string
         }[]
+      }
+      increment_consent_stat: {
+        Args: { p_categories?: string[]; p_stat_type: string }
+        Returns: undefined
       }
       refresh_map_poi_cache: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
