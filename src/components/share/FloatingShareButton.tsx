@@ -115,13 +115,22 @@ export function FloatingShareButton() {
   }, [location.pathname]);
 
   const fetchSettings = async () => {
-    const { data } = await supabase
-      .from('social_share_settings')
-      .select('*')
-      .single();
-    
-    if (data) {
-      setSettings(data as ShareSettings);
+    try {
+      const { data, error } = await supabase
+        .from('social_share_settings')
+        .select('*')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Failed to fetch share settings:', error);
+        return;
+      }
+      
+      if (data) {
+        setSettings(data as ShareSettings);
+      }
+    } catch (error) {
+      console.error('Error fetching share settings:', error);
     }
   };
 

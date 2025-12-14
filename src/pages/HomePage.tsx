@@ -16,15 +16,16 @@ import { useAllHomepageCTAsGrouped } from "@/hooks/useHomepageCTAs";
 import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/home/CTASection";
 import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
+import { SectionErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy load ALL below-fold components for reduced initial JS bundle
-const HomepageVisits = lazy(() => import("@/components/HomepageVisits").then(m => ({ default: m.HomepageVisits })));
-const FeaturedCardSection = lazy(() => import("@/components/FeaturedCardSection").then(m => ({ default: m.FeaturedCardSection })));
-const FestivalSpotlight = lazy(() => import("@/components/festivals/FestivalSpotlight"));
-const AllDistrictsWeather = lazy(() => import("@/components/weather/AllDistrictsWeather"));
-const EventCalendarWidget = lazy(() => import("@/components/events/EventCalendarWidget"));
-const FeaturedContentSection = lazy(() => import("@/components/home/FeaturedContentSection").then(m => ({ default: m.FeaturedContentSection })));
-const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed").then(m => ({ default: m.RecentlyViewed })));
+const HomepageVisits = lazy(() => import("@/components/HomepageVisits").then(m => ({ default: m.HomepageVisits })).catch(() => ({ default: () => null })));
+const FeaturedCardSection = lazy(() => import("@/components/FeaturedCardSection").then(m => ({ default: m.FeaturedCardSection })).catch(() => ({ default: () => null })));
+const FestivalSpotlight = lazy(() => import("@/components/festivals/FestivalSpotlight").catch(() => ({ default: () => null })));
+const AllDistrictsWeather = lazy(() => import("@/components/weather/AllDistrictsWeather").catch(() => ({ default: () => null })));
+const EventCalendarWidget = lazy(() => import("@/components/events/EventCalendarWidget").catch(() => ({ default: () => null })));
+const FeaturedContentSection = lazy(() => import("@/components/home/FeaturedContentSection").then(m => ({ default: m.FeaturedContentSection })).catch(() => ({ default: () => null })));
+const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed").then(m => ({ default: m.RecentlyViewed })).catch(() => ({ default: () => null })));
 
 // Memoized skeleton components for better performance
 const CardSkeleton = memo(() => (
@@ -199,9 +200,11 @@ const HomePage = () => {
       <BelowHeroCTAs ctas={belowHeroCtas} />
 
       {/* Recently Viewed - Lazy */}
-      <LazySection className="container-wide py-6" minHeight="0px" rootMargin="50px">
-        <RecentlyViewed variant="horizontal" maxItems={6} />
-      </LazySection>
+      <SectionErrorBoundary>
+        <LazySection className="container-wide py-6" minHeight="0px" rootMargin="50px">
+          <RecentlyViewed variant="horizontal" maxItems={6} />
+        </LazySection>
+      </SectionErrorBoundary>
 
       {/* Introduction - CMS Driven (Above fold on most screens) */}
       <FadeInSection>
@@ -259,94 +262,110 @@ const HomePage = () => {
       </section>
 
       {/* Dynamic Featured Content - Lazy loaded with larger margins */}
-      <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
-        <div className="container-wide">
-          <FeaturedContentSection sectionKey="cultural_highlight" variant="hero" />
-        </div>
-      </LazySection>
-
-      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
-        <div className="container-wide">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <FeaturedContentSection sectionKey="local_food" variant="card" limit={3} />
-            <FeaturedContentSection sectionKey="spiritual" variant="card" limit={3} />
+      <SectionErrorBoundary>
+        <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+          <div className="container-wide">
+            <FeaturedContentSection sectionKey="cultural_highlight" variant="hero" />
           </div>
-        </div>
-      </LazySection>
+        </LazySection>
+      </SectionErrorBoundary>
 
-      <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
-        <div className="container-wide">
-          <FeaturedContentSection sectionKey="nature" variant="hero" />
-        </div>
-      </LazySection>
+      <SectionErrorBoundary>
+        <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+          <div className="container-wide">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <FeaturedContentSection sectionKey="local_food" variant="card" limit={3} />
+              <FeaturedContentSection sectionKey="spiritual" variant="card" limit={3} />
+            </div>
+          </div>
+        </LazySection>
+      </SectionErrorBoundary>
 
-      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
-        <div className="container-wide">
-          <FeaturedContentSection sectionKey="districts" variant="card" />
-        </div>
-      </LazySection>
+      <SectionErrorBoundary>
+        <LazySection className="section-padding bg-muted/40" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+          <div className="container-wide">
+            <FeaturedContentSection sectionKey="nature" variant="hero" />
+          </div>
+        </LazySection>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary>
+        <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="300px">
+          <div className="container-wide">
+            <FeaturedContentSection sectionKey="districts" variant="card" />
+          </div>
+        </LazySection>
+      </SectionErrorBoundary>
 
       {/* Mid-Page CTA */}
       <MidPageCTA ctas={midPageCtas} />
 
       {/* Legacy Featured Highlights - Lazy with larger margin */}
-      {highlights.length > 0 && (
-        <LazySection className="section-padding bg-muted/40" minHeight="300px" rootMargin="400px">
-          <div className="container-wide">
-            <h2 className="font-display text-2xl md:text-3xl font-semibold text-center text-primary mb-10">Featured Highlights</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              {highlights.map((highlight) => (
-                <Link key={highlight.id} to={highlight.button_link} className="relative rounded-2xl overflow-hidden group block">
-                  {highlight.image_url && (
-                    <img 
-                      src={highlight.image_url} 
-                      alt={highlight.title} 
-                      loading="lazy" 
-                      decoding="async"
-                      width="496" 
-                      height="320" 
-                      className="w-full h-72 md:h-80 object-cover transition-transform duration-500 group-hover:scale-103" 
-                    />
-                  )}
-                  <div className="absolute inset-0 hero-overlay">
-                    <div className="absolute bottom-0 p-6 text-white">
-                      <h3 className="font-display text-xl md:text-2xl font-semibold mb-2">{highlight.title}</h3>
-                      <p className="text-sm md:text-base text-white/85 line-clamp-2 mb-3">{highlight.description}</p>
-                      <span className="inline-flex items-center text-sm font-medium text-white/90 group-hover:text-white transition-colors">{highlight.button_text} →</span>
+      {Array.isArray(highlights) && highlights.length > 0 && (
+        <SectionErrorBoundary>
+          <LazySection className="section-padding bg-muted/40" minHeight="300px" rootMargin="400px">
+            <div className="container-wide">
+              <h2 className="font-display text-2xl md:text-3xl font-semibold text-center text-primary mb-10">Featured Highlights</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                {highlights.map((highlight) => (
+                  <Link key={highlight.id} to={highlight.button_link || "#"} className="relative rounded-2xl overflow-hidden group block">
+                    {highlight.image_url && (
+                      <img 
+                        src={highlight.image_url} 
+                        alt={highlight.title || "Highlight"} 
+                        loading="lazy" 
+                        decoding="async"
+                        width="496" 
+                        height="320" 
+                        className="w-full h-72 md:h-80 object-cover transition-transform duration-500 group-hover:scale-103" 
+                      />
+                    )}
+                    <div className="absolute inset-0 hero-overlay">
+                      <div className="absolute bottom-0 p-6 text-white">
+                        <h3 className="font-display text-xl md:text-2xl font-semibold mb-2">{highlight.title}</h3>
+                        <p className="text-sm md:text-base text-white/85 line-clamp-2 mb-3">{highlight.description}</p>
+                        <span className="inline-flex items-center text-sm font-medium text-white/90 group-hover:text-white transition-colors">{highlight.button_text} →</span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </LazySection>
+          </LazySection>
+        </SectionErrorBoundary>
       )}
 
       {/* Weather - Deferred significantly (heavy component) */}
-      <LazySection className="section-padding-sm bg-muted/40" fallback={<div className="container-wide"><WeatherSkeleton /></div>} rootMargin="500px">
-        <div className="container-wide">
-          <AllDistrictsWeather />
-        </div>
-      </LazySection>
+      <SectionErrorBoundary>
+        <LazySection className="section-padding-sm bg-muted/40" fallback={<div className="container-wide"><WeatherSkeleton /></div>} rootMargin="500px">
+          <div className="container-wide">
+            <AllDistrictsWeather />
+          </div>
+        </LazySection>
+      </SectionErrorBoundary>
 
       {/* Festival & Events - Lazy with large margin */}
-      <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="400px">
-        <div className="container-wide">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <FestivalSpotlight limit={3} />
-            </div>
-            <div className="space-y-6">
-              <EventCalendarWidget events={upcomingEvents as any} isLoading={eventsLoading} title="Upcoming Events" showViewAll={true} compact={true} />
+      <SectionErrorBoundary>
+        <LazySection className="section-padding" fallback={<div className="container-wide"><CardSkeleton /></div>} rootMargin="400px">
+          <div className="container-wide">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <FestivalSpotlight limit={3} />
+              </div>
+              <div className="space-y-6">
+                <EventCalendarWidget events={upcomingEvents ?? []} isLoading={eventsLoading} title="Upcoming Events" showViewAll={true} compact={true} />
+              </div>
             </div>
           </div>
-        </div>
-      </LazySection>
+        </LazySection>
+      </SectionErrorBoundary>
 
       {/* Featured Card Section - Very low priority */}
-      <LazySection minHeight="200px" rootMargin="500px">
-        <FeaturedCardSection slug="follow-our-journey" />
-      </LazySection>
+      <SectionErrorBoundary>
+        <LazySection minHeight="200px" rootMargin="500px">
+          <FeaturedCardSection slug="follow-our-journey" />
+        </LazySection>
+      </SectionErrorBoundary>
 
       {/* Footer CTA */}
       <FooterCTA ctas={footerCtas} />
