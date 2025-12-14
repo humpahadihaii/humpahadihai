@@ -107,6 +107,15 @@
       "route": "/admin/ai-settings",
       "group": "ai",
       "order": 2,
+      "required_roles": ["super_admin"]
+    },
+    {
+      "id": "bulk-ai",
+      "label": "Bulk AI Generation",
+      "icon": "Zap",
+      "route": "/admin/bulk-ai",
+      "group": "ai",
+      "order": 3,
       "required_roles": ["super_admin", "admin"]
     },
     {
