@@ -55,8 +55,9 @@ export function usePublicFeaturedCards(locale: string = 'en') {
       if (error) throw error;
       return data as FeaturedCard[];
     },
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes (reduced for faster updates)
     gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false, // Prevent refetch on tab focus
   });
 }
 
