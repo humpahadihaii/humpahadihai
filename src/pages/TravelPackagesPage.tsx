@@ -85,7 +85,7 @@ const TravelPackagesPage = () => {
         .eq("is_active", true)
         .in("category", ["stay", "local_experience"])
         .order("is_featured", { ascending: false })
-        .order("sort_order");
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as TourismListing[];

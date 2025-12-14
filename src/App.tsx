@@ -15,6 +15,7 @@ import { QuickAccessBar } from "./components/QuickAccessBar";
 import { FloatingShareButton } from "./components/share/FloatingShareButton";
 import { Suspense, lazy, memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Critical pages and route guards loaded eagerly for fast initial render
 import HomePage from "./pages/HomePage";
@@ -299,23 +300,27 @@ const AppContent = memo(() => {
 AppContent.displayName = "AppContent";
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ReadingModeProvider>
-        <CookieConsentProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AnalyticsProvider>
-              <SearchProvider>
-                <AppContent />
-              </SearchProvider>
-            </AnalyticsProvider>
-          </BrowserRouter>
-        </CookieConsentProvider>
-      </ReadingModeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ReadingModeProvider>
+          <CookieConsentProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AnalyticsProvider>
+                <SearchProvider>
+                  <ErrorBoundary>
+                    <AppContent />
+                  </ErrorBoundary>
+                </SearchProvider>
+              </AnalyticsProvider>
+            </BrowserRouter>
+          </CookieConsentProvider>
+        </ReadingModeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
