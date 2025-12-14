@@ -18,7 +18,7 @@ import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
 import { SectionErrorBoundary } from "@/components/ErrorBoundary";
 
-// Lazy load ALL below-fold components for reduced initial JS bundle
+// Lazy load ALL below-fold components for reduced initial JS bundle - with safe fallbacks
 const HomepageVisits = lazy(() => import("@/components/HomepageVisits").then(m => ({ default: m.HomepageVisits })).catch(() => ({ default: () => null })));
 const FeaturedCardSection = lazy(() => import("@/components/FeaturedCardSection").then(m => ({ default: m.FeaturedCardSection })).catch(() => ({ default: () => null })));
 const FestivalSpotlight = lazy(() => import("@/components/festivals/FestivalSpotlight").catch(() => ({ default: () => null })));

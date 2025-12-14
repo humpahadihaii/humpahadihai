@@ -75,10 +75,10 @@ export function useFeaturedContentConfig() {
       const { data, error } = await supabase
         .from("featured_content_config")
         .select("*")
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
-      return data as FeaturedContentConfig;
+      return data as FeaturedContentConfig | null;
     },
     staleTime: 1000 * 60 * 10, // 10 minutes cache
     gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
@@ -185,96 +185,104 @@ export function useCombinedFeaturedContent(sectionKey: string, limit = 3) {
   return useQuery({
     queryKey: ["combined-featured-content", sectionKey, limit],
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Single query to get featured content for this section
-      const { data: slots, error: slotsError } = await supabase
-        .from("featured_content_slots")
-        .select(`
-          *,
-          content:cultural_content(
-            id, title, slug, short_intro, hero_image, status,
-            district:districts(id, name, slug),
-            category:content_categories(id, name, slug)
-          )
-        `)
-        .eq("section_key", sectionKey)
-        .order("priority", { ascending: false })
-        .limit(limit);
-      
-      if (slotsError) throw slotsError;
-      
-      // Filter valid slots
-      const validSlots = (slots || []).filter(slot => {
-        if (!slot.content || slot.content.status !== 'published') return false;
-        if (slot.start_date && slot.start_date > today) return false;
-        if (slot.end_date && slot.end_date < today) return false;
-        return true;
-      });
-      
-      const manualContent: FeaturedCulturalContent[] = validSlots.map(slot => ({
-        id: slot.content!.id,
-        title: slot.content!.title,
-        slug: slot.content!.slug,
-        short_intro: slot.content!.short_intro,
-        hero_image: slot.content!.hero_image,
-        status: slot.content!.status,
-        is_featured: true,
-        district: slot.content!.district,
-        category: slot.content!.category,
-        subcategory: null,
-      }));
-      
-      // If we have enough manual content, return it
-      if (manualContent.length >= limit) {
-        return manualContent.slice(0, limit);
-      }
-      
-      // Otherwise, fill with auto content
-      const manualIds = manualContent.map(c => c.id);
-      const categoryNames = SECTION_CATEGORY_MAP[sectionKey] || [];
-      
-      let autoQuery = supabase
-        .from("cultural_content")
-        .select(`
-          id, title, slug, short_intro, hero_image, status, is_featured,
-          district:districts(id, name, slug),
-          category:content_categories(id, name, slug),
-          subcategory:content_subcategories(id, name, slug)
-        `)
-        .eq("status", "published")
-        .not("hero_image", "is", null)
-        .not("short_intro", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(limit * 2);
-      
-      if (manualIds.length > 0) {
-        autoQuery = autoQuery.not("id", "in", `(${manualIds.join(",")})`);
-      }
-      
-      const { data: autoData } = await autoQuery;
-      
-      let autoFiltered = autoData || [];
-      if (categoryNames.length > 0) {
-        autoFiltered = autoFiltered.filter(item => 
-          item.category && categoryNames.some(cat => 
-            item.category!.name.toLowerCase().includes(cat.toLowerCase())
-          )
-        );
-      }
-      
-      // For districts section, ensure variety
-      if (sectionKey === 'districts') {
-        const seenDistricts = new Set<string>();
-        autoFiltered = autoFiltered.filter(item => {
-          if (!item.district) return false;
-          if (seenDistricts.has(item.district.id)) return false;
-          seenDistricts.add(item.district.id);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Single query to get featured content for this section
+        const { data: slots, error: slotsError } = await supabase
+          .from("featured_content_slots")
+          .select(`
+            *,
+            content:cultural_content(
+              id, title, slug, short_intro, hero_image, status,
+              district:districts(id, name, slug),
+              category:content_categories(id, name, slug)
+            )
+          `)
+          .eq("section_key", sectionKey)
+          .order("priority", { ascending: false })
+          .limit(limit);
+        
+        if (slotsError) {
+          console.warn("[FeaturedContent] Error fetching slots:", slotsError);
+          return [];
+        }
+        
+        // Filter valid slots
+        const validSlots = (slots || []).filter(slot => {
+          if (!slot.content || slot.content.status !== 'published') return false;
+          if (slot.start_date && slot.start_date > today) return false;
+          if (slot.end_date && slot.end_date < today) return false;
           return true;
         });
+        
+        const manualContent: FeaturedCulturalContent[] = validSlots.map(slot => ({
+          id: slot.content!.id,
+          title: slot.content!.title,
+          slug: slot.content!.slug,
+          short_intro: slot.content!.short_intro,
+          hero_image: slot.content!.hero_image,
+          status: slot.content!.status,
+          is_featured: true,
+          district: slot.content!.district,
+          category: slot.content!.category,
+          subcategory: null,
+        }));
+        
+        // If we have enough manual content, return it
+        if (manualContent.length >= limit) {
+          return manualContent.slice(0, limit);
+        }
+        
+        // Otherwise, fill with auto content
+        const manualIds = manualContent.map(c => c.id);
+        const categoryNames = SECTION_CATEGORY_MAP[sectionKey] || [];
+        
+        let autoQuery = supabase
+          .from("cultural_content")
+          .select(`
+            id, title, slug, short_intro, hero_image, status, is_featured,
+            district:districts(id, name, slug),
+            category:content_categories(id, name, slug),
+            subcategory:content_subcategories(id, name, slug)
+          `)
+          .eq("status", "published")
+          .not("hero_image", "is", null)
+          .not("short_intro", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(limit * 2);
+        
+        if (manualIds.length > 0) {
+          autoQuery = autoQuery.not("id", "in", `(${manualIds.join(",")})`);
+        }
+        
+        const { data: autoData } = await autoQuery;
+        
+        let autoFiltered = autoData || [];
+        if (categoryNames.length > 0) {
+          autoFiltered = autoFiltered.filter(item => 
+            item.category && categoryNames.some(cat => 
+              item.category!.name.toLowerCase().includes(cat.toLowerCase())
+            )
+          );
+        }
+        
+        // For districts section, ensure variety
+        if (sectionKey === 'districts') {
+          const seenDistricts = new Set<string>();
+          autoFiltered = autoFiltered.filter(item => {
+            if (!item.district) return false;
+            if (seenDistricts.has(item.district.id)) return false;
+            seenDistricts.add(item.district.id);
+            return true;
+          });
+        }
+        
+        return [...manualContent, ...autoFiltered].slice(0, limit) as FeaturedCulturalContent[];
+      } catch (error) {
+        console.error("[FeaturedContent] Error:", error);
+        return [];
       }
-      
-      return [...manualContent, ...autoFiltered].slice(0, limit) as FeaturedCulturalContent[];
     },
     staleTime: 1000 * 60 * 5, // 5 minutes cache
     gcTime: 1000 * 60 * 10, // 10 minutes garbage collection

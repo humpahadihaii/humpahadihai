@@ -90,7 +90,7 @@ export const useDistrictTravelPackages = (districtId: string | undefined) => {
         .select("*")
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
-        .order("sort_order")
+        .order("created_at", { ascending: false })
         .limit(6);
       
       if (error) throw error;
