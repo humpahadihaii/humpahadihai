@@ -7,6 +7,7 @@ import { AnalyticsProvider } from "./components/AnalyticsProvider";
 import { CookieConsentProvider } from "./components/cookie";
 import { SearchProvider, SearchModal } from "./components/search";
 import { ReadingModeProvider } from "./components/ReadingModeToggle";
+import ScrollToTop from "./components/ScrollToTop";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AdminToolbar } from "./components/AdminToolbar";
@@ -131,6 +132,7 @@ const AppContent = () => {
   
   return (
     <>
+      <ScrollToTop />
       <AdminToolbar />
       <div className="flex flex-col min-h-screen">
         {/* Hide Navigation on admin and auth routes */}
