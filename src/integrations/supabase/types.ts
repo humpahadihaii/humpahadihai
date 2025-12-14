@@ -4513,6 +4513,108 @@ export type Database = {
         }
         Relationships: []
       }
+      place_guides: {
+        Row: {
+          about_the_place: string | null
+          category: string | null
+          cover_image: string | null
+          created_at: string | null
+          district_id: string | null
+          emergency_info: Json | null
+          gallery_images: string[] | null
+          google_maps_url: string | null
+          has_full_guide: boolean | null
+          how_to_reach: Json | null
+          id: string
+          is_featured: boolean | null
+          latitude: number | null
+          local_tips: string | null
+          longitude: number | null
+          name: string
+          routes_transport: string | null
+          seo_description: string | null
+          seo_title: string | null
+          short_description: string | null
+          slug: string
+          status: string | null
+          things_to_do: string[] | null
+          updated_at: string | null
+          village_id: string | null
+          weather_info: string | null
+        }
+        Insert: {
+          about_the_place?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          district_id?: string | null
+          emergency_info?: Json | null
+          gallery_images?: string[] | null
+          google_maps_url?: string | null
+          has_full_guide?: boolean | null
+          how_to_reach?: Json | null
+          id?: string
+          is_featured?: boolean | null
+          latitude?: number | null
+          local_tips?: string | null
+          longitude?: number | null
+          name: string
+          routes_transport?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          short_description?: string | null
+          slug: string
+          status?: string | null
+          things_to_do?: string[] | null
+          updated_at?: string | null
+          village_id?: string | null
+          weather_info?: string | null
+        }
+        Update: {
+          about_the_place?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          district_id?: string | null
+          emergency_info?: Json | null
+          gallery_images?: string[] | null
+          google_maps_url?: string | null
+          has_full_guide?: boolean | null
+          how_to_reach?: Json | null
+          id?: string
+          is_featured?: boolean | null
+          latitude?: number | null
+          local_tips?: string | null
+          longitude?: number | null
+          name?: string
+          routes_transport?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          short_description?: string | null
+          slug?: string
+          status?: string | null
+          things_to_do?: string[] | null
+          updated_at?: string | null
+          village_id?: string | null
+          weather_info?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_guides_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "place_guides_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_order_requests: {
         Row: {
           admin_notes: string | null
@@ -4708,6 +4810,87 @@ export type Database = {
             columns: ["promotion_package_id"]
             isOneToOne: false
             referencedRelation: "promotion_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_categories: {
+        Row: {
+          cover_image: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          route_type: string | null
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          route_type?: string | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          route_type?: string | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      route_category_districts: {
+        Row: {
+          created_at: string | null
+          district_id: string
+          id: string
+          route_category_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          district_id: string
+          id?: string
+          route_category_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          district_id?: string
+          id?: string
+          route_category_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_category_districts_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_category_districts_route_category_id_fkey"
+            columns: ["route_category_id"]
+            isOneToOne: false
+            referencedRelation: "route_categories"
             referencedColumns: ["id"]
           },
         ]
