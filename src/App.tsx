@@ -3,26 +3,28 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback } from "react";
+import { Suspense, lazy, memo, useState, useEffect, useRef, useCallback, ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cn } from "@/lib/utils";
-import { createDeferredComponent, DeferredRender } from "./components/DeferredComponent";
+import { createDeferredComponent } from "./components/DeferredComponent";
 
-// Critical components loaded eagerly
+// ============================================
+// CRITICAL: Providers must be EAGERLY imported
+// Never lazy-load or defer context providers
+// ============================================
+import { CookieConsentProvider } from "./components/cookie";
+import { AnalyticsProvider } from "./components/AnalyticsProvider";
+import { SearchProvider, SearchModal } from "./components/search";
+import { ReadingModeProvider } from "./components/ReadingModeToggle";
+
+// Critical layout components loaded eagerly
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 
-// Deferred non-critical components (load after first paint)
-const DeferredAnalyticsProvider = createDeferredComponent(
-  () => import("./components/AnalyticsProvider").then(m => ({ default: m.AnalyticsProvider })),
-  { delay: 500 }
-);
-const DeferredCookieConsentProvider = createDeferredComponent(
-  () => import("./components/cookie").then(m => ({ default: m.CookieConsentProvider })),
-  { delay: 300 }
-);
+// Deferred NON-PROVIDER components (load after first paint)
+// These are UI components, NOT context providers
 const DeferredAdminToolbar = createDeferredComponent(
   () => import("./components/AdminToolbar").then(m => ({ default: m.AdminToolbar })),
   { delay: 1000 }
@@ -36,11 +38,6 @@ const DeferredQuickAccessBar = createDeferredComponent(
   { delay: 600 }
 );
 
-// Lazy load search components (used on interaction)
-const SearchProvider = lazy(() => import("./components/search").then(m => ({ default: m.SearchProvider })));
-const SearchModal = lazy(() => import("./components/search").then(m => ({ default: m.SearchModal })));
-const ReadingModeProvider = lazy(() => import("./components/ReadingModeToggle").then(m => ({ default: m.ReadingModeProvider })));
-
 // Critical pages loaded eagerly for fast initial render
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
@@ -48,6 +45,24 @@ import AdminRoute from "./components/AdminRoute";
 import AdminDashboardRoute from "./components/AdminDashboardRoute";
 import PendingApprovalRoute from "./components/PendingApprovalRoute";
 
+// Safe provider wrapper - ensures app renders even if a provider fails
+const SafeProvider = memo(({ 
+  children, 
+  Provider, 
+  name 
+}: { 
+  children: ReactNode; 
+  Provider: React.ComponentType<{ children: ReactNode }>; 
+  name: string;
+}) => {
+  try {
+    return <Provider>{children}</Provider>;
+  } catch (error) {
+    console.error(`Provider ${name} failed to initialize:`, error);
+    return <>{children}</>;
+  }
+});
+SafeProvider.displayName = "SafeProvider";
 // Lazy load all other pages for code splitting
 const CulturePage = lazy(() => import("./pages/CulturePage"));
 const FoodPage = lazy(() => import("./pages/FoodPage"));
@@ -487,36 +502,28 @@ const AppContent = memo(() => {
 });
 AppContent.displayName = "AppContent";
 
-// Simple wrapper for deferred providers that don't need router context
-const DeferredProviders = memo(({ children }: { children: React.ReactNode }) => {
-  return (
-    <DeferredCookieConsentProvider>
-      <DeferredAnalyticsProvider>
-        {children}
-      </DeferredAnalyticsProvider>
-    </DeferredCookieConsentProvider>
-  );
-});
-DeferredProviders.displayName = "DeferredProviders";
-
+// ============================================
+// App root with stable provider hierarchy
+// Order: Router → Query → UI → Cookie → Analytics → Search → Reading → App
+// ============================================
 const App = () => (
   <BrowserRouter>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Suspense fallback={null}>
-            <ReadingModeProvider>
-              <Suspense fallback={null}>
-                <SearchProvider>
+          <CookieConsentProvider>
+            <AnalyticsProvider>
+              <SearchProvider>
+                <ReadingModeProvider>
                   <Toaster />
                   <Sonner />
                   <ErrorBoundary>
                     <AppContent />
                   </ErrorBoundary>
-                </SearchProvider>
-              </Suspense>
-            </ReadingModeProvider>
-          </Suspense>
+                </ReadingModeProvider>
+              </SearchProvider>
+            </AnalyticsProvider>
+          </CookieConsentProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
