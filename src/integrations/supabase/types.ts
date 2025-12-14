@@ -3519,6 +3519,57 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_ctas: {
+        Row: {
+          background_color: string | null
+          created_at: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          open_in_new_tab: boolean | null
+          position: string
+          size: string | null
+          text_color: string | null
+          updated_at: string | null
+          url: string
+          variant: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          open_in_new_tab?: boolean | null
+          position?: string
+          size?: string | null
+          text_color?: string | null
+          updated_at?: string | null
+          url: string
+          variant?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          open_in_new_tab?: boolean | null
+          position?: string
+          size?: string | null
+          text_color?: string | null
+          updated_at?: string | null
+          url?: string
+          variant?: string | null
+        }
+        Relationships: []
+      }
       homepage_visits: {
         Row: {
           created_at: string
