@@ -300,27 +300,27 @@ const AppContent = memo(() => {
 AppContent.displayName = "AppContent";
 
 const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ReadingModeProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+  <BrowserRouter>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <ReadingModeProvider>
             <CookieConsentProvider>
               <AnalyticsProvider>
                 <SearchProvider>
+                  <Toaster />
+                  <Sonner />
                   <ErrorBoundary>
                     <AppContent />
                   </ErrorBoundary>
                 </SearchProvider>
               </AnalyticsProvider>
             </CookieConsentProvider>
-          </BrowserRouter>
-        </ReadingModeProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
+          </ReadingModeProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  </BrowserRouter>
 );
 
 export default App;
