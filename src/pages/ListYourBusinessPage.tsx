@@ -108,12 +108,19 @@ const ListYourBusinessPage = () => {
     { icon: CheckCircle, text: "Free listing for verified providers" },
   ];
 
-  const heroBullets = settings?.hero_bullets || [
+  const defaultBullets = [
     "Free listing for local businesses",
     "Reach authentic travel seekers",
     "Support the local Uttarakhand economy",
     "Get featured in our curated travel packages",
   ];
+  
+  // Handle both string arrays and object arrays from settings
+  const heroBullets: string[] = settings?.hero_bullets 
+    ? (settings.hero_bullets as Array<string | { icon?: string; text: string }>).map((b) => 
+        typeof b === 'string' ? b : b.text
+      )
+    : defaultBullets;
 
   if (submitted) {
     return (
