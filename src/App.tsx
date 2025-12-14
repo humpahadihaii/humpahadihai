@@ -138,20 +138,20 @@ const queryClient = new QueryClient({
   },
 });
 
-// Circular progress loader with percentage - hybrid approach
+// Non-blocking circular progress indicator - positioned in corner, no overlay
 const CircularProgressLoader = memo(({ progress, isVisible }: { progress: number; isVisible: boolean }) => {
-  if (!isVisible && progress >= 100) return null;
+  // Hide completely once done
+  if (!isVisible || progress >= 100) return null;
 
-  const radius = 42;
+  const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[9999] flex items-center justify-center",
-        "bg-background/70 backdrop-blur-sm",
-        "transition-opacity duration-500 ease-out",
+        "fixed bottom-4 right-4 z-[100]",
+        "transition-opacity duration-300 ease-out",
         !isVisible && "opacity-0 pointer-events-none"
       )}
       role="progressbar"
@@ -160,45 +160,24 @@ const CircularProgressLoader = memo(({ progress, isVisible }: { progress: number
       aria-valuemax={100}
       aria-label="Loading page"
     >
-      <div className="relative w-20 h-20">
-        {/* Background track */}
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={5} />
+      <div className="relative w-12 h-12 bg-background/90 backdrop-blur-sm rounded-full shadow-lg border border-border/50">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={3} />
           <circle
-            cx="50"
-            cy="50"
+            cx="24"
+            cy="24"
             r={radius}
             fill="none"
             stroke="hsl(var(--primary))"
-            strokeWidth={5}
+            strokeWidth={3}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            className="transition-[stroke-dashoffset] duration-200 ease-out"
+            className="transition-[stroke-dashoffset] duration-150 ease-out"
           />
         </svg>
-        {/* Spinning accent overlay */}
-        <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 100 100" style={{ animationDuration: "1.5s" }}>
-          <defs>
-            <linearGradient id="spinnerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke="url(#spinnerGrad)"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeDasharray={`${circumference * 0.25} ${circumference * 0.75}`}
-          />
-        </svg>
-        {/* Percentage text */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-base font-semibold text-foreground tabular-nums">{progress}%</span>
+          <span className="text-[10px] font-semibold text-foreground tabular-nums">{progress}%</span>
         </div>
       </div>
     </div>
