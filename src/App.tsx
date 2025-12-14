@@ -16,9 +16,12 @@ import { FloatingShareButton } from "./components/share/FloatingShareButton";
 import { Suspense, lazy, memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Critical pages loaded eagerly for fast initial render
+// Critical pages and route guards loaded eagerly for fast initial render
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
+import AdminRoute from "./components/AdminRoute";
+import AdminDashboardRoute from "./components/AdminDashboardRoute";
+import PendingApprovalRoute from "./components/PendingApprovalRoute";
 
 // Lazy load all other pages for code splitting
 const CulturePage = lazy(() => import("./pages/CulturePage"));
@@ -60,9 +63,6 @@ const CulturalContentDetailPage = lazy(() => import("./pages/CulturalContentDeta
 
 // Admin pages - lazy loaded as separate chunk
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const AdminRoute = lazy(() => import("./components/AdminRoute"));
-const AdminDashboardRoute = lazy(() => import("./components/AdminDashboardRoute"));
-const PendingApprovalRoute = lazy(() => import("./components/PendingApprovalRoute"));
 const UnauthorizedPage = lazy(() => import("./pages/admin/UnauthorizedPage"));
 const AdminThoughtsPage = lazy(() => import("./pages/AdminThoughtsPage"));
 const AdminSubmissionsPage = lazy(() => import("./pages/AdminSubmissionsPage"));
