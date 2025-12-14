@@ -67,7 +67,8 @@ export type AdminSection =
   | "/admin/product-orders"
   | "/admin/bookings"
   | "/admin/page-settings"
-  | "/admin/notify-settings";
+  | "/admin/notify-settings"
+  | "/admin/homepage-ctas";
 
 /**
  * Complete list of all admin sections
@@ -114,6 +115,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   "/admin/bookings",
   "/admin/page-settings",
   "/admin/notify-settings",
+  "/admin/homepage-ctas",
 ];
 
 /**
@@ -151,6 +153,7 @@ export const ROLE_PERMISSIONS: Record<RBACRole, AdminSection[]> = {
     "/admin/site-images",
     "/admin/featured-highlights",
     "/admin/ai-tools",
+    "/admin/homepage-ctas",
   ],
 
   // MODERATOR: Submissions and moderation only
