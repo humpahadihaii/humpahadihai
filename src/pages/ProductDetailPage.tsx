@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,17 @@ import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
+
+const productOrderSchema = z.object({
+  full_name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  phone: z.string().trim().max(20, "Phone must be under 20 characters").optional().or(z.literal("")),
+  city: z.string().trim().max(100, "City must be under 100 characters").optional().or(z.literal("")),
+  pincode: z.string().trim().max(10, "Pincode must be under 10 characters").optional().or(z.literal("")),
+  quantity: z.number().int().min(1, "At least 1 quantity required").max(1000, "Max quantity is 1000"),
+  preferred_delivery: z.string().trim().max(100, "Delivery preference must be under 100 characters").optional().or(z.literal("")),
+  message: z.string().trim().max(1000, "Message must be under 1000 characters").optional().or(z.literal("")),
+});
 
 const ProductDetailPage = () => {
   const { slug } = useParams();
@@ -56,10 +68,21 @@ const ProductDetailPage = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("product_order_requests").insert({
-        local_product_id: product.id,
+      const validatedData = productOrderSchema.parse({
         ...formData,
         quantity: Number(formData.quantity),
+      });
+      
+      const { error } = await supabase.from("product_order_requests").insert({
+        local_product_id: product.id,
+        full_name: validatedData.full_name,
+        email: validatedData.email,
+        phone: validatedData.phone || null,
+        city: validatedData.city || null,
+        pincode: validatedData.pincode || null,
+        quantity: validatedData.quantity,
+        preferred_delivery: validatedData.preferred_delivery || null,
+        message: validatedData.message || null,
       });
 
       if (error) throw error;
@@ -68,8 +91,12 @@ const ProductDetailPage = () => {
       setSubmittedEnquiryData({ ...formData });
       setIsEnquirySuccess(true);
     } catch (error) {
-      console.error("Error submitting order:", error);
-      toast.error("Failed to submit order. Please try again.");
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0]?.message || "Please check your input");
+      } else {
+        console.error("Error submitting order:", error);
+        toast.error("Failed to submit order. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

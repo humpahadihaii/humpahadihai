@@ -2,6 +2,7 @@ import { useState } from "react";
 import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,17 @@ import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
 import WeatherWidget from "@/components/weather/WeatherWidget";
+
+const travelEnquirySchema = z.object({
+  full_name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  phone: z.string().trim().max(20, "Phone must be under 20 characters").optional().or(z.literal("")),
+  preferred_start_date: z.string().optional().or(z.literal("")),
+  month_or_season: z.string().trim().max(50, "Season must be under 50 characters").optional().or(z.literal("")),
+  number_of_travellers: z.number().int().min(1, "At least 1 traveller required").max(100, "Max 100 travellers"),
+  city: z.string().trim().max(100, "City must be under 100 characters").optional().or(z.literal("")),
+  message: z.string().trim().max(1000, "Message must be under 1000 characters").optional().or(z.literal("")),
+});
 
 interface TourismListing {
   id: string;
@@ -126,10 +138,21 @@ const TravelPackageDetailPage = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("travel_booking_requests").insert({
-        travel_package_id: pkg.id,
+      const validatedData = travelEnquirySchema.parse({
         ...formData,
         number_of_travellers: Number(formData.number_of_travellers),
+      });
+      
+      const { error } = await supabase.from("travel_booking_requests").insert({
+        travel_package_id: pkg.id,
+        full_name: validatedData.full_name,
+        email: validatedData.email,
+        phone: validatedData.phone || null,
+        preferred_start_date: validatedData.preferred_start_date || null,
+        month_or_season: validatedData.month_or_season || null,
+        number_of_travellers: validatedData.number_of_travellers,
+        city: validatedData.city || null,
+        message: validatedData.message || null,
       });
 
       if (error) throw error;
@@ -138,8 +161,12 @@ const TravelPackageDetailPage = () => {
       setSubmittedEnquiryData({ ...formData });
       setIsEnquirySuccess(true);
     } catch (error) {
-      console.error("Error submitting enquiry:", error);
-      toast.error("Failed to submit enquiry. Please try again.");
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0]?.message || "Please check your input");
+      } else {
+        console.error("Error submitting enquiry:", error);
+        toast.error("Failed to submit enquiry. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

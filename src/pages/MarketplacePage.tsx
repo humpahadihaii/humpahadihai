@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageSettings } from "@/hooks/usePageSettings";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -19,6 +20,14 @@ import LeafletMap, { MapMarker } from "@/components/maps/LeafletMap";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingModal } from "@/components/BookingModal";
+
+const enquirySchema = z.object({
+  full_name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  phone: z.string().trim().max(20, "Phone must be under 20 characters").optional().or(z.literal("")),
+  preferred_dates: z.string().trim().max(100, "Dates must be under 100 characters").optional().or(z.literal("")),
+  message: z.string().trim().max(1000, "Message must be under 1000 characters").optional().or(z.literal("")),
+});
 
 interface TourismListing {
   id: string;
@@ -196,14 +205,16 @@ export default function MarketplacePage() {
 
     setSubmitting(true);
     try {
+      const validatedData = enquirySchema.parse(enquiryForm);
+      
       const { error } = await supabase.from("tourism_inquiries").insert({
         listing_id: enquiryListing.id,
         provider_id: enquiryListing.provider?.id,
-        full_name: enquiryForm.full_name,
-        email: enquiryForm.email,
-        phone: enquiryForm.phone,
-        preferred_dates: enquiryForm.preferred_dates,
-        message: enquiryForm.message,
+        full_name: validatedData.full_name,
+        email: validatedData.email,
+        phone: validatedData.phone || null,
+        preferred_dates: validatedData.preferred_dates || null,
+        message: validatedData.message || null,
         source: "marketplace",
         status: "new",
       });
@@ -214,8 +225,12 @@ export default function MarketplacePage() {
       setEnquiryListing(null);
       setEnquiryForm({ full_name: "", email: "", phone: "", preferred_dates: "", message: "" });
     } catch (error) {
-      console.error("Error submitting enquiry:", error);
-      toast.error("Failed to submit enquiry. Please try again.");
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0]?.message || "Please check your input");
+      } else {
+        console.error("Error submitting enquiry:", error);
+        toast.error("Failed to submit enquiry. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
