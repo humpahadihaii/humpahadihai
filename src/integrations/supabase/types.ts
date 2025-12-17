@@ -6614,8 +6614,6 @@ export type Database = {
         Returns: undefined
       }
       refresh_map_poi_cache: { Args: never; Returns: undefined }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       user_has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
