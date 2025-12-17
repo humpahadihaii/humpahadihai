@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,17 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Megaphone, Instagram, Globe, Sparkles, CheckCircle } from "lucide-react";
 import { Helmet } from "react-helmet";
+
+const promotionRequestSchema = z.object({
+  business_name: z.string().trim().min(1, "Business name is required").max(100, "Business name must be under 100 characters"),
+  contact_person: z.string().trim().min(1, "Contact person is required").max(100, "Contact person must be under 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  phone: z.string().trim().max(20, "Phone must be under 20 characters").optional().or(z.literal("")),
+  instagram_handle: z.string().trim().max(50, "Instagram handle must be under 50 characters").optional().or(z.literal("")),
+  business_type: z.string().trim().max(100, "Business type must be under 100 characters").optional().or(z.literal("")),
+  city: z.string().trim().max(100, "City must be under 100 characters").optional().or(z.literal("")),
+  message: z.string().trim().max(1000, "Message must be under 1000 characters").optional().or(z.literal("")),
+});
 
 interface PromotionPackage {
   id: string;
@@ -79,9 +91,18 @@ const PromotionsPage = () => {
 
     setIsSubmitting(true);
     try {
+      const validatedData = promotionRequestSchema.parse(formData);
+      
       const { error } = await supabase.from("promotion_requests").insert({
         promotion_package_id: selectedPackage.id,
-        ...formData,
+        business_name: validatedData.business_name,
+        contact_person: validatedData.contact_person,
+        email: validatedData.email,
+        phone: validatedData.phone || null,
+        instagram_handle: validatedData.instagram_handle || null,
+        business_type: validatedData.business_type || null,
+        city: validatedData.city || null,
+        message: validatedData.message || null,
       });
 
       if (error) throw error;
@@ -99,8 +120,12 @@ const PromotionsPage = () => {
         message: "",
       });
     } catch (error) {
-      console.error("Error submitting request:", error);
-      toast.error("Failed to submit request. Please try again.");
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0]?.message || "Please check your input");
+      } else {
+        console.error("Error submitting request:", error);
+        toast.error("Failed to submit request. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Helmet } from "react-helmet";
 import Navigation from "@/components/Navigation";
@@ -14,6 +15,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Building2, CheckCircle, Users, TrendingUp, Globe } from "lucide-react";
 import { usePageSettings } from "@/hooks/usePageSettings";
+
+const businessListingSchema = z.object({
+  business_name: z.string().trim().min(1, "Business name is required").max(100, "Business name must be under 100 characters"),
+  business_type: z.string().min(1, "Business type is required"),
+  district_id: z.string().optional().or(z.literal("")),
+  village_name: z.string().trim().max(100, "Village name must be under 100 characters").optional().or(z.literal("")),
+  short_description: z.string().trim().max(200, "Short description must be under 200 characters").optional().or(z.literal("")),
+  detailed_description: z.string().trim().max(2000, "Description must be under 2000 characters").optional().or(z.literal("")),
+  website_url: z.string().trim().max(255, "URL must be under 255 characters").optional().or(z.literal("")),
+  social_url: z.string().trim().max(255, "URL must be under 255 characters").optional().or(z.literal("")),
+  contact_name: z.string().trim().min(1, "Contact name is required").max(100, "Contact name must be under 100 characters"),
+  phone: z.string().trim().min(1, "Phone is required").max(20, "Phone must be under 20 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  price_range: z.string().trim().max(100, "Price range must be under 100 characters").optional().or(z.literal("")),
+  availability_notes: z.string().trim().max(200, "Availability notes must be under 200 characters").optional().or(z.literal("")),
+});
 
 const BUSINESS_TYPES = [
   { value: "homestay", label: "Homestay" },
@@ -60,17 +77,17 @@ const ListYourBusinessPage = () => {
   });
 
   const submitMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (validatedData: z.infer<typeof businessListingSchema>) => {
       // Create provider with is_active = false, source = intake_form
       const { error } = await supabase.from("tourism_providers").insert([{
-        name: formData.business_name,
-        type: formData.business_type,
-        district_id: formData.district_id || null,
-        description: formData.detailed_description || formData.short_description || null,
-        website_url: formData.website_url || null,
-        contact_name: formData.contact_name || null,
-        phone: formData.phone || null,
-        email: formData.email || null,
+        name: validatedData.business_name,
+        type: validatedData.business_type,
+        district_id: validatedData.district_id || null,
+        description: validatedData.detailed_description || validatedData.short_description || null,
+        website_url: validatedData.website_url || null,
+        contact_name: validatedData.contact_name || null,
+        phone: validatedData.phone || null,
+        email: validatedData.email || null,
         is_active: false,
         is_verified: false,
         is_sample: false,
@@ -83,22 +100,29 @@ const ListYourBusinessPage = () => {
       toast.success("Application submitted successfully!");
     },
     onError: (error) => {
-      console.error(error);
-      toast.error("Failed to submit. Please try again.");
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0]?.message || "Please check your input");
+      } else {
+        console.error(error);
+        toast.error("Failed to submit. Please try again.");
+      }
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.business_name || !formData.business_type || !formData.contact_name || !formData.email) {
-      toast.error("Please fill all required fields");
-      return;
-    }
     if (!agreed) {
       toast.error("Please agree to the terms");
       return;
     }
-    submitMutation.mutate();
+    try {
+      const validatedData = businessListingSchema.parse(formData);
+      submitMutation.mutate(validatedData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0]?.message || "Please check your input");
+      }
+    }
   };
 
   const benefits = [
