@@ -522,94 +522,107 @@ export default function MarketplacePage() {
                 ))}
               </div>
             ) : filteredListings && filteredListings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {filteredListings.map((listing, index) => (
-                  <Card
+                  <Link 
                     key={listing.id}
-                    className={`overflow-hidden hover:shadow-lg transition-shadow ${
-                      listing.is_featured ? "ring-2 ring-primary" : ""
-                    }`}
+                    to={`/listings/${listing.id}`}
+                    className="group block"
                   >
-                    {/* Fixed aspect ratio container to prevent CLS */}
-                    <div className="relative aspect-video bg-muted">
-                      <img
-                        src={listing.image_url || `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`}
-                        alt={listing.title}
-                        className="w-full h-full object-cover"
-                        loading={index < 3 ? "eager" : "lazy"}
-                        decoding={index < 3 ? "sync" : "async"}
-                        fetchPriority={index < 3 ? "high" : "auto"}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`;
-                        }}
-                      />
-                      {listing.is_featured && (
-                        <Badge className="absolute top-2 right-2 bg-primary">Featured</Badge>
-                      )}
-                    </div>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-lg line-clamp-2">{listing.title}</h3>
-                        <Badge variant="outline" className="shrink-0">
-                          {getCategoryLabel(listing.category)}
-                        </Badge>
+                    <Card
+                      className={`h-full overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                        listing.is_featured ? "ring-2 ring-primary" : ""
+                      }`}
+                    >
+                      {/* Fixed aspect ratio container to prevent CLS */}
+                      <div className="relative aspect-video bg-muted overflow-hidden">
+                        <img
+                          src={listing.image_url || `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`}
+                          alt={listing.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading={index < 3 ? "eager" : "lazy"}
+                          decoding={index < 3 ? "sync" : "async"}
+                          fetchPriority={index < 3 ? "high" : "auto"}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80`;
+                          }}
+                        />
+                        {listing.is_featured && (
+                          <Badge className="absolute top-2 right-2 bg-primary">Featured</Badge>
+                        )}
+                        {listing.provider?.is_verified && (
+                          <Badge variant="secondary" className="absolute top-2 left-2 text-xs">
+                            Verified
+                          </Badge>
+                        )}
                       </div>
-                      {listing.provider && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{listing.provider.name}</span>
-                          {listing.provider.is_verified && (
-                            <Badge variant="secondary" className="text-xs">
-                              Verified
-                            </Badge>
-                          )}
-                          {listing.provider.rating && (
-                            <span className="flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              {listing.provider.rating}
-                            </span>
-                          )}
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">{listing.title}</h3>
+                          <Badge variant="outline" className="shrink-0">
+                            {getCategoryLabel(listing.category)}
+                          </Badge>
                         </div>
-                      )}
-                    </CardHeader>
-                    <CardContent className="pb-3">
-                      {listing.district && (
-                        <p className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                          <MapPin className="h-3 w-3" />
-                          {listing.district.name}
-                        </p>
-                      )}
-                      {listing.short_description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {listing.short_description}
-                        </p>
-                      )}
-                      {listing.base_price && (
-                        <p className="mt-2 font-semibold text-primary">
-                          ₹{listing.base_price.toLocaleString()}
-                          {listing.price_unit && (
-                            <span className="text-sm font-normal text-muted-foreground">
-                              {" "}/ {listing.price_unit}
-                            </span>
-                          )}
-                        </p>
-                      )}
-                    </CardContent>
-                    <CardFooter className="pt-0 flex gap-2">
-                      <Button
-                        className="flex-1"
-                        onClick={() => setBookingListing(listing)}
-                      >
-                        Book Now
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => setEnquiryListing(listing)}
-                      >
-                        Enquire
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                        {listing.provider && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>{listing.provider.name}</span>
+                            {listing.provider.rating && (
+                              <span className="flex items-center gap-1">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                {listing.provider.rating}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </CardHeader>
+                      <CardContent className="pb-3">
+                        {listing.district && (
+                          <p className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                            <MapPin className="h-3 w-3" />
+                            {listing.district.name}
+                          </p>
+                        )}
+                        {listing.short_description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {listing.short_description}
+                          </p>
+                        )}
+                        {listing.base_price && (
+                          <p className="mt-3 font-semibold text-primary text-lg">
+                            ₹{listing.base_price.toLocaleString()}
+                            {listing.price_unit && (
+                              <span className="text-sm font-normal text-muted-foreground">
+                                {" "}/ {listing.price_unit}
+                              </span>
+                            )}
+                          </p>
+                        )}
+                      </CardContent>
+                      <CardFooter className="pt-0 flex gap-2">
+                        <Button
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setBookingListing(listing);
+                          }}
+                        >
+                          Book Now
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setEnquiryListing(listing);
+                          }}
+                        >
+                          Enquire
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             ) : (
