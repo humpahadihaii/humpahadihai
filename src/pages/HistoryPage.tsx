@@ -405,7 +405,6 @@ const historyEras: HistoryEra[] = [
         image: charDhamImg,
         imageAlt: "Char Dham Temples - Kedarnath, Badrinath, Gangotri, Yamunotri"
       }
-      }
     ],
     highlights: { 
       en: [
