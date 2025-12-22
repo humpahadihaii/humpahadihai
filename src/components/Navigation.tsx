@@ -178,17 +178,21 @@ const Navigation = () => {
               {/* More dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="px-3 py-2 rounded-lg font-medium text-sm text-foreground/80 hover:text-foreground hover:bg-muted transition-all duration-200 flex items-center gap-1">
+                  <button className="px-3 py-2 rounded-lg font-medium text-sm text-foreground/80 hover:text-foreground hover:bg-muted transition-all duration-200 flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2">
                     More
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-56 p-2.5"
+                  collisionPadding={16}
+                >
                   {moreNavItems.map((item) => (
                     <DropdownMenuItem key={item.path} asChild>
                       <Link
                         to={item.path}
-                        className={isActive(item.path) ? "bg-muted font-medium" : ""}
+                        className={`w-full ${isActive(item.path) ? "bg-primary/10 text-primary font-medium" : ""}`}
                       >
                         {item.name}
                       </Link>
