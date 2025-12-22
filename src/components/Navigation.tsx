@@ -102,6 +102,7 @@ const Navigation = () => {
     { name: "Home", path: "/" },
     { name: "Districts", path: "/districts" },
     { name: "Culture", path: "/culture" },
+    { name: "History", path: "/history" },
     { name: "Food", path: "/food" },
     { name: "Travel", path: "/travel" },
   ];
