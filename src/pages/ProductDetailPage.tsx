@@ -11,11 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ShoppingBag, ArrowLeft, Tag, CheckCircle } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Tag, CheckCircle, ChevronRight, Home } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
 import { BookingContactPrompt } from "@/components/BookingContactPrompt";
+import { AuthenticityBadge, CulturalCueBadge } from "@/components/ui/authenticity-badge";
+import { FastImage } from "@/components/ui/fast-image";
 
 const productOrderSchema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
@@ -27,6 +29,26 @@ const productOrderSchema = z.object({
   preferred_delivery: z.string().trim().max(100, "Delivery preference must be under 100 characters").optional().or(z.literal("")),
   message: z.string().trim().max(1000, "Message must be under 1000 characters").optional().or(z.literal("")),
 });
+
+interface LocalProduct {
+  id: string;
+  name: string;
+  slug: string;
+  category_id: string | null;
+  short_description: string | null;
+  full_description: string | null;
+  price: number;
+  price_currency: string;
+  unit_label: string | null;
+  stock_status: string;
+  thumbnail_image_url: string | null;
+  gallery_images: string[] | null;
+  tags: string[] | null;
+  is_featured: boolean;
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_image_url: string | null;
+}
 
 const ProductDetailPage = () => {
   const { slug } = useParams();
@@ -57,9 +79,29 @@ const ProductDetailPage = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as LocalProduct;
     },
     enabled: !!slug,
+  });
+
+  // Fetch related products from same category
+  const { data: relatedProducts = [] } = useQuery({
+    queryKey: ["related-products", product?.category_id, product?.id],
+    queryFn: async () => {
+      if (!product?.category_id) return [];
+      const { data, error } = await supabase
+        .from("local_products")
+        .select("id, name, slug, thumbnail_image_url, price, price_currency")
+        .eq("is_active", true)
+        .eq("category_id", product.category_id)
+        .neq("id", product.id)
+        .order("is_featured", { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!product?.category_id && !!product?.id,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,17 +181,27 @@ const ProductDetailPage = () => {
 
   const getStockBadge = (status: string) => {
     switch (status) {
-      case "in_stock": return <Badge className="bg-green-100 text-green-800">In Stock</Badge>;
-      case "out_of_stock": return <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>;
-      case "made_to_order": return <Badge className="bg-blue-100 text-blue-800">Made to Order</Badge>;
+      case "in_stock": return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">In Stock</Badge>;
+      case "out_of_stock": return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Out of Stock</Badge>;
+      case "made_to_order": return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Made to Order</Badge>;
       default: return null;
     }
+  };
+
+  // Get cultural tags
+  const getCulturalTags = (tags: string[] | null) => {
+    if (!tags) return [];
+    const culturalKeywords = ["handmade", "traditional", "organic", "local", "artisan", "handcrafted"];
+    return tags.filter(tag => 
+      culturalKeywords.some(kw => tag.toLowerCase().includes(kw))
+    );
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen py-12 px-4">
-        <div className="container mx-auto max-w-4xl animate-pulse">
+        <div className="container mx-auto max-w-5xl animate-pulse">
+          <div className="h-4 bg-muted rounded w-48 mb-6" />
           <div className="grid md:grid-cols-2 gap-8">
             <div className="aspect-square bg-muted rounded-lg" />
             <div className="space-y-4">
@@ -176,45 +228,66 @@ const ProductDetailPage = () => {
     );
   }
 
+  const culturalTags = getCulturalTags(product.tags);
+
   return (
     <>
       <SEOHead meta={seoMeta} sharePreview={sharePreview} />
 
       <div className="min-h-screen py-8 px-4">
-        <div className="container mx-auto max-w-4xl">
-          {/* Back Button */}
-          <Button variant="ghost" asChild className="mb-6">
-            <Link to="/products">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Store
+        <div className="container mx-auto max-w-5xl">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6 flex-wrap">
+            <Link to="/" className="hover:text-foreground transition-colors flex items-center gap-1">
+              <Home className="h-3.5 w-3.5" />
+              Home
             </Link>
-          </Button>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <Link to="/products" className="hover:text-foreground transition-colors">
+              Pahadi Store
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-foreground font-medium line-clamp-1">{product.name}</span>
+          </nav>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Image */}
-            <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-              {product.thumbnail_image_url ? (
-                <img
-                  src={product.thumbnail_image_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <ShoppingBag className="h-24 w-24 text-muted-foreground" />
-                </div>
-              )}
+            <div className="space-y-4">
+              <div className="aspect-square rounded-xl overflow-hidden bg-muted border">
+                {product.thumbnail_image_url ? (
+                  <FastImage
+                    src={product.thumbnail_image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                    <ShoppingBag className="h-24 w-24 text-primary/30" />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Details */}
             <div className="space-y-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  {getStockBadge(product.stock_status)}
-                </div>
-                <h1 className="text-3xl font-bold text-primary mb-2">{product.name}</h1>
-                <p className="text-lg text-muted-foreground">{product.short_description}</p>
+              {/* Authenticity Badge + Stock */}
+              <div className="flex flex-wrap items-center gap-3">
+                <AuthenticityBadge />
+                {getStockBadge(product.stock_status)}
               </div>
 
+              {/* Title */}
+              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">{product.name}</h1>
+              
+              {/* Short description */}
+              {product.short_description && (
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  {product.short_description}
+                </p>
+              )}
+
+              {/* Price */}
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-primary">₹{product.price.toLocaleString()}</span>
                 {product.unit_label && (
@@ -222,9 +295,13 @@ const ProductDetailPage = () => {
                 )}
               </div>
 
+              {/* Cultural & regular tags */}
               {product.tags && product.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {product.tags.map((tag, i) => (
+                  {culturalTags.map((tag, i) => (
+                    <CulturalCueBadge key={i} label={tag} />
+                  ))}
+                  {product.tags.filter(t => !culturalTags.includes(t)).map((tag, i) => (
                     <Badge key={i} variant="outline" className="flex items-center gap-1">
                       <Tag className="h-3 w-3" /> {tag}
                     </Badge>
@@ -232,7 +309,8 @@ const ProductDetailPage = () => {
                 </div>
               )}
 
-              <div className="flex gap-3">
+              {/* CTA Buttons */}
+              <div className="flex gap-3 pt-2">
                 <Button 
                   size="lg" 
                   className="flex-1" 
@@ -247,142 +325,208 @@ const ProductDetailPage = () => {
                       Enquire
                     </Button>
                   </DialogTrigger>
-                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                  {isEnquirySuccess && submittedEnquiryData ? (
-                    <div className="flex flex-col items-center justify-center py-6 text-center">
-                      <CheckCircle className="h-16 w-16 text-primary mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">Order Request Submitted!</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Thank you! We've received your order for {product.name}. We will contact you soon.
-                      </p>
-                      
-                      <BookingContactPrompt
-                        booking={{
-                          type: "product",
-                          itemName: product.name,
-                          name: submittedEnquiryData.full_name,
-                          email: submittedEnquiryData.email,
-                          phone: submittedEnquiryData.phone,
-                          quantity: submittedEnquiryData.quantity,
-                          notes: submittedEnquiryData.message,
-                          city: submittedEnquiryData.city,
-                          pincode: submittedEnquiryData.pincode,
-                        }}
-                      />
-                      
-                      <Button onClick={() => handleEnquiryDialogClose(false)} className="mt-4">Close</Button>
-                    </div>
-                  ) : (
-                    <>
-                      <DialogHeader>
-                        <DialogTitle>Order: {product.name}</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="full_name">Full Name *</Label>
-                            <Input
-                              id="full_name"
-                              required
-                              value={formData.full_name}
-                              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                            />
+                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                    {isEnquirySuccess && submittedEnquiryData ? (
+                      <div className="flex flex-col items-center justify-center py-6 text-center">
+                        <CheckCircle className="h-16 w-16 text-primary mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">Order Request Submitted!</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Thank you! We've received your order for {product.name}. We will contact you soon.
+                        </p>
+                        
+                        <BookingContactPrompt
+                          booking={{
+                            type: "product",
+                            itemName: product.name,
+                            name: submittedEnquiryData.full_name,
+                            email: submittedEnquiryData.email,
+                            phone: submittedEnquiryData.phone,
+                            quantity: submittedEnquiryData.quantity,
+                            notes: submittedEnquiryData.message,
+                            city: submittedEnquiryData.city,
+                            pincode: submittedEnquiryData.pincode,
+                          }}
+                        />
+                        
+                        <Button onClick={() => handleEnquiryDialogClose(false)} className="mt-4">Close</Button>
+                      </div>
+                    ) : (
+                      <>
+                        <DialogHeader>
+                          <DialogTitle>Order: {product.name}</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="full_name">Full Name *</Label>
+                              <Input
+                                id="full_name"
+                                required
+                                value={formData.full_name}
+                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="email">Email *</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                required
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email *</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              required
-                              value={formData.email}
-                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            />
-                          </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="phone">Phone</Label>
+                              <Input
+                                id="phone"
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="quantity">Quantity</Label>
+                              <Input
+                                id="quantity"
+                                type="number"
+                                min={1}
+                                value={formData.quantity}
+                                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="city">City</Label>
+                              <Input
+                                id="city"
+                                value={formData.city}
+                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="pincode">Pincode</Label>
+                              <Input
+                                id="pincode"
+                                value={formData.pincode}
+                                onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
                           <div className="space-y-2">
-                            <Label htmlFor="phone">Phone</Label>
+                            <Label htmlFor="preferred_delivery">Preferred Delivery</Label>
                             <Input
-                              id="phone"
-                              value={formData.phone}
-                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              id="preferred_delivery"
+                              placeholder="e.g., Courier, Speed Post, Pick-up"
+                              value={formData.preferred_delivery}
+                              onChange={(e) => setFormData({ ...formData, preferred_delivery: e.target.value })}
                             />
                           </div>
+
                           <div className="space-y-2">
-                            <Label htmlFor="quantity">Quantity</Label>
-                            <Input
-                              id="quantity"
-                              type="number"
-                              min={1}
-                              value={formData.quantity}
-                              onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                            <Label htmlFor="message">Additional Message</Label>
+                            <Textarea
+                              id="message"
+                              rows={3}
+                              value={formData.message}
+                              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                             />
                           </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="city">City</Label>
-                            <Input
-                              id="city"
-                              value={formData.city}
-                              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="pincode">Pincode</Label>
-                            <Input
-                              id="pincode"
-                              value={formData.pincode}
-                              onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                            />
-                          </div>
-                        </div>
+                          <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? "Submitting..." : "Submit Order Request"}
+                          </Button>
+                        </form>
+                      </>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="preferred_delivery">Preferred Delivery</Label>
-                          <Input
-                            id="preferred_delivery"
-                            placeholder="e.g., Courier, Speed Post, Pick-up"
-                            value={formData.preferred_delivery}
-                            onChange={(e) => setFormData({ ...formData, preferred_delivery: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="message">Additional Message</Label>
-                          <Textarea
-                            id="message"
-                            rows={3}
-                            value={formData.message}
-                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                          />
-                        </div>
-
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                          {isSubmitting ? "Submitting..." : "Submit Order Request"}
-                        </Button>
-                      </form>
-                    </>
-                  )}
-                </DialogContent>
-              </Dialog>
+              {/* Trust signals */}
+              <div className="text-sm text-muted-foreground border-t pt-4 mt-4 space-y-1">
+                <p>✓ Authentic product from Uttarakhand</p>
+                <p>✓ Direct from local artisans</p>
+                <p>✓ Secure payment & easy returns</p>
               </div>
             </div>
           </div>
 
           {/* Full Description */}
           {product.full_description && (
-            <Card className="mt-8">
+            <Card className="mt-10">
               <CardHeader>
-                <CardTitle>Product Details</CardTitle>
+                <CardTitle>About This Product</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-line">{product.full_description}</p>
+                <p className="whitespace-pre-line text-muted-foreground leading-relaxed">
+                  {product.full_description}
+                </p>
               </CardContent>
             </Card>
           )}
+
+          {/* Related Products */}
+          {relatedProducts.length > 0 && (
+            <section className="mt-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Related Products</h2>
+                <Button variant="ghost" asChild>
+                  <Link to="/products">
+                    View All <ChevronRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {relatedProducts.map((item) => (
+                  <Link 
+                    key={item.id} 
+                    to={`/products/${item.slug}`}
+                    className="group block"
+                  >
+                    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                      <div className="aspect-square bg-muted overflow-hidden">
+                        {item.thumbnail_image_url ? (
+                          <img
+                            src={item.thumbnail_image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ShoppingBag className="h-8 w-8 text-muted-foreground/30" />
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="p-3">
+                        <h4 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                          {item.name}
+                        </h4>
+                        <p className="text-lg font-bold text-primary">
+                          {item.price_currency || "₹"}{item.price?.toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Back to Store Link */}
+          <div className="mt-10 text-center">
+            <Button variant="outline" asChild>
+              <Link to="/products">
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Pahadi Store
+              </Link>
+            </Button>
+          </div>
 
           {/* Booking Modal */}
           <BookingModal

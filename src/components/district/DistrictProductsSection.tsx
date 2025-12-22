@@ -63,10 +63,10 @@ export default function DistrictProductsSection({
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {products.map((product) => (
             <Link key={product.id} to={`/products/${product.slug}`} className="block group">
-              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
+              <Card className="h-full overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="aspect-square overflow-hidden bg-muted relative">
                   {product.thumbnail_image_url ? (
                     <img
@@ -76,21 +76,21 @@ export default function DistrictProductsSection({
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ShoppingBag className="h-10 w-10 text-muted-foreground/30" />
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                      <ShoppingBag className="h-10 w-10 text-primary/30" />
                     </div>
                   )}
                   {product.is_featured && (
-                    <Badge className="absolute top-2 right-2 bg-primary">Featured</Badge>
+                    <Badge className="absolute top-2 right-2 bg-secondary text-secondary-foreground">Featured</Badge>
                   )}
                   {product.stock_status === "out_of_stock" && (
-                    <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                      <Badge variant="destructive">Out of Stock</Badge>
-                    </div>
+                    <Badge variant="destructive" className="absolute top-2 left-2 text-xs">
+                      Out of Stock
+                    </Badge>
                   )}
                 </div>
                 <CardContent className="p-3">
-                  <h4 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                  <h4 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors mb-1 min-h-[2.5rem]">
                     {product.name}
                   </h4>
                   {product.price && (
