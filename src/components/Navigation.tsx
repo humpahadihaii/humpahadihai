@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, LogIn, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -10,12 +10,6 @@ import { toast } from "sonner";
 import logoFallback from "@/assets/hum-pahadi-logo-new.jpg";
 import { SearchTrigger } from "@/components/search";
 import { AdminPinModal } from "@/components/AdminPinModal";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 // Environment flag for dev/staging - show visible admin login
 const SHOW_ADMIN_LOGIN = import.meta.env.VITE_SHOW_ADMIN_LOGIN === "true";
@@ -169,37 +163,11 @@ const Navigation = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-0.5">
-              {primaryNavItems.map((item) => (
+            {/* Desktop Navigation - All items inline */}
+            <div className="hidden lg:flex items-center gap-0.5 flex-wrap justify-end">
+              {allNavItems.map((item) => (
                 <NavLink key={item.path} item={item} />
               ))}
-              
-              {/* More dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="px-3 py-2 rounded-lg font-medium text-sm text-foreground/80 hover:text-foreground hover:bg-muted transition-all duration-200 flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2">
-                    More
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="w-56 p-2.5"
-                  collisionPadding={16}
-                >
-                  {moreNavItems.map((item) => (
-                    <DropdownMenuItem key={item.path} asChild>
-                      <Link
-                        to={item.path}
-                        className={`w-full ${isActive(item.path) ? "bg-primary/10 text-primary font-medium" : ""}`}
-                      >
-                        {item.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
 
             {/* Right side: Search + Auth */}
