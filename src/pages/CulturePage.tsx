@@ -14,22 +14,25 @@ export default function CulturePage() {
   // Try both possible keys for backwards compatibility
   const heroImage = getImage("culture_hero") || getImage("culture_section_image");
   
-  // Prefetch culture content data on mount
+  // Prefetch culture content data on mount - only if not already cached
   useEffect(() => {
-    queryClient.prefetchQuery({
-      queryKey: ["content-items", "culture"],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("content_items")
-          .select("*")
-          .eq("type", "culture")
-          .eq("status", "published")
-          .order("published_at", { ascending: false });
-        if (error) throw error;
-        return data;
-      },
-      staleTime: 5 * 60 * 1000,
-    });
+    const existingData = queryClient.getQueryData(["content-items", "culture"]);
+    if (!existingData) {
+      queryClient.prefetchQuery({
+        queryKey: ["content-items", "culture"],
+        queryFn: async () => {
+          const { data, error } = await supabase
+            .from("content_items")
+            .select("id, title, slug, excerpt, main_image_url, published_at")
+            .eq("type", "culture")
+            .eq("status", "published")
+            .order("published_at", { ascending: false });
+          if (error) throw error;
+          return data;
+        },
+        staleTime: 10 * 60 * 1000,
+      });
+    }
   }, [queryClient]);
   
   
