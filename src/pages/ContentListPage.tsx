@@ -35,20 +35,22 @@ const ContentListPage = ({
   // SEO
   const seoMeta = useSEO(contentType as PageType, { name: title, description });
 
-  const { data: items, isLoading } = useQuery({
+  const { data: items, isLoading, isFetching } = useQuery({
     queryKey: ["content-items", contentType],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("content_items")
-        .select("*")
+        .select("id, title, slug, excerpt, main_image_url, published_at")
         .eq("type", contentType)
         .eq("status", "published")
         .order("published_at", { ascending: false });
       if (error) throw error;
       return data as ContentItem[];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes - content doesn't change often
+    gcTime: 30 * 60 * 1000, // 30 minutes garbage collection
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Don't refetch if data exists
   });
 
   return (
@@ -85,14 +87,14 @@ const ContentListPage = ({
       {/* Content Grid */}
       <section className="responsive-section px-4 sm:px-6 lg:px-8">
         <div className="responsive-container max-w-7xl">
-          {isLoading ? (
+          {isLoading && !items ? (
             <div className="responsive-grid">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} className="responsive-card">
-                  <Skeleton className="h-40 sm:h-48 w-full rounded-t-lg" />
+                <Card key={i} className="responsive-card animate-pulse">
+                  <div className="h-40 sm:h-48 w-full rounded-t-lg bg-muted" />
                   <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full mt-2" />
+                    <div className="h-5 w-3/4 bg-muted rounded" />
+                    <div className="h-4 w-full mt-2 bg-muted/70 rounded" />
                   </CardHeader>
                 </Card>
               ))}

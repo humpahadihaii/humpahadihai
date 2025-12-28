@@ -26,13 +26,14 @@ const fetchSiteImages = async () => {
 };
 
 export const useSiteImages = () => {
-  const { data: images = {} } = useQuery({
+  const { data: images = {}, isLoading } = useQuery({
     queryKey: ['site-images'],
     queryFn: fetchSiteImages,
-    staleTime: 1000 * 60 * 30, // 30 minutes - images rarely change
-    gcTime: 1000 * 60 * 60, // 1 hour garbage collection
+    staleTime: 1000 * 60 * 60, // 1 hour - images rarely change
+    gcTime: 1000 * 60 * 120, // 2 hours garbage collection
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   // Move browser-only preload logic to useEffect (runs only on client)
@@ -58,5 +59,5 @@ export const useSiteImages = () => {
     return images[key] || fallback;
   };
 
-  return { images, getImage };
+  return { images, getImage, isLoading };
 };
