@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink, CalendarPlus } from "lucide-react";
+import { MapPin, Clock, Mountain, Calendar, CheckCircle, XCircle, ArrowLeft, Star, Home, ExternalLink, CalendarPlus, Users, Heart } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
 import { BookingModal } from "@/components/BookingModal";
@@ -328,6 +328,27 @@ const TravelPackageDetailPage = () => {
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.itinerary) }}
                 />
               </CardContent>
+              <CardFooter className="flex-col items-start gap-3 pt-0">
+                <div className="w-full border-t border-border/40 pt-4">
+                  <p className="text-sm text-muted-foreground italic mb-3">
+                    Every journey in Uttarakhand is shaped by its people, landscapes, and traditions.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span>Customisable itineraries</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span>Local support available</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Heart className="h-4 w-4 text-primary" />
+                      <span>No obligation enquiry</span>
+                    </div>
+                  </div>
+                </div>
+              </CardFooter>
             </Card>
           )}
 
@@ -440,23 +461,51 @@ const TravelPackageDetailPage = () => {
             </div>
           )}
 
+          {/* Return Path Links */}
+          <div className="mb-8 pt-4 border-t border-border/40">
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link
+                to="/districts"
+                className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Back to Districts
+              </Link>
+              <span className="text-border">·</span>
+              <Link
+                to="/culture"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Explore local culture
+              </Link>
+              <span className="text-border">·</span>
+              <Link
+                to="/travel-packages"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                More travel experiences
+              </Link>
+            </div>
+          </div>
+
           {/* Price & CTA */}
-          <Card className="sticky bottom-4 bg-background/95 backdrop-blur-sm">
+          <Card className="sticky bottom-4 bg-background/95 backdrop-blur-sm border-primary/20">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Price per person</p>
                   <span className="text-3xl font-bold text-primary">₹{pkg.price_per_person.toLocaleString()}</span>
+                  <p className="text-xs text-muted-foreground mt-1">Flexible dates • Local guidance included</p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
                   <Button size="lg" className="flex-1 md:flex-none" onClick={() => setIsBookingOpen(true)}>
                     <CalendarPlus className="h-4 w-4 mr-2" />
-                    Book Now
+                    Plan Your Visit
                   </Button>
                   <Dialog open={isDialogOpen} onOpenChange={handleEnquiryDialogClose}>
                     <DialogTrigger asChild>
                       <Button size="lg" variant="outline" className="flex-1 md:flex-none">
-                        Enquire
+                        Ask for Details
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -600,6 +649,19 @@ const TravelPackageDetailPage = () => {
             }}
             source="travel_package_page"
           />
+        </div>
+
+        {/* Mobile Sticky CTA */}
+        <div className="fixed bottom-0 left-0 right-0 md:hidden bg-background/95 backdrop-blur-sm border-t border-border/40 p-3 z-40">
+          <div className="flex items-center gap-3 container mx-auto">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground truncate">{pkg.title}</p>
+              <p className="font-semibold text-primary">₹{pkg.price_per_person.toLocaleString()}</p>
+            </div>
+            <Button size="sm" onClick={() => setIsBookingOpen(true)}>
+              Plan Your Trip
+            </Button>
+          </div>
         </div>
       </div>
     </>

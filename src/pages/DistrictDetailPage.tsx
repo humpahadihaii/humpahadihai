@@ -564,6 +564,38 @@ const DistrictDetailPage = () => {
                 )}
               </ArchivalSection>
 
+              {/* Experience This District - Travel Intent Block */}
+              <div className="relative bg-gradient-to-br from-primary/5 via-muted/30 to-transparent border border-border/40 rounded-xl p-6 md:p-8">
+                <div className="absolute left-0 top-6 bottom-6 w-1 bg-primary/30 rounded-full" />
+                <div className="pl-4">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Mountain className="h-5 w-5 text-primary" />
+                    Experience {district.name}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-5">
+                    From its serene landscapes to vibrant local traditions, {district.name} offers a journey 
+                    through the heart of {district.region || "Uttarakhand"}. Whether you seek spiritual solace, 
+                    adventure in the mountains, or authentic cultural encounters — this land welcomes every traveller.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      to="/travel-packages"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-sm text-primary font-medium transition-colors"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      View travel experiences
+                    </Link>
+                    <Link
+                      to="/marketplace"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                    >
+                      <Home className="h-4 w-4 text-muted-foreground" />
+                      Explore local stays
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
               {/* Festival Spotlight */}
               {district.id && (
                 <ArchivalSection
@@ -619,6 +651,13 @@ const DistrictDetailPage = () => {
                   >
                     <Scroll className="h-4 w-4 text-muted-foreground" />
                     Uttarakhand History
+                  </Link>
+                  <Link
+                    to="/travel-packages"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    Travel Experiences
                   </Link>
                   <Link
                     to="/gallery"

@@ -182,6 +182,33 @@ const TravelPackagesPage = () => {
           </div>
         </section>
 
+        {/* Travel Intro Section */}
+        <section className="py-8 border-b border-border/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="text-muted-foreground leading-relaxed">
+                Every journey in Uttarakhand is shaped by its people, landscapes, and traditions. 
+                Our travel experiences are designed with flexibility in mind — whether you're seeking a 
+                spiritual pilgrimage, an adventure trek, or a peaceful retreat in the mountains.
+              </p>
+              <div className="flex justify-center gap-6 mt-6">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>Customisable itineraries</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>Local expertise</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>No obligation enquiry</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Featured Packages */}
         {featuredPackages.length > 0 && (
           <section className="py-8 bg-muted/30">
