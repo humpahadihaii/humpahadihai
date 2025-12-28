@@ -44,7 +44,7 @@ export function HeatmapViewer() {
         .select('page_slug')
         .limit(100)) as { data: any[] | null };
       
-      const uniquePages = [...new Set((data || []).map(d => d.page_slug))];
+      const uniquePages = [...new Set((data || []).map(d => d.page_slug))].filter((p): p is string => !!p && p.trim() !== "");
       return uniquePages.sort();
     },
   });
@@ -144,7 +144,7 @@ export function HeatmapViewer() {
   // Get unique viewport widths
   const viewportWidths = useMemo(() => {
     if (!heatmapData) return [];
-    return [...new Set(heatmapData.map(b => b.viewport_width).filter(Boolean))].sort((a, b) => a - b);
+    return [...new Set(heatmapData.map(b => b.viewport_width).filter((w): w is number => w != null && w > 0))].sort((a, b) => a - b);
   }, [heatmapData]);
 
   return (

@@ -114,7 +114,7 @@ const TravelPackagesPage = () => {
     );
   });
 
-  const regions = [...new Set(packages.map((p) => p.region).filter(Boolean))];
+  const regions = [...new Set(packages.map((p) => p.region).filter((r): r is string => !!r && r.trim() !== ""))];
   const featuredPackages = packages.filter(p => p.is_featured).slice(0, 3);
 
   const getDifficultyColor = (level: string | null) => {
