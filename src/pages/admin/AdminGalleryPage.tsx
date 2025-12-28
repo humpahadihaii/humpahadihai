@@ -147,7 +147,7 @@ export default function AdminGalleryPage() {
     }
   };
 
-  const categories = Array.from(new Set(items.map(item => item.category)));
+  const categories = Array.from(new Set(items.map(item => item.category))).filter(cat => cat && cat.trim() !== "");
   const filteredItems = items.filter((item) => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
