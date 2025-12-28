@@ -4434,6 +4434,7 @@ export type Database = {
       }
       media_library: {
         Row: {
+          admin_notes: string | null
           alt_text: string | null
           created_at: string | null
           file_size: number | null
@@ -4442,6 +4443,7 @@ export type Database = {
           filename: string
           height: number | null
           id: string
+          source: string | null
           tags: string[] | null
           title: string | null
           updated_at: string | null
@@ -4449,6 +4451,7 @@ export type Database = {
           width: number | null
         }
         Insert: {
+          admin_notes?: string | null
           alt_text?: string | null
           created_at?: string | null
           file_size?: number | null
@@ -4457,6 +4460,7 @@ export type Database = {
           filename: string
           height?: number | null
           id?: string
+          source?: string | null
           tags?: string[] | null
           title?: string | null
           updated_at?: string | null
@@ -4464,6 +4468,7 @@ export type Database = {
           width?: number | null
         }
         Update: {
+          admin_notes?: string | null
           alt_text?: string | null
           created_at?: string | null
           file_size?: number | null
@@ -4472,6 +4477,7 @@ export type Database = {
           filename?: string
           height?: number | null
           id?: string
+          source?: string | null
           tags?: string[] | null
           title?: string | null
           updated_at?: string | null
