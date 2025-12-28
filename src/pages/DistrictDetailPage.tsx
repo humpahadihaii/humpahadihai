@@ -6,7 +6,27 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Mountain, Utensils, TreePine, Landmark, ChevronRight, Search, Home, Building, Map, BookOpen } from "lucide-react";
+import { 
+  MapPin, 
+  Users, 
+  Mountain, 
+  Utensils, 
+  TreePine, 
+  Landmark, 
+  ChevronRight, 
+  Search, 
+  Home, 
+  Building, 
+  Map, 
+  BookOpen,
+  Quote,
+  ArrowLeft,
+  Calendar,
+  Heart,
+  Scroll,
+  Info,
+  ExternalLink
+} from "lucide-react";
 import { useState, useMemo, lazy, Suspense } from "react";
 import type { Database } from "@/integrations/supabase/types";
 import PlacesToVisit from "@/components/PlacesToVisit";
@@ -36,6 +56,39 @@ type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
 type Village = Database["public"]["Tables"]["villages"]["Row"];
 
 const INITIAL_VILLAGES_COUNT = 12;
+
+// Archival Section Component - Consistent with Culture/History pages
+function ArchivalSection({
+  id,
+  title,
+  icon,
+  children,
+  className = "",
+}: {
+  id?: string;
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section 
+      id={id}
+      className={`scroll-mt-24 relative bg-muted/20 border border-border/30 rounded-xl p-6 md:p-8 ${className}`}
+    >
+      {/* Left accent line */}
+      <div className="absolute left-0 top-6 bottom-6 w-1 bg-primary/40 rounded-full" />
+      
+      <h2 className="text-lg md:text-xl font-semibold mb-5 flex items-center gap-3 text-foreground pl-4">
+        {icon && <span className="text-muted-foreground">{icon}</span>}
+        <span>{title}</span>
+      </h2>
+      <div className="pl-4">
+        {children}
+      </div>
+    </section>
+  );
+}
 
 const DistrictDetailPage = () => {
   const { slug } = useParams();
@@ -294,13 +347,23 @@ const DistrictDetailPage = () => {
     image: district.seo_image_url || district.banner_image || district.image_url,
   } : undefined;
 
+  // Extract insight from overview
+  const getInsight = () => {
+    if (!district?.overview) return null;
+    const sentences = district.overview.split(/[.!?]+/).filter(s => s.trim().length > 60);
+    return sentences[0]?.trim() || null;
+  };
+
+  const insight = getInsight();
+
   if (districtLoading) {
     return (
-      <div className="min-h-screen">
-        <Skeleton className="h-[60vh] w-full" />
+      <div className="min-h-screen bg-background">
+        <div className="h-[50vh] bg-muted animate-pulse" />
         <div className="container mx-auto px-4 py-12">
-          <Skeleton className="h-12 w-1/2 mb-4" />
-          <Skeleton className="h-32 w-full" />
+          <div className="h-8 w-1/3 bg-muted rounded mb-4" />
+          <div className="h-6 w-2/3 bg-muted/70 rounded mb-8" />
+          <div className="h-48 w-full bg-muted/50 rounded-xl" />
         </div>
       </div>
     );
@@ -308,12 +371,19 @@ const DistrictDetailPage = () => {
 
   if (!district) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <Card className="max-w-md w-full border-border/40">
           <CardContent className="py-12 text-center">
+            <Mountain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-4">District Not Found</h2>
+            <p className="text-muted-foreground mb-6">
+              The district you're looking for doesn't exist or has been removed.
+            </p>
             <Button asChild>
-              <Link to="/districts">Back to Districts</Link>
+              <Link to="/districts">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Districts
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -325,87 +395,114 @@ const DistrictDetailPage = () => {
     <div className="min-h-screen bg-background">
       <SEOHead meta={seoMeta} sharePreview={sharePreview} />
 
-      {/* Hero Section - Preload hero image */}
-      <section className="relative h-[60vh] overflow-hidden">
-        <link rel="preload" as="image" href={district.banner_image || district.image_url || "/placeholder.svg"} />
-        <img
-          src={district.banner_image || district.image_url || "/placeholder.svg"}
-          alt={`${district.name} district landscape`}
-          className="w-full h-full object-cover"
-          loading="eager"
-          fetchPriority="high"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8">
-          <div className="container mx-auto">
-            {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 text-sm text-foreground/70 mb-4">
+      {/* Archival Hero Section */}
+      <header className="relative bg-muted/30 overflow-hidden">
+        {/* Background Image with Subtle Overlay */}
+        {(district.banner_image || district.image_url) && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${district.banner_image || district.image_url})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/80 to-background" />
+          </div>
+        )}
+        
+        {/* Hero Content */}
+        <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-20">
+          {/* Breadcrumb Navigation */}
+          <nav className="mb-8">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
               <ChevronRight className="h-4 w-4" />
               <Link to="/districts" className="hover:text-foreground transition-colors">Districts</Link>
               <ChevronRight className="h-4 w-4" />
               <span className="text-foreground">{district.name}</span>
-            </nav>
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="secondary">Uttarakhand</Badge>
-              <Badge variant="outline">{district.region || "Kumaon/Garhwal"}</Badge>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-4">
-              {district.name}
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              {district.overview?.substring(0, 150)}...
-            </p>
-          </div>
-        </div>
-      </section>
+          </nav>
 
-      {/* Quick Facts Bar */}
-      <section className="bg-secondary/30 border-y">
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          {/* Meta Badges */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Badge variant="outline" className="text-muted-foreground border-border/60 text-xs">
+              Uttarakhand
+            </Badge>
+            {district.region && (
+              <Badge variant="outline" className="text-muted-foreground border-border/60 text-xs">
+                <MapPin className="h-3 w-3 mr-1" />
+                {district.region} Region
+              </Badge>
+            )}
+          </div>
+
+          {/* Title - Authoritative Serif */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] font-serif font-bold text-foreground mb-5 max-w-4xl leading-[1.1] tracking-tight">
+            {district.name}
+          </h1>
+
+          {/* Subtitle / Short Overview */}
+          {district.overview && (
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+              {district.overview.substring(0, 160)}...
+            </p>
+          )}
+        </div>
+      </header>
+
+      {/* Quick Facts Bar - Refined */}
+      <section className="bg-muted/30 border-y border-border/30">
+        <div className="container mx-auto px-4 py-5">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
             {district.population && (
               <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Population</p>
-                  <p className="font-semibold">{district.population}</p>
+                  <p className="text-xs text-muted-foreground">Population</p>
+                  <p className="font-semibold text-sm">{district.population}</p>
                 </div>
               </div>
             )}
             {district.geography && (
               <div className="flex items-center gap-3">
-                <Mountain className="h-5 w-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Mountain className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Geography</p>
-                  <p className="font-semibold">{district.geography}</p>
+                  <p className="text-xs text-muted-foreground">Geography</p>
+                  <p className="font-semibold text-sm">{district.geography}</p>
                 </div>
               </div>
             )}
             {district.best_time_to_visit && (
               <div className="flex items-center gap-3">
-                <TreePine className="h-5 w-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <TreePine className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Best Time</p>
-                  <p className="font-semibold">{district.best_time_to_visit}</p>
+                  <p className="text-xs text-muted-foreground">Best Time</p>
+                  <p className="font-semibold text-sm">{district.best_time_to_visit}</p>
                 </div>
               </div>
             )}
             {district.local_languages && (
               <div className="flex items-center gap-3">
-                <Landmark className="h-5 w-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Landmark className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Languages</p>
-                  <p className="font-semibold">{district.local_languages}</p>
+                  <p className="text-xs text-muted-foreground">Languages</p>
+                  <p className="font-semibold text-sm">{district.local_languages}</p>
                 </div>
               </div>
             )}
             {allVillages && allVillages.length > 0 && (
               <div className="flex items-center gap-3">
-                <Home className="h-5 w-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Home className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Villages</p>
-                  <p className="font-semibold">{allVillages.length}</p>
+                  <p className="text-xs text-muted-foreground">Villages</p>
+                  <p className="font-semibold text-sm">{allVillages.length}</p>
                 </div>
               </div>
             )}
@@ -413,470 +510,559 @@ const DistrictDetailPage = () => {
         </div>
       </section>
 
-      {/* Encyclopedia Navigation */}
-      <section className="border-b sticky top-0 bg-background/95 backdrop-blur z-10">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center gap-2 py-3 overflow-x-auto">
-            <BookOpen className="h-4 w-4 text-primary shrink-0" />
-            <span className="text-sm font-medium text-muted-foreground shrink-0">Jump to:</span>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <a href="#about">About</a>
-              </Button>
-              {combinedPlaces.length > 0 && (
-                <Button variant="ghost" size="sm" asChild>
-                  <a href="#places">Places</a>
-                </Button>
-              )}
-              <Button variant="ghost" size="sm" asChild>
-                <a href="#heritage">Heritage</a>
-              </Button>
-              {hotels && hotels.length > 0 && (
-                <Button variant="ghost" size="sm" asChild>
-                  <a href="#hotels">Hotels</a>
-                </Button>
-              )}
-              {(providers.length > 0 || listings.length > 0) && (
-                <Button variant="ghost" size="sm" asChild>
-                  <a href="#marketplace">Marketplace</a>
-                </Button>
-              )}
-              {villages && villages.length > 0 && (
-                <Button variant="ghost" size="sm" asChild>
-                  <a href="#villages">Villages</a>
-                </Button>
-              )}
-              <Button variant="ghost" size="sm" asChild>
-                <a href="#map">Map</a>
-              </Button>
-            </div>
-          </nav>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main content - 2 columns */}
-            <div className="lg:col-span-2">
-              <Card className="border-none shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl flex items-center gap-2">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                    About {district.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
-                    {district.overview}
-                  </p>
-                  {district.cultural_identity && (
-                    <div className="mt-6 p-4 bg-secondary/30 rounded-lg">
-                      <p className="font-semibold mb-2">Cultural Identity</p>
-                      <p className="text-muted-foreground">{district.cultural_identity}</p>
-                    </div>
-                  )}
-                  {district.famous_specialties && (
-                    <div className="mt-4 p-4 bg-primary/5 rounded-lg">
-                      <p className="font-semibold mb-2">Famous For</p>
-                      <p className="text-muted-foreground">{district.famous_specialties}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+      {/* Main Content Layout */}
+      <main className="bg-background">
+        <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             
-            {/* Sidebar - 1 column */}
-            <div className="space-y-6">
-              {/* Weather Widget */}
-              {district.latitude && district.longitude && (
-                <WeatherWidget
-                  lat={Number(district.latitude)}
-                  lng={Number(district.longitude)}
-                  locationName={district.name}
-                />
-              )}
+            {/* Main Article - Constrained Width for Readability */}
+            <article className="lg:col-span-8 lg:max-w-[800px] space-y-10 md:space-y-14">
               
-              {/* Upcoming Events */}
-              <EventCalendarWidget
-                districtId={district.id}
-                title="Upcoming Events"
-                showViewAll={true}
-                compact={true}
-                limit={3}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Festival Spotlight for this District */}
-      <section className="py-12 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <FestivalSpotlight districtId={district.id} showTitle={true} limit={3} />
-        </div>
-      </section>
-
-      {/* Places to Visit Section */}
-      <div id="places">
-        <PlacesToVisit 
-          districtName={district.name} 
-          places={combinedPlaces} 
-        />
-      </div>
-
-      {/* Food & Festivals Section */}
-      <div id="heritage" className="bg-secondary/10">
-        <FoodAndFestivals
-          districtName={district.name}
-          foodItems={combinedFoods}
-          festivalItems={combinedFestivals}
-          cultureItems={cultureContent.map(c => ({
-            id: c.id,
-            title: c.title,
-            description: c.description,
-            image_url: c.image_url,
-            category: c.category,
-          }))}
-        />
-      </div>
-
-      {/* Hotels Section */}
-      <DistrictHotelsSection
-        districtName={district.name}
-        hotels={hotels || []}
-        isLoading={hotelsLoading}
-      />
-
-      {/* Local Marketplace Section */}
-      <DistrictMarketplaceSection
-        districtName={district.name}
-        districtSlug={district.slug}
-        providers={providers}
-        listings={listings}
-        isLoading={marketplaceLoading}
-      />
-
-      {/* Travel Packages Section */}
-      <DistrictTravelPackagesSection
-        districtName={district.name}
-        packages={travelPackages || []}
-        isLoading={packagesLoading}
-      />
-
-      {/* Local Products Section */}
-      <DistrictProductsSection
-        districtName={district.name}
-        products={products || []}
-        isLoading={productsLoading}
-      />
-
-      {/* Villages Preview Section */}
-      {villages && villages.length > 0 && (
-        <section id="villages" className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-3">
-                <Home className="h-8 w-8 text-primary" />
-                <div>
-                  <h2 className="text-3xl font-bold">Villages of {district.name}</h2>
-                  <p className="text-muted-foreground">Explore the rural heritage</p>
+              {/* Insight Callout - Editorial Highlight */}
+              {insight && (
+                <div className="relative bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-l-4 border-primary/60 rounded-r-xl p-6 md:p-8">
+                  <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/20" />
+                  <p className="text-lg md:text-xl text-foreground/90 leading-relaxed italic font-serif">
+                    "{insight}"
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-4 font-medium">
+                    — District Overview
+                  </p>
                 </div>
-              </div>
-              <Button variant="outline" asChild>
-                <a href="#all-villages">
-                  View All <ChevronRight className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {villages.map((village) => (
-                <Link key={village.id} to={`/villages/${village.slug}`}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all group h-full">
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={village.thumbnail_url || "/placeholder.svg"}
-                        alt={village.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                        {village.name}
-                      </CardTitle>
-                      <CardDescription className="line-clamp-2">
-                        {village.introduction?.substring(0, 100)}...
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+              )}
 
-      {/* Map Section */}
-      <section id="map" className="py-16 px-4 bg-secondary/10">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <Map className="h-8 w-8 text-primary" />
-              <div>
-                <h2 className="text-3xl font-bold">Explore {district.name} on Map</h2>
-                <p className="text-muted-foreground">Interactive map with villages and places</p>
-              </div>
-            </div>
-            {!showMap && (
-              <Button onClick={() => setShowMap(true)}>
-                <Map className="mr-2 h-4 w-4" />
-                Load Map
-              </Button>
-            )}
-          </div>
-
-          {showMap && (
-            <Suspense fallback={
-              <Card className="h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <Map className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4 animate-pulse" />
-                  <p className="text-muted-foreground">Loading map...</p>
+              {/* About Section */}
+              <ArchivalSection
+                id="about"
+                title={`About ${district.name}`}
+                icon={<BookOpen className="h-5 w-5" />}
+              >
+                <div className="prose prose-lg max-w-none prose-p:text-foreground/80 prose-p:leading-[1.85]">
+                  <p>{district.overview}</p>
                 </div>
-              </Card>
-            }>
-              <DistrictMap
-                districtName={district.name}
-                centerLat={district.latitude || undefined}
-                centerLng={district.longitude || undefined}
-                villages={allVillages?.map(v => ({
-                  id: v.id,
-                  name: v.name,
-                  latitude: v.latitude,
-                  longitude: v.longitude,
-                  introduction: v.introduction,
-                })) || []}
-                places={combinedPlaces.map(p => ({
-                  id: p.id,
-                  title: p.title,
-                  description: p.description,
-                  google_map_link: p.google_map_link,
-                }))}
-              />
-            </Suspense>
-          )}
+                
+                {district.cultural_identity && (
+                  <div className="mt-6 p-4 bg-secondary/20 rounded-lg border border-border/30">
+                    <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-primary" />
+                      Cultural Identity
+                    </p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{district.cultural_identity}</p>
+                  </div>
+                )}
+                
+                {district.famous_specialties && (
+                  <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Landmark className="h-4 w-4 text-primary" />
+                      Famous For
+                    </p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{district.famous_specialties}</p>
+                  </div>
+                )}
+              </ArchivalSection>
 
-          {!showMap && (
-            <Card className="h-[300px] flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/10">
-              <div className="text-center">
-                <Map className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">Click "Load Map" to see villages and places on an interactive map</p>
-              </div>
-            </Card>
-          )}
-        </div>
-      </section>
+              {/* Festival Spotlight */}
+              {district.id && (
+                <ArchivalSection
+                  title="Festival Spotlight"
+                  icon={<Calendar className="h-5 w-5" />}
+                >
+                  <FestivalSpotlight districtId={district.id} showTitle={false} limit={3} />
+                </ArchivalSection>
+              )}
 
-      {/* Other Districts Section */}
-      <OtherDistrictsSection
-        districts={otherDistricts || []}
-        isLoading={otherDistrictsLoading}
-      />
+              {/* Places to Visit Section */}
+              {combinedPlaces.length > 0 && (
+                <div id="places">
+                  <PlacesToVisit 
+                    districtName={district.name} 
+                    places={combinedPlaces} 
+                  />
+                </div>
+              )}
 
-      {/* All Villages Directory */}
-      {allVillages && allVillages.length > 0 && (
-        <section id="all-villages" className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex items-center gap-3 mb-2">
-              <Home className="h-8 w-8 text-primary" />
-              <h2 className="text-3xl font-bold">Top Places in {district.name}</h2>
-            </div>
-            <p className="text-muted-foreground mb-6">
-              Complete directory of {allVillages.length} settlements in {district.name} district
-            </p>
-            
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by village name..."
-                  value={villageSearch}
-                  onChange={(e) => setVillageSearch(e.target.value)}
-                  className="pl-10"
+              {/* Food & Festivals Section */}
+              <div id="heritage">
+                <FoodAndFestivals
+                  districtName={district.name}
+                  foodItems={combinedFoods}
+                  festivalItems={combinedFestivals}
+                  cultureItems={cultureContent.map(c => ({
+                    id: c.id,
+                    title: c.title,
+                    description: c.description,
+                    image_url: c.image_url,
+                    category: c.category,
+                  }))}
                 />
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant={villageTypeFilter === "all" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setVillageTypeFilter("all")}
-                >
-                  All
-                </Button>
-                <Button 
-                  variant={villageTypeFilter === "village" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setVillageTypeFilter("village")}
-                >
-                  <Home className="h-3 w-3 mr-1" /> Villages
-                </Button>
-                <Button 
-                  variant={villageTypeFilter === "town" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setVillageTypeFilter("town")}
-                >
-                  <Building className="h-3 w-3 mr-1" /> Towns
+
+              {/* Internal Context Links - Editorial Style */}
+              <div className="pt-8 border-t border-border/40">
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
+                  Continue Exploring
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    to="/culture"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    {district.region === "Kumaon" ? "Kumaoni Culture" : "Garhwali Culture"}
+                  </Link>
+                  <Link
+                    to="/history"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <Scroll className="h-4 w-4 text-muted-foreground" />
+                    Uttarakhand History
+                  </Link>
+                  <Link
+                    to="/gallery"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <Mountain className="h-4 w-4 text-muted-foreground" />
+                    Photo Gallery
+                  </Link>
+                </div>
+              </div>
+            </article>
+
+            {/* Sidebar - Quick Reference */}
+            <aside className="lg:col-span-4 order-first lg:order-last">
+              <div className="lg:sticky lg:top-24 space-y-6">
+                {/* Quick Jump Navigation */}
+                <Card className="border-border/40 bg-muted/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+                      <Scroll className="h-4 w-4" />
+                      Jump to Section
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <nav className="flex flex-col gap-1">
+                      <a href="#about" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                        <BookOpen className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">About</span>
+                      </a>
+                      {combinedPlaces.length > 0 && (
+                        <a href="#places" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                          <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Places to Visit</span>
+                        </a>
+                      )}
+                      <a href="#heritage" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                        <Heart className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Heritage</span>
+                      </a>
+                      {hotels && hotels.length > 0 && (
+                        <a href="#hotels" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                          <Building className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Hotels</span>
+                        </a>
+                      )}
+                      {villages && villages.length > 0 && (
+                        <a href="#villages" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                          <Home className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Villages</span>
+                        </a>
+                      )}
+                      <a href="#map" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                        <Map className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Map</span>
+                      </a>
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Weather Widget */}
+                {district.latitude && district.longitude && (
+                  <WeatherWidget
+                    lat={Number(district.latitude)}
+                    lng={Number(district.longitude)}
+                    locationName={district.name}
+                  />
+                )}
+                
+                {/* Upcoming Events */}
+                <EventCalendarWidget
+                  districtId={district.id}
+                  title="Upcoming Events"
+                  showViewAll={true}
+                  compact={true}
+                  limit={3}
+                />
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        {/* Hotels Section */}
+        <DistrictHotelsSection
+          districtName={district.name}
+          hotels={hotels || []}
+          isLoading={hotelsLoading}
+        />
+
+        {/* Local Marketplace Section */}
+        <DistrictMarketplaceSection
+          districtName={district.name}
+          districtSlug={district.slug}
+          providers={providers}
+          listings={listings}
+          isLoading={marketplaceLoading}
+        />
+
+        {/* Travel Packages Section */}
+        <DistrictTravelPackagesSection
+          districtName={district.name}
+          packages={travelPackages || []}
+          isLoading={packagesLoading}
+        />
+
+        {/* Local Products Section */}
+        <DistrictProductsSection
+          districtName={district.name}
+          products={products || []}
+          isLoading={productsLoading}
+        />
+
+        {/* Villages Preview Section */}
+        {villages && villages.length > 0 && (
+          <section id="villages" className="py-16 px-4 bg-muted/20">
+            <div className="container mx-auto">
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Home className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Villages of {district.name}</h2>
+                    <p className="text-muted-foreground text-sm">Explore the rural heritage</p>
+                  </div>
+                </div>
+                <Button variant="outline" asChild>
+                  <a href="#all-villages">
+                    View All <ChevronRight className="ml-2 h-4 w-4" />
+                  </a>
                 </Button>
               </div>
-            </div>
-
-            {/* Results count */}
-            {villageSearch && (
-              <p className="text-sm text-muted-foreground mb-4">
-                Found {filteredVillages.length} result{filteredVillages.length !== 1 ? 's' : ''} for "{villageSearch}"
-              </p>
-            )}
-
-            {/* Villages Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {displayedVillages.map((village) => (
-                <Link key={village.id} to={`/villages/${village.slug}`}>
-                  <Card className="hover:shadow-lg transition-all cursor-pointer h-full group border-border/50 hover:border-primary/30">
-                    {village.thumbnail_url ? (
-                      <div className="h-32 overflow-hidden rounded-t-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {villages.map((village) => (
+                  <Link key={village.id} to={`/villages/${village.slug}`}>
+                    <Card className="overflow-hidden hover:shadow-xl transition-all group h-full border-border/40">
+                      <div className="h-48 overflow-hidden">
                         <img
-                          src={village.thumbnail_url}
+                          src={village.thumbnail_url || "/placeholder.svg"}
                           alt={village.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
                       </div>
-                    ) : (
-                      <div className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center rounded-t-lg">
-                        <Home className="h-10 w-10 text-primary/30" />
-                      </div>
-                    )}
-                    <CardHeader className="p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-sm group-hover:text-primary transition-colors line-clamp-1">
+                      <CardHeader>
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
                           {village.name}
                         </CardTitle>
-                        <Badge variant="outline" className="text-xs shrink-0">
-                          Village
-                        </Badge>
-                      </div>
-                      {village.tehsil && (
-                        <CardDescription className="text-xs line-clamp-1">
-                          {village.tehsil} Tehsil
+                        <CardDescription className="line-clamp-2">
+                          {village.introduction?.substring(0, 100)}...
                         </CardDescription>
-                      )}
-                      {village.introduction && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                          {village.introduction.substring(0, 80)}...
-                        </p>
-                      )}
-                      {village.population && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                          <Users className="h-3 w-3" />
-                          <span>{village.population.toLocaleString()} people</span>
-                        </div>
-                      )}
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))}
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Map Section */}
+        <section id="map" className="py-16 px-4 bg-muted/10 border-t border-border/30">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Map className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Explore {district.name} on Map</h2>
+                  <p className="text-muted-foreground text-sm">Interactive map with villages and places</p>
+                </div>
+              </div>
+              {!showMap && (
+                <Button onClick={() => setShowMap(true)}>
+                  <Map className="mr-2 h-4 w-4" />
+                  Load Map
+                </Button>
+              )}
             </div>
 
-            {/* Show More / Show Less */}
-            {filteredVillages.length > INITIAL_VILLAGES_COUNT && (
-              <div className="text-center mt-8">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowAllVillages(!showAllVillages)}
-                  className="min-w-[200px]"
-                >
-                  {showAllVillages 
-                    ? `Show Less` 
-                    : `Show All ${filteredVillages.length} Villages`
-                  }
-                </Button>
-              </div>
+            {showMap && (
+              <Suspense fallback={
+                <Card className="h-[400px] flex items-center justify-center border-border/40">
+                  <div className="text-center">
+                    <Map className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4 animate-pulse" />
+                    <p className="text-muted-foreground">Loading map...</p>
+                  </div>
+                </Card>
+              }>
+                <DistrictMap
+                  districtName={district.name}
+                  centerLat={district.latitude || undefined}
+                  centerLng={district.longitude || undefined}
+                  villages={allVillages?.map(v => ({
+                    id: v.id,
+                    name: v.name,
+                    latitude: v.latitude,
+                    longitude: v.longitude,
+                    introduction: v.introduction,
+                  })) || []}
+                  places={combinedPlaces.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    description: p.description,
+                    google_map_link: p.google_map_link,
+                  }))}
+                />
+              </Suspense>
             )}
 
-            {/* Empty state */}
-            {filteredVillages.length === 0 && villageSearch && (
-              <div className="text-center py-12">
-                <Home className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="text-muted-foreground">No villages found matching "{villageSearch}"</p>
-                <Button variant="ghost" onClick={() => setVillageSearch("")} className="mt-2">
-                  Clear search
-                </Button>
-              </div>
+            {!showMap && (
+              <Card className="h-[300px] flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/10 border-border/40">
+                <div className="text-center">
+                  <Map className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">Click "Load Map" to see villages and places on an interactive map</p>
+                </div>
+              </Card>
             )}
           </div>
         </section>
-      )}
 
-      {/* Related Culture & Regions - SEO Internal Linking */}
-      <section className="py-12 px-4 bg-muted/30 border-t">
-        <div className="container mx-auto">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Related Culture & Regions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Culture Links */}
-            <div className="bg-background rounded-lg p-6 border">
-              <h3 className="font-semibold text-foreground mb-4">Culture & Traditions</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/culture" className="text-primary hover:text-primary/80 hover:underline text-sm">
-                    {district.region === "Kumaon" ? "Kumaoni Cultural Traditions" : "Garhwali Folk Traditions"}
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/food" className="text-primary hover:text-primary/80 hover:underline text-sm">
-                    Traditional Food of {district.name}
-                  </Link>
-                </li>
-              </ul>
-            </div>
+        {/* Other Districts Section */}
+        <OtherDistrictsSection
+          districts={otherDistricts || []}
+          isLoading={otherDistrictsLoading}
+        />
 
-            {/* Gallery Link */}
-            <div className="bg-background rounded-lg p-6 border">
-              <h3 className="font-semibold text-foreground mb-4">Photo Gallery</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
-                    Cultural Images from {district.name} District
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
-                    Uttarakhand Heritage Photos
-                  </Link>
-                </li>
-              </ul>
-            </div>
+        {/* All Villages Directory */}
+        {allVillages && allVillages.length > 0 && (
+          <section id="all-villages" className="py-16 px-4">
+            <div className="container mx-auto">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Home className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Top Places in {district.name}</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Complete directory of {allVillages.length} settlements
+                  </p>
+                </div>
+              </div>
+              
+              {/* Search and Filter */}
+              <div className="flex flex-col sm:flex-row gap-4 my-8">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by village name..."
+                    value={villageSearch}
+                    onChange={(e) => setVillageSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={villageTypeFilter === "all" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setVillageTypeFilter("all")}
+                  >
+                    All
+                  </Button>
+                  <Button 
+                    variant={villageTypeFilter === "village" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setVillageTypeFilter("village")}
+                  >
+                    <Home className="h-3 w-3 mr-1" /> Villages
+                  </Button>
+                  <Button 
+                    variant={villageTypeFilter === "town" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setVillageTypeFilter("town")}
+                  >
+                    <Building className="h-3 w-3 mr-1" /> Towns
+                  </Button>
+                </div>
+              </div>
 
-            {/* Nearby Districts */}
-            <div className="bg-background rounded-lg p-6 border">
-              <h3 className="font-semibold text-foreground mb-4">Explore Nearby</h3>
-              <ul className="space-y-2">
-                {otherDistricts?.slice(0, 3).map((otherDist) => (
-                  <li key={otherDist.id}>
-                    <Link 
-                      to={`/districts/${otherDist.slug}`} 
-                      className="text-primary hover:text-primary/80 hover:underline text-sm"
-                    >
-                      Explore {otherDist.name} District Culture
-                    </Link>
-                  </li>
+              {/* Results count */}
+              {villageSearch && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Found {filteredVillages.length} result{filteredVillages.length !== 1 ? 's' : ''} for "{villageSearch}"
+                </p>
+              )}
+
+              {/* Villages Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {displayedVillages.map((village) => (
+                  <Link key={village.id} to={`/villages/${village.slug}`}>
+                    <Card className="hover:shadow-lg transition-all cursor-pointer h-full group border-border/40 hover:border-primary/30">
+                      {village.thumbnail_url ? (
+                        <div className="h-32 overflow-hidden rounded-t-lg">
+                          <img
+                            src={village.thumbnail_url}
+                            alt={village.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center rounded-t-lg">
+                          <Home className="h-10 w-10 text-primary/30" />
+                        </div>
+                      )}
+                      <CardHeader className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-sm group-hover:text-primary transition-colors line-clamp-1">
+                            {village.name}
+                          </CardTitle>
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            Village
+                          </Badge>
+                        </div>
+                        {village.tehsil && (
+                          <CardDescription className="text-xs line-clamp-1">
+                            {village.tehsil} Tehsil
+                          </CardDescription>
+                        )}
+                        {village.introduction && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                            {village.introduction.substring(0, 80)}...
+                          </p>
+                        )}
+                        {village.population && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                            <Users className="h-3 w-3" />
+                            <span>{village.population.toLocaleString()} people</span>
+                          </div>
+                        )}
+                      </CardHeader>
+                    </Card>
+                  </Link>
                 ))}
-              </ul>
+              </div>
+
+              {/* Show More / Show Less */}
+              {filteredVillages.length > INITIAL_VILLAGES_COUNT && (
+                <div className="text-center mt-8">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowAllVillages(!showAllVillages)}
+                    className="min-w-[200px]"
+                  >
+                    {showAllVillages 
+                      ? `Show Less` 
+                      : `Show All ${filteredVillages.length} Villages`
+                    }
+                  </Button>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {filteredVillages.length === 0 && villageSearch && (
+                <div className="text-center py-12">
+                  <Home className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-muted-foreground">No villages found matching "{villageSearch}"</p>
+                  <Button variant="ghost" onClick={() => setVillageSearch("")} className="mt-2">
+                    Clear search
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Related Culture & Regions - SEO Internal Linking */}
+        <section className="py-12 px-4 bg-muted/20 border-t border-border/30">
+          <div className="container mx-auto">
+            <h2 className="text-xl md:text-2xl font-serif font-semibold text-foreground mb-6">Related Culture & Regions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Culture Links */}
+              <Card className="border-border/40 bg-background/60">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-primary" />
+                    Culture & Traditions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-2">
+                    <li>
+                      <Link to="/culture" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                        {district.region === "Kumaon" ? "Kumaoni Cultural Traditions" : "Garhwali Folk Traditions"}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/food" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                        Traditional Food of {district.name}
+                      </Link>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Gallery Link */}
+              <Card className="border-border/40 bg-background/60">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Mountain className="h-4 w-4 text-primary" />
+                    Photo Gallery
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-2">
+                    <li>
+                      <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                        Cultural Images from {district.name} District
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/gallery" className="text-primary hover:text-primary/80 hover:underline text-sm">
+                        Uttarakhand Heritage Photos
+                      </Link>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Nearby Districts */}
+              <Card className="border-border/40 bg-background/60">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    Explore Nearby
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-2">
+                    {otherDistricts?.slice(0, 3).map((otherDist) => (
+                      <li key={otherDist.id}>
+                        <Link 
+                          to={`/districts/${otherDist.slug}`} 
+                          className="text-primary hover:text-primary/80 hover:underline text-sm"
+                        >
+                          Explore {otherDist.name} District
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </div>
   );
 };
