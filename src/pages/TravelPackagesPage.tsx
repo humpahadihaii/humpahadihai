@@ -182,16 +182,28 @@ const TravelPackagesPage = () => {
           </div>
         </section>
 
-        {/* Travel Intro Section */}
-        <section className="py-8 border-b border-border/30">
+        {/* Story Intro Section */}
+        <section className="py-10 border-b border-border/30">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-muted-foreground leading-relaxed">
-                Every journey in Uttarakhand is shaped by its people, landscapes, and traditions. 
-                Our travel experiences are designed with flexibility in mind — whether you're seeking a 
-                spiritual pilgrimage, an adventure trek, or a peaceful retreat in the mountains.
-              </p>
-              <div className="flex justify-center gap-6 mt-6">
+            <div className="max-w-3xl mx-auto">
+              {/* Editorial Story Block */}
+              <div className="relative bg-muted/20 border border-border/30 rounded-xl p-6 md:p-8">
+                <div className="absolute left-0 top-6 bottom-6 w-1 bg-primary/40 rounded-full" />
+                <div className="pl-4">
+                  <p className="text-foreground/90 leading-relaxed text-base md:text-lg mb-4">
+                    Travel in Uttarakhand is shaped by mountains, traditions, and everyday life in the hills. 
+                    Every path leads through landscapes that have witnessed centuries of pilgrimage, 
+                    trade, and the quiet rhythms of pahadi communities.
+                  </p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Our travel experiences are designed with flexibility — whether you seek a spiritual journey, 
+                    an adventure trek, or simply time among the mountains and their people.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Micro-confidence indicators */}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-6">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Check className="h-4 w-4 text-primary" />
                   <span>Customisable itineraries</span>
@@ -209,7 +221,7 @@ const TravelPackagesPage = () => {
           </div>
         </section>
 
-        {/* Featured Packages */}
+        {/* Featured Packages with Story Context */}
         {featuredPackages.length > 0 && (
           <section className="py-8 bg-muted/30">
             <div className="container mx-auto px-4">
@@ -261,6 +273,16 @@ const TravelPackagesPage = () => {
             </div>
           </section>
         )}
+
+        {/* Slow Travel Story Block */}
+        <section className="py-6 bg-gradient-to-r from-primary/5 via-transparent to-primary/5">
+          <div className="container mx-auto px-4">
+            <p className="text-center text-muted-foreground text-sm italic max-w-2xl mx-auto">
+              "The mountains teach patience. Here, travel is not about rushing through destinations — 
+              it is about pausing, listening, and letting the land reveal itself in its own time."
+            </p>
+          </div>
+        </section>
 
         {/* Tabs Section */}
         <section className="py-8">
@@ -501,6 +523,18 @@ const TravelPackagesPage = () => {
                 </div>
               </TabsContent>
             </Tabs>
+          </div>
+        </section>
+
+        {/* Story Block Before CTA */}
+        <section className="py-8">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-muted-foreground leading-relaxed italic">
+                Every journey here is guided by local knowledge and lived traditions. 
+                The people of these mountains carry stories that no guidebook can capture.
+              </p>
+            </div>
           </div>
         </section>
 

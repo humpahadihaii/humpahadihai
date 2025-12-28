@@ -461,24 +461,32 @@ const TravelPackageDetailPage = () => {
             </div>
           )}
 
+          {/* Story Block Before CTA */}
+          <div className="mb-6 relative bg-muted/20 border border-border/30 rounded-xl p-5">
+            <div className="absolute left-0 top-5 bottom-5 w-1 bg-primary/30 rounded-full" />
+            <p className="pl-4 text-muted-foreground text-sm leading-relaxed italic">
+              Every journey here is guided by local knowledge and lived traditions. 
+              The paths you walk have been shaped by generations — pilgrims, traders, and families 
+              who call these mountains home.
+            </p>
+          </div>
+
           {/* Return Path Links */}
           <div className="mb-8 pt-4 border-t border-border/40">
+            <p className="text-xs text-muted-foreground mb-3">Continue exploring</p>
             <div className="flex flex-wrap gap-3 text-sm">
               <Link
                 to="/districts"
-                className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+                className="text-primary hover:text-primary/80 hover:underline underline-offset-2 transition-colors"
               >
-                <ArrowLeft className="h-3 w-3" />
-                Back to Districts
+                Explore districts →
               </Link>
-              <span className="text-border">·</span>
               <Link
                 to="/culture"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                Explore local culture
+                Learn about local culture
               </Link>
-              <span className="text-border">·</span>
               <Link
                 to="/travel-packages"
                 className="text-muted-foreground hover:text-foreground transition-colors"
