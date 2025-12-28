@@ -10,6 +10,7 @@ import { ShoppingBag, Search, Star, Package, ArrowRight, Sparkles } from "lucide
 import { Helmet } from "react-helmet";
 import { AuthenticityBadge, CulturalCueBadge } from "@/components/ui/authenticity-badge";
 import { Button } from "@/components/ui/button";
+import { StoryBlockInline } from "@/components/StoryBlock";
 
 interface LocalProduct {
   id: string;
@@ -293,6 +294,13 @@ const ProductsPage = () => {
                 })}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Story Block - Traditions */}
+        <section className="py-10 px-4">
+          <div className="container mx-auto max-w-xl">
+            <StoryBlockInline theme="traditions" />
           </div>
         </section>
 
