@@ -109,34 +109,19 @@ const DistrictDetailPage = () => {
       if (error) throw error;
       return data;
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch villages linked to this district (preview)
-  const { data: villages } = useQuery({
+  // Fetch all villages for the directory (combined query - no need for separate preview query)
+  const { data: allVillages } = useQuery({
     queryKey: ["district-villages", district?.id],
     queryFn: async () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("villages")
-        .select("*")
-        .eq("district_id", district.id)
-        .eq("status", "published")
-        .order("name")
-        .limit(6);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!district?.id,
-  });
-
-  // Fetch all villages for the directory
-  const { data: allVillages } = useQuery({
-    queryKey: ["district-all-villages", district?.id],
-    queryFn: async () => {
-      if (!district?.id) return [];
-      const { data, error } = await supabase
-        .from("villages")
-        .select("id, name, slug, thumbnail_url, tehsil, population, introduction, status, latitude, longitude")
+        .select("id, name, slug, thumbnail_url, tehsil, introduction, population, latitude, longitude")
         .eq("district_id", district.id)
         .eq("status", "published")
         .order("name");
@@ -144,7 +129,13 @@ const DistrictDetailPage = () => {
       return data;
     },
     enabled: !!district?.id,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
+
+  // Preview villages (first 6)
+  const villages = useMemo(() => allVillages?.slice(0, 6) || [], [allVillages]);
 
   // Filter villages by search
   const filteredVillages = useMemo(() => {
@@ -168,13 +159,16 @@ const DistrictDetailPage = () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("district_content")
-        .select("*")
+        .select("id, title, description, image_url, category, google_map_link")
         .eq("district_id", district.id)
         .order("title");
       if (error) throw error;
       return data as DistrictContent[];
     },
     enabled: !!district?.id,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch district_places (new table)
@@ -184,7 +178,7 @@ const DistrictDetailPage = () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("district_places")
-        .select("*")
+        .select("id, name, short_description, full_description, image_url, google_maps_url, is_highlighted, sort_order")
         .eq("district_id", district.id)
         .eq("is_active", true)
         .order("is_highlighted", { ascending: false })
@@ -193,6 +187,9 @@ const DistrictDetailPage = () => {
       return data;
     },
     enabled: !!district?.id,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch district_foods (new table)
@@ -202,7 +199,7 @@ const DistrictDetailPage = () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("district_foods")
-        .select("*")
+        .select("id, name, description, image_url, sort_order")
         .eq("district_id", district.id)
         .eq("is_active", true)
         .order("sort_order");
@@ -210,6 +207,9 @@ const DistrictDetailPage = () => {
       return data;
     },
     enabled: !!district?.id,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch district_festivals (new table)
@@ -219,7 +219,7 @@ const DistrictDetailPage = () => {
       if (!district?.id) return [];
       const { data, error } = await supabase
         .from("district_festivals")
-        .select("*")
+        .select("id, name, description, image_url, month, sort_order")
         .eq("district_id", district.id)
         .eq("is_active", true)
         .order("sort_order");
@@ -227,6 +227,9 @@ const DistrictDetailPage = () => {
       return data;
     },
     enabled: !!district?.id,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // New hooks for additional content

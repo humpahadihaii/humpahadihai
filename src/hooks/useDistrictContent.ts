@@ -9,15 +9,19 @@ export const useDistrictHotels = (districtId: string | undefined) => {
       if (!districtId) return [];
       const { data, error } = await supabase
         .from("district_hotels")
-        .select("*")
+        .select("id, name, description, category, image_url, rating, price_range, location")
         .eq("district_id", districtId)
         .eq("status", "published")
         .order("rating", { ascending: false })
-        .order("name");
+        .order("name")
+        .limit(8);
       if (error) throw error;
       return data || [];
     },
     enabled: !!districtId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -29,16 +33,19 @@ export const useDistrictMarketplace = (districtId: string | undefined) => {
       if (!districtId) return [];
       const { data, error } = await supabase
         .from("tourism_providers")
-        .select("*")
+        .select("id, name, type, is_verified, rating, image_url")
         .eq("district_id", districtId)
         .eq("is_active", true)
         .order("is_verified", { ascending: false })
         .order("rating", { ascending: false })
-        .limit(8);
+        .limit(6);
       if (error) throw error;
       return data || [];
     },
     enabled: !!districtId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const listingsQuery = useQuery({
@@ -48,18 +55,21 @@ export const useDistrictMarketplace = (districtId: string | undefined) => {
       const { data, error } = await supabase
         .from("tourism_listings")
         .select(`
-          *,
-          provider:tourism_providers(id, name, type, is_verified, rating)
+          id, title, category, short_description, image_url, base_price, is_featured,
+          provider:tourism_providers(id, name, type, is_verified)
         `)
         .eq("district_id", districtId)
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
         .order("sort_order")
-        .limit(12);
+        .limit(8);
       if (error) throw error;
       return data || [];
     },
     enabled: !!districtId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   return {
@@ -76,27 +86,21 @@ export const useDistrictTravelPackages = (districtId: string | undefined) => {
     queryFn: async () => {
       if (!districtId) return [];
       
-      // First get villages in this district
-      const { data: villages } = await supabase
-        .from("villages")
-        .select("id")
-        .eq("district_id", districtId);
-      
-      const villageIds = villages?.map(v => v.id) || [];
-      
-      // Get packages linked to these villages OR packages with region matching district
       const { data, error } = await supabase
         .from("travel_packages")
-        .select("*")
+        .select("id, title, slug, short_description, thumbnail_image_url, price_per_person, duration_days, is_featured")
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(4);
       
       if (error) throw error;
       return data || [];
     },
     enabled: !!districtId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -107,29 +111,20 @@ export const useDistrictProducts = (districtId: string | undefined) => {
     queryFn: async () => {
       if (!districtId) return [];
       
-      // Get villages in this district
-      const { data: villages } = await supabase
-        .from("villages")
-        .select("id")
-        .eq("district_id", districtId);
-      
-      const villageIds = villages?.map(v => v.id) || [];
-      
-      if (villageIds.length === 0) return [];
-      
-      // Get products linked to these villages
       const { data, error } = await supabase
         .from("local_products")
-        .select("*")
-        .in("village_id", villageIds)
+        .select("id, name, slug, thumbnail_image_url, price, is_featured")
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
-        .limit(8);
+        .limit(6);
       
       if (error) throw error;
       return data || [];
     },
     enabled: !!districtId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -140,24 +135,21 @@ export const useOtherDistricts = (currentDistrictId: string | undefined, region?
     queryFn: async () => {
       if (!currentDistrictId) return [];
       
-      let query = supabase
+      const { data, error } = await supabase
         .from("districts")
-        .select("id, name, slug, overview, image_url, region")
+        .select("id, name, slug, image_url, region")
         .neq("id", currentDistrictId)
         .eq("status", "published")
         .order("sort_order")
-        .limit(6);
+        .limit(4);
       
-      // Optionally prefer same region
-      if (region) {
-        query = query.order("region", { ascending: false });
-      }
-      
-      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
     enabled: !!currentDistrictId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -170,16 +162,19 @@ export const useNearbyVillages = (currentVillageId: string | undefined, district
       
       const { data, error } = await supabase
         .from("villages")
-        .select("id, name, slug, thumbnail_url, introduction, tehsil")
+        .select("id, name, slug, thumbnail_url, introduction")
         .eq("district_id", districtId)
         .neq("id", currentVillageId)
         .eq("status", "published")
         .order("name")
-        .limit(6);
+        .limit(4);
       
       if (error) throw error;
       return data || [];
     },
     enabled: !!currentVillageId && !!districtId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
