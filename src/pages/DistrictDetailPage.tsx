@@ -27,18 +27,19 @@ import {
   Info,
   ExternalLink
 } from "lucide-react";
-import { useState, useMemo, lazy, Suspense } from "react";
+import { useState, useMemo } from "react";
 import type { Database } from "@/integrations/supabase/types";
+import DistrictMap from "@/components/DistrictMap";
 import PlacesToVisit from "@/components/PlacesToVisit";
 import FoodAndFestivals from "@/components/FoodAndFestivals";
 import SEOHead from "@/components/SEOHead";
 import { usePageSEO } from "@/hooks/useSEO";
-import { 
-  useDistrictHotels, 
-  useDistrictMarketplace, 
-  useDistrictTravelPackages, 
+import {
+  useDistrictHotels,
+  useDistrictMarketplace,
+  useDistrictTravelPackages,
   useDistrictProducts,
-  useOtherDistricts 
+  useOtherDistricts,
 } from "@/hooks/useDistrictContent";
 import DistrictHotelsSection from "@/components/district/DistrictHotelsSection";
 import DistrictMarketplaceSection from "@/components/district/DistrictMarketplaceSection";
@@ -49,8 +50,6 @@ import WeatherWidget from "@/components/weather/WeatherWidget";
 import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
 
-// Lazy load the map component
-const DistrictMap = lazy(() => import("@/components/DistrictMap"));
 
 type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
 type Village = Database["public"]["Tables"]["villages"]["Row"];
@@ -801,33 +800,28 @@ const DistrictDetailPage = () => {
             </div>
 
             {showMap && (
-              <Suspense fallback={
-                <Card className="h-[400px] flex items-center justify-center border-border/40">
-                  <div className="text-center">
-                    <Map className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4 animate-pulse" />
-                    <p className="text-muted-foreground">Loading map...</p>
-                  </div>
-                </Card>
-              }>
-                <DistrictMap
-                  districtName={district.name}
-                  centerLat={district.latitude || undefined}
-                  centerLng={district.longitude || undefined}
-                  villages={allVillages?.map(v => ({
+              <DistrictMap
+                districtName={district.name}
+                centerLat={district.latitude || undefined}
+                centerLng={district.longitude || undefined}
+                villages={
+                  allVillages?.map((v) => ({
                     id: v.id,
                     name: v.name,
                     latitude: v.latitude,
                     longitude: v.longitude,
                     introduction: v.introduction,
-                  })) || []}
-                  places={combinedPlaces.map(p => ({
+                  })) || []
+                }
+                places={
+                  combinedPlaces.map((p) => ({
                     id: p.id,
                     title: p.title,
                     description: p.description,
                     google_map_link: p.google_map_link,
-                  }))}
-                />
-              </Suspense>
+                  }))
+                }
+              />
             )}
 
             {!showMap && (
