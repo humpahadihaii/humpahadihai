@@ -1,15 +1,17 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { BookOpen, ChevronRight } from "lucide-react";
+import { BookOpen, ChevronRight, Calendar } from "lucide-react";
 import ContentListPage from "./ContentListPage";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { supabase } from "@/integrations/supabase/client";
 import { StoryBlock } from "@/components/StoryBlock";
+import { useSeasonalContent } from "@/hooks/useSeasonalContent";
 
 export default function CulturePage() {
   const { getImage } = useSiteImages();
   const queryClient = useQueryClient();
+  const { culturalRhythm, seasonIcon, currentSeasonName } = useSeasonalContent();
   
   // Try both possible keys for backwards compatibility
   const heroImage = getImage("culture_hero") || getImage("culture_section_image");
@@ -50,6 +52,26 @@ export default function CulturePage() {
       <section className="py-10 md:py-14 px-4 bg-muted/20">
         <div className="container mx-auto max-w-3xl">
           <StoryBlock theme="culture" variant="default" />
+        </div>
+      </section>
+
+      {/* Seasonal Cultural Rhythm */}
+      <section className="py-8 bg-muted/10 border-y border-border/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-start gap-4 p-5 rounded-xl bg-background border border-border/40">
+              <span className="text-2xl flex-shrink-0 mt-0.5" aria-hidden="true">{seasonIcon}</span>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                  <Calendar className="h-3 w-3" />
+                  Seasonal Cultural Rhythm • {currentSeasonName}
+                </p>
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  {culturalRhythm}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       

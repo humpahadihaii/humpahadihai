@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MapPin, Clock, Mountain, Star, Search, Check, ArrowRight, Home } from "lucide-react";
+import { MapPin, Clock, Mountain, Star, Search, Check, ArrowRight, Home, Calendar } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useSeasonalContent } from "@/hooks/useSeasonalContent";
 
 interface TravelPackage {
   id: string;
@@ -52,6 +53,7 @@ interface TourismListing {
 
 const TravelPackagesPage = () => {
   const { data: pageSettings } = usePageSettings("travel-packages");
+  const { getTravelNote, seasonIcon, currentSeasonName } = useSeasonalContent();
   const [searchQuery, setSearchQuery] = useState("");
   const [regionFilter, setRegionFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
@@ -281,6 +283,24 @@ const TravelPackagesPage = () => {
               "The mountains teach patience. Here, travel is not about rushing through destinations — 
               it is about pausing, listening, and letting the land reveal itself in its own time."
             </p>
+          </div>
+        </section>
+
+        {/* Seasonal Travel Note */}
+        <section className="py-4 border-b border-border/20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto flex items-start gap-3 p-4 rounded-lg bg-muted/30 border border-border/30">
+              <span className="text-xl flex-shrink-0 mt-0.5" aria-hidden="true">{seasonIcon}</span>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
+                  <Calendar className="h-3 w-3" />
+                  Seasonal Note • {currentSeasonName}
+                </p>
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  {getTravelNote()}
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
