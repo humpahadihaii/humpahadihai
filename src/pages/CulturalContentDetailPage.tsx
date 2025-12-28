@@ -31,7 +31,6 @@ import {
   Utensils,
   BookOpen,
   Lightbulb,
-  AlertTriangle,
   Share2,
   ChevronRight,
   Star,
@@ -46,6 +45,10 @@ import {
   ExternalLink,
   Mountain,
   Compass,
+  Quote,
+  Music,
+  Shirt,
+  Landmark,
 } from 'lucide-react';
 
 // Content type to schema type mapping
@@ -71,6 +74,15 @@ const SECTION_VISIBILITY: Record<string, string[]> = {
   'traditions': ['local_customs', 'cultural_significance'],
   'handicrafts': ['preparation_method', 'price_range'],
   'default': ['cultural_significance', 'origin_history', 'dos_and_donts', 'fun_facts'],
+};
+
+// Section icon mapping for cultural anchors
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  'festivals': <Calendar className="h-4 w-4" />,
+  'language': <BookOpen className="h-4 w-4" />,
+  'clothing': <Shirt className="h-4 w-4" />,
+  'folk-dance': <Music className="h-4 w-4" />,
+  'traditions': <Landmark className="h-4 w-4" />,
 };
 
 export default function CulturalContentDetailPage() {
@@ -107,16 +119,10 @@ export default function CulturalContentDetailPage() {
         <div className="container mx-auto px-4 py-8">
           <Skeleton className="h-8 w-64 mb-4" />
           <Skeleton className="h-[400px] w-full rounded-lg mb-8" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <Skeleton className="h-32 w-full rounded-lg" />
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-32 w-full rounded-lg" />
-            </div>
-            <div className="space-y-4">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-32 w-full rounded-lg" />
-            </div>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <Skeleton className="h-32 w-full rounded-lg" />
+            <Skeleton className="h-48 w-full rounded-lg" />
+            <Skeleton className="h-32 w-full rounded-lg" />
           </div>
         </div>
         <Footer />
@@ -272,6 +278,17 @@ export default function CulturalContentDetailPage() {
     return visibleSections.includes(field);
   };
 
+  // Extract a cultural insight quote from content
+  const getCulturalInsight = () => {
+    const text = content.cultural_significance || content.origin_history || content.short_intro || '';
+    if (!text) return null;
+    // Get first substantial sentence (at least 50 chars)
+    const sentences = text.split(/[.!?]+/).filter((s: string) => s.trim().length > 50);
+    return sentences[0]?.trim() || null;
+  };
+
+  const culturalInsight = getCulturalInsight();
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -303,258 +320,293 @@ export default function CulturalContentDetailPage() {
       <Navigation />
       <FloatingShareButton />
 
-      {/* Hero Section */}
-      <header
-        className="relative h-[450px] md:h-[500px] bg-cover bg-center"
-        style={{
-          backgroundImage: content.hero_image
-            ? `url(${content.hero_image})`
-            : 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%)',
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-end pb-10">
-          {/* Breadcrumb */}
-          <Breadcrumb className="mb-4">
-            <BreadcrumbList className="flex-wrap">
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/" className="text-white/70 hover:text-white flex items-center">
-                    <Home className="h-4 w-4" />
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-white/50" />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to={`/districts/${district.slug}`} className="text-white/70 hover:text-white">
-                    {district.name}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-white/50" />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link
-                    to={`/districts/${district.slug}/${category.slug}`}
-                    className="text-white/70 hover:text-white"
-                  >
-                    {category.name}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              {subcategory && (
-                <>
-                  <BreadcrumbSeparator className="text-white/50" />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link
-                        to={`/districts/${district.slug}/${category.slug}/${subcategory.slug}`}
-                        className="text-white/70 hover:text-white"
-                      >
-                        {subcategory.name}
-                      </Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                </>
-              )}
-              <BreadcrumbSeparator className="text-white/50" />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-white font-medium">{content.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+      {/* Archival Hero Section - Refined & Calm */}
+      <header className="relative bg-muted/30">
+        {/* Background Image with Subtle Overlay */}
+        {content.hero_image && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${content.hero_image})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/85 to-background" />
+          </div>
+        )}
+        
+        {/* Content */}
+        <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-20">
+          {/* Breadcrumb - Muted */}
+          <nav className="mb-8">
+            <Breadcrumb>
+              <BreadcrumbList className="flex-wrap text-sm">
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/" className="text-muted-foreground hover:text-foreground flex items-center transition-colors">
+                      <Home className="h-3.5 w-3.5" />
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-muted-foreground/50" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to={`/districts/${district.slug}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                      {district.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-muted-foreground/50" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link
+                      to={`/districts/${district.slug}/${category.slug}`}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                {subcategory && (
+                  <>
+                    <BreadcrumbSeparator className="text-muted-foreground/50" />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link
+                          to={`/districts/${district.slug}/${category.slug}/${subcategory.slug}`}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {subcategory.name}
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  </>
+                )}
+                <BreadcrumbSeparator className="text-muted-foreground/50" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-foreground font-medium">{content.title}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </nav>
 
-          {/* Badges */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
+          {/* Meta Badges - Subtle */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             {content.is_featured && (
-              <Badge className="bg-amber-500 text-black border-0">
+              <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-0 text-xs font-medium">
                 <Star className="h-3 w-3 mr-1" />
                 Featured
               </Badge>
             )}
-            <Badge variant="secondary" className="bg-white/20 text-white border-0 backdrop-blur-sm">
+            <Badge variant="outline" className="text-muted-foreground border-border/60 text-xs">
               {category.name}
             </Badge>
             {subcategory && (
-              <Badge variant="outline" className="text-white border-white/40">
+              <Badge variant="outline" className="text-muted-foreground border-border/60 text-xs">
                 {subcategory.name}
               </Badge>
             )}
           </div>
 
-          {/* Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 max-w-4xl">
+          {/* Title - Authoritative */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-serif font-bold text-foreground mb-5 max-w-4xl leading-[1.15] tracking-tight">
             {content.title}
           </h1>
 
-          {/* Short Intro */}
+          {/* Subtitle / Short Intro */}
           {content.short_intro && (
-            <p className="text-white/90 text-lg md:text-xl max-w-3xl leading-relaxed">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
               {content.short_intro}
             </p>
           )}
+
+          {/* Meta Info - Muted Date/Location */}
+          <div className="flex flex-wrap items-center gap-4 mt-6 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" />
+              {district.name}, Uttarakhand
+            </span>
+            {content.created_at && (
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4" />
+                {new Date(content.created_at).toLocaleDateString('en-IN', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </span>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Warm cultural background with subtle texture */}
-      <main className="bg-gradient-to-b from-amber-50/30 via-background to-background dark:from-amber-950/10 dark:via-background">
+      {/* Main Content - Archival Reading Layout */}
+      <main className="bg-background">
         <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-            {/* Main Content Area - Constrained reading width */}
-            <article className="lg:col-span-8 xl:col-span-7 space-y-12 md:space-y-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             
+            {/* Main Article - Constrained Width for Readability */}
+            <article className="lg:col-span-8 lg:max-w-[800px] space-y-10 md:space-y-14">
+              
+              {/* Cultural Insight Callout - Editorial Highlight */}
+              {culturalInsight && (
+                <div className="relative bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-l-4 border-primary/60 rounded-r-xl p-6 md:p-8">
+                  <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/20" />
+                  <p className="text-lg md:text-xl text-foreground/90 leading-relaxed italic font-serif">
+                    "{culturalInsight}"
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-4 font-medium">
+                    — Cultural Insight
+                  </p>
+                </div>
+              )}
+
               {/* Section 1: Cultural & Social Significance */}
               {shouldShow('cultural_significance', content.cultural_significance) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Heart className="h-5 w-5" />}
                   title="Cultural & Social Significance"
                 >
                   <ArticleText>{content.cultural_significance}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 2: Origin & Historical Background */}
               {shouldShow('origin_history', content.origin_history) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<BookOpen className="h-5 w-5" />}
                   title="Origin & Historical Background"
                 >
                   <ArticleText>{content.origin_history}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 3: Spiritual Significance (temples, spiritual places) */}
               {shouldShow('spiritual_significance', content.spiritual_significance) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Sparkles className="h-5 w-5" />}
                   title="Spiritual Significance"
                 >
                   <ArticleText>{content.spiritual_significance}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 4: Historical Significance */}
               {shouldShow('historical_significance', content.historical_significance) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<BookOpen className="h-5 w-5" />}
                   title="Historical Significance"
                 >
                   <ArticleText>{content.historical_significance}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 5: Ingredients (food only) */}
               {shouldShow('ingredients', ingredients) && ingredients.length > 0 && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Utensils className="h-5 w-5" />}
                   title="Traditional Ingredients"
                 >
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {ingredients.map((ingredient: string, index: number) => (
-                      <li key={index} className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border/40 shadow-sm">
-                        <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
-                        <span className="text-foreground font-medium">{ingredient}</span>
+                      <li key={index} className="flex items-center gap-3 p-4 rounded-lg bg-muted/40 border border-border/30">
+                        <span className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
+                        <span className="text-foreground">{ingredient}</span>
                       </li>
                     ))}
                   </ul>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 6: Traditional Preparation / Practices */}
               {shouldShow('preparation_method', content.preparation_method) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Utensils className="h-5 w-5" />}
                   title="Traditional Preparation Method"
                 >
                   <ArticleText>{content.preparation_method}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 7: Taste & Texture (food) */}
               {shouldShow('taste_description', content.taste_description) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Sparkles className="h-5 w-5" />}
                   title="Taste & Texture Profile"
                 >
                   <ArticleText>{content.taste_description}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 8: Local Customs & Rituals */}
               {shouldShow('local_customs', content.local_customs) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Users className="h-5 w-5" />}
                   title="Local Customs & Rituals"
                 >
                   <ArticleText>{content.local_customs}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 9: Things to Do */}
               {shouldShow('things_to_do', thingsToDo) && thingsToDo.length > 0 && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Compass className="h-5 w-5" />}
                   title="Things to Do & Experience"
                 >
                   <ul className="space-y-4">
                     {thingsToDo.map((item, index) => (
                       <li key={index} className="flex items-start gap-4">
-                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-semibold shrink-0 mt-0.5">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-muted text-muted-foreground text-sm font-medium shrink-0 mt-0.5">
                           {index + 1}
                         </span>
-                        <span className="text-foreground/80 text-base leading-relaxed">{item}</span>
+                        <span className="text-foreground/85 text-base leading-relaxed">{item}</span>
                       </li>
                     ))}
                   </ul>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 10: Best Time / When to Enjoy */}
               {shouldShow('consumption_occasions', content.consumption_occasions) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Calendar className="h-5 w-5" />}
                   title={category.slug === 'local-food' ? 'When & How to Enjoy' : 'Best Time to Visit'}
                 >
                   <ArticleText>{content.consumption_occasions}</ArticleText>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 11: Famous Places to Experience */}
               {famousPlaces.length > 0 && (
-                <ContentSection
+                <ArchivalSection
                   icon={<MapPin className="h-5 w-5" />}
                   title="Where to Experience"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {famousPlaces.map((place: any, index: number) => (
-                      <Card key={index} className="border-border/40 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                        <CardContent className="p-5">
-                          <h4 className="font-semibold text-foreground text-base">{place.name}</h4>
-                          {place.address && (
-                            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{place.address}</p>
-                          )}
-                          {place.maps_url && (
-                            <a
-                              href={place.maps_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mt-3 font-medium"
-                            >
-                              <MapPin className="h-3.5 w-3.5" />
-                              View on Map
-                            </a>
-                          )}
-                        </CardContent>
-                      </Card>
+                      <div key={index} className="p-5 rounded-lg bg-muted/40 border border-border/30">
+                        <h4 className="font-semibold text-foreground">{place.name}</h4>
+                        {place.address && (
+                          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{place.address}</p>
+                        )}
+                        {place.maps_url && (
+                          <a
+                            href={place.maps_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mt-3 font-medium"
+                          >
+                            <MapPin className="h-3.5 w-3.5" />
+                            View on Map
+                          </a>
+                        )}
+                      </div>
                     ))}
                   </div>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 12: How to Reach */}
               {howToReach && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Compass className="h-5 w-5" />}
                   title="How to Reach"
                 >
@@ -569,36 +621,36 @@ export default function CulturalContentDetailPage() {
                       <InfoCard title="By Road" content={howToReach.by_road} />
                     )}
                   </div>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 13: Do's & Don'ts */}
               {shouldShow('dos_and_donts', content.dos_and_donts) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<ShieldCheck className="h-5 w-5" />}
                   title="Tourist Tips & Local Advice"
                 >
-                  <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 rounded-xl p-6">
+                  <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-lg p-6">
                     <ArticleText className="!text-foreground/90">{content.dos_and_donts}</ArticleText>
                   </div>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 14: Fun Facts */}
               {shouldShow('fun_facts', content.fun_facts) && (
-                <ContentSection
+                <ArchivalSection
                   icon={<Lightbulb className="h-5 w-5" />}
                   title="Fun Facts & Folklore"
                 >
-                  <div className="bg-primary/5 border border-primary/15 rounded-xl p-6">
+                  <div className="bg-primary/5 border border-primary/10 rounded-lg p-6">
                     <ArticleText className="!text-foreground/90">{content.fun_facts}</ArticleText>
                   </div>
-                </ContentSection>
+                </ArchivalSection>
               )}
 
               {/* Section 15: FAQs */}
               {faqs.length > 0 && (
-                <ContentSection
+                <ArchivalSection
                   icon={<HelpCircle className="h-5 w-5" />}
                   title="Frequently Asked Questions"
                 >
@@ -607,31 +659,59 @@ export default function CulturalContentDetailPage() {
                       <AccordionItem 
                         key={index} 
                         value={`faq-${index}`} 
-                        className="border border-border/40 rounded-xl px-5 bg-card/50 data-[state=open]:bg-card shadow-sm"
+                        className="border border-border/40 rounded-lg px-5 bg-muted/20 data-[state=open]:bg-muted/40"
                       >
                         <AccordionTrigger className="text-left hover:text-primary py-4 text-base font-medium hover:no-underline">
                           {faq.question}
                         </AccordionTrigger>
                         <AccordionContent className="pb-4">
-                          <p className="text-muted-foreground leading-relaxed text-[15px]">{faq.answer}</p>
+                          <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                         </AccordionContent>
                       </AccordionItem>
                     ))}
                   </Accordion>
-                </ContentSection>
+                </ArchivalSection>
               )}
+
+              {/* Internal Context Links - Editorial Style */}
+              <div className="pt-8 border-t border-border/40">
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
+                  Continue Exploring
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    to={`/districts/${district.slug}`}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    {district.name} District
+                  </Link>
+                  <Link
+                    to={`/districts/${district.slug}/${category.slug}`}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    More {category.name}
+                  </Link>
+                  <Link
+                    to="/gallery"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted/50 hover:bg-muted text-sm text-foreground transition-colors border border-border/30"
+                  >
+                    <Mountain className="h-4 w-4 text-muted-foreground" />
+                    Photo Gallery
+                  </Link>
+                </div>
+              </div>
             </article>
 
-            {/* Sidebar - Contained width on large screens */}
-            <aside className="lg:col-span-4 xl:col-span-5 space-y-6 lg:max-w-sm xl:max-w-md lg:ml-auto">
+            {/* Sidebar - Quick Reference */}
+            <aside className="lg:col-span-4 space-y-6">
               {/* Quick Info Card */}
-              <Card className="sticky top-24 border-border/40 shadow-sm">
+              <Card className="sticky top-24 border-border/40 bg-muted/20">
                 <CardHeader className="pb-4 border-b border-border/30">
-                  <CardTitle className="text-lg flex items-center gap-2.5">
-                    <span className="p-2 rounded-lg bg-primary/10 text-primary">
-                      <Info className="h-4 w-4" />
-                    </span>
-                    Quick Info
+                  <CardTitle className="text-base flex items-center gap-2.5 font-medium">
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                    Quick Reference
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-5 space-y-5">
@@ -667,20 +747,20 @@ export default function CulturalContentDetailPage() {
                   <Separator className="!my-4" />
 
                   <div>
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1.5">District</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1.5">Location</p>
                     <Link
                       to={`/districts/${district.slug}`}
-                      className="font-semibold text-primary hover:underline flex items-center gap-1.5"
+                      className="font-medium text-primary hover:underline flex items-center gap-1.5 text-sm"
                     >
                       <MapPin className="h-4 w-4" />
-                      {district.name}
+                      {district.name}, Uttarakhand
                     </Link>
                   </div>
 
                   {content.google_maps_url && (
                     <>
                       <Separator className="!my-4" />
-                      <Button asChild className="w-full">
+                      <Button asChild variant="outline" className="w-full">
                         <a
                           href={content.google_maps_url}
                           target="_blank"
@@ -697,9 +777,10 @@ export default function CulturalContentDetailPage() {
                   <Separator className="!my-4" />
 
                   <div>
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">Share this page</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">Share</p>
                     <Button
                       variant="outline"
+                      size="sm"
                       className="w-full"
                       onClick={() => {
                         if (navigator.share) {
@@ -714,32 +795,32 @@ export default function CulturalContentDetailPage() {
                       }}
                     >
                       <Share2 className="h-4 w-4 mr-2" />
-                      Share Now
+                      Share Page
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-            {/* Related Content - Same Subcategory */}
-            {relatedFromSubcategory.length > 0 && (
-              <RelatedContentCard
-                title={`More ${subcategory?.name || ''}`}
-                items={relatedFromSubcategory}
-                districtSlug={district.slug}
-                categorySlug={category.slug}
-                subcategorySlug={subcategory?.slug}
-              />
-            )}
+              {/* Related Content - Same Subcategory */}
+              {relatedFromSubcategory.length > 0 && (
+                <RelatedContentCard
+                  title={`More ${subcategory?.name || ''}`}
+                  items={relatedFromSubcategory}
+                  districtSlug={district.slug}
+                  categorySlug={category.slug}
+                  subcategorySlug={subcategory?.slug}
+                />
+              )}
 
-            {/* Related Content - Same Category */}
-            {relatedFromCategory.length > 0 && (
-              <RelatedContentCard
-                title={`More in ${category.name}`}
-                items={relatedFromCategory}
-                districtSlug={district.slug}
-                categorySlug={category.slug}
-              />
-            )}
+              {/* Related Content - Same Category */}
+              {relatedFromCategory.length > 0 && (
+                <RelatedContentCard
+                  title={`More in ${category.name}`}
+                  items={relatedFromCategory}
+                  districtSlug={district.slug}
+                  categorySlug={category.slug}
+                />
+              )}
             </aside>
           </div>
         </div>
@@ -748,11 +829,11 @@ export default function CulturalContentDetailPage() {
         {relatedFromDistrict.length > 0 && (
           <div className="container mx-auto px-4 pb-16">
             <section className="border-t border-border/40 pt-12">
-              <h2 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-3">
-                <TreePine className="h-7 w-7 text-primary" />
+              <h2 className="text-xl md:text-2xl font-semibold mb-8 flex items-center gap-3 text-foreground">
+                <TreePine className="h-6 w-6 text-muted-foreground" />
                 Explore More in {district.name}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
                 {relatedFromDistrict.map((item) => (
                   <RelatedCard
                     key={item.id}
@@ -762,7 +843,7 @@ export default function CulturalContentDetailPage() {
                 ))}
               </div>
               <div className="text-center mt-10">
-                <Button variant="outline" size="lg" asChild>
+                <Button variant="outline" asChild>
                   <Link to={`/districts/${district.slug}`}>
                     View All in {district.name}
                     <ChevronRight className="h-4 w-4 ml-1" />
@@ -779,7 +860,7 @@ export default function CulturalContentDetailPage() {
   );
 }
 
-// Article Text Component - Enhanced typography for reading
+// Article Text Component - Enhanced typography for archival reading
 function ArticleText({ 
   children, 
   className = '' 
@@ -788,16 +869,16 @@ function ArticleText({
   className?: string;
 }) {
   return (
-    <div className={`prose prose-lg max-w-none ${className}`}>
-      <p className="text-foreground/80 text-[17px] md:text-lg leading-[1.8] md:leading-[1.85] whitespace-pre-line tracking-[-0.01em]">
+    <div className={`${className}`}>
+      <p className="text-foreground/80 text-base md:text-[17px] leading-[1.85] md:leading-[1.9] whitespace-pre-line tracking-[-0.01em]">
         {children}
       </p>
     </div>
   );
 }
 
-// Reusable Section Component with improved hierarchy
-function ContentSection({
+// Archival Section Component - Soft content block with accent line
+function ArchivalSection({
   icon,
   title,
   children,
@@ -808,17 +889,17 @@ function ContentSection({
 }) {
   return (
     <section 
-      className="scroll-mt-24 relative" 
+      className="scroll-mt-24 relative bg-muted/20 border border-border/30 rounded-xl p-6 md:p-8" 
       id={title.toLowerCase().replace(/\s+/g, '-')}
     >
-      {/* Subtle section separator */}
-      <div className="absolute -left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/10 to-transparent hidden lg:block" />
+      {/* Left accent line */}
+      <div className="absolute left-0 top-6 bottom-6 w-1 bg-primary/40 rounded-full" />
       
-      <h2 className="text-xl md:text-2xl lg:text-[1.65rem] font-bold mb-5 md:mb-6 flex items-center gap-3 text-foreground">
-        <span className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">{icon}</span>
-        <span className="leading-tight">{title}</span>
+      <h2 className="text-lg md:text-xl font-semibold mb-5 flex items-center gap-3 text-foreground pl-4">
+        <span className="text-muted-foreground">{icon}</span>
+        <span>{title}</span>
       </h2>
-      <div className="pl-0 lg:pl-1">
+      <div className="pl-4">
         {children}
       </div>
     </section>
@@ -836,8 +917,8 @@ function QuickInfoRow({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-3.5">
-      <span className="text-primary/70 shrink-0 mt-0.5">{icon}</span>
+    <div className="flex items-start gap-3">
+      <span className="text-muted-foreground shrink-0 mt-0.5">{icon}</span>
       <div>
         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
         <p className="font-medium text-foreground text-sm mt-0.5">{value}</p>
@@ -846,11 +927,11 @@ function QuickInfoRow({
   );
 }
 
-// Info Card for How to Reach - Enhanced styling
+// Info Card for How to Reach
 function InfoCard({ title, content }: { title: string; content: string }) {
   return (
-    <div className="p-5 rounded-xl bg-card border border-border/40 shadow-sm hover:shadow-md transition-shadow">
-      <h4 className="font-semibold text-foreground mb-2.5 text-base">{title}</h4>
+    <div className="p-5 rounded-lg bg-muted/40 border border-border/30">
+      <h4 className="font-semibold text-foreground mb-2">{title}</h4>
       <p className="text-sm text-muted-foreground leading-relaxed">{content}</p>
     </div>
   );
@@ -871,27 +952,27 @@ function RelatedContentCard({
   subcategorySlug?: string;
 }) {
   return (
-    <Card>
+    <Card className="border-border/40 bg-muted/20">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         {items.map((item) => (
           <Link
             key={item.id}
             to={`/districts/${districtSlug}/${categorySlug}/${subcategorySlug || item.subcategory?.slug || 'item'}/${item.slug}`}
-            className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted transition-colors group"
+            className="flex items-center gap-3 p-2.5 -mx-2 rounded-lg hover:bg-muted transition-colors group"
           >
             {item.hero_image ? (
               <img
                 src={item.hero_image}
                 alt=""
-                className="w-12 h-12 rounded-lg object-cover shrink-0"
+                className="w-11 h-11 rounded-lg object-cover shrink-0"
                 loading="lazy"
               />
             ) : (
-              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                <Mountain className="h-5 w-5 text-muted-foreground" />
+              <div className="w-11 h-11 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <Mountain className="h-4 w-4 text-muted-foreground" />
               </div>
             )}
             <div className="min-w-0">
@@ -911,43 +992,42 @@ function RelatedContentCard({
   );
 }
 
-// Related Card for bottom section
-function RelatedCard({ item, districtSlug }: { item: any; districtSlug: string }) {
-  // Build URL based on available data
+// Related Card for grid display
+function RelatedCard({
+  item,
+  districtSlug,
+}: {
+  item: any;
+  districtSlug: string;
+}) {
   const categorySlug = item.category?.slug || 'culture';
   const subcategorySlug = item.subcategory?.slug || 'item';
-  
+
   return (
-    <Link to={`/districts/${districtSlug}/${categorySlug}/${subcategorySlug}/${item.slug}`}>
-      <Card className="h-full hover:shadow-lg transition-all group overflow-hidden">
+    <Link
+      to={`/districts/${districtSlug}/${categorySlug}/${subcategorySlug}/${item.slug}`}
+      className="group block"
+    >
+      <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted mb-3">
         {item.hero_image ? (
-          <div className="aspect-video overflow-hidden">
-            <img
-              src={item.hero_image}
-              alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          </div>
+          <img
+            src={item.hero_image}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
         ) : (
-          <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            <Mountain className="h-10 w-10 text-primary/30" />
+          <div className="w-full h-full flex items-center justify-center">
+            <Mountain className="h-8 w-8 text-muted-foreground" />
           </div>
         )}
-        <CardContent className="p-4">
-          <Badge variant="secondary" className="mb-2 text-xs">
-            {item.category?.name || 'Culture'}
-          </Badge>
-          <h3 className="font-semibold group-hover:text-primary transition-colors line-clamp-1">
-            {item.title}
-          </h3>
-          {item.short_intro && (
-            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-              {item.short_intro}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      </div>
+      <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors text-sm">
+        {item.title}
+      </h3>
+      {item.category?.name && (
+        <p className="text-xs text-muted-foreground mt-1">{item.category.name}</p>
+      )}
     </Link>
   );
 }
