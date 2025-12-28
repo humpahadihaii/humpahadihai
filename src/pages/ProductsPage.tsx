@@ -6,10 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingBag, Search, Star, Package } from "lucide-react";
+import { ShoppingBag, Search, Star, Package, ArrowRight, Sparkles } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { AuthenticityBadge, CulturalCueBadge } from "@/components/ui/authenticity-badge";
-import { CardImage } from "@/components/ui/fast-image";
+import { Button } from "@/components/ui/button";
 
 interface LocalProduct {
   id: string;
@@ -81,6 +81,10 @@ const ProductsPage = () => {
     );
   };
 
+  const categoryName = categoryFilter !== "all" 
+    ? categories.find(c => c.id === categoryFilter)?.name 
+    : null;
+
   return (
     <>
       <Helmet>
@@ -88,146 +92,240 @@ const ProductsPage = () => {
         <meta name="description" content="Shop authentic Pahadi products - handcrafted items, organic foods, traditional clothing, and more from the hills of Uttarakhand." />
       </Helmet>
 
-      <div className="min-h-screen py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          {/* Header */}
-          <div className="text-center mb-10">
-            <ShoppingBag className="h-14 w-14 text-primary mx-auto mb-4" />
-            <h1 className="text-4xl font-bold text-primary mb-3">Pahadi Store</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
+      <div className="min-h-screen bg-background">
+        {/* Hero Header */}
+        <section className="py-10 md:py-16 px-4 bg-gradient-to-b from-primary/5 via-muted/30 to-background">
+          <div className="container mx-auto max-w-6xl text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Authentic Pahadi Products</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
+              Pahadi Store
+            </h1>
+            <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-6 leading-relaxed">
               Discover authentic local products from the hills of Uttarakhand. Handcrafted with love and tradition.
             </p>
             <AuthenticityBadge className="mx-auto" />
           </div>
+        </section>
 
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-10">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        {/* Filters - Sticky */}
+        <section className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 py-4 px-4">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  className="pl-10 h-11"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:w-52 h-11">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
+        </section>
 
-          {/* Products Grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <Card key={i} className="animate-pulse overflow-hidden">
-                  <div className="aspect-square bg-muted" />
-                  <CardContent className="space-y-3 pt-4">
-                    <div className="h-4 bg-muted rounded w-3/4" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
-                  </CardContent>
-                </Card>
+        {/* Products */}
+        <section className="py-8 md:py-12 px-4">
+          <div className="container mx-auto max-w-6xl">
+            {/* Results count */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-muted-foreground">
+                {isLoading ? "Loading..." : (
+                  <>
+                    <span className="font-medium text-foreground">{filteredProducts.length}</span>
+                    {" "}products {categoryName && `in ${categoryName}`}
+                  </>
+                )}
+              </p>
+              {(searchQuery || categoryFilter !== "all") && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCategoryFilter("all");
+                  }}
+                >
+                  Clear filters
+                </Button>
+              )}
+            </div>
+
+            {/* Products Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <Card key={i} className="overflow-hidden border-0 shadow-sm">
+                    <div className="aspect-square bg-muted animate-pulse" />
+                    <CardContent className="space-y-3 pt-4 pb-4">
+                      <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+                      <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Package className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-lg font-medium text-foreground mb-2">No products found</p>
+                <p className="text-sm text-muted-foreground mb-6">Try adjusting your search or filters</p>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCategoryFilter("all");
+                  }}
+                >
+                  View all products
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {filteredProducts.map((product, index) => {
+                  const culturalTag = getCulturalTag(product.tags);
+                  const isOutOfStock = product.stock_status === "out_of_stock";
+                  
+                  return (
+                    <Link 
+                      key={product.id} 
+                      to={`/products/${product.slug}`}
+                      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+                    >
+                      <Card className={`h-full overflow-hidden border-0 shadow-sm transition-all duration-300 rounded-xl ${
+                        isOutOfStock 
+                          ? 'opacity-75' 
+                          : 'hover:shadow-xl md:hover:-translate-y-1'
+                      }`}>
+                        {/* Image */}
+                        <div className="relative aspect-square overflow-hidden bg-muted">
+                          {product.thumbnail_image_url ? (
+                            <img
+                              src={product.thumbnail_image_url}
+                              alt={product.name}
+                              loading={index < 8 ? "eager" : "lazy"}
+                              decoding={index < 8 ? "sync" : "async"}
+                              className={`w-full h-full object-cover transition-transform duration-300 ${
+                                !isOutOfStock ? 'group-hover:scale-105' : ''
+                              }`}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                              <ShoppingBag className="h-10 w-10 text-primary/40" />
+                            </div>
+                          )}
+                          
+                          {/* Badges overlay */}
+                          <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
+                            <div className="flex flex-col gap-1.5">
+                              {isOutOfStock && (
+                                <Badge variant="destructive" className="text-xs font-medium">
+                                  Sold Out
+                                </Badge>
+                              )}
+                              {product.stock_status === "made_to_order" && (
+                                <Badge className="bg-blue-500/90 text-white text-xs font-medium">
+                                  Made to Order
+                                </Badge>
+                              )}
+                            </div>
+                            {product.is_featured && (
+                              <Badge className="bg-amber-500/90 text-white text-xs font-medium">
+                                <Star className="h-3 w-3 mr-1 fill-current" /> Featured
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Cultural tag */}
+                          {culturalTag && (
+                            <div className="absolute bottom-2 left-2">
+                              <CulturalCueBadge label={culturalTag} />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="font-semibold text-sm md:text-base line-clamp-2 mb-1.5 group-hover:text-primary transition-colors min-h-[2.5rem]">
+                            {product.name}
+                          </h3>
+                          
+                          {product.short_description && (
+                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-3 hidden sm:block">
+                              {product.short_description}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-lg md:text-xl font-bold text-primary">
+                                ₹{product.price.toLocaleString()}
+                              </span>
+                              {product.unit_label && (
+                                <span className="text-xs text-muted-foreground">
+                                  /{product.unit_label}
+                                </span>
+                              )}
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex">
+                              <ArrowRight className="h-4 w-4 text-primary" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Trust Section */}
+        <section className="py-12 px-4 bg-muted/30">
+          <div className="container mx-auto max-w-4xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {[
+                { icon: "🏔️", label: "Made in Uttarakhand" },
+                { icon: "🤝", label: "Direct from Artisans" },
+                { icon: "✨", label: "Handcrafted Quality" },
+                { icon: "📦", label: "Secure Packaging" },
+              ].map((item) => (
+                <div key={item.label} className="flex flex-col items-center gap-2">
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-xs md:text-sm font-medium text-muted-foreground">{item.label}</span>
+                </div>
               ))}
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-16">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No products found matching your criteria.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-              {filteredProducts.map((product) => {
-                const culturalTag = getCulturalTag(product.tags);
-                
-                return (
-                  <Link 
-                    key={product.id} 
-                    to={`/products/${product.slug}`}
-                    className="group block"
-                  >
-                    <Card className="h-full overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-border/60">
-                      {/* Image with badges */}
-                      <div className="relative aspect-square overflow-hidden bg-muted">
-                        {product.thumbnail_image_url ? (
-                          <CardImage
-                            src={product.thumbnail_image_url}
-                            alt={product.name}
-                            className="group-hover:scale-105 transition-transform duration-300"
-                            priority={false}
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                            <ShoppingBag className="h-12 w-12 text-primary/40" />
-                          </div>
-                        )}
-                        
-                        {/* Overlay badges */}
-                        <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
-                          <div className="flex flex-col gap-1.5">
-                            {product.stock_status === "out_of_stock" && (
-                              <Badge variant="destructive" className="text-xs">
-                                Out of Stock
-                              </Badge>
-                            )}
-                            {product.stock_status === "made_to_order" && (
-                              <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                Made to Order
-                              </Badge>
-                            )}
-                          </div>
-                          {product.is_featured && (
-                            <Badge className="bg-secondary text-secondary-foreground">
-                              <Star className="h-3 w-3 mr-1 fill-current" /> Featured
-                            </Badge>
-                          )}
-                        </div>
+          </div>
+        </section>
 
-                        {/* Cultural tag at bottom of image */}
-                        {culturalTag && (
-                          <div className="absolute bottom-2 left-2">
-                            <CulturalCueBadge label={culturalTag} />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold text-base line-clamp-2 mb-2 group-hover:text-primary transition-colors min-h-[2.5rem]">
-                          {product.name}
-                        </h3>
-                        
-                        {product.short_description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                            {product.short_description}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xl font-bold text-primary">
-                            ₹{product.price.toLocaleString()}
-                          </span>
-                          {product.unit_label && (
-                            <span className="text-sm text-muted-foreground">
-                              /{product.unit_label}
-                            </span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {/* Back to Marketplace */}
+        <section className="py-8 px-4">
+          <div className="container mx-auto max-w-6xl text-center">
+            <Button asChild variant="outline" size="lg">
+              <Link to="/marketplace">
+                Explore Full Marketplace
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
       </div>
     </>
   );
