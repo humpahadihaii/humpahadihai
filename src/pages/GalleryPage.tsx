@@ -32,7 +32,7 @@ const GalleryPage = () => {
     refetchOnWindowFocus: false,
   });
 
-  const categories = Array.from(new Set(galleryItems?.map(item => item.category.toLowerCase()) || []));
+  const categories = Array.from(new Set(galleryItems?.map(item => item.category.toLowerCase()) || [])).filter(cat => cat && cat.trim() !== "");
 
   const filteredItems = activeTab === "all" 
     ? galleryItems 

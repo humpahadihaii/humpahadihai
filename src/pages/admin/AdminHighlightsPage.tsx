@@ -164,7 +164,7 @@ export default function AdminHighlightsPage() {
     }
   };
 
-  const types = Array.from(new Set(highlights.map(h => h.type)));
+  const types = Array.from(new Set(highlights.map(h => h.type))).filter(t => t && t.trim() !== "");
   const filteredHighlights = highlights.filter((highlight) => {
     const matchesSearch = highlight.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDistrict = districtFilter === "all" || highlight.district_id === districtFilter;
