@@ -17,6 +17,7 @@ import { HeroCTAs, BelowHeroCTAs, MidPageCTA, FooterCTA } from "@/components/hom
 import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
 import { SectionErrorBoundary } from "@/components/ErrorBoundary";
+import { RotatingStoryBlock } from "@/components/StoryBlock";
 
 
 // Import FeaturedCardSection directly for faster loading (above fold)
@@ -298,6 +299,15 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Story Block - Emotional Connection */}
+      <FadeInSection>
+        <section className="py-10 md:py-14 px-4">
+          <div className="container mx-auto max-w-3xl">
+            <RotatingStoryBlock variant="accent" />
+          </div>
+        </section>
+      </FadeInSection>
 
       {/* Dynamic Featured Content - Render immediately without LazySection delays */}
       <SectionErrorBoundary>

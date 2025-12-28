@@ -5,6 +5,7 @@ import { BookOpen, ChevronRight } from "lucide-react";
 import ContentListPage from "./ContentListPage";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { supabase } from "@/integrations/supabase/client";
+import { StoryBlock } from "@/components/StoryBlock";
 
 export default function CulturePage() {
   const { getImage } = useSiteImages();
@@ -41,6 +42,13 @@ export default function CulturePage() {
         heroGradient="from-primary/70 to-secondary/70"
         heroImage={heroImage !== "/placeholder.svg" ? heroImage : undefined}
       />
+      
+      {/* Story Block - Cultural Connection */}
+      <section className="py-10 md:py-14 px-4 bg-muted/20">
+        <div className="container mx-auto max-w-3xl">
+          <StoryBlock theme="culture" variant="default" />
+        </div>
+      </section>
       
       {/* History Link Section */}
       <section className="py-12 bg-muted/30 border-t border-border/50">
