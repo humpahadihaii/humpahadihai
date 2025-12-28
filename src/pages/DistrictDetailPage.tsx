@@ -564,6 +564,88 @@ const DistrictDetailPage = () => {
                 )}
               </ArchivalSection>
 
+              {/* Why Visit Section - Micro-section for travel intent */}
+              <ArchivalSection
+                id="why-visit"
+                title={`Why Visit ${district.name}?`}
+                icon={<Heart className="h-5 w-5" />}
+              >
+                <div className="space-y-3">
+                  {/* Dynamic points based on district characteristics */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Mountain className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed">
+                      {district.geography 
+                        ? `Discover ${district.geography.toLowerCase()} landscapes that offer breathtaking views and serene escapes.`
+                        : `Experience pristine mountain landscapes and valleys that define the natural beauty of ${district.region || 'Uttarakhand'}.`
+                      }
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Landmark className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed">
+                      {district.cultural_identity 
+                        ? `Immerse yourself in rich traditions — ${district.cultural_identity.substring(0, 100)}${district.cultural_identity.length > 100 ? '...' : ''}`
+                        : `Immerse yourself in age-old ${district.region === 'Kumaon' ? 'Kumaoni' : 'Garhwali'} traditions, folk music, and community festivals.`
+                      }
+                    </p>
+                  </div>
+                  
+                  {district.famous_specialties && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <TreePine className="h-4 w-4 text-primary" />
+                      </div>
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        Known for {district.famous_specialties.substring(0, 120)}{district.famous_specialties.length > 120 ? '...' : ''}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Users className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed">
+                      Experience the warmth of pahadi hospitality and connect with communities preserving centuries-old ways of life.
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <MapPin className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed">
+                      A quieter, offbeat destination — ideal for travellers seeking authentic experiences away from crowded tourist spots.
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Subtle editorial links */}
+                <div className="mt-6 pt-4 border-t border-border/30">
+                  <p className="text-xs text-muted-foreground mb-3">Continue your exploration</p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                    <Link 
+                      to="/travel-packages" 
+                      className="text-primary hover:text-primary/80 hover:underline underline-offset-2 transition-colors"
+                    >
+                      Explore travel experiences →
+                    </Link>
+                    <Link 
+                      to="/culture" 
+                      className="text-muted-foreground hover:text-foreground hover:underline underline-offset-2 transition-colors"
+                    >
+                      Learn about local culture
+                    </Link>
+                  </div>
+                </div>
+              </ArchivalSection>
+
               {/* Experience This District - Travel Intent Block */}
               <div className="relative bg-gradient-to-br from-primary/5 via-muted/30 to-transparent border border-border/40 rounded-xl p-6 md:p-8">
                 <div className="absolute left-0 top-6 bottom-6 w-1 bg-primary/30 rounded-full" />
@@ -687,6 +769,10 @@ const DistrictDetailPage = () => {
                         <BookOpen className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">About</span>
                       </a>
+                      <a href="#why-visit" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
+                        <Heart className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Why Visit</span>
+                      </a>
                       {combinedPlaces.length > 0 && (
                         <a href="#places" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
                           <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -694,7 +780,7 @@ const DistrictDetailPage = () => {
                         </a>
                       )}
                       <a href="#heritage" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group">
-                        <Heart className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Landmark className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">Heritage</span>
                       </a>
                       {hotels && hotels.length > 0 && (
