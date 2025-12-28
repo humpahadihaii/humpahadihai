@@ -41,6 +41,12 @@ export interface MediaUsage {
   content_id: string | null;
   page_slug: string | null;
   field_name: string | null;
+  resolved_path: string | null;
+  district_slug: string | null;
+  category_slug: string | null;
+  subcategory_slug: string | null;
+  content_slug: string | null;
+  content_title: string | null;
   created_at: string;
 }
 
@@ -50,6 +56,12 @@ export interface UploadProgress {
   status: 'pending' | 'uploading' | 'completed' | 'failed';
   error?: string;
   mediaItem?: MediaItem;
+}
+
+export interface DiscoveryResult {
+  discovered: number;
+  registered: number;
+  usagesCreated: number;
 }
 
 interface UseMediaLibraryReturn {
@@ -69,9 +81,35 @@ interface UseMediaLibraryReturn {
   removeFromFolder: (mediaId: string, folderId: string) => Promise<boolean>;
   createFolder: (name: string, description?: string) => Promise<MediaFolder | null>;
   scanAndSyncUsage: () => Promise<void>;
-  discoverFrontendImages: () => Promise<{ discovered: number; registered: number }>;
+  discoverFrontendImages: () => Promise<DiscoveryResult>;
   searchMedia: (query: string) => Promise<MediaItem[]>;
   clearUploadQueue: () => void;
+}
+
+// Helper to extract image URLs from HTML content
+function extractImagesFromHtml(html: string): string[] {
+  if (!html) return [];
+  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+  const urls: string[] = [];
+  let match;
+  while ((match = imgRegex.exec(html)) !== null) {
+    const url = match[1];
+    if (url && url.startsWith('http')) {
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+// Helper to check if URL is a valid content image (not static asset)
+function isContentImage(url: string): boolean {
+  if (!url || !url.startsWith('http')) return false;
+  // Exclude common static/placeholder patterns
+  if (url.includes('unsplash.com')) return false;
+  if (url.includes('placeholder')) return false;
+  if (url.includes('/icons/')) return false;
+  if (url.includes('/logos/')) return false;
+  return true;
 }
 
 export function useMediaLibrary(): UseMediaLibraryReturn {
@@ -134,7 +172,15 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
         const itemFolders = itemAssignments
           .map(a => a.media_folders)
           .filter(Boolean) as MediaFolder[];
-        const itemUsage = usageData?.filter(u => u.media_id === m.id) || [];
+        const itemUsage = (usageData?.filter(u => u.media_id === m.id) || []).map(u => ({
+          ...u,
+          resolved_path: u.resolved_path || null,
+          district_slug: u.district_slug || null,
+          category_slug: u.category_slug || null,
+          subcategory_slug: u.subcategory_slug || null,
+          content_slug: u.content_slug || null,
+          content_title: u.content_title || null
+        }));
 
         return {
           ...m,
@@ -217,7 +263,6 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
   const uploadMediaBulk = useCallback(async (files: File[], folderId?: string): Promise<void> => {
     setUploading(true);
     
-    // Initialize queue
     const initialQueue: UploadProgress[] = files.map(file => ({
       file,
       progress: 0,
@@ -228,7 +273,6 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // Update status to uploading
       setUploadQueue(prev => prev.map((item, idx) => 
         idx === i ? { ...item, status: 'uploading', progress: 10 } : item
       ));
@@ -337,7 +381,6 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
 
   const replaceMedia = useCallback(async (id: string, file: File): Promise<boolean> => {
     try {
-      // Get current media item
       const { data: currentMedia } = await supabase
         .from("media_library")
         .select("file_url")
@@ -346,7 +389,6 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
 
       if (!currentMedia) throw new Error("Media not found");
 
-      // Upload new file
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
       const filePath = `media-library/${fileName}`;
@@ -361,7 +403,6 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
         .from("media")
         .getPublicUrl(filePath);
 
-      // Update media library record with new URL
       const { error: updateError } = await supabase
         .from("media_library")
         .update({
@@ -375,7 +416,6 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
 
       if (updateError) throw updateError;
 
-      // Update all content references to use the new URL
       const { data: usageData } = await supabase
         .from("media_usage")
         .select("*")
@@ -478,254 +518,457 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
     }
   }, [toast]);
 
-  const discoverFrontendImages = useCallback(async (): Promise<{ discovered: number; registered: number }> => {
-    toast({ title: "Discovering Images", description: "Scanning frontend content for images..." });
+  const discoverFrontendImages = useCallback(async (): Promise<DiscoveryResult> => {
+    toast({ title: "Discovering Images", description: "Scanning all frontend content for images..." });
 
     let discovered = 0;
     let registered = 0;
+    let usagesCreated = 0;
 
     try {
+      // Get folder mappings
       const { data: foldersData } = await supabase.from("media_folders").select("id, slug");
       const folderMap = Object.fromEntries((foldersData || []).map(f => [f.slug, f.id]));
 
-      // Content type to folder mapping
-      const contentTypeToFolder: Record<string, string> = {
-        districts: "districts",
-        villages: "districts",
-        cultural_content: "culture",
-        content_categories: "culture",
-        cms_stories: "homepage-common",
-        gallery_items: "gallery",
-        local_products: "products",
-        travel_packages: "travel",
-        tourism_listings: "travel",
-        cms_events: "homepage-common",
-        cms_site_settings: "homepage-common",
-        destination_guides: "travel",
-        destination_places: "travel"
+      // Get existing media URLs
+      const { data: existingMedia } = await supabase.from("media_library").select("id, file_url");
+      const mediaUrlMap = new Map((existingMedia || []).map(m => [m.file_url, m.id]));
+
+      // Helper to get or create media record
+      const getOrCreateMedia = async (imageUrl: string, folderSlug?: string): Promise<string | null> => {
+        if (!isContentImage(imageUrl)) return null;
+        
+        discovered++;
+        
+        if (mediaUrlMap.has(imageUrl)) {
+          return mediaUrlMap.get(imageUrl) || null;
+        }
+
+        const filename = imageUrl.split('/').pop() || 'unknown';
+        const { data: newMedia, error } = await supabase
+          .from("media_library")
+          .insert({
+            filename,
+            file_url: imageUrl,
+            file_type: 'image/jpeg',
+            source: 'frontend-detected',
+            tags: []
+          })
+          .select()
+          .single();
+
+        if (error || !newMedia) return null;
+
+        registered++;
+        mediaUrlMap.set(imageUrl, newMedia.id);
+
+        if (folderSlug && folderMap[folderSlug]) {
+          await supabase.from("media_folder_assignments").upsert({
+            media_id: newMedia.id,
+            folder_id: folderMap[folderSlug]
+          }, { onConflict: "media_id,folder_id" });
+        }
+
+        return newMedia.id;
       };
 
-      // Get existing media URLs
-      const { data: existingMedia } = await supabase
-        .from("media_library")
-        .select("file_url");
-      const existingUrls = new Set((existingMedia || []).map(m => m.file_url));
+      // Helper to create usage record with full path
+      const createUsage = async (
+        mediaId: string,
+        contentType: string,
+        contentId: string,
+        fieldName: string,
+        resolvedPath: string,
+        hierarchy: {
+          districtSlug?: string;
+          categorySlug?: string;
+          subcategorySlug?: string;
+          contentSlug?: string;
+          contentTitle?: string;
+        }
+      ) => {
+        const { error } = await supabase.from("media_usage").upsert({
+          media_id: mediaId,
+          content_type: contentType,
+          content_id: contentId,
+          field_name: fieldName,
+          page_slug: hierarchy.contentSlug || null,
+          resolved_path: resolvedPath,
+          district_slug: hierarchy.districtSlug || null,
+          category_slug: hierarchy.categorySlug || null,
+          subcategory_slug: hierarchy.subcategorySlug || null,
+          content_slug: hierarchy.contentSlug || null,
+          content_title: hierarchy.contentTitle || null
+        }, { onConflict: "media_id,content_type,content_id,field_name" });
 
-      // Tables and their image fields to scan
-      const tablesToScan = [
-        { table: "districts", fields: ["image_url", "thumbnail_url"], type: "districts" },
-        { table: "villages", fields: ["thumbnail_url", "hero_image_url"], type: "districts" },
-        { table: "cultural_content", fields: ["hero_image", "image_gallery"], type: "cultural_content" },
-        { table: "content_categories", fields: ["hero_image"], type: "content_categories" },
-        { table: "cms_stories", fields: ["cover_image_url"], type: "cms_stories" },
-        { table: "gallery_items", fields: ["image_url", "thumbnail_url"], type: "gallery_items" },
-        { table: "local_products", fields: ["image_url", "images"], type: "local_products" },
-        { table: "travel_packages", fields: ["thumbnail_image_url", "images"], type: "travel_packages" },
-        { table: "tourism_listings", fields: ["thumbnail_image_url", "images"], type: "tourism_listings" },
-        { table: "cms_events", fields: ["banner_image_url"], type: "cms_events" },
-        { table: "destination_guides", fields: ["hero_image", "thumbnail_image"], type: "destination_guides" },
-        { table: "destination_places", fields: ["image_url"], type: "destination_places" }
-      ];
+        if (!error) usagesCreated++;
+      };
 
-      for (const { table, fields, type } of tablesToScan) {
-        try {
-          const { data: rows } = await supabase
-            .from(table as any)
-            .select("*");
+      // Load lookup data
+      const { data: districts } = await supabase.from("districts").select("id, slug, name");
+      const districtMap = new Map((districts || []).map(d => [d.id, d]));
 
-          if (!rows) continue;
+      const { data: categories } = await supabase.from("content_categories").select("id, slug, name, district_id");
+      const categoryMap = new Map((categories || []).map(c => [c.id, c]));
 
-          for (const row of rows) {
-            const rowData = row as Record<string, any>;
+      const { data: subcategories } = await supabase.from("content_subcategories").select("id, slug, name, category_id");
+      const subcategoryMap = new Map((subcategories || []).map(s => [s.id, s]));
 
-            for (const field of fields) {
-              let imageUrls: string[] = [];
-              const fieldValue = rowData[field];
+      // ========== 1. DISTRICTS ==========
+      const { data: districtRows } = await supabase.from("districts").select("*");
+      for (const row of districtRows || []) {
+        const resolvedPath = `/districts/${row.slug}`;
+        
+        for (const field of ['image_url', 'thumbnail_url']) {
+          const imageUrl = (row as any)[field];
+          if (!imageUrl) continue;
+          
+          const mediaId = await getOrCreateMedia(imageUrl, 'districts');
+          if (mediaId) {
+            await createUsage(mediaId, 'districts', row.id, field, resolvedPath, {
+              districtSlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+      }
 
-              if (!fieldValue) continue;
+      // ========== 2. VILLAGES ==========
+      const { data: villageRows } = await supabase.from("villages").select("*");
+      for (const row of villageRows || []) {
+        const district = districtMap.get(row.district_id);
+        const resolvedPath = `/villages/${row.slug}`;
+        
+        for (const field of ['thumbnail_url', 'hero_image_url']) {
+          const imageUrl = (row as any)[field];
+          if (!imageUrl) continue;
+          
+          const mediaId = await getOrCreateMedia(imageUrl, 'districts');
+          if (mediaId) {
+            await createUsage(mediaId, 'villages', row.id, field, resolvedPath, {
+              districtSlug: district?.slug,
+              contentSlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+      }
 
-              // Handle arrays
-              if (Array.isArray(fieldValue)) {
-                imageUrls = fieldValue.filter(v => typeof v === 'string' && v.startsWith('http'));
-              } else if (typeof fieldValue === 'string' && fieldValue.startsWith('http')) {
-                imageUrls = [fieldValue];
-              }
+      // ========== 3. CULTURAL CONTENT (with full hierarchy) ==========
+      const { data: culturalRows } = await supabase.from("cultural_content").select("*");
+      for (const row of culturalRows || []) {
+        const district = districtMap.get(row.district_id);
+        const category = categoryMap.get(row.category_id);
+        const subcategory = row.subcategory_id ? subcategoryMap.get(row.subcategory_id) : null;
+        
+        // Build full frontend path: /districts/:districtSlug/:categorySlug/:subcategorySlug/:contentSlug
+        let resolvedPath = `/districts/${district?.slug || 'unknown'}`;
+        if (category) resolvedPath += `/${category.slug}`;
+        if (subcategory) resolvedPath += `/${subcategory.slug}`;
+        resolvedPath += `/${row.slug}`;
 
-              for (const imageUrl of imageUrls) {
-                discovered++;
+        // Single image field
+        if (row.hero_image) {
+          const mediaId = await getOrCreateMedia(row.hero_image, 'culture');
+          if (mediaId) {
+            await createUsage(mediaId, 'cultural_content', row.id, 'hero_image', resolvedPath, {
+              districtSlug: district?.slug,
+              categorySlug: category?.slug,
+              subcategorySlug: subcategory?.slug,
+              contentSlug: row.slug,
+              contentTitle: row.title
+            });
+          }
+        }
 
-                // Skip if already exists
-                if (existingUrls.has(imageUrl)) continue;
-
-                // Skip placeholder/unsplash images
-                if (imageUrl.includes('unsplash.com') || imageUrl.includes('placeholder')) continue;
-
-                // Extract filename from URL
-                const filename = imageUrl.split('/').pop() || 'unknown';
-
-                // Register new image
-                const { data: newMedia, error: insertError } = await supabase
-                  .from("media_library")
-                  .insert({
-                    filename,
-                    file_url: imageUrl,
-                    file_type: 'image/jpeg',
-                    source: 'frontend-detected',
-                    tags: []
-                  })
-                  .select()
-                  .single();
-
-                if (!insertError && newMedia) {
-                  registered++;
-                  existingUrls.add(imageUrl);
-
-                  // Assign to appropriate folder
-                  const folderSlug = contentTypeToFolder[type];
-                  if (folderSlug && folderMap[folderSlug]) {
-                    await supabase
-                      .from("media_folder_assignments")
-                      .insert({
-                        media_id: newMedia.id,
-                        folder_id: folderMap[folderSlug]
-                      });
-                  }
-
-                  // Record usage
-                  await supabase
-                    .from("media_usage")
-                    .insert({
-                      media_id: newMedia.id,
-                      content_type: type,
-                      content_id: rowData.id,
-                      page_slug: rowData.slug || null,
-                      field_name: field
-                    });
-                }
+        // Gallery array
+        if (row.image_gallery && Array.isArray(row.image_gallery)) {
+          for (const imageUrl of row.image_gallery) {
+            if (typeof imageUrl === 'string') {
+              const mediaId = await getOrCreateMedia(imageUrl, 'culture');
+              if (mediaId) {
+                await createUsage(mediaId, 'cultural_content', row.id, 'image_gallery', resolvedPath, {
+                  districtSlug: district?.slug,
+                  categorySlug: category?.slug,
+                  subcategorySlug: subcategory?.slug,
+                  contentSlug: row.slug,
+                  contentTitle: row.title
+                });
               }
             }
           }
-        } catch (e) {
-          console.warn(`Error scanning table ${table}:`, e);
+        }
+      }
+
+      // ========== 4. CONTENT CATEGORIES ==========
+      const { data: categoryRows } = await supabase.from("content_categories").select("*");
+      for (const row of categoryRows || []) {
+        const district = districtMap.get(row.district_id);
+        const resolvedPath = `/districts/${district?.slug || 'unknown'}/${row.slug}`;
+        
+        if (row.hero_image) {
+          const mediaId = await getOrCreateMedia(row.hero_image, 'culture');
+          if (mediaId) {
+            await createUsage(mediaId, 'content_categories', row.id, 'hero_image', resolvedPath, {
+              districtSlug: district?.slug,
+              categorySlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+      }
+
+      // ========== 5. CONTENT SUBCATEGORIES ==========
+      const { data: subcategoryRows } = await supabase.from("content_subcategories").select("*");
+      for (const row of subcategoryRows || []) {
+        const category = categoryMap.get(row.category_id);
+        const district = category ? districtMap.get(category.district_id) : null;
+        const resolvedPath = `/districts/${district?.slug || 'unknown'}/${category?.slug || 'unknown'}/${row.slug}`;
+        
+        if (row.hero_image) {
+          const mediaId = await getOrCreateMedia(row.hero_image, 'culture');
+          if (mediaId) {
+            await createUsage(mediaId, 'content_subcategories', row.id, 'hero_image', resolvedPath, {
+              districtSlug: district?.slug,
+              categorySlug: category?.slug,
+              subcategorySlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+      }
+
+      // ========== 6. TRAVEL PACKAGES ==========
+      const { data: travelRows } = await supabase.from("travel_packages").select("*");
+      for (const row of travelRows || []) {
+        const resolvedPath = `/travel-packages/${row.slug}`;
+        
+        if (row.thumbnail_image_url) {
+          const mediaId = await getOrCreateMedia(row.thumbnail_image_url, 'travel');
+          if (mediaId) {
+            await createUsage(mediaId, 'travel_packages', row.id, 'thumbnail_image_url', resolvedPath, {
+              contentSlug: row.slug,
+              contentTitle: row.title
+            });
+          }
+        }
+
+        // Gallery array
+        if (row.gallery_images && Array.isArray(row.gallery_images)) {
+          for (const imageUrl of row.gallery_images) {
+            if (typeof imageUrl === 'string') {
+              const mediaId = await getOrCreateMedia(imageUrl, 'travel');
+              if (mediaId) {
+                await createUsage(mediaId, 'travel_packages', row.id, 'gallery_images', resolvedPath, {
+                  contentSlug: row.slug,
+                  contentTitle: row.title
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // ========== 7. LOCAL PRODUCTS ==========
+      const { data: productRows } = await supabase.from("local_products").select("*");
+      for (const row of productRows || []) {
+        const resolvedPath = `/products/${row.slug}`;
+        
+        if (row.thumbnail_image_url) {
+          const mediaId = await getOrCreateMedia(row.thumbnail_image_url, 'products');
+          if (mediaId) {
+            await createUsage(mediaId, 'local_products', row.id, 'thumbnail_image_url', resolvedPath, {
+              contentSlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+
+        if (row.gallery_images && Array.isArray(row.gallery_images)) {
+          for (const imageUrl of row.gallery_images) {
+            if (typeof imageUrl === 'string') {
+              const mediaId = await getOrCreateMedia(imageUrl, 'products');
+              if (mediaId) {
+                await createUsage(mediaId, 'local_products', row.id, 'gallery_images', resolvedPath, {
+                  contentSlug: row.slug,
+                  contentTitle: row.name
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // ========== 8. TOURISM LISTINGS ==========
+      const { data: listingRows } = await supabase.from("tourism_listings").select("*");
+      for (const row of listingRows || []) {
+        const resolvedPath = `/listings/${row.id}`;
+        
+        for (const field of ['thumbnail_image_url', 'image_url']) {
+          const imageUrl = (row as any)[field];
+          if (!imageUrl) continue;
+          
+          const mediaId = await getOrCreateMedia(imageUrl, 'travel');
+          if (mediaId) {
+            await createUsage(mediaId, 'tourism_listings', row.id, field, resolvedPath, {
+              contentTitle: row.title
+            });
+          }
+        }
+
+        // Check for gallery_images array if exists
+        const rowData = row as Record<string, any>;
+        if (rowData.gallery_images && Array.isArray(rowData.gallery_images)) {
+          for (const imageUrl of rowData.gallery_images) {
+            if (typeof imageUrl === 'string') {
+              const mediaId = await getOrCreateMedia(imageUrl, 'travel');
+              if (mediaId) {
+                await createUsage(mediaId, 'tourism_listings', row.id, 'gallery_images', resolvedPath, {
+                  contentTitle: row.title
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // ========== 9. CMS EVENTS ==========
+      const { data: eventRows } = await supabase.from("cms_events").select("*");
+      for (const row of eventRows || []) {
+        const resolvedPath = `/events/${row.slug}`;
+        
+        if (row.banner_image_url) {
+          const mediaId = await getOrCreateMedia(row.banner_image_url, 'homepage-common');
+          if (mediaId) {
+            await createUsage(mediaId, 'cms_events', row.id, 'banner_image_url', resolvedPath, {
+              contentSlug: row.slug,
+              contentTitle: row.title
+            });
+          }
+        }
+      }
+
+      // ========== 10. CMS STORIES ==========
+      const { data: storyRows } = await supabase.from("cms_stories").select("*");
+      for (const row of storyRows || []) {
+        const resolvedPath = `/stories/${row.slug}`;
+        
+        if (row.cover_image_url) {
+          const mediaId = await getOrCreateMedia(row.cover_image_url, 'homepage-common');
+          if (mediaId) {
+            await createUsage(mediaId, 'cms_stories', row.id, 'cover_image_url', resolvedPath, {
+              contentSlug: row.slug,
+              contentTitle: row.title
+            });
+          }
+        }
+
+        // Parse HTML body for embedded images
+        if (row.body) {
+          const htmlImages = extractImagesFromHtml(row.body);
+          for (const imageUrl of htmlImages) {
+            const mediaId = await getOrCreateMedia(imageUrl, 'homepage-common');
+            if (mediaId) {
+              await createUsage(mediaId, 'cms_stories', row.id, 'body_embedded', resolvedPath, {
+                contentSlug: row.slug,
+                contentTitle: row.title
+              });
+            }
+          }
+        }
+      }
+
+      // ========== 11. DESTINATION GUIDES ==========
+      const { data: guideRows } = await supabase.from("destination_guides").select("*");
+      for (const row of guideRows || []) {
+        const resolvedPath = `/destinations/${row.slug}`;
+        
+        for (const field of ['hero_image', 'thumbnail_image']) {
+          const imageUrl = (row as any)[field];
+          if (!imageUrl) continue;
+          
+          const mediaId = await getOrCreateMedia(imageUrl, 'travel');
+          if (mediaId) {
+            await createUsage(mediaId, 'destination_guides', row.id, field, resolvedPath, {
+              contentSlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+      }
+
+      // ========== 12. DESTINATION PLACES ==========
+      const { data: placeRows } = await supabase.from("destination_places").select("*");
+      const { data: guideData } = await supabase.from("destination_guides").select("id, slug");
+      const guideSlugMap = new Map((guideData || []).map(g => [g.id, g.slug]));
+
+      for (const row of placeRows || []) {
+        const guideSlug = guideSlugMap.get(row.destination_id) || 'unknown';
+        const resolvedPath = `/destinations/${guideSlug}/${row.slug}`;
+        
+        if (row.main_image) {
+          const mediaId = await getOrCreateMedia(row.main_image, 'travel');
+          if (mediaId) {
+            await createUsage(mediaId, 'destination_places', row.id, 'main_image', resolvedPath, {
+              contentSlug: row.slug,
+              contentTitle: row.name
+            });
+          }
+        }
+
+        if (row.image_gallery && Array.isArray(row.image_gallery)) {
+          for (const imageUrl of row.image_gallery) {
+            if (typeof imageUrl === 'string') {
+              const mediaId = await getOrCreateMedia(imageUrl, 'travel');
+              if (mediaId) {
+                await createUsage(mediaId, 'destination_places', row.id, 'image_gallery', resolvedPath, {
+                  contentSlug: row.slug,
+                  contentTitle: row.name
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // ========== 13. GALLERY ITEMS ==========
+      const { data: galleryRows } = await supabase.from("gallery_items").select("*");
+      for (const row of galleryRows || []) {
+        const resolvedPath = `/gallery`;
+        
+        for (const field of ['image_url', 'thumbnail_url']) {
+          const imageUrl = (row as any)[field];
+          if (!imageUrl) continue;
+          
+          const mediaId = await getOrCreateMedia(imageUrl, 'gallery');
+          if (mediaId) {
+            await createUsage(mediaId, 'gallery_items', row.id, field, resolvedPath, {
+              contentTitle: row.title
+            });
+          }
         }
       }
 
       toast({ 
         title: "Discovery Complete", 
-        description: `Found ${discovered} images, registered ${registered} new images`
+        description: `Found ${discovered} images, registered ${registered} new, created ${usagesCreated} usage records`
       });
 
       await fetchMedia();
       await fetchFolders();
 
-      return { discovered, registered };
+      return { discovered, registered, usagesCreated };
     } catch (error) {
       console.error("Error discovering images:", error);
       toast({ title: "Error", description: "Failed to discover frontend images", variant: "destructive" });
-      return { discovered: 0, registered: 0 };
+      return { discovered: 0, registered: 0, usagesCreated: 0 };
     }
   }, [toast, fetchMedia, fetchFolders]);
 
   const scanAndSyncUsage = useCallback(async () => {
-    toast({ title: "Scanning", description: "Analyzing image usage across the site..." });
-
-    try {
-      const { data: media } = await supabase.from("media_library").select("id, file_url");
-      if (!media?.length) {
-        toast({ title: "Info", description: "No media items to scan" });
-        return;
-      }
-
-      const { data: foldersData } = await supabase.from("media_folders").select("id, slug");
-      const folderMap = Object.fromEntries((foldersData || []).map(f => [f.slug, f.id]));
-
-      const contentTypeToFolder: Record<string, string> = {
-        districts: "districts",
-        villages: "districts",
-        cultural_content: "culture",
-        content_categories: "culture",
-        gallery_items: "gallery",
-        local_products: "products",
-        travel_packages: "travel",
-        tourism_listings: "travel",
-        cms_site_settings: "homepage-common",
-        cms_stories: "homepage-common",
-        cms_events: "homepage-common"
-      };
-
-      const tables = [
-        { table: "districts", field: "image_url", type: "districts" },
-        { table: "districts", field: "thumbnail_url", type: "districts" },
-        { table: "villages", field: "thumbnail_url", type: "districts" },
-        { table: "villages", field: "hero_image_url", type: "districts" },
-        { table: "cultural_content", field: "hero_image", type: "cultural_content" },
-        { table: "content_categories", field: "hero_image", type: "content_categories" },
-        { table: "gallery_items", field: "image_url", type: "gallery_items" },
-        { table: "local_products", field: "image_url", type: "local_products" },
-        { table: "travel_packages", field: "thumbnail_image_url", type: "travel_packages" },
-        { table: "tourism_listings", field: "thumbnail_image_url", type: "tourism_listings" },
-        { table: "cms_stories", field: "cover_image_url", type: "cms_stories" },
-        { table: "cms_events", field: "banner_image_url", type: "cms_events" }
-      ];
-
-      let usageCount = 0;
-
-      for (const { table, field, type } of tables) {
-        try {
-          const { data: rows } = await supabase
-            .from(table as any)
-            .select("*");
-
-          if (!rows) continue;
-
-          for (const row of rows) {
-            const rowData = row as Record<string, any>;
-            const imageUrl = rowData[field];
-            if (!imageUrl || typeof imageUrl !== 'string') continue;
-
-            const matchingMedia = media.find(m => 
-              imageUrl === m.file_url || 
-              imageUrl.includes(m.file_url) || 
-              m.file_url.includes(imageUrl)
-            );
-
-            if (matchingMedia) {
-              usageCount++;
-
-              await supabase.from("media_usage").upsert({
-                media_id: matchingMedia.id,
-                content_type: type,
-                content_id: rowData.id,
-                page_slug: rowData.slug || null,
-                field_name: field
-              }, {
-                onConflict: "media_id,content_type,content_id,field_name"
-              });
-
-              const folderSlug = contentTypeToFolder[type];
-              if (folderSlug && folderMap[folderSlug]) {
-                await supabase.from("media_folder_assignments").upsert({
-                  media_id: matchingMedia.id,
-                  folder_id: folderMap[folderSlug]
-                }, {
-                  onConflict: "media_id,folder_id"
-                });
-              }
-            }
-          }
-        } catch (e) {
-          console.warn(`Error scanning table ${table}:`, e);
-        }
-      }
-
-      toast({ title: "Complete", description: `Found ${usageCount} image usages` });
-      await fetchMedia();
-      await fetchFolders();
-    } catch (error) {
-      console.error("Error scanning usage:", error);
-      toast({ title: "Error", description: "Failed to scan image usage", variant: "destructive" });
-    }
-  }, [toast, fetchMedia, fetchFolders]);
+    // Now just calls discoverFrontendImages for consistency
+    await discoverFrontendImages();
+  }, [discoverFrontendImages]);
 
   const searchMedia = useCallback(async (query: string): Promise<MediaItem[]> => {
     if (!query.trim()) return mediaItems;
@@ -735,7 +978,8 @@ export function useMediaLibrary(): UseMediaLibraryReturn {
       item.filename.toLowerCase().includes(lowerQuery) ||
       item.title?.toLowerCase().includes(lowerQuery) ||
       item.alt_text?.toLowerCase().includes(lowerQuery) ||
-      item.tags?.some(t => t.toLowerCase().includes(lowerQuery))
+      item.tags?.some(t => t.toLowerCase().includes(lowerQuery)) ||
+      item.usage.some(u => u.resolved_path?.toLowerCase().includes(lowerQuery))
     );
   }, [mediaItems]);
 

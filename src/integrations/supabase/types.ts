@@ -4488,33 +4488,51 @@ export type Database = {
       }
       media_usage: {
         Row: {
+          category_slug: string | null
           content_id: string | null
+          content_slug: string | null
+          content_title: string | null
           content_type: string
           created_at: string
+          district_slug: string | null
           field_name: string | null
           id: string
           media_id: string
           page_slug: string | null
+          resolved_path: string | null
+          subcategory_slug: string | null
           updated_at: string
         }
         Insert: {
+          category_slug?: string | null
           content_id?: string | null
+          content_slug?: string | null
+          content_title?: string | null
           content_type: string
           created_at?: string
+          district_slug?: string | null
           field_name?: string | null
           id?: string
           media_id: string
           page_slug?: string | null
+          resolved_path?: string | null
+          subcategory_slug?: string | null
           updated_at?: string
         }
         Update: {
+          category_slug?: string | null
           content_id?: string | null
+          content_slug?: string | null
+          content_title?: string | null
           content_type?: string
           created_at?: string
+          district_slug?: string | null
           field_name?: string | null
           id?: string
           media_id?: string
           page_slug?: string | null
+          resolved_path?: string | null
+          subcategory_slug?: string | null
           updated_at?: string
         }
         Relationships: [
