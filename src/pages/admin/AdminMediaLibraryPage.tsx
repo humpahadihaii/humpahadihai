@@ -57,10 +57,12 @@ import {
   Replace,
   AlertCircle,
   CheckCircle2,
+  Link2,
   Loader2,
   Globe,
   UploadCloud,
 } from "lucide-react";
+import { AssignToPageModal } from "@/components/admin/AssignToPageModal";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -105,6 +107,8 @@ export default function AdminMediaLibraryPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isDiscovering, setIsDiscovering] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assignTarget, setAssignTarget] = useState<MediaItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -302,6 +306,15 @@ export default function AdminMediaLibraryPage() {
     setIsDiscovering(true);
     await discoverFrontendImages();
     setIsDiscovering(false);
+  };
+
+  const handleAssignToPage = (item: MediaItem) => {
+    setAssignTarget(item);
+    setAssignModalOpen(true);
+  };
+
+  const handleAssignComplete = async () => {
+    await fetchMedia();
   };
 
   const copyUrl = (url: string) => {
@@ -596,6 +609,7 @@ export default function AdminMediaLibraryPage() {
                     onPreview={setPreviewItem}
                     onCopyUrl={copyUrl}
                     onReplace={handleReplace}
+                    onAssignToPage={handleAssignToPage}
                     copiedUrl={copiedUrl}
                   />
                 ))}
@@ -611,6 +625,7 @@ export default function AdminMediaLibraryPage() {
                     onPreview={setPreviewItem}
                     onCopyUrl={copyUrl}
                     onReplace={handleReplace}
+                    onAssignToPage={handleAssignToPage}
                     copiedUrl={copiedUrl}
                     formatFileSize={formatFileSize}
                   />
@@ -994,6 +1009,16 @@ export default function AdminMediaLibraryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Assign to Page Modal */}
+      <AssignToPageModal
+        open={assignModalOpen}
+        onOpenChange={setAssignModalOpen}
+        imageUrl={assignTarget?.file_url || ""}
+        mediaId={assignTarget?.id || ""}
+        imageName={assignTarget?.title || assignTarget?.filename || "Image"}
+        onComplete={handleAssignComplete}
+      />
     </AdminLayout>
   );
 }
@@ -1006,6 +1031,7 @@ function MediaCard({
   onPreview,
   onCopyUrl,
   onReplace,
+  onAssignToPage,
   copiedUrl,
 }: {
   item: MediaItem;
@@ -1014,6 +1040,7 @@ function MediaCard({
   onPreview: (item: MediaItem) => void;
   onCopyUrl: (url: string) => void;
   onReplace: (item: MediaItem) => void;
+  onAssignToPage: (item: MediaItem) => void;
   copiedUrl: string | null;
 }) {
   return (
@@ -1077,6 +1104,10 @@ function MediaCard({
               )}
               Copy URL
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAssignToPage(item)}>
+              <Link2 className="h-4 w-4 mr-2" />
+              Assign to Page
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onDelete(item)}
@@ -1103,6 +1134,7 @@ function MediaListItem({
   onPreview,
   onCopyUrl,
   onReplace,
+  onAssignToPage,
   copiedUrl,
   formatFileSize,
 }: {
@@ -1112,6 +1144,7 @@ function MediaListItem({
   onPreview: (item: MediaItem) => void;
   onCopyUrl: (url: string) => void;
   onReplace: (item: MediaItem) => void;
+  onAssignToPage: (item: MediaItem) => void;
   copiedUrl: string | null;
   formatFileSize: (bytes: number | null) => string;
 }) {
@@ -1178,6 +1211,9 @@ function MediaListItem({
           </Button>
           <Button variant="ghost" size="icon" onClick={() => onReplace(item)}>
             <Replace className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => onAssignToPage(item)} title="Assign to Page">
+            <Link2 className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
             <Pencil className="h-4 w-4" />
