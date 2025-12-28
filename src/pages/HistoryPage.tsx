@@ -18,11 +18,16 @@ import {
   Users,
   Landmark,
   Music,
-  Footprints
+  Footprints,
+  Quote,
+  Share2,
+  ExternalLink,
+  ArrowLeft
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Accordion,
   AccordionContent,
@@ -109,182 +114,162 @@ const historyEras: HistoryEra[] = [
         title: { en: "The Kuninda Dynasty: First Hill Empire", hi: "कुनिंद राजवंश: पहला पहाड़ी साम्राज्य" },
         content: { 
           en: <>The transition from tribal confederacies to organized statehood is marked by the rise of the <strong className="text-primary">Kuninda Dynasty (2nd century BCE – 3rd century CE)</strong>. The Kunindas were the first power to unite the Garhwal and Kumaon regions under a single political umbrella. Their territory extended from the <strong className="text-primary">Sutlej river</strong> in the west to the <strong className="text-primary">Kali river</strong> in the east.{"\n\n"}The most significant ruler of this dynasty was <strong className="text-primary">Amoghbhuti</strong>, whose name appears on beautiful silver and copper coins discovered across the region. These coins are invaluable historical documents; they feature a deer (representing the forest nature of the kingdom) alongside <strong className="text-primary">Buddhist symbols</strong> like the stupa and <strong className="text-primary">Hindu symbols</strong> like the swastika and Lakshmi. This numismatic evidence suggests a <strong className="text-primary">syncretic society</strong> where early Shaivism and Buddhism coexisted. The Kunindas were likely a trading power, controlling the lucrative <strong className="text-primary">salt and wool trade</strong> between Tibet and the Gangetic plains.</>,
-          hi: <>जनजातीय संघों से संगठित राज्य की ओर संक्रमण <strong className="text-primary">कुनिंद राजवंश (दूसरी शताब्दी ई.पू. – तीसरी शताब्दी ई.)</strong> के उदय से चिह्नित है। कुनिंद पहली शक्ति थे जिन्होंने गढ़वाल और कुमाऊं क्षेत्रों को एक राजनीतिक छत्र के तहत एकीकृत किया। उनका क्षेत्र पश्चिम में <strong className="text-primary">सतलुज नदी</strong> से पूर्व में <strong className="text-primary">काली नदी</strong> तक फैला था।{"\n\n"}इस राजवंश के सबसे महत्वपूर्ण शासक <strong className="text-primary">अमोघभूति</strong> थे, जिनका नाम क्षेत्र भर में खोजे गए सुंदर चांदी और तांबे के सिक्कों पर दिखाई देता है। ये सिक्के अमूल्य ऐतिहासिक दस्तावेज हैं; इनमें एक हिरण के साथ <strong className="text-primary">बौद्ध प्रतीक</strong> जैसे स्तूप और <strong className="text-primary">हिंदू प्रतीक</strong> जैसे स्वास्तिक और लक्ष्मी दर्शाए गए हैं। यह एक <strong className="text-primary">समन्वयवादी समाज</strong> का संकेत देता है जहां प्रारंभिक शैव धर्म और बौद्ध धर्म सह-अस्तित्व में थे।</>
-        }
-      },
-      {
-        title: { en: "The Ashokan Connection", hi: "अशोक से संबंध" },
-        content: { 
-          en: <>The discovery of an <strong className="text-primary">Ashokan Rock Edict at Kalsi</strong> (near Dehradun) in <strong className="text-primary">1860</strong> provides definitive proof that the region was within the <strong className="text-primary">Mauryan sphere of influence</strong> as early as the <strong className="text-primary">3rd century BCE</strong>. The edict, inscribed on a massive quartz rock, proclaims <strong className="text-primary">Ashoka&apos;s policy of non-violence and Dhamma</strong>. The location of the edict at the confluence of the <strong className="text-primary">Yamuna and Tons rivers</strong> indicates that this was a strategic gateway to the hills, likely serving as a trade depot and a center for Buddhist missionary activity.{"\n\n"}Following the decline of the Kunindas, the region saw a period of fragmentation. The <strong className="text-primary">Kushanas</strong> and later the <strong className="text-primary">Guptas</strong> exercised nominal suzerainty. The <strong className="text-primary">Allahabad Pillar inscription of Samudragupta</strong> mentions <strong className="text-primary">Kartripura</strong> (identified with the Katyur valley), suggesting that the hill kingdoms paid tribute to the Gupta empire while retaining internal autonomy.</>,
-          hi: <><strong className="text-primary">1860</strong> में <strong className="text-primary">कालसी</strong> (देहरादून के पास) में <strong className="text-primary">अशोक शिलालेख</strong> की खोज इस बात का निश्चित प्रमाण देती है कि यह क्षेत्र <strong className="text-primary">तीसरी शताब्दी ई.पू.</strong> में <strong className="text-primary">मौर्य प्रभाव क्षेत्र</strong> में था। एक विशाल क्वार्ट्ज चट्टान पर उत्कीर्ण यह शिलालेख <strong className="text-primary">अशोक की अहिंसा और धम्म की नीति</strong> की घोषणा करता है। <strong className="text-primary">यमुना और टोंस नदियों</strong> के संगम पर शिलालेख का स्थान इंगित करता है कि यह पहाड़ियों का एक रणनीतिक प्रवेश द्वार था।{"\n\n"}कुनिंदों के पतन के बाद, क्षेत्र में विखंडन का दौर आया। <strong className="text-primary">कुषाणों</strong> और बाद में <strong className="text-primary">गुप्तों</strong> ने नाममात्र की अधीनता का प्रयोग किया। <strong className="text-primary">समुद्रगुप्त के इलाहाबाद स्तंभ शिलालेख</strong> में <strong className="text-primary">कार्त्रिपुर</strong> (कत्यूर घाटी से पहचाना गया) का उल्लेख है।</>
+          hi: <>जनजातीय संघों से संगठित राज्य की ओर संक्रमण <strong className="text-primary">कुनिंद राजवंश (दूसरी शताब्दी ई.पू. – तीसरी शताब्दी ई.)</strong> के उदय से चिह्नित है। कुनिंद गढ़वाल और कुमाऊं क्षेत्रों को एकीकृत करने वाली पहली शक्ति थे। उनका क्षेत्र पश्चिम में <strong className="text-primary">सतलुज नदी</strong> से पूर्व में <strong className="text-primary">काली नदी</strong> तक फैला था।{"\n\n"}इस राजवंश का सबसे महत्वपूर्ण शासक <strong className="text-primary">अमोघभूति</strong> था, जिसका नाम क्षेत्र में खोजे गए सुंदर चांदी और तांबे के सिक्कों पर दिखाई देता है। ये सिक्के अमूल्य ऐतिहासिक दस्तावेज हैं; इनमें हिरण (राज्य की वन प्रकृति का प्रतिनिधित्व) के साथ <strong className="text-primary">बौद्ध प्रतीक</strong> जैसे स्तूप और <strong className="text-primary">हिंदू प्रतीक</strong> जैसे स्वास्तिक और लक्ष्मी हैं। यह एक <strong className="text-primary">समन्वयवादी समाज</strong> का संकेत देता है।</>
         }
       }
     ],
     highlights: { 
       en: [
-        "Lakhudyar rock paintings – Mesolithic & Chalcolithic art (Almora)",
-        "Kols & Kiratas – Earliest inhabitants of the hills",
-        "Kedarkhand (Garhwal) & Manaskhand (Kumaon) – Skanda Purana",
-        "Kuninda Dynasty (2nd c. BCE – 3rd c. CE) – First unified kingdom",
-        "King Amoghbhuti's coins – Buddhist-Hindu syncretism",
-        "Ashokan Rock Edict at Kalsi (3rd century BCE)"
+        "Lakhudyar rock paintings from Mesolithic period",
+        "Kuninda dynasty coinage with Buddhist & Hindu symbols",
+        "References in Rig Veda and Mahabharata",
+        "Kedarkhand and Manaskhand in Skanda Purana"
       ],
       hi: [
-        "लखुड्यार शैल चित्र – मध्यपाषाण और ताम्रपाषाण कला (अल्मोड़ा)",
-        "कोल और किरात – पहाड़ों के सबसे पुराने निवासी",
-        "केदारखंड (गढ़वाल) और मानसखंड (कुमाऊं) – स्कंद पुराण",
-        "कुनिंद राजवंश (दूसरी सदी ई.पू. – तीसरी सदी ई.) – पहला एकीकृत राज्य",
-        "राजा अमोघभूति के सिक्के – बौद्ध-हिंदू समन्वय",
-        "कालसी में अशोक शिलालेख (तीसरी शताब्दी ई.पू.)"
+        "मध्यपाषाण काल के लखुड्यार शैल चित्र",
+        "बौद्ध और हिंदू प्रतीकों के साथ कुनिंद राजवंश के सिक्के",
+        "ऋग्वेद और महाभारत में संदर्भ",
+        "स्कंद पुराण में केदारखंड और मानसखंड"
       ]
     },
     relatedLinks: [
-      { label: "Explore Char Dham", path: "/culture" },
-      { label: "Sacred Temples", path: "/cultural/temples-shrines" }
+      { label: "Almora District", path: "/districts/almora" },
+      { label: "Chamoli District", path: "/districts/chamoli" }
     ],
-    accentColor: "from-amber-500/20 to-orange-500/20"
+    accentColor: "from-amber-500/5 to-orange-500/5"
   },
   {
     id: "medieval",
     title: { 
-      en: "Medieval Period", 
-      hi: "मध्यकालीन युग" 
+      en: "Medieval Kingdoms", 
+      hi: "मध्यकालीन राजवंश" 
     },
     period: { 
-      en: "7th Century – 18th Century CE", 
-      hi: "7वीं शताब्दी – 18वीं शताब्दी ई." 
+      en: "7th – 18th Century CE", 
+      hi: "7वीं – 18वीं शताब्दी ई." 
     },
     icon: <Crown className="h-6 w-6" />,
     description: { 
-      en: <>The medieval period in Uttarakhand is characterized by the consolidation of power into localized empires that constructed the architectural and administrative foundations of the region. Three great dynasties shaped this era: the <strong className="text-primary">Katyuris</strong>, the <strong className="text-primary">Chands</strong>, and the <strong className="text-primary">Panwars (Parmars)</strong>. This period witnessed the construction of magnificent temples, the flowering of art and culture, and the eventual invasion by the <strong className="text-primary">Gorkhas</strong>.</>,
-      hi: <>उत्तराखंड में मध्यकालीन काल स्थानीय साम्राज्यों में शक्ति के समेकन द्वारा चिह्नित है जिन्होंने क्षेत्र की स्थापत्य और प्रशासनिक नींव का निर्माण किया। तीन महान राजवंशों ने इस युग को आकार दिया: <strong className="text-primary">कत्यूरी</strong>, <strong className="text-primary">चंद</strong> और <strong className="text-primary">पंवार (परमार)</strong>। इस अवधि में भव्य मंदिरों का निर्माण, कला और संस्कृति का विकास, और अंततः <strong className="text-primary">गोरखाओं</strong> द्वारा आक्रमण देखा गया।</>
+      en: <>The medieval period (7th – 18th century CE) witnessed the consolidation of power into two powerful hill kingdoms: <strong className="text-primary">Garhwal</strong> and <strong className="text-primary">Kumaon</strong>. This era established the distinct regional identities that persist to this day, shaping the culture, language, and traditions of Uttarakhand.</>,
+      hi: <>मध्यकाल (7वीं – 18वीं शताब्दी ई.) में दो शक्तिशाली पहाड़ी राज्यों में सत्ता का समेकन देखा गया: <strong className="text-primary">गढ़वाल</strong> और <strong className="text-primary">कुमाऊं</strong>। इस युग ने विशिष्ट क्षेत्रीय पहचान स्थापित की जो आज तक कायम है।</>
     },
     subsections: [
       {
-        title: { en: "Katyuri Dynasty: The Golden Age (700-1200 CE)", hi: "कत्यूरी राजवंश: स्वर्ण युग (700-1200 ई.)" },
+        title: { en: "The Katyuri Dynasty of Kumaon (7th–11th Century CE)", hi: "कुमाऊं का कत्यूरी राजवंश (7वीं–11वीं शताब्दी ई.)" },
         content: { 
-          en: <>Often heralded as the <strong className="text-primary">&apos;Golden Era&apos;</strong> of Uttarakhand history, the <strong className="text-primary">Katyuri Dynasty</strong> represents the zenith of early medieval hill civilization. Ruling initially from <strong className="text-primary">Joshimath</strong> and later shifting their capital to <strong className="text-primary">Kartikeyapura</strong> (modern-day <strong className="text-primary">Baijnath</strong> in the Gomti valley), the Katyuris unified Kumaon and Garhwal under a centralized administration.{"\n\n"}<strong className="text-primary">Origins and Expansion:</strong>{"\n"}The origins of the Katyuris are shrouded in debate. Historian <strong className="text-primary">E.T. Atkinson</strong> traces them to the Khasas, while others link them to the Kunindas or even migrants from Ayodhya. The dynasty was founded by <strong className="text-primary">Vasu Dev</strong> (also known as Basdeo), who is credited with initiating the transition from wooden to stone architecture in temple construction. At its peak, the Katyuri empire extended from <strong className="text-primary">Nepal</strong> in the east to <strong className="text-primary">Kabul</strong> in the west.{"\n\n"}<strong className="text-primary">Architectural Legacy:</strong>{"\n"}The Katyuris were prolific builders. They are responsible for:{"\n"}• The majestic <strong className="text-primary">Jageshwar temple complex</strong> (near Almora) – one of the <strong className="text-primary">twelve Jyotirlingas</strong>, featuring over 100 temples built in the <strong className="text-primary">Nagara style</strong>{"\n"}• The <strong className="text-primary">Katarmal Sun Temple</strong> (9th century) – a rare shrine dedicated to the Sun God, second only to <strong className="text-primary">Konark</strong> in significance{"\n\n"}<strong className="text-primary">Decline and Fragmentation:</strong>{"\n"}The dynasty&apos;s decline began in the 11th century, accelerated by the tyrannical rule of later kings like <strong className="text-primary">Vir Dev</strong> (or Bira Dev). Vir Dev is remembered in folklore as a despot who imposed heavy taxes and forced his subjects into labor (<strong className="text-primary">begar</strong>). His death triggered a civil war, leading to the fragmentation of the empire into numerous small principalities or <strong className="text-primary">thokdaris</strong>.</>,
-          hi: <>अक्सर उत्तराखंड इतिहास के <strong className="text-primary">&apos;स्वर्ण युग&apos;</strong> के रूप में प्रशंसित, <strong className="text-primary">कत्यूरी राजवंश</strong> प्रारंभिक मध्यकालीन पहाड़ी सभ्यता के शिखर का प्रतिनिधित्व करता है। शुरू में <strong className="text-primary">जोशीमठ</strong> से और बाद में <strong className="text-primary">कार्तिकेयपुर</strong> (आधुनिक <strong className="text-primary">बैजनाथ</strong>, गोमती घाटी में) में राजधानी स्थानांतरित करके, कत्यूरियों ने कुमाऊं और गढ़वाल को केंद्रीकृत प्रशासन के तहत एकीकृत किया।{"\n\n"}<strong className="text-primary">उत्पत्ति और विस्तार:</strong>{"\n"}कत्यूरियों की उत्पत्ति बहस में घिरी है। इतिहासकार <strong className="text-primary">ई.टी. एटकिंसन</strong> उन्हें खसों से जोड़ते हैं। राजवंश की स्थापना <strong className="text-primary">वासुदेव</strong> (बासदेव) ने की। अपने चरम पर, कत्यूरी साम्राज्य पूर्व में <strong className="text-primary">नेपाल</strong> से पश्चिम में <strong className="text-primary">काबुल</strong> तक फैला था।{"\n\n"}<strong className="text-primary">स्थापत्य विरासत:</strong>{"\n"}कत्यूरी विपुल निर्माता थे:{"\n"}• भव्य <strong className="text-primary">जागेश्वर मंदिर परिसर</strong> (अल्मोड़ा के पास) – <strong className="text-primary">बारह ज्योतिर्लिंगों</strong> में से एक, <strong className="text-primary">नागर शैली</strong> में निर्मित 100+ मंदिर{"\n"}• <strong className="text-primary">कटारमल सूर्य मंदिर</strong> (9वीं सदी) – सूर्य देव को समर्पित दुर्लभ मंदिर, <strong className="text-primary">कोणार्क</strong> के बाद दूसरा{"\n\n"}<strong className="text-primary">पतन और विखंडन:</strong>{"\n"}राजवंश का पतन 11वीं सदी में शुरू हुआ, <strong className="text-primary">वीर देव</strong> जैसे बाद के राजाओं के अत्याचारी शासन से त्वरित। वीर देव को लोककथाओं में एक तानाशाह के रूप में याद किया जाता है जिसने भारी कर लगाए और प्रजा को <strong className="text-primary">बेगार</strong> में मजबूर किया।</>
+          en: <>Following the decline of the Kunindas, the region saw the rise of the <strong className="text-primary">Katyuris</strong>, a dynasty that claims descent from the Ayodhya kings and came to power around the <strong className="text-primary">7th century CE</strong>. The Katyuris were the first major dynasty of the medieval period and are credited with establishing a sophisticated state apparatus in the hills.{"\n\n"}<strong className="text-primary">The Golden Age of Temple Building:</strong>{"\n"}The Katyuri era is synonymous with a golden age of <strong className="text-primary">temple architecture</strong>. The structural temples built during this period are distinct from the later Nagara-style temples and are characterized by their intricate stone carvings and unique "Katyuri" style.{"\n\n"}<strong className="text-primary">Key Katyuri Temples:</strong>{"\n"}• <strong>Jageshwar Temples, Almora:</strong> A cluster of 124 temples dedicated to Shiva, considered one of the 12 Jyotirlingas. Dates from 7th to 14th century.{"\n"}• <strong>Baijnath Temples, Bageshwar:</strong> A complex of 18 temples with exquisite sculptures on a raised platform beside the Gomti river.{"\n"}• <strong>Katarmal Sun Temple, Almora:</strong> A 9th-century sun temple with 45 smaller shrines, second only to the Konark Sun Temple.{"\n"}• <strong>Champawat Temples:</strong> Including the Baleshwar Temple, showcase Katyuri stone carving at its finest.{"\n\n"}The Katyuris also developed a system of land grants and <strong className="text-primary">copper-plate inscriptions</strong>, which are now vital historical sources. Their decline around the 11th century was gradual, leading to fragmentation and the rise of the <strong className="text-primary">Chand dynasty</strong> in Kumaon.</>,
+          hi: <>कुनिंदों के पतन के बाद, <strong className="text-primary">कत्यूरियों</strong> का उदय हुआ, एक राजवंश जो अयोध्या के राजाओं से वंश का दावा करता है और <strong className="text-primary">7वीं शताब्दी ई.</strong> के आसपास सत्ता में आया।{"\n\n"}<strong className="text-primary">मंदिर निर्माण का स्वर्ण युग:</strong>{"\n"}कत्यूरी युग <strong className="text-primary">मंदिर वास्तुकला</strong> के स्वर्ण युग का पर्याय है।{"\n\n"}<strong className="text-primary">प्रमुख कत्यूरी मंदिर:</strong>{"\n"}• <strong>जागेश्वर मंदिर, अल्मोड़ा:</strong> शिव को समर्पित 124 मंदिरों का समूह, 12 ज्योतिर्लिंगों में से एक।{"\n"}• <strong>बैजनाथ मंदिर, बागेश्वर:</strong> गोमती नदी के किनारे 18 मंदिरों का परिसर।{"\n"}• <strong>कटारमल सूर्य मंदिर, अल्मोड़ा:</strong> 45 छोटे मंदिरों के साथ 9वीं शताब्दी का सूर्य मंदिर।</>
         },
         image: katyuriTemplesImg,
-        imageAlt: "Jageshwar Temple Complex - Katyuri Dynasty"
+        imageAlt: "Katyuri Temple Architecture"
       },
       {
-        title: { en: "The Chand Dynasty: Unifiers of Kumaon", hi: "चंद राजवंश: कुमाऊं के एकीकरणकर्ता" },
+        title: { en: "The Chand Dynasty of Kumaon (10th–18th Century)", hi: "कुमाऊं का चंद राजवंश (10वीं–18वीं शताब्दी)" },
         content: { 
-          en: <>Into the power vacuum left by the Katyuris stepped the <strong className="text-primary">Chand Dynasty</strong>. Founded by <strong className="text-primary">Som Chand</strong> (reputedly a prince from <strong className="text-primary">Kanauj</strong>) around the <strong className="text-primary">10th century</strong>, the Chands initially established their stronghold in <strong className="text-primary">Champawat</strong>. Over the next few centuries, they systematically subjugated the local Khasa chieftains and expanded their domain.{"\n\n"}<strong className="text-primary">Strategic Shift to Almora (1568):</strong>{"\n"}A defining moment in Kumaoni history occurred in <strong className="text-primary">1568</strong> when King <strong className="text-primary">Kalyan Chand</strong> moved the capital from Champawat to <strong className="text-primary">Almora</strong>. This new capital, situated on a ridge, offered better strategic defense and centralized control over the trade routes. The Chands transformed Almora into a cultural and political hub, patronizing the arts and creating the famous <strong className="text-primary">&apos;Pahari School&apos;</strong> of painting.{"\n\n"}<strong className="text-primary">The Height of Power – Baz Bahadur Chand (1638-1678):</strong>{"\n"}The dynasty reached its apogee under <strong className="text-primary">Baz Bahadur Chand</strong>. A contemporary of the Mughal Emperor <strong className="text-primary">Shah Jahan</strong>, Baz Bahadur visited the Mughal court and secured recognition for his sovereignty. He led military campaigns into <strong className="text-primary">Tibet</strong> to secure the salt trade and expanded his kingdom into the fertile <strong className="text-primary">Terai</strong> region, which became the granary of Kumaon.</>,
-          hi: <>कत्यूरियों द्वारा छोड़ी गई शक्ति शून्यता में <strong className="text-primary">चंद राजवंश</strong> ने कदम रखा। <strong className="text-primary">10वीं शताब्दी</strong> के आसपास <strong className="text-primary">सोम चंद</strong> (कथित रूप से <strong className="text-primary">कन्नौज</strong> के राजकुमार) द्वारा स्थापित, चंदों ने शुरू में <strong className="text-primary">चंपावत</strong> में अपना गढ़ स्थापित किया।{"\n\n"}<strong className="text-primary">अल्मोड़ा में रणनीतिक स्थानांतरण (1568):</strong>{"\n"}कुमाऊंनी इतिहास में एक निर्णायक क्षण <strong className="text-primary">1568</strong> में आया जब राजा <strong className="text-primary">कल्याण चंद</strong> ने राजधानी चंपावत से <strong className="text-primary">अल्मोड़ा</strong> स्थानांतरित की। चंदों ने अल्मोड़ा को सांस्कृतिक और राजनीतिक केंद्र में बदल दिया, प्रसिद्ध <strong className="text-primary">&apos;पहाड़ी स्कूल&apos;</strong> चित्रकला को संरक्षण दिया।{"\n\n"}<strong className="text-primary">शक्ति का शिखर – बाज बहादुर चंद (1638-1678):</strong>{"\n"}राजवंश <strong className="text-primary">बाज बहादुर चंद</strong> के तहत अपने शिखर पर पहुंचा। मुगल सम्राट <strong className="text-primary">शाहजहां</strong> के समकालीन, बाज बहादुर ने मुगल दरबार का दौरा किया। उन्होंने नमक व्यापार सुनिश्चित करने के लिए <strong className="text-primary">तिब्बत</strong> में सैन्य अभियान चलाए और <strong className="text-primary">तराई</strong> क्षेत्र में विस्तार किया।</>
-        }
+          en: <>Emerging from the shadows of the declining Katyuris, the <strong className="text-primary">Chand dynasty</strong> rose to become the pre-eminent power in Kumaon. According to tradition, <strong className="text-primary">Som Chand</strong>, a prince from the Jhula branch of the Mewari Rajputs, founded the dynasty around the <strong className="text-primary">10th century</strong>.{"\n\n"}The Chands consolidated their power over Kumaon through a combination of military conquest, strategic marriages, and administrative acumen. Their capital shifted over centuries from <strong className="text-primary">Champawat</strong> to <strong className="text-primary">Almora</strong> (founded by Balo Kalyan Chand in 1560).{"\n\n"}<strong className="text-primary">Notable Chand Rulers:</strong>{"\n"}• <strong>Gyan Chand (1374–1419):</strong> Expanded the kingdom significantly and is credited with military reforms.{"\n"}• <strong>Balo Kalyan Chand (1560–1568):</strong> Founded the new capital at Almora, which became a major trading center.{"\n"}• <strong>Baz Bahadur Chand (1638–1678):</strong> The most powerful Chand king, expanded the kingdom's influence and patronized arts.{"\n"}• <strong>Udyot Chand (1678–1698):</strong> Built the iconic Katarmal Sun Temple.{"\n\n"}The Chands developed <strong className="text-primary">Kumaoni</strong> as a literary language, patronized the distinctive <strong className="text-primary">Pahari painting</strong> style, and established the <strong className="text-primary">Nanda Devi Raj Jat</strong> as the greatest pilgrimage of the region. Their rule came to an end with the <strong className="text-primary">Gorkha invasion in 1790</strong>.</>,
+          hi: <>घटते कत्यूरियों की छाया से उभरकर, <strong className="text-primary">चंद राजवंश</strong> कुमाऊं में प्रमुख शक्ति बन गया। परंपरा के अनुसार, मेवाड़ी राजपूतों की झूला शाखा के राजकुमार <strong className="text-primary">सोम चंद</strong> ने <strong className="text-primary">10वीं शताब्दी</strong> में राजवंश की स्थापना की।{"\n\n"}चंदों ने अपनी राजधानी सदियों में <strong className="text-primary">चंपावत</strong> से <strong className="text-primary">अल्मोड़ा</strong> (1560 में बालो कल्याण चंद द्वारा स्थापित) स्थानांतरित की।{"\n\n"}<strong className="text-primary">उल्लेखनीय चंद शासक:</strong>{"\n"}• <strong>ज्ञान चंद (1374–1419):</strong> राज्य का महत्वपूर्ण विस्तार किया।{"\n"}• <strong>बालो कल्याण चंद (1560–1568):</strong> अल्मोड़ा में नई राजधानी की स्थापना की।{"\n"}• <strong>बाज बहादुर चंद (1638–1678):</strong> सबसे शक्तिशाली चंद राजा।{"\n\n"}चंदों ने <strong className="text-primary">कुमाऊंनी</strong> को एक साहित्यिक भाषा के रूप में विकसित किया और <strong className="text-primary">नंदा देवी राज जात</strong> को क्षेत्र की सबसे बड़ी तीर्थयात्रा के रूप में स्थापित किया।</>
+        },
+        image: nandaDeviRajJatImg,
+        imageAlt: "Nanda Devi Raj Jat Pilgrimage"
       },
       {
-        title: { en: "The Garhwal Kingdom: 52 Garhs & Ajay Pal", hi: "गढ़वाल राज्य: 52 गढ़ और अजय पाल" },
+        title: { en: "The Parmar (Panwar) Dynasty of Garhwal", hi: "गढ़वाल का परमार (पंवार) राजवंश" },
         content: { 
-          en: <>While the Chands consolidated Kumaon, the Garhwal region remained divided into <strong className="text-primary">52 independent chieftaincies</strong>, each ruled from a hilltop fort or <strong className="text-primary">Garh</strong> (hence the name <strong className="text-primary">Garhwal</strong>—Land of Forts). The unification of these garhs was the achievement of the <strong className="text-primary">Panwar (Parmar) Dynasty</strong>.{"\n\n"}<strong className="text-primary">Ajay Pal: The Unifier:</strong>{"\n"}The Panwar dynasty was founded by <strong className="text-primary">Kanak Pal</strong> in the <strong className="text-primary">9th century</strong>, but it was the 37th ruler, <strong className="text-primary">Ajay Pal</strong> (<strong className="text-primary">14th/15th century</strong>), who transformed it into an empire. Through a combination of military conquest and diplomatic alliances, Ajay Pal subjugated the 52 garhs. He moved his capital from <strong className="text-primary">Chandpur Garhi</strong> to <strong className="text-primary">Devalgarh</strong> and finally to <strong className="text-primary">Srinagar</strong> (on the banks of the <strong className="text-primary">Alaknanda</strong>), creating a centralized state.{"\n\n"}<strong className="text-primary">Mughal Relations and Independence:</strong>{"\n"}The Garhwal kings maintained a fierce independence. In the <strong className="text-primary">17th century</strong>, King <strong className="text-primary">Prithvi Pat Shah</strong> famously granted asylum to <strong className="text-primary">Suleiman Shikoh</strong>, the fugitive son of <strong className="text-primary">Dara Shikoh</strong>, defying the wrath of Emperor <strong className="text-primary">Aurangzeb</strong>. This act of defiance underscored the Garhwal kingdom&apos;s sovereignty and its adherence to the code of <strong className="text-primary">sharanagat</strong> (protecting the refugee).</>,
-          hi: <>जबकि चंदों ने कुमाऊं को समेकित किया, गढ़वाल क्षेत्र <strong className="text-primary">52 स्वतंत्र सरदारियों</strong> में विभाजित रहा, प्रत्येक पहाड़ी किले या <strong className="text-primary">गढ़</strong> से शासित (इसलिए नाम <strong className="text-primary">गढ़वाल</strong>—किलों की भूमि)। इन गढ़ों का एकीकरण <strong className="text-primary">पंवार (परमार) राजवंश</strong> की उपलब्धि थी।{"\n\n"}<strong className="text-primary">अजय पाल: एकीकरणकर्ता:</strong>{"\n"}पंवार राजवंश की स्थापना <strong className="text-primary">9वीं शताब्दी</strong> में <strong className="text-primary">कनक पाल</strong> ने की, लेकिन 37वें शासक <strong className="text-primary">अजय पाल</strong> (<strong className="text-primary">14वीं/15वीं सदी</strong>) ने इसे साम्राज्य में बदल दिया। उन्होंने राजधानी <strong className="text-primary">चांदपुर गढ़ी</strong> से <strong className="text-primary">देवलगढ़</strong> और अंत में <strong className="text-primary">श्रीनगर</strong> (<strong className="text-primary">अलकनंदा</strong> के तट पर) स्थानांतरित की।{"\n\n"}<strong className="text-primary">मुगल संबंध और स्वतंत्रता:</strong>{"\n"}<strong className="text-primary">17वीं सदी</strong> में, राजा <strong className="text-primary">पृथ्वी पत शाह</strong> ने <strong className="text-primary">दारा शिकोह</strong> के भगोड़े पुत्र <strong className="text-primary">सुलेमान शिकोह</strong> को शरण दी, सम्राट <strong className="text-primary">औरंगजेब</strong> के क्रोध की अवहेलना करते हुए। इसने <strong className="text-primary">शरणागत</strong> (शरणार्थी की रक्षा) की संहिता के प्रति गढ़वाल राज्य की प्रतिबद्धता को रेखांकित किया।</>
+          en: <>While the Chands were consolidating Kumaon, a parallel history was unfolding in <strong className="text-primary">Garhwal</strong> (literally "Land of Forts"). Legend holds that <strong className="text-primary">Kanak Pal</strong>, a prince of the Parmar Rajputs from Malwa, came to Garhwal around the <strong className="text-primary">9th century</strong> after a pilgrimage to Badrinath and founded a kingdom.{"\n\n"}The early Garhwal kingdom was a loose confederation of <strong className="text-primary">52 garhs</strong> (forts), each controlled by a local thakur (lord). The Parmar dynasty's genius lay in uniting these fractious chieftains under a single banner. Key rulers who shaped Garhwal include:{"\n\n"}• <strong>Ajay Pal (1500–1519):</strong> The most transformative ruler, he conquered all 52 garhs and unified Garhwal, establishing <strong className="text-primary">Srinagar</strong> (near Pauri) as the capital.{"\n"}• <strong>Man Shah (1581–1614):</strong> Fought off Mughal incursions and maintained Garhwal's independence.{"\n"}• <strong>Fateh Shah (1684–1716):</strong> Expanded the kingdom to its greatest extent, defeating Kumaon and the Tibetans.{"\n"}• <strong>Pradyumna Shah (1785–1804):</strong> The last independent king, who died fighting the Gorkha invasion at the Battle of Khurbura.</>,
+          hi: <>जब चंद कुमाऊं को मजबूत कर रहे थे, <strong className="text-primary">गढ़वाल</strong> (शाब्दिक अर्थ "किलों की भूमि") में एक समानांतर इतिहास प्रकट हो रहा था। किंवदंती है कि मालवा के परमार राजपूतों के राजकुमार <strong className="text-primary">कनक पाल</strong> बद्रीनाथ की तीर्थयात्रा के बाद <strong className="text-primary">9वीं शताब्दी</strong> में गढ़वाल आए और एक राज्य की स्थापना की।{"\n\n"}प्रारंभिक गढ़वाल राज्य <strong className="text-primary">52 गढ़ों</strong> (किलों) का एक ढीला संघ था। प्रमुख शासक:{"\n\n"}• <strong>अजय पाल (1500–1519):</strong> सबसे परिवर्तनकारी शासक, उन्होंने सभी 52 गढ़ों को जीता और <strong className="text-primary">श्रीनगर</strong> को राजधानी बनाया।{"\n"}• <strong>मान शाह (1581–1614):</strong> मुगल आक्रमणों को रोका और गढ़वाल की स्वतंत्रता बनाए रखी।{"\n"}• <strong>फतेह शाह (1684–1716):</strong> राज्य का सबसे बड़े विस्तार तक विस्तार किया।{"\n"}• <strong>प्रद्युम्न शाह (1785–1804):</strong> अंतिम स्वतंत्र राजा।</>
         },
         image: garhwalKingdomImg,
-        imageAlt: "Garhwal Kingdom Historical Site"
+        imageAlt: "Garhwal Kingdom History"
       },
       {
-        title: { en: "The Gorkha Invasion: Period of Gorkhyani", hi: "गोरखा आक्रमण: गोरख्यानी का काल" },
+        title: { en: "Cultural Flowering: Art, Architecture & Society", hi: "सांस्कृतिक उत्कर्ष: कला, वास्तुकला और समाज" },
         content: { 
-          en: <>The late <strong className="text-primary">18th century</strong> brought a cataclysmic shift. The expansionist <strong className="text-primary">Gorkha Kingdom of Nepal</strong>, seeking to extend its empire, invaded <strong className="text-primary">Kumaon in 1790</strong> and annexed it. They then turned their eyes to Garhwal.{"\n\n"}In <strong className="text-primary">1804</strong>, the Garhwal King <strong className="text-primary">Pradyumna Shah</strong> died fighting the Gorkhas at the <strong className="text-primary">Battle of Khurbura</strong> near Dehradun. This ushered in the era of <strong className="text-primary">Gorkhyani</strong>—a period of Gorkha rule remembered in local folklore for its brutality, excessive taxation, and the suppression of local freedoms.{"\n\n"}For over a decade, the hills groaned under a military occupation that dismantled the traditional administrative structures of the Chand and Panwar dynasties. The Gorkhyani period represents a dark chapter that would only end with the arrival of the British.</>,
-          hi: <><strong className="text-primary">18वीं सदी</strong> के अंत में एक विनाशकारी बदलाव आया। विस्तारवादी <strong className="text-primary">नेपाल का गोरखा राज्य</strong>, अपने साम्राज्य का विस्तार करने की कोशिश में, <strong className="text-primary">1790 में कुमाऊं</strong> पर आक्रमण किया और इसे मिला लिया।{"\n\n"}<strong className="text-primary">1804</strong> में, गढ़वाल के राजा <strong className="text-primary">प्रद्युम्न शाह</strong> देहरादून के पास <strong className="text-primary">खुरबुरा की लड़ाई</strong> में गोरखाओं से लड़ते हुए वीरगति को प्राप्त हुए। इसने <strong className="text-primary">गोरख्यानी</strong> युग की शुरुआत की—गोरखा शासन का एक काल जिसे स्थानीय लोककथाओं में इसकी क्रूरता, अत्यधिक कराधान और स्थानीय स्वतंत्रता के दमन के लिए याद किया जाता है।{"\n\n"}एक दशक से अधिक समय तक, पहाड़ियां एक सैन्य कब्जे के तहत कराहती रहीं। गोरख्यानी काल एक अंधेरे अध्याय का प्रतिनिधित्व करता है।</>
-        }
+          en: <>The medieval period was not just an era of political consolidation but also a time of immense <strong className="text-primary">cultural flowering</strong>. Despite, or perhaps because of, their isolation, both kingdoms developed rich and distinctive artistic traditions.{"\n\n"}<strong className="text-primary">Pahari Painting:</strong>{"\n"}Both Garhwal and Kumaon became significant centers of the <strong className="text-primary">Pahari school of miniature painting</strong>. Originating in the hill courts of Himachal, the style was adopted and transformed by artists in the Kumaoni and Garhwali courts. The paintings are characterized by their vibrant colors, lyrical depiction of nature, and themes drawn from Hindu mythology.{"\n\n"}<strong className="text-primary">Folk Traditions:</strong>{"\n"}The medieval era also saw the crystallization of major folk traditions:{"\n"}• <strong>Chholiya Dance:</strong> A martial sword dance performed at weddings, originating from Kumaon.{"\n"}• <strong>Jaunsari Barada Nati:</strong> A large group dance from the Jaunsar-Bawar region with Tibetan influences.{"\n"}• <strong>Ramman Festival:</strong> A UNESCO Intangible Cultural Heritage ritual from Chamoli.{"\n"}• <strong>Nanda Devi Raj Jat:</strong> The great 280 km pilgrimage held once every 12 years.{"\n\n"}These traditions, patronized by the courts, spread among the common people and remain vibrant to this day.</>,
+          hi: <>मध्यकाल केवल राजनीतिक समेकन का युग नहीं बल्कि <strong className="text-primary">सांस्कृतिक उत्कर्ष</strong> का समय भी था।{"\n\n"}<strong className="text-primary">पहाड़ी चित्रकला:</strong>{"\n"}गढ़वाल और कुमाऊं दोनों <strong className="text-primary">पहाड़ी लघुचित्र शैली</strong> के महत्वपूर्ण केंद्र बन गए।{"\n\n"}<strong className="text-primary">लोक परंपराएं:</strong>{"\n"}मध्यकाल में प्रमुख लोक परंपराओं का समेकन हुआ:{"\n"}• <strong>छोलिया नृत्य:</strong> शादियों में प्रस्तुत एक युद्ध तलवार नृत्य।{"\n"}• <strong>जौनसारी बरदा नाटी:</strong> तिब्बती प्रभावों के साथ जौनसार-बावर क्षेत्र से एक बड़ा समूह नृत्य।{"\n"}• <strong>रम्माण उत्सव:</strong> चमोली से एक यूनेस्को अमूर्त सांस्कृतिक विरासत अनुष्ठान।{"\n"}• <strong>नंदा देवी राज जात:</strong> हर 12 साल में एक बार आयोजित 280 किमी की महान तीर्थयात्रा।</>
+        },
+        image: chholiyaDanceImg,
+        imageAlt: "Chholiya Dance Performance"
       }
     ],
     highlights: { 
       en: [
-        "Katyuri Dynasty (700-1200 CE) – Golden Age of temple building",
-        "Jageshwar Temple Complex – 100+ temples, one of 12 Jyotirlingas",
-        "Katarmal Sun Temple (9th c.) – Second to Konark",
-        "Chand Dynasty – Pahari School of painting (Almora)",
-        "Baz Bahadur Chand (1638-1678) – Peak of Kumaoni power",
-        "Ajay Pal – United 52 Garhs of Garhwal",
-        "Gorkha Invasion (1790) – Battle of Khurbura (1804)"
+        "Katyuri temple architecture at Jageshwar & Baijnath",
+        "Chand dynasty's founding of Almora (1560)",
+        "Parmar unification of 52 garhs under Ajay Pal",
+        "Pahari miniature painting tradition"
       ],
       hi: [
-        "कत्यूरी राजवंश (700-1200 ई.) – मंदिर निर्माण का स्वर्ण युग",
-        "जागेश्वर मंदिर परिसर – 100+ मंदिर, 12 ज्योतिर्लिंगों में से एक",
-        "कटारमल सूर्य मंदिर (9वीं सदी) – कोणार्क के बाद दूसरा",
-        "चंद राजवंश – पहाड़ी चित्रकला स्कूल (अल्मोड़ा)",
-        "बाज बहादुर चंद (1638-1678) – कुमाऊंनी शक्ति का शिखर",
-        "अजय पाल – गढ़वाल के 52 गढ़ों का एकीकरण",
-        "गोरखा आक्रमण (1790) – खुरबुरा की लड़ाई (1804)"
+        "जागेश्वर और बैजनाथ में कत्यूरी मंदिर वास्तुकला",
+        "चंद राजवंश द्वारा अल्मोड़ा की स्थापना (1560)",
+        "अजय पाल के तहत 52 गढ़ों का परमार एकीकरण",
+        "पहाड़ी लघुचित्र चित्रकला परंपरा"
       ]
     },
     relatedLinks: [
-      { label: "Almora District", path: "/districts" },
-      { label: "Garhwal Region", path: "/districts" }
+      { label: "Almora District", path: "/districts/almora" },
+      { label: "Pauri Garhwal", path: "/districts/pauri-garhwal" },
+      { label: "Champawat District", path: "/districts/champawat" }
     ],
-    accentColor: "from-purple-500/20 to-indigo-500/20"
+    accentColor: "from-purple-500/5 to-indigo-500/5"
   },
   {
     id: "colonial",
     title: { 
       en: "Colonial Era", 
-      hi: "औपनिवेशिक काल" 
+      hi: "औपनिवेशिक युग" 
     },
     period: { 
-      en: "1815 – 1947", 
-      hi: "1815 – 1947" 
+      en: "1815 – 1947 CE", 
+      hi: "1815 – 1947 ई." 
     },
     icon: <Building className="h-6 w-6" />,
     description: { 
-      en: <>The arrival of the <strong className="text-primary">British</strong> in the early <strong className="text-primary">19th century</strong> fundamentally altered the trajectory of Uttarakhand&apos;s history. Initially welcomed as liberators from <strong className="text-primary">Gorkha rule</strong>, the British soon established a colonial administration that integrated the hills into the global imperial economy while simultaneously alienating the local population from their natural resources.</>,
-      hi: <><strong className="text-primary">19वीं सदी</strong> की शुरुआत में <strong className="text-primary">अंग्रेजों</strong> के आगमन ने उत्तराखंड के इतिहास की दिशा को मौलिक रूप से बदल दिया। शुरू में <strong className="text-primary">गोरखा शासन</strong> से मुक्तिदाता के रूप में स्वागत किए गए, अंग्रेजों ने जल्द ही एक औपनिवेशिक प्रशासन स्थापित किया।</>
+      en: <>The 19th century began with a violent disruption: the <strong className="text-primary">Gorkha invasions</strong>. Between 1790 and 1815, the expanding Gorkha Empire from Nepal conquered both Kumaon and Garhwal, ending centuries of local rule. The Gorkha period was marked by heavy taxation and military conscription, which was deeply resented by the local population.</>,
+      hi: <>19वीं शताब्दी एक हिंसक व्यवधान के साथ शुरू हुई: <strong className="text-primary">गोरखा आक्रमण</strong>। 1790 और 1815 के बीच, नेपाल से विस्तारित गोरखा साम्राज्य ने कुमाऊं और गढ़वाल दोनों को जीत लिया। गोरखा काल भारी कराधान और सैन्य भर्ती द्वारा चिह्नित था।</>
     },
     subsections: [
       {
-        title: { en: "Anglo-Nepalese War & Treaty of Sugauli (1816)", hi: "एंग्लो-नेपाली युद्ध और सुगौली संधि (1816)" },
+        title: { en: "The Gorkha Interregnum (1790–1815)", hi: "गोरखा मध्यांतर (1790–1815)" },
         content: { 
-          en: <>The <strong className="text-primary">British East India Company</strong>, eyeing the lucrative trans-Himalayan trade routes to <strong className="text-primary">Tibet</strong> and the vast timber resources of the lower Himalayas, found themselves in conflict with the expanding Gorkha empire. The <strong className="text-primary">Anglo-Nepalese War (1814–1816)</strong> was a fierce conflict fought across the Himalayan frontier.{"\n\n"}<strong className="text-primary">The Treaty of Sugauli (1816):</strong>{"\n"}The war concluded with the signing of the <strong className="text-primary">Treaty of Sugauli in 1816</strong>, which redrew the map of the region:{"\n"}• The Gorkhas ceded the territories of <strong className="text-primary">Kumaon and Garhwal</strong> to the British{"\n"}• The British retained direct control over Kumaon and the eastern part of Garhwal (<strong className="text-primary">Pauri</strong>), forming the administrative unit of <strong className="text-primary">British Garhwal</strong>{"\n"}• The western part of Garhwal (<strong className="text-primary">Tehri</strong>) was restored to <strong className="text-primary">Sudarshan Shah</strong> (son of the fallen Pradyumna Shah), creating the <strong className="text-primary">Princely State of Tehri Garhwal</strong> that remained semi-independent until <strong className="text-primary">1949</strong></>,
-          hi: <><strong className="text-primary">ब्रिटिश ईस्ट इंडिया कंपनी</strong>, <strong className="text-primary">तिब्बत</strong> के लाभदायक ट्रांस-हिमालयी व्यापार मार्गों पर नजर रखते हुए, विस्तारवादी गोरखा साम्राज्य के साथ संघर्ष में पड़ गई। <strong className="text-primary">एंग्लो-नेपाली युद्ध (1814-1816)</strong> हिमालयी सीमा पर लड़ा गया एक भयंकर संघर्ष था।{"\n\n"}<strong className="text-primary">सुगौली की संधि (1816):</strong>{"\n"}युद्ध <strong className="text-primary">1816 में सुगौली की संधि</strong> पर हस्ताक्षर के साथ समाप्त हुआ:{"\n"}• गोरखाओं ने <strong className="text-primary">कुमाऊं और गढ़वाल</strong> के क्षेत्र अंग्रेजों को सौंप दिए{"\n"}• अंग्रेजों ने कुमाऊं और गढ़वाल के पूर्वी भाग (<strong className="text-primary">पौड़ी</strong>) पर सीधा नियंत्रण बनाए रखा, <strong className="text-primary">ब्रिटिश गढ़वाल</strong> की प्रशासनिक इकाई बनाई{"\n"}• गढ़वाल का पश्चिमी भाग (<strong className="text-primary">टिहरी</strong>) <strong className="text-primary">सुदर्शन शाह</strong> को बहाल किया गया, <strong className="text-primary">टिहरी गढ़वाल रियासत</strong> बनाई जो <strong className="text-primary">1949</strong> तक अर्ध-स्वतंत्र रही</>
+          en: <>The <strong className="text-primary">Gorkha conquest</strong> was swift and brutal. In 1790, the Gorkhas defeated the Chand king, <strong className="text-primary">Mahendra Chand</strong>, and occupied Kumaon. By 1804, after the heroic last stand of <strong className="text-primary">Pradyumna Shah</strong> at Khurbura, Garhwal too fell.{"\n\n"}The Gorkha period (1790–1815) is often viewed negatively in local memory. The new rulers imposed harsh <strong className="text-primary">Jhara</strong> (corvée labor), heavy taxes, and forced military service. However, some scholars note that the Gorkhas also introduced certain administrative reforms and briefly unified the entire central Himalayan region.{"\n\n"}The Gorkha period ended when they came into conflict with the <strong className="text-primary">British East India Company</strong>. The <strong className="text-primary">Anglo-Gorkha War (1814–1816)</strong> led to the <strong className="text-primary">Treaty of Sugauli (1816)</strong>, by which Nepal ceded Kumaon and the eastern part of Garhwal to the British.</>,
+          hi: <><strong className="text-primary">गोरखा विजय</strong> तेज और क्रूर थी। 1790 में, गोरखाओं ने चंद राजा <strong className="text-primary">महेंद्र चंद</strong> को हराया और कुमाऊं पर कब्जा कर लिया। 1804 तक, खुरबुरा में <strong className="text-primary">प्रद्युम्न शाह</strong> के वीरतापूर्ण अंतिम प्रतिरोध के बाद, गढ़वाल भी गिर गया।{"\n\n"}गोरखा काल (1790–1815) को स्थानीय स्मृति में प्रायः नकारात्मक रूप से देखा जाता है। नए शासकों ने कठोर <strong className="text-primary">झारा</strong> (बेगार), भारी कर और जबरन सैन्य सेवा लागू की।{"\n\n"}गोरखा काल समाप्त हुआ जब वे <strong className="text-primary">ब्रिटिश ईस्ट इंडिया कंपनी</strong> के साथ संघर्ष में आए। <strong className="text-primary">आंग्ल-गोरखा युद्ध (1814–1816)</strong> के परिणामस्वरूप <strong className="text-primary">सुगौली संधि (1816)</strong> हुई।</>
         }
       },
       {
-        title: { en: "British Administration & Infrastructure", hi: "ब्रिटिश प्रशासन और बुनियादी ढांचा" },
+        title: { en: "The British Raj in Kumaon & Garhwal", hi: "कुमाऊं और गढ़वाल में ब्रिटिश राज" },
         content: { 
-          en: <>British rule in Uttarakhand was distinct from the plains; it was designated as a <strong className="text-primary">&apos;Non-Regulation&apos; province</strong>, meaning the standard laws of the Bengal Presidency did not apply, giving the local Commissioners immense discretionary power.{"\n\n"}<strong className="text-primary">The Era of Commissioners:</strong>{"\n"}Administrators like <strong className="text-primary">G.W. Traill</strong> and <strong className="text-primary">J.H. Batten</strong> focused on land settlements. The most legendary figure was <strong className="text-primary">Sir Henry Ramsay</strong> (Commissioner from <strong className="text-primary">1856–1884</strong>), known as the <strong className="text-primary">&apos;King of Kumaon.&apos;</strong> Ramsay was a benevolent despot who introduced potato cultivation, built canals, and managed the region with a deep understanding of local customs.{"\n\n"}<strong className="text-primary">Railways and Urbanization:</strong>{"\n"}The British integrated the hills into the imperial infrastructure:{"\n"}• Railway reached <strong className="text-primary">Haridwar (1886)</strong> and <strong className="text-primary">Dehradun (1900)</strong>{"\n"}• Dehradun transformed into a major timber depot and urban center{"\n"}• Hill stations of <strong className="text-primary">Mussoorie, Nainital, and Ranikhet</strong> were developed as summer retreats{"\n"}• European architecture and convent education introduced</>,
-          hi: <>उत्तराखंड में ब्रिटिश शासन मैदानों से अलग था; इसे <strong className="text-primary">&apos;गैर-विनियमन&apos; प्रांत</strong> के रूप में नामित किया गया।{"\n\n"}<strong className="text-primary">आयुक्तों का युग:</strong>{"\n"}<strong className="text-primary">जी.डब्ल्यू. ट्रेल</strong> और <strong className="text-primary">जे.एच. बैटन</strong> जैसे प्रशासकों ने भूमि बंदोबस्त पर ध्यान केंद्रित किया। सबसे प्रसिद्ध व्यक्ति <strong className="text-primary">सर हेनरी रामसे</strong> (<strong className="text-primary">1856-1884</strong> तक आयुक्त) थे, जिन्हें <strong className="text-primary">&apos;कुमाऊं का राजा&apos;</strong> कहा जाता था।{"\n\n"}<strong className="text-primary">रेलवे और शहरीकरण:</strong>{"\n"}• रेलवे <strong className="text-primary">हरिद्वार (1886)</strong> और <strong className="text-primary">देहरादून (1900)</strong> पहुंची{"\n"}• देहरादून एक प्रमुख लकड़ी डिपो और शहरी केंद्र में बदल गया{"\n"}• <strong className="text-primary">मसूरी, नैनीताल और रानीखेत</strong> के हिल स्टेशन ग्रीष्मकालीन विश्राम स्थलों के रूप में विकसित{"\n"}• यूरोपीय वास्तुकला और कॉन्वेंट शिक्षा की शुरुआत</>
+          en: <>The British administration of the hills was distinctly different from that of the plains. Recognizing the difficult terrain and the unique social structure, the British implemented a <strong className="text-primary">Non-Regulation system</strong>, which gave considerable autonomy to the local Commissioner.{"\n\n"}<strong className="text-primary">Key Developments under British Rule:</strong>{"\n"}• <strong>Hill Stations:</strong> The establishment of <strong className="text-primary">Nainital (1841), Mussoorie (1823), Ranikhet (1869), and Lansdowne</strong> as summer retreats transformed the economy and demographics of the region.{"\n"}• <strong>Forest Policy:</strong> The British established <strong className="text-primary">Reserved Forests</strong>, restricting traditional lopping and grazing rights, which led to significant local resentment and later, the Chipko-precursor movements.{"\n"}• <strong>Tea Plantations:</strong> Tea cultivation was introduced in areas like <strong className="text-primary">Berinag and Kausani</strong>.{"\n"}• <strong>Modern Education:</strong> Schools and colleges were established, leading to a new educated class.{"\n"}• <strong>Infrastructure:</strong> The famous <strong className="text-primary">Corbett National Park</strong> was established in 1936 as India's first national park.{"\n\n"}The British period also saw the emergence of <strong className="text-primary">reform movements</strong>. Figures like <strong className="text-primary">Ganga Datt Upreti</strong> and <strong className="text-primary">Badri Dutt Pande</strong> campaigned against social evils like the <strong className="text-primary">Kuli Begar</strong> (forced labor) system.</>,
+          hi: <>पहाड़ों का ब्रिटिश प्रशासन मैदानों से स्पष्ट रूप से भिन्न था। कठिन इलाके और अद्वितीय सामाजिक संरचना को पहचानते हुए, ब्रिटिशों ने एक <strong className="text-primary">गैर-विनियमन प्रणाली</strong> लागू की।{"\n\n"}<strong className="text-primary">ब्रिटिश शासन के तहत प्रमुख विकास:</strong>{"\n"}• <strong>हिल स्टेशन:</strong> <strong className="text-primary">नैनीताल (1841), मसूरी (1823), रानीखेत (1869), और लैंसडाउन</strong> की स्थापना।{"\n"}• <strong>वन नीति:</strong> ब्रिटिशों ने <strong className="text-primary">आरक्षित वन</strong> स्थापित किए, पारंपरिक अधिकारों को प्रतिबंधित किया।{"\n"}• <strong>चाय बागान:</strong> <strong className="text-primary">बेरीनाग और कौसानी</strong> जैसे क्षेत्रों में चाय की खेती शुरू हुई।{"\n"}• <strong>आधुनिक शिक्षा:</strong> स्कूल और कॉलेज स्थापित किए गए।{"\n"}• <strong>बुनियादी ढांचा:</strong> प्रसिद्ध <strong className="text-primary">कॉर्बेट नेशनल पार्क</strong> 1936 में स्थापित किया गया।{"\n\n"}ब्रिटिश काल में <strong className="text-primary">सुधार आंदोलनों</strong> का उदय भी हुआ। <strong className="text-primary">गंगा दत्त उप्रेती</strong> और <strong className="text-primary">बद्री दत्त पांडे</strong> जैसे व्यक्तियों ने <strong className="text-primary">कुली बेगार</strong> प्रथा के खिलाफ अभियान चलाया।</>
         }
       },
       {
-        title: { en: "Forest Rights & Resistance", hi: "वन अधिकार और प्रतिरोध" },
+        title: { en: "Freedom Struggle in Uttarakhand", hi: "उत्तराखंड में स्वतंत्रता संग्राम" },
         content: { 
-          en: <>While infrastructure brought modernization, British forest policy brought impoverishment. The colonial state viewed the Himalayan forests as a commercial resource for railway sleepers and revenue, rather than a community asset.{"\n\n"}<strong className="text-primary">Draconian Forest Laws:</strong>{"\n"}The <strong className="text-primary">Indian Forest Acts of 1865, 1878, and 1927</strong> systematically stripped villagers of their traditional rights to grazing, fuel, and fodder. The forests were demarcated into &apos;Reserved&apos; and &apos;Protected,&apos; turning the local inhabitants into trespassers on their own ancestral lands.{"\n\n"}<strong className="text-primary">The Coolie Begar Movement (1921):</strong>{"\n"}The resentment against colonial exploitation culminated in the movement against <strong className="text-primary">Coolie Begar</strong>—a system of forced labor where locals were compelled to carry loads for British officials without payment.{"\n\n"}On <strong className="text-primary">January 14, 1921</strong>, at the <strong className="text-primary">Uttarayani fair in Bageshwar</strong>, thousands of villagers led by <strong className="text-primary">Badri Datt Pandey</strong> took a solemn oath at the confluence of the <strong className="text-primary">Saryu and Gomti rivers</strong>. They threw the official registers of forced labor into the river, effectively ending the practice.{"\n\n"}<strong className="text-primary">Badri Datt Pandey</strong> earned the title <strong className="text-primary">&apos;Kumaon Kesari&apos;</strong> (Lion of Kumaon) for this non-violent victory, which <strong className="text-primary">Mahatma Gandhi</strong> famously described as a <strong className="text-primary">&apos;bloodless revolution.&apos;</strong>{"\n\n"}This period also sowed the seeds of environmental activism. The resistance to British forest management was the precursor to the post-independence <strong className="text-primary">Chipko Movement of the 1970s</strong>, establishing a century-long tradition of grassroots environmentalism in Uttarakhand.</>,
-          hi: <>जबकि बुनियादी ढांचे ने आधुनिकीकरण लाया, ब्रिटिश वन नीति ने गरीबी लाई।{"\n\n"}<strong className="text-primary">कठोर वन कानून:</strong>{"\n"}<strong className="text-primary">1865, 1878 और 1927 के भारतीय वन अधिनियमों</strong> ने व्यवस्थित रूप से ग्रामीणों से चराई, ईंधन और चारे के पारंपरिक अधिकार छीन लिए।{"\n\n"}<strong className="text-primary">कुली बेगार आंदोलन (1921):</strong>{"\n"}औपनिवेशिक शोषण के खिलाफ आक्रोश <strong className="text-primary">कुली बेगार</strong> के खिलाफ आंदोलन में परिणत हुआ—जबरन मजदूरी की एक प्रणाली।{"\n\n"}<strong className="text-primary">14 जनवरी 1921</strong> को, <strong className="text-primary">बागेश्वर के उत्तरायणी मेले</strong> में, <strong className="text-primary">बद्री दत्त पांडे</strong> के नेतृत्व में हजारों ग्रामीणों ने <strong className="text-primary">सरयू और गोमती नदियों</strong> के संगम पर गंभीर शपथ ली।{"\n\n"}<strong className="text-primary">बद्री दत्त पांडे</strong> ने इस अहिंसक जीत के लिए <strong className="text-primary">&apos;कुमाऊं केसरी&apos;</strong> की उपाधि अर्जित की, जिसे <strong className="text-primary">महात्मा गांधी</strong> ने <strong className="text-primary">&apos;रक्तहीन क्रांति&apos;</strong> बताया।{"\n\n"}यह अवधि पर्यावरण सक्रियता के बीज भी बोई। ब्रिटिश वन प्रबंधन के खिलाफ प्रतिरोध <strong className="text-primary">1970 के दशक के चिपको आंदोलन</strong> का अग्रदूत था।</>
+          en: <>Uttarakhand played a notable, though often overlooked, role in the Indian freedom struggle. The region contributed to both the <strong className="text-primary">mainstream nationalist movement</strong> and developed its <strong className="text-primary">own local resistance movements</strong>.{"\n\n"}<strong className="text-primary">Key Events & Figures:</strong>{"\n"}• <strong>Kuli Begar Abolition (1921):</strong> Led by <strong className="text-primary">Badri Dutt Pande</strong>, this movement against forced labor was a landmark of local resistance.{"\n"}• <strong>Salt Satyagraha (1930):</strong> People from the hills participated actively. <strong className="text-primary">Kuntala Devi</strong> led a group of women to make salt in defiance.{"\n"}• <strong>Quit India Movement (1942):</strong> <strong className="text-primary">Sridev Suman</strong> was martyred after a prolonged hunger strike in Tehri jail, becoming a major symbol of resistance.{"\n"}• <strong>Tehri State:</strong> The princely state of Tehri, which remained outside British India, had its own movement against the Raja, culminating in the <strong className="text-primary">Tehri State Praja Mandal</strong> agitation.{"\n\n"}When India gained independence in 1947, the region was merged into the new state of <strong className="text-primary">Uttar Pradesh</strong>. Tehri state was integrated in 1949. This merger, while administratively convenient, sowed the seeds of a future demand for a separate hill state.</>,
+          hi: <>उत्तराखंड ने भारतीय स्वतंत्रता संग्राम में एक उल्लेखनीय, हालांकि अक्सर अनदेखी, भूमिका निभाई।{"\n\n"}<strong className="text-primary">प्रमुख घटनाएं और व्यक्ति:</strong>{"\n"}• <strong>कुली बेगार उन्मूलन (1921):</strong> <strong className="text-primary">बद्री दत्त पांडे</strong> के नेतृत्व में, बेगार के खिलाफ यह आंदोलन स्थानीय प्रतिरोध की एक मील का पत्थर था।{"\n"}• <strong>नमक सत्याग्रह (1930):</strong> पहाड़ों के लोगों ने सक्रिय रूप से भाग लिया। <strong className="text-primary">कुंतला देवी</strong> ने महिलाओं के एक समूह का नेतृत्व किया।{"\n"}• <strong>भारत छोड़ो आंदोलन (1942):</strong> <strong className="text-primary">श्रीदेव सुमन</strong> टिहरी जेल में लंबी भूख हड़ताल के बाद शहीद हो गए।{"\n"}• <strong>टिहरी राज्य:</strong> टिहरी की रियासत का राजा के खिलाफ अपना आंदोलन था, जो <strong className="text-primary">टिहरी राज्य प्रजा मंडल</strong> आंदोलन में समाप्त हुआ।{"\n\n"}1947 में जब भारत को स्वतंत्रता मिली, तो क्षेत्र को नए <strong className="text-primary">उत्तर प्रदेश</strong> राज्य में मिला दिया गया।</>
         }
       }
     ],
     highlights: { 
       en: [
-        "Treaty of Sugauli (1816) – End of Gorkha rule",
-        "British Garhwal & Tehri Garhwal (Princely State) formed",
-        "Sir Henry Ramsay – 'King of Kumaon' (1856-1884)",
-        "Railways: Haridwar (1886), Dehradun (1900)",
-        "Hill stations: Mussoorie, Nainital, Ranikhet developed",
-        "Indian Forest Acts (1865, 1878, 1927) – Loss of forest rights",
-        "Coolie Begar Movement (Jan 14, 1921) – 'Bloodless Revolution'",
-        "Badri Datt Pandey – 'Kumaon Kesari'"
+        "Treaty of Sugauli (1816) ended Gorkha rule",
+        "Establishment of Nainital and Mussoorie hill stations",
+        "Kuli Begar abolition movement (1921)",
+        "Martyrdom of Sridev Suman (1944)"
       ],
       hi: [
-        "सुगौली की संधि (1816) – गोरखा शासन का अंत",
-        "ब्रिटिश गढ़वाल और टिहरी गढ़वाल (रियासत) का गठन",
-        "सर हेनरी रामसे – 'कुमाऊं के राजा' (1856-1884)",
-        "रेलवे: हरिद्वार (1886), देहरादून (1900)",
-        "हिल स्टेशन: मसूरी, नैनीताल, रानीखेत विकसित",
-        "भारतीय वन अधिनियम (1865, 1878, 1927) – वन अधिकारों की हानि",
-        "कुली बेगार आंदोलन (14 जनवरी 1921) – 'रक्तहीन क्रांति'",
-        "बद्री दत्त पांडे – 'कुमाऊं केसरी'"
+        "सुगौली संधि (1816) ने गोरखा शासन समाप्त किया",
+        "नैनीताल और मसूरी हिल स्टेशनों की स्थापना",
+        "कुली बेगार उन्मूलन आंदोलन (1921)",
+        "श्रीदेव सुमन की शहादत (1944)"
       ]
     },
     relatedLinks: [
-      { label: "Mussoorie", path: "/districts" },
-      { label: "Nainital", path: "/districts" },
-      { label: "Dehradun", path: "/districts" }
+      { label: "Nainital District", path: "/districts/nainital" },
+      { label: "Tehri Garhwal", path: "/districts/tehri-garhwal" },
+      { label: "Dehradun District", path: "/districts/dehradun" }
     ],
-    accentColor: "from-slate-500/20 to-gray-500/20"
+    accentColor: "from-emerald-500/5 to-teal-500/5"
   },
   {
     id: "statehood",
@@ -293,367 +278,520 @@ const historyEras: HistoryEra[] = [
       hi: "उत्तराखंड का गठन" 
     },
     period: { 
-      en: "1938 – 2000", 
-      hi: "1938 – 2000" 
+      en: "1947 – 2000 CE", 
+      hi: "1947 – 2000 ई." 
     },
     icon: <Flag className="h-6 w-6" />,
     description: { 
-      en: <>The creation of Uttarakhand on <strong className="text-primary">November 9, 2000</strong>, was not merely an administrative reorganization; it was the culmination of a century-long struggle for identity, dignity, and self-governance.</>,
-      hi: <><strong className="text-primary">9 नवंबर 2000</strong> को उत्तराखंड का निर्माण केवल प्रशासनिक पुनर्गठन नहीं था; यह पहचान, सम्मान और स्व-शासन के लिए एक शताब्दी लंबे संघर्ष की परिणति थी।</>
+      en: <>The post-independence period (1947–2000) is defined by the struggle for <strong className="text-primary">Uttarakhand statehood</strong>. Being part of the large and diverse state of <strong className="text-primary">Uttar Pradesh</strong>, the hill districts consistently faced neglect. Resources were diverted to the more populous and politically influential plains, leaving the hills underdeveloped despite their immense natural wealth.</>,
+      hi: <>स्वतंत्रता के बाद का काल (1947–2000) <strong className="text-primary">उत्तराखंड राज्य</strong> के संघर्ष द्वारा परिभाषित है। बड़े और विविध <strong className="text-primary">उत्तर प्रदेश</strong> राज्य का हिस्सा होने के कारण, पहाड़ी जिलों को लगातार उपेक्षा का सामना करना पड़ा।</>
     },
     subsections: [
       {
-        title: { en: "Roots of the Demand (1938-1990)", hi: "मांग की जड़ें (1938-1990)" },
+        title: { en: "Seeds of Separation (1950s–1970s)", hi: "अलगाव के बीज (1950–1970 के दशक)" },
         content: { 
-          en: <>The articulation of a separate hill identity began as early as <strong className="text-primary">1938</strong>, at a special session of the <strong className="text-primary">Indian National Congress in Srinagar (Garhwal)</strong>. <strong className="text-primary">Pandit Jawaharlal Nehru</strong> acknowledged the unique culture of the region, and local leader <strong className="text-primary">Sridev Suman</strong> advocated for the distinct needs of the Himalayan people.{"\n\n"}For decades, the hills suffered from <strong className="text-primary">&apos;internal colonization.&apos;</strong> Resources were extracted to feed the plains, leading to mass migration—the so-called <strong className="text-primary">&apos;money-order economy.&apos;</strong>{"\n\n"}<strong className="text-primary">Uttarakhand Kranti Dal (UKD) – 1979:</strong>{"\n"}The formation of the <strong className="text-primary">Uttarakhand Kranti Dal (UKD)</strong> in <strong className="text-primary">1979 in Mussoorie</strong> marked the institutionalization of the statehood demand. Led by <strong className="text-primary">Indramani Badoni</strong> (often called the <strong className="text-primary">&apos;Gandhi of Uttarakhand&apos;</strong>), the UKD began to mobilize the masses.</>,
-          hi: <>एक अलग पहाड़ी पहचान की अभिव्यक्ति <strong className="text-primary">1938</strong> में <strong className="text-primary">श्रीनगर (गढ़वाल) में भारतीय राष्ट्रीय कांग्रेस</strong> के विशेष सत्र में शुरू हुई। <strong className="text-primary">पंडित जवाहरलाल नेहरू</strong> ने क्षेत्र की अनूठी संस्कृति को स्वीकार किया, और <strong className="text-primary">श्रीदेव सुमन</strong> ने हिमालयी लोगों की विशेष जरूरतों की वकालत की।{"\n\n"}दशकों तक, पहाड़ियों ने <strong className="text-primary">&apos;आंतरिक उपनिवेशवाद&apos;</strong> झेला—<strong className="text-primary">&apos;मनी-ऑर्डर अर्थव्यवस्था।&apos;</strong>{"\n\n"}<strong className="text-primary">उत्तराखंड क्रांति दल (यूकेडी) – 1979:</strong>{"\n"}<strong className="text-primary">1979 में मसूरी</strong> में <strong className="text-primary">उत्तराखंड क्रांति दल (यूकेडी)</strong> का गठन हुआ। <strong className="text-primary">इंद्रमणि बडोनी</strong> (<strong className="text-primary">&apos;उत्तराखंड के गांधी&apos;</strong>) के नेतृत्व में।</>
+          en: <>The demand for a separate hill state has roots going back to the <strong className="text-primary">1950s</strong>. Early articulations came from local leaders who felt the hills were being sidelined in the political economy of UP. The formation of <strong className="text-primary">Himachal Pradesh (1971)</strong>, carved out of Punjab, gave a powerful impetus to similar demands in Uttarakhand.{"\n\n"}<strong className="text-primary">Early Arguments for Separation:</strong>{"\n"}• <strong>Geographic Neglect:</strong> Difficult terrain meant less investment in roads, healthcare, and education.{"\n"}• <strong>Economic Drain:</strong> Resources like water, forests, and tourism revenue benefited the state at large, while local populations remained poor.{"\n"}• <strong>Cultural Distinctiveness:</strong> The Garhwali and Kumaoni languages, dialects, and traditions were distinct from the Hindi belt of UP.{"\n"}• <strong>Outmigration:</strong> Lack of opportunities led to massive outmigration, with villages becoming desolate.{"\n\n"}The <strong className="text-primary">Uttarakhand Kranti Dal</strong>, formed in 1979, became the first political party to formally demand statehood.</>,
+          hi: <>एक अलग पहाड़ी राज्य की मांग की जड़ें <strong className="text-primary">1950 के दशक</strong> तक जाती हैं। प्रारंभिक अभिव्यक्तियां स्थानीय नेताओं से आईं जिन्होंने महसूस किया कि पहाड़ों को उत्तर प्रदेश की राजनीतिक अर्थव्यवस्था में किनारे किया जा रहा है। <strong className="text-primary">हिमाचल प्रदेश (1971)</strong> के गठन ने उत्तराखंड में समान मांगों को शक्तिशाली प्रोत्साहन दिया।{"\n\n"}<strong className="text-primary">अलगाव के प्रारंभिक तर्क:</strong>{"\n"}• <strong>भौगोलिक उपेक्षा:</strong> कठिन इलाके का मतलब सड़कों, स्वास्थ्य सेवा और शिक्षा में कम निवेश।{"\n"}• <strong>आर्थिक निकासी:</strong> पानी, जंगल और पर्यटन राजस्व जैसे संसाधनों ने समग्र राज्य को लाभान्वित किया।{"\n"}• <strong>सांस्कृतिक विशिष्टता:</strong> गढ़वाली और कुमाऊंनी भाषाएं और परंपराएं उत्तर प्रदेश की हिंदी पट्टी से भिन्न थीं।{"\n\n"}<strong className="text-primary">उत्तराखंड क्रांति दल</strong>, 1979 में गठित, राज्य की औपचारिक मांग करने वाला पहला राजनीतिक दल बना।</>
         }
       },
       {
-        title: { en: "The Turning Point: 1994 Tragedy", hi: "निर्णायक मोड़: 1994 की त्रासदी" },
+        title: { en: "The Chipko Movement (1970s)", hi: "चिपको आंदोलन (1970 के दशक)" },
         content: { 
-          en: <>The movement remained largely peaceful until <strong className="text-primary">1994</strong>, when the <strong className="text-primary">Mandal Commission&apos;s 27% OBC reservation</strong> sparked outrage in the hills. The slogan <strong className="text-primary">&apos;Koda-Jhangora Khayenge, Uttarakhand Banayenge&apos;</strong> echoed across the valleys.{"\n\n"}<strong className="text-primary">Key Events of 1994:</strong>{"\n"}• <strong className="text-primary">Khatima Firing (September 1, 1994)</strong>: Police opened fire on peaceful protestors, killing <strong className="text-primary">seven people</strong>.{"\n"}• <strong className="text-primary">Mussoorie Firing (September 2, 1994)</strong>: Six people killed, including <strong className="text-primary">Hansa Dhanai and Belmati Chauhan</strong>.{"\n"}• <strong className="text-primary">Rampur Tiraha Incident (October 2, 1994)</strong>: The darkest night of the movement. Police opened fire and committed mass sexual violence against women protestors. This atrocity shocked the nation and made statehood inevitable.</>,
-          hi: <>आंदोलन <strong className="text-primary">1994</strong> तक शांतिपूर्ण रहा, जब <strong className="text-primary">मंडल आयोग के 27% ओबीसी आरक्षण</strong> ने आक्रोश पैदा किया। नारा <strong className="text-primary">&apos;कोड़ा-झंगोरा खाएंगे, उत्तराखंड बनाएंगे&apos;</strong> गूंज उठा।{"\n\n"}<strong className="text-primary">1994 की प्रमुख घटनाएं:</strong>{"\n"}• <strong className="text-primary">खटीमा गोलीकांड (1 सितंबर 1994)</strong>: <strong className="text-primary">सात लोग</strong> शहीद।{"\n"}• <strong className="text-primary">मसूरी गोलीकांड (2 सितंबर 1994)</strong>: <strong className="text-primary">हंसा धनाई और बेलमती चौहान</strong> सहित छह शहीद।{"\n"}• <strong className="text-primary">रामपुर तिराहा कांड (2 अक्टूबर 1994)</strong>: आंदोलन की सबसे काली रात। इस अत्याचार ने राष्ट्र की अंतरात्मा को झकझोर दिया।</>
+          en: <>Before the statehood movement crystallized, the hills witnessed a <strong className="text-primary">powerful environmental movement</strong> that had significant political undertones: the <strong className="text-primary">Chipko Movement</strong>.{"\n\n"}In 1973, villagers of <strong className="text-primary">Mandal village</strong> (near Gopeshwar in Chamoli district), led by <strong className="text-primary">Chandi Prasad Bhatt</strong> and later joined by <strong className="text-primary">Sunderlal Bahuguna</strong>, hugged trees to prevent them from being felled by logging contractors. The movement, which drew on the legacy of the <strong className="text-primary">Bishnoi community</strong> and echoed Gandhian non-violence, quickly spread across the hills.{"\n\n"}<strong className="text-primary">Impact of Chipko:</strong>{"\n"}• Led to a <strong className="text-primary">15-year ban on commercial green felling</strong> in Uttarakhand (1980).{"\n"}• Brought global attention to deforestation and community rights.{"\n"}• Created a cadre of socially conscious activists who later became leaders of the statehood movement.{"\n"}• Demonstrated the capacity of the hill people for organized, non-violent protest.{"\n\n"}The Chipko movement also highlighted the stark reality: the people of the hills had no control over their own resources. This grievance became central to the statehood demand.</>,
+          hi: <>राज्य आंदोलन के क्रिस्टलीकरण से पहले, पहाड़ों ने एक <strong className="text-primary">शक्तिशाली पर्यावरण आंदोलन</strong> देखा: <strong className="text-primary">चिपको आंदोलन</strong>।{"\n\n"}1973 में, <strong className="text-primary">मंडल गांव</strong> (चमोली जिले में गोपेश्वर के पास) के ग्रामीणों ने, <strong className="text-primary">चंडी प्रसाद भट्ट</strong> के नेतृत्व में और बाद में <strong className="text-primary">सुंदरलाल बहुगुणा</strong> के शामिल होने से, पेड़ों को गले लगाया ताकि उन्हें ठेकेदारों द्वारा काटे जाने से रोका जा सके।{"\n\n"}<strong className="text-primary">चिपको का प्रभाव:</strong>{"\n"}• उत्तराखंड में <strong className="text-primary">वाणिज्यिक हरित कटाई पर 15 साल का प्रतिबंध</strong> (1980) लगा।{"\n"}• वनों की कटाई और सामुदायिक अधिकारों पर वैश्विक ध्यान आकर्षित किया।{"\n"}• सामाजिक रूप से जागरूक कार्यकर्ताओं का एक कैडर बनाया जो बाद में राज्य आंदोलन के नेता बने।{"\n\n"}चिपको आंदोलन ने इस कटु वास्तविकता को भी उजागर किया: पहाड़ों के लोगों का अपने संसाधनों पर कोई नियंत्रण नहीं था।</>
         }
       },
       {
-        title: { en: "Birth of the State (November 9, 2000)", hi: "राज्य का जन्म (9 नवंबर 2000)" },
+        title: { en: "The Statehood Agitation (1994)", hi: "राज्य आंदोलन (1994)" },
         content: { 
-          en: <>The <strong className="text-primary">Uttar Pradesh Reorganization Bill</strong> was passed, and on <strong className="text-primary">November 9, 2000</strong>, the state was officially formed as the <strong className="text-primary">27th state of the Indian Union</strong>.{"\n\n"}Initially named <strong className="text-primary">&apos;Uttaranchal,&apos;</strong> the state was officially renamed <strong className="text-primary">&apos;Uttarakhand&apos;</strong> in <strong className="text-primary">January 2007</strong>, reclaiming its ancient Puranic identity. The state capital was established at <strong className="text-primary">Dehradun</strong>, with <strong className="text-primary">Gairsain</strong> later declared as the summer capital.</>,
-          hi: <><strong className="text-primary">उत्तर प्रदेश पुनर्गठन विधेयक</strong> पारित हुआ, और <strong className="text-primary">9 नवंबर 2000</strong> को भारतीय संघ के <strong className="text-primary">27वें राज्य</strong> के रूप में आधिकारिक रूप से राज्य का गठन हुआ।{"\n\n"}शुरू में <strong className="text-primary">&apos;उत्तरांचल&apos;</strong> नाम दिया गया, <strong className="text-primary">जनवरी 2007</strong> में आधिकारिक रूप से <strong className="text-primary">&apos;उत्तराखंड&apos;</strong> नाम बदल दिया गया। राज्य की राजधानी <strong className="text-primary">देहरादून</strong> में स्थापित की गई, बाद में <strong className="text-primary">गैरसैंण</strong> को ग्रीष्मकालीन राजधानी घोषित किया गया।</>
+          en: <>The statehood movement reached its climax in the <strong className="text-primary">1990s</strong>. In 1994, the UP government's decision to extend the <strong className="text-primary">Mandal Commission's reservation policy</strong> to the hill districts—without considering their different demographic composition—ignited massive protests.{"\n\n"}On <strong className="text-primary">October 1–2, 1994</strong>, the peaceful protest in Muzaffarnagar turned tragic. Police fired on unarmed protesters, and in the ensuing chaos, <strong className="text-primary">several people were killed</strong>. The exact death toll remains disputed, but the <strong className="text-primary">Muzaffarnagar massacre</strong> became a turning point.{"\n\n"}Following Muzaffarnagar, the movement intensified. <strong className="text-primary">Rampur Tiraha</strong> (Muzaffarnagar) and <strong className="text-primary">Khatima</strong> (Udham Singh Nagar) saw further incidents of police brutality.{"\n\n"}The martyrs of the movement—particularly women like <strong className="text-primary">Belmati Chauhan</strong> and <strong className="text-primary">Hansa Dhanai</strong>—became powerful symbols of sacrifice. The hill women, who had borne the brunt of underdevelopment and outmigration, were at the forefront of the agitation.{"\n\n"}Eventually, political pressure mounted. The <strong className="text-primary">BJP-led central government</strong>, in 2000, passed the <strong className="text-primary">Uttar Pradesh Reorganization Act</strong>, and on <strong className="text-primary">November 9, 2000</strong>, <strong className="text-primary">Uttaranchal</strong> (later renamed <strong className="text-primary">Uttarakhand</strong> in 2007) became the <strong className="text-primary">27th state of India</strong>.</>,
+          hi: <>राज्य आंदोलन <strong className="text-primary">1990 के दशक</strong> में अपने चरम पर पहुंचा। 1994 में, उत्तर प्रदेश सरकार के <strong className="text-primary">मंडल आयोग की आरक्षण नीति</strong> को पहाड़ी जिलों तक बढ़ाने के फैसले ने बड़े पैमाने पर विरोध प्रदर्शन शुरू कर दिए।{"\n\n"}<strong className="text-primary">1-2 अक्टूबर, 1994</strong> को मुजफ्फरनगर में शांतिपूर्ण विरोध प्रदर्शन त्रासदी में बदल गया। पुलिस ने निहत्थे प्रदर्शनकारियों पर गोली चलाई। <strong className="text-primary">मुजफ्फरनगर नरसंहार</strong> एक महत्वपूर्ण मोड़ बन गया।{"\n\n"}मुजफ्फरनगर के बाद, आंदोलन तेज हो गया। <strong className="text-primary">रामपुर तिराहा</strong> और <strong className="text-primary">खटीमा</strong> में पुलिस क्रूरता की और घटनाएं हुईं।{"\n\n"}आंदोलन के शहीद—विशेष रूप से <strong className="text-primary">बेलमती चौहान</strong> और <strong className="text-primary">हंसा धनई</strong> जैसी महिलाएं—बलिदान के शक्तिशाली प्रतीक बन गईं।{"\n\n"}अंततः, राजनीतिक दबाव बढ़ा। <strong className="text-primary">भाजपा नेतृत्व वाली केंद्र सरकार</strong> ने 2000 में <strong className="text-primary">उत्तर प्रदेश पुनर्गठन अधिनियम</strong> पारित किया, और <strong className="text-primary">9 नवंबर, 2000</strong> को <strong className="text-primary">उत्तरांचल</strong> (बाद में 2007 में <strong className="text-primary">उत्तराखंड</strong> नाम बदला) <strong className="text-primary">भारत का 27वां राज्य</strong> बना।</>
         }
       }
     ],
     highlights: { 
       en: [
-        "1938 – First articulation of separate hill identity (Srinagar Congress)",
-        "Sridev Suman – Early advocate for hill autonomy",
-        "1979 – Uttarakhand Kranti Dal formed (Mussoorie)",
-        "Indramani Badoni – 'Gandhi of Uttarakhand'",
-        "'Koda-Jhangora Khayenge, Uttarakhand Banayenge' – Movement slogan",
-        "Khatima Firing (Sept 1, 1994) – 7 killed",
-        "Mussoorie Firing (Sept 2, 1994) – 6 killed",
-        "Rampur Tiraha (Oct 2, 1994) – Darkest night of the movement",
-        "November 9, 2000 – 27th State of India formed",
-        "January 2007 – Renamed from Uttaranchal to Uttarakhand"
+        "Chipko Movement began in 1973",
+        "Uttarakhand Kranti Dal formed in 1979",
+        "Muzaffarnagar tragedy (October 1994)",
+        "Statehood achieved on November 9, 2000"
       ],
       hi: [
-        "1938 – अलग पहाड़ी पहचान की पहली अभिव्यक्ति (श्रीनगर कांग्रेस)",
-        "श्रीदेव सुमन – पहाड़ी स्वायत्तता के प्रारंभिक समर्थक",
-        "1979 – उत्तराखंड क्रांति दल गठित (मसूरी)",
-        "इंद्रमणि बडोनी – 'उत्तराखंड के गांधी'",
-        "'कोड़ा-झंगोरा खाएंगे, उत्तराखंड बनाएंगे' – आंदोलन का नारा",
-        "खटीमा गोलीकांड (1 सितंबर 1994) – 7 शहीद",
-        "मसूरी गोलीकांड (2 सितंबर 1994) – 6 शहीद",
-        "रामपुर तिराहा (2 अक्टूबर 1994) – आंदोलन की सबसे काली रात",
-        "9 नवंबर 2000 – भारत का 27वां राज्य गठित",
-        "जनवरी 2007 – उत्तरांचल से उत्तराखंड नाम बदला"
+        "1973 में चिपको आंदोलन शुरू हुआ",
+        "1979 में उत्तराखंड क्रांति दल का गठन",
+        "मुजफ्फरनगर त्रासदी (अक्टूबर 1994)",
+        "9 नवंबर, 2000 को राज्य का दर्जा प्राप्त"
       ]
     },
     relatedLinks: [
-      { label: "Explore Districts", path: "/districts" }
+      { label: "Chamoli District", path: "/districts/chamoli" },
+      { label: "Dehradun District", path: "/districts/dehradun" }
     ],
-    accentColor: "from-green-500/20 to-emerald-500/20"
+    accentColor: "from-rose-500/5 to-pink-500/5"
   },
   {
-    id: "legacy",
+    id: "cultural-legacy",
     title: { 
       en: "Cultural Legacy", 
       hi: "सांस्कृतिक विरासत" 
     },
     period: { 
-      en: "Living Heritage", 
-      hi: "जीवंत विरासत" 
+      en: "Timeless Heritage", 
+      hi: "कालातीत विरासत" 
     },
     icon: <Heart className="h-6 w-6" />,
     description: { 
-      en: <>The history of Uttarakhand is not confined to textbooks; it lives on in the <strong className="text-primary">languages, festivals, and spiritual practices</strong> of its people. The geographical isolation of the deep valleys has allowed for the preservation of ancient traditions.</>,
-      hi: <>उत्तराखंड का इतिहास पाठ्यपुस्तकों तक सीमित नहीं है; यह <strong className="text-primary">भाषाओं, त्योहारों और आध्यात्मिक प्रथाओं</strong> में जीवित है।</>
+      en: <>Throughout its history, from the prehistoric rock paintings to the modern statehood struggle, <strong className="text-primary">Uttarakhand</strong> has developed a unique cultural identity. This section celebrates the enduring legacy of its people, their traditions, and their contributions to Indian civilization.</>,
+      hi: <>प्रागैतिहासिक शैल चित्रों से आधुनिक राज्य संघर्ष तक अपने पूरे इतिहास में, <strong className="text-primary">उत्तराखंड</strong> ने एक अद्वितीय सांस्कृतिक पहचान विकसित की है। यह खंड इसके लोगों, उनकी परंपराओं और भारतीय सभ्यता में उनके योगदान की स्थायी विरासत का उत्सव मनाता है।</>
     },
     subsections: [
       {
-        title: { en: "Languages of the Hills", hi: "पहाड़ों की भाषाएं" },
+        title: { en: "Char Dham: The Ultimate Pilgrimage", hi: "चार धाम: परम तीर्थयात्रा" },
         content: { 
-          en: "The linguistic landscape of Uttarakhand is dominated by two major languages: Garhwali and Kumaoni. Both belong to the Central Pahari group of Indo-Aryan languages and evolved from Khasa-Prakrit and Sanskrit.\n\n• Kumaoni: Spoken in the eastern division, it has several dialects including Khasparjia, Johari, and Danpuriya. It has a rich oral tradition of ballads and folk tales.\n\n• Garhwali: Spoken in the western division, it too has numerous regional variations reflecting the diverse geography of the region.\n\n• Jaunsari: Spoken in the Jaunsar-Bawar region of Dehradun, Jaunsari is distinct from the other two, retaining strong ties to Western Pahari dialects and the specific cultural context of the Mahasu deity worship.\n\nStatus: While these languages are the carriers of the region's folklore (Jagars—ritualistic songs invoking deities), they face challenges from the increasing dominance of Hindi in education and media.",
-          hi: "उत्तराखंड का भाषाई परिदृश्य दो प्रमुख भाषाओं से प्रभुत्व रखता है: गढ़वाली और कुमाऊनी। दोनों इंडो-आर्यन भाषाओं के मध्य पहाड़ी समूह से संबंधित हैं और खस-प्राकृत और संस्कृत से विकसित हुई हैं।\n\n• कुमाऊनी: पूर्वी मंडल में बोली जाती है, इसमें खसपरजिया, जोहारी और दानपुरिया सहित कई बोलियां हैं। इसमें गाथाओं और लोककथाओं की समृद्ध मौखिक परंपरा है।\n\n• गढ़वाली: पश्चिमी मंडल में बोली जाती है, इसमें भी क्षेत्र की विविध भूगोल को दर्शाती कई क्षेत्रीय विविधताएं हैं।\n\n• जौनसारी: देहरादून के जौनसार-बावर क्षेत्र में बोली जाती है, जौनसारी अन्य दो से अलग है, पश्चिमी पहाड़ी बोलियों और महासू देवता पूजा के विशिष्ट सांस्कृतिक संदर्भ से मजबूत संबंध बनाए रखती है।\n\nस्थिति: जबकि ये भाषाएं क्षेत्र की लोककथाओं (जागर—देवताओं का आह्वान करने वाले अनुष्ठानिक गीत) की वाहक हैं, वे शिक्षा और मीडिया में हिंदी के बढ़ते प्रभुत्व से चुनौतियों का सामना करती हैं।"
-        }
-      },
-      {
-        title: { en: "Jaunsar-Bawar: A Unique Cultural Pocket", hi: "जौनसार-बावर: एक अनूठी सांस्कृतिक पहचान" },
-        content: { 
-          en: "The Jaunsar-Bawar region offers a fascinating glimpse into a distinct cultural pocket that claims lineage from the Mahabharata.\n\nMahasu Devta:\nThe supreme deity of the Jaunsaris is Mahasu (a collective of four brother deities: Bashik, Pavasi, Boothia, and Chalda). Mahasu acts not just as a god but as a living judicial authority—disputes in the community are brought before his oracle (mali), who delivers verdicts believed to be divinely inspired.\n\nThe region maintains unique traditions:\n• Practice of polyandry (fraternal) in some areas, linked to the Pandava legend\n• Distinct architectural style with intricately carved wooden houses\n• Annual Mahasu temple fairs that unite the community\n• Nature worship and ancestral deity veneration\n\nThis region represents a living anthropological treasure, preserving social customs that provide insight into ancient Indo-Aryan practices.",
-          hi: "जौनसार-बावर क्षेत्र एक अलग सांस्कृतिक पहचान की आकर्षक झलक प्रदान करता है जो महाभारत से वंश का दावा करती है।\n\nमहासू देवता:\nजौनसारियों के सर्वोच्च देवता महासू हैं (चार भाई देवताओं का सामूहिक: बाशिक, पावासी, बूठिया और चल्दा)। महासू न केवल एक देवता के रूप में बल्कि एक जीवित न्यायिक प्राधिकरण के रूप में कार्य करते हैं—समुदाय में विवाद उनके ओरेकल (माली) के सामने लाए जाते हैं, जो दैवीय रूप से प्रेरित माने जाने वाले फैसले देता है।\n\nक्षेत्र अद्वितीय परंपराएं बनाए रखता है:\n• कुछ क्षेत्रों में बहुपतित्व (भ्रातृ) की प्रथा, पांडव किंवदंती से जुड़ी\n• जटिल नक्काशीदार लकड़ी के घरों के साथ विशिष्ट वास्तुकला शैली\n• वार्षिक महासू मंदिर मेले जो समुदाय को एकजुट करते हैं\n• प्रकृति पूजा और पूर्वज देवता आराधना\n\nयह क्षेत्र एक जीवित मानवशास्त्रीय खजाने का प्रतिनिधित्व करता है।"
+          en: <>The <strong className="text-primary">Char Dham</strong> of Uttarakhand—<strong className="text-primary">Badrinath, Kedarnath, Gangotri, and Yamunotri</strong>—constitute one of the most sacred pilgrimage circuits in Hinduism. Every year, millions of pilgrims brave treacherous mountain roads to visit these shrines, seeking moksha (liberation).{"\n\n"}<strong className="text-primary">Badrinath:</strong> Dedicated to Vishnu, located at the source of the Alaknanda. Associated with the sage Vyasa and the Mahabharata.{"\n"}<strong className="text-primary">Kedarnath:</strong> Dedicated to Shiva, one of the 12 Jyotirlingas. Tragically devastated by floods in 2013 and later rebuilt.{"\n"}<strong className="text-primary">Gangotri:</strong> Source of the Ganges (Bhagirathi), associated with King Bhagirath's penance.{"\n"}<strong className="text-primary">Yamunotri:</strong> Source of the Yamuna, dedicated to the goddess Yamuna.{"\n\n"}These shrines were likely established in their present form during the <strong className="text-primary">9th century by Adi Shankaracharya</strong>, who is credited with reviving Hindu pilgrimage across India.</>,
+          hi: <>उत्तराखंड के <strong className="text-primary">चार धाम</strong>—<strong className="text-primary">बद्रीनाथ, केदारनाथ, गंगोत्री, और यमुनोत्री</strong>—हिंदू धर्म में सबसे पवित्र तीर्थ मार्गों में से एक हैं। हर साल, लाखों तीर्थयात्री मोक्ष की तलाश में इन मंदिरों के दर्शन के लिए खतरनाक पहाड़ी सड़कों का सामना करते हैं।{"\n\n"}<strong className="text-primary">बद्रीनाथ:</strong> विष्णु को समर्पित, अलकनंदा के स्रोत पर स्थित।{"\n"}<strong className="text-primary">केदारनाथ:</strong> शिव को समर्पित, 12 ज्योतिर्लिंगों में से एक। 2013 में बाढ़ से दुखद रूप से तबाह हुआ।{"\n"}<strong className="text-primary">गंगोत्री:</strong> गंगा (भागीरथी) का स्रोत, राजा भगीरथ की तपस्या से जुड़ा।{"\n"}<strong className="text-primary">यमुनोत्री:</strong> यमुना का स्रोत, देवी यमुना को समर्पित।{"\n\n"}ये मंदिर संभवतः <strong className="text-primary">9वीं शताब्दी में आदि शंकराचार्य</strong> द्वारा अपने वर्तमान रूप में स्थापित किए गए थे।</>
         },
-        image: jaunsarBawarImg,
-        imageAlt: "Jaunsar-Bawar Tribal Culture"
+        image: charDhamImg,
+        imageAlt: "Char Dham Pilgrimage Sites"
       },
       {
-        title: { en: "Living Heritage: Performance Arts", hi: "जीवंत विरासत: प्रदर्शन कलाएं" },
+        title: { en: "Living Traditions: Dance, Music & Festivals", hi: "जीवित परंपराएं: नृत्य, संगीत और त्यौहार" },
         content: { 
-          en: "The history of Uttarakhand is encoded in its performance arts, which blend martial traditions with agricultural gratitude.\n\nRamman (UNESCO Intangible Heritage – 2009):\nCelebrated in the twin villages of Saloor-Dungra in Chamoli, Ramman is a ritual theater dedicated to Bhumiyal Devta. Held annually in late April, it involves masked dances that enact episodes from the Ramayana and local legends. It is a unique community event where social roles, history, and spirituality are reenacted, and it was inscribed on the UNESCO Representative List of the Intangible Cultural Heritage of Humanity in 2009.\n\nChholiya Dance:\nOriginating in the Kumaon region, Chholiya is a martial sword dance with a history of over a thousand years. It dates back to the Khasa and Chand eras when marriages were often performed at sword-point (bride capture). Today, it is an auspicious part of wedding processions, where male dancers in traditional warrior attire (with swords and shields) perform acrobatic feats to the beat of dhol and turri. It symbolizes protection from evil spirits and preserves the martial history of the Kumaoni Rajput clans.\n\nNanda Devi Raj Jaat:\nThis is one of the most significant pilgrimages in the state, often called the 'Himalayan Mahakumbh.' Taking place once every 12 years, it celebrates the journey of Goddess Nanda Devi (the patron deity of Uttarakhand) from her maternal home to her husband Shiva's abode in Kailash. The three-week barefoot journey covers 280 kilometers across difficult terrain, unifying the entire Garhwal and Kumaon regions in a single spiritual bond. The next Raj Jaat is a major cultural event that draws pilgrims from across India.",
-          hi: "उत्तराखंड का इतिहास इसकी प्रदर्शन कलाओं में एन्कोड है, जो युद्ध परंपराओं को कृषि कृतज्ञता के साथ मिलाती हैं।\n\nरम्माण (यूनेस्को अमूर्त विरासत – 2009):\nचमोली के जुड़वां गांवों सलूर-डुंगरा में मनाया जाने वाला, रम्माण भूमियाल देवता को समर्पित एक अनुष्ठानिक नाटक है। अप्रैल के अंत में प्रतिवर्ष आयोजित, इसमें मुखौटा नृत्य शामिल हैं जो रामायण और स्थानीय किंवदंतियों के प्रसंगों का अभिनय करते हैं। 2009 में इसे यूनेस्को की मानवता की अमूर्त सांस्कृतिक विरासत की प्रतिनिधि सूची में अंकित किया गया।\n\nछोलिया नृत्य:\nकुमाऊं क्षेत्र में उत्पन्न, छोलिया एक हजार वर्षों से अधिक के इतिहास वाला युद्ध तलवार नृत्य है। यह खस और चंद युगों से है जब विवाह अक्सर तलवार की नोक पर (दुल्हन का अपहरण) किए जाते थे। आज, यह विवाह जुलूसों का शुभ हिस्सा है, जहां पारंपरिक योद्धा पोशाक (तलवार और ढाल के साथ) में पुरुष नर्तक ढोल और तुर्री की ताल पर कलाबाजी करते हैं।\n\nनंदा देवी राज जात:\nयह राज्य की सबसे महत्वपूर्ण तीर्थयात्राओं में से एक है, जिसे अक्सर 'हिमालयी महाकुंभ' कहा जाता है। हर 12 साल में एक बार होने वाली, यह देवी नंदा देवी (उत्तराखंड की आराध्य देवी) की उनके मायके से उनके पति शिव के कैलाश निवास तक की यात्रा का उत्सव है। तीन सप्ताह की नंगे पैर यात्रा कठिन इलाके में 280 किलोमीटर की दूरी तय करती है।"
+          en: <>Uttarakhand's cultural life is a vibrant tapestry woven from its diverse communities and histories. The region has preserved ancient traditions that are still practiced with fervor.{"\n\n"}<strong className="text-primary">Key Folk Dances:</strong>{"\n"}• <strong>Chholiya:</strong> A martial sword dance from Kumaon, performed at weddings.{"\n"}• <strong>Langvir Nritya:</strong> A devotional acrobatic dance performed during Dussehra.{"\n"}• <strong>Pandav Nritya:</strong> A ritual enactment of the Mahabharata, lasting several nights.{"\n"}• <strong>Jhoda/Jhora:</strong> A community chain dance performed in circles.{"\n\n"}<strong className="text-primary">Key Festivals:</strong>{"\n"}• <strong>Harela:</strong> A festival celebrating the onset of monsoon and sowing.{"\n"}• <strong>Ghughutia (Makar Sankranti):</strong> Children wear garlands of fried dough and sing to crows.{"\n"}• <strong>Phool Dei:</strong> Young girls decorate thresholds with flowers and rice paste in spring.{"\n"}• <strong>Nanda Devi Raj Jat:</strong> The great 12-yearly pilgrimage from Nauti to Roopkund.{"\n\n"}The <strong className="text-primary">Ramman Festival</strong> of Saloor-Dungra village in Chamoli, which involves mask performances and ritualistic enactments, was inscribed on UNESCO's <strong className="text-primary">Intangible Cultural Heritage</strong> list in 2009.</>,
+          hi: <>उत्तराखंड का सांस्कृतिक जीवन इसके विविध समुदायों और इतिहासों से बुना गया एक जीवंत चित्रपट है।{"\n\n"}<strong className="text-primary">प्रमुख लोक नृत्य:</strong>{"\n"}• <strong>छोलिया:</strong> कुमाऊं से एक युद्ध तलवार नृत्य, शादियों में प्रस्तुत।{"\n"}• <strong>लांगवीर नृत्य:</strong> दशहरे के दौरान प्रस्तुत एक भक्ति कलाबाजी नृत्य।{"\n"}• <strong>पांडव नृत्य:</strong> महाभारत का अनुष्ठानिक अभिनय।{"\n"}• <strong>झोड़ा/झोरा:</strong> वृत्तों में प्रस्तुत एक सामुदायिक श्रृंखला नृत्य।{"\n\n"}<strong className="text-primary">प्रमुख त्यौहार:</strong>{"\n"}• <strong>हरेला:</strong> मानसून और बुवाई की शुरुआत का उत्सव।{"\n"}• <strong>घुघुतिया (मकर संक्रांति):</strong> बच्चे तले हुए आटे की माला पहनते हैं।{"\n"}• <strong>फूल देई:</strong> युवा लड़कियां वसंत में दहलीज को फूलों से सजाती हैं।{"\n"}• <strong>नंदा देवी राज जात:</strong> नौटी से रूपकुंड तक 12-वर्षीय तीर्थयात्रा।{"\n\n"}चमोली में सलूर-डूंगरा गांव का <strong className="text-primary">रम्माण उत्सव</strong> 2009 में यूनेस्को की <strong className="text-primary">अमूर्त सांस्कृतिक विरासत</strong> सूची में अंकित किया गया था।</>
         },
         image: rammanFestivalImg,
         imageAlt: "Ramman Festival UNESCO Heritage"
       },
       {
-        title: { en: "Temple Architecture & Char Dham Economy", hi: "मंदिर स्थापत्य और चार धाम अर्थव्यवस्था" },
+        title: { en: "Jaunsari-Bawar: A Distinct Cultural Zone", hi: "जौनसारी-बावर: एक विशिष्ट सांस्कृतिक क्षेत्र" },
         content: { 
-          en: "History in Uttarakhand is etched in stone. The evolution of temple architecture tells a story of adaptation to the seismic and climatic reality of the Himalayas:\n\n• Nagara Style: Classical temple architecture used by the Katyuris (Jageshwar, Baijnath)\n• Koti Banal Style: Indigenous, earthquake-resistant construction using wood and stone layers, developed in response to the Himalayan seismic activity\n\nThe Char Dham Economy:\nThe Char Dham (Yamunotri, Gangotri, Kedarnath, Badrinath) are not merely religious sites; they are historical economic hubs that have sustained a 'yatra economy' for millennia. This pilgrimage circuit links the remote Himalayan villages to the wealth and devotion of the Indian plains.\n\nThe temples have been destroyed and rebuilt multiple times—Kedarnath most recently devastated by the 2013 floods—yet they continue to draw millions of pilgrims annually. The yatra season (May-November) remains the economic lifeline of thousands of families involved in hospitality, porterage, and religious services.\n\nThis living heritage demonstrates how spirituality, economics, and history are inextricably woven in Uttarakhand's identity as Devbhoomi—the Land of Gods.",
-          hi: "उत्तराखंड में इतिहास पत्थर में उकेरा गया है। मंदिर स्थापत्य का विकास हिमालय की भूकंपीय और जलवायु वास्तविकता के अनुकूलन की कहानी बताता है:\n\n• नागर शैली: कत्यूरियों द्वारा उपयोग की जाने वाली शास्त्रीय मंदिर वास्तुकला (जागेश्वर, बैजनाथ)\n• कोटी बनाल शैली: लकड़ी और पत्थर की परतों का उपयोग करके स्वदेशी, भूकंप-रोधी निर्माण, हिमालयी भूकंपीय गतिविधि के जवाब में विकसित\n\nचार धाम अर्थव्यवस्था:\nचार धाम (यमुनोत्री, गंगोत्री, केदारनाथ, बद्रीनाथ) केवल धार्मिक स्थल नहीं हैं; वे ऐतिहासिक आर्थिक केंद्र हैं जिन्होंने सहस्राब्दियों से 'यात्रा अर्थव्यवस्था' को बनाए रखा है। यह तीर्थयात्रा सर्किट दूरस्थ हिमालयी गांवों को भारतीय मैदानों की संपदा और भक्ति से जोड़ता है।\n\nमंदिरों को कई बार नष्ट और पुनर्निर्मित किया गया है—केदारनाथ हाल ही में 2013 की बाढ़ से तबाह हुआ—फिर भी वे सालाना लाखों तीर्थयात्रियों को आकर्षित करते रहते हैं। यात्रा सीजन (मई-नवंबर) आतिथ्य, कुली और धार्मिक सेवाओं में शामिल हजारों परिवारों की आर्थिक जीवन रेखा बना हुआ है।\n\nयह जीवंत विरासत प्रदर्शित करती है कि कैसे आध्यात्मिकता, अर्थशास्त्र और इतिहास देवभूमि—देवताओं की भूमि—के रूप में उत्तराखंड की पहचान में अविभाज्य रूप से बुने हुए हैं।"
+          en: <>The <strong className="text-primary">Jaunsari-Bawar</strong> region (in present-day Dehradun and Uttarkashi districts) represents a unique cultural pocket within Uttarakhand. The Jaunsari people claim descent from the <strong className="text-primary">Pandavas</strong> and their culture has preserved elements that suggest ancient connections.{"\n\n"}<strong className="text-primary">Distinctive Features:</strong>{"\n"}• <strong>Mahasu Devta:</strong> Worship of the Mahasu deity, a form of Shiva, unique to this region.{"\n"}• <strong>Polyandry:</strong> Historically practiced fraternal polyandry, similar to Himalayan Tibetan cultures.{"\n"}• <strong>Barada Nati:</strong> A large group dance involving entire villages, distinct from other Garhwali dances.{"\n"}• <strong>Architecture:</strong> Traditional houses with wooden balconies and slate roofs, influenced by Tibetan styles.{"\n"}• <strong>Language:</strong> The Jaunsari dialect has elements that distinguish it from mainstream Garhwali.{"\n\n"}The Jaunsari-Bawar region is a fascinating case study in how micro-cultures can preserve distinct identities within a larger region.</>,
+          hi: <><strong className="text-primary">जौनसारी-बावर</strong> क्षेत्र (वर्तमान देहरादून और उत्तरकाशी जिलों में) उत्तराखंड के भीतर एक अद्वितीय सांस्कृतिक क्षेत्र का प्रतिनिधित्व करता है। जौनसारी लोग <strong className="text-primary">पांडवों</strong> से वंश का दावा करते हैं।{"\n\n"}<strong className="text-primary">विशिष्ट विशेषताएं:</strong>{"\n"}• <strong>महासू देवता:</strong> महासू देवता की पूजा, शिव का एक रूप, इस क्षेत्र के लिए अद्वितीय।{"\n"}• <strong>बहुपतित्व:</strong> ऐतिहासिक रूप से भ्रातृ बहुपतित्व का अभ्यास।{"\n"}• <strong>बरदा नाटी:</strong> पूरे गांवों को शामिल करने वाला एक बड़ा समूह नृत्य।{"\n"}• <strong>वास्तुकला:</strong> लकड़ी की बालकनियों और स्लेट छतों वाले पारंपरिक घर।{"\n"}• <strong>भाषा:</strong> जौनसारी बोली में ऐसे तत्व हैं जो इसे मुख्यधारा गढ़वाली से अलग करते हैं।{"\n\n"}जौनसारी-बावर क्षेत्र इस बात का एक आकर्षक केस स्टडी है कि कैसे सूक्ष्म-संस्कृतियां एक बड़े क्षेत्र के भीतर विशिष्ट पहचान बनाए रख सकती हैं।</>
         },
-        image: charDhamImg,
-        imageAlt: "Char Dham Temples - Kedarnath, Badrinath, Gangotri, Yamunotri"
+        image: jaunsarBawarImg,
+        imageAlt: "Jaunsari Bawar Culture"
       }
     ],
     highlights: { 
       en: [
-        "Languages: Garhwali, Kumaoni, Jaunsari (Central Pahari group)",
-        "Jagars – Ritualistic songs invoking deities",
-        "Jaunsar-Bawar – Mahasu Devta worship, unique traditions",
-        "Ramman (UNESCO 2009) – Masked ritual theater (Chamoli)",
-        "Chholiya Dance – 1000-year martial sword dance tradition",
-        "Nanda Devi Raj Jaat – 12-year, 280 km barefoot pilgrimage",
-        "Nagara & Koti Banal – Temple architecture styles",
-        "Char Dham – Millennial 'yatra economy'"
+        "Char Dham pilgrimage circuit",
+        "Ramman Festival (UNESCO Intangible Heritage)",
+        "Chholiya and Langvir traditional dances",
+        "Unique Jaunsari-Bawar cultural zone"
       ],
       hi: [
-        "भाषाएं: गढ़वाली, कुमाऊनी, जौनसारी (मध्य पहाड़ी समूह)",
-        "जागर – देवताओं का आह्वान करने वाले अनुष्ठानिक गीत",
-        "जौनसार-बावर – महासू देवता पूजा, अनूठी परंपराएं",
-        "रम्माण (यूनेस्को 2009) – मुखौटा अनुष्ठानिक नाटक (चमोली)",
-        "छोलिया नृत्य – 1000 वर्षीय युद्ध तलवार नृत्य परंपरा",
-        "नंदा देवी राज जात – 12 वर्षीय, 280 किमी नंगे पैर तीर्थयात्रा",
-        "नागर और कोटी बनाल – मंदिर स्थापत्य शैलियां",
-        "चार धाम – सहस्राब्दी 'यात्रा अर्थव्यवस्था'"
+        "चार धाम तीर्थयात्रा मार्ग",
+        "रम्माण उत्सव (यूनेस्को अमूर्त विरासत)",
+        "छोलिया और लांगवीर पारंपरिक नृत्य",
+        "अद्वितीय जौनसारी-बावर सांस्कृतिक क्षेत्र"
       ]
     },
     relatedLinks: [
-      { label: "Culture & Traditions", path: "/culture" },
-      { label: "Pahadi Food", path: "/food" },
-      { label: "Char Dham", path: "/culture" }
+      { label: "Explore Culture", path: "/culture" },
+      { label: "View Gallery", path: "/gallery" },
+      { label: "Uttarkashi District", path: "/districts/uttarkashi" }
     ],
-    accentColor: "from-rose-500/20 to-pink-500/20"
+    accentColor: "from-cyan-500/5 to-blue-500/5"
   }
 ];
+
+// Helper function for translations
+const t = (obj: { en: React.ReactNode; hi: React.ReactNode }, language: Language): React.ReactNode => obj[language];
+const tArray = (obj: { en: string[]; hi: string[] }, language: Language): string[] => obj[language];
+
+// Era Section Component - Archival styling with timeline
+function EraSection({
+  era,
+  language,
+  isFirst,
+}: {
+  era: HistoryEra;
+  language: Language;
+  isFirst?: boolean;
+}) {
+  const t = (obj: { en: React.ReactNode; hi: React.ReactNode }): React.ReactNode => obj[language];
+  const tArr = (obj: { en: string[]; hi: string[] }): string[] => obj[language];
+
+  // Get insight text from first subsection
+  const getInsight = () => {
+    if (era.subsections.length > 0) {
+      const firstContent = era.subsections[0].content[language];
+      if (typeof firstContent === 'object' && 'props' in firstContent) {
+        // Extract text content from JSX
+        const extractText = (node: React.ReactNode): string => {
+          if (typeof node === 'string') return node;
+          if (Array.isArray(node)) return node.map(extractText).join('');
+          if (node && typeof node === 'object' && 'props' in node) {
+            return extractText((node as React.ReactElement).props.children);
+          }
+          return '';
+        };
+        const text = extractText(firstContent);
+        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 60);
+        return sentences[0]?.trim() || null;
+      }
+    }
+    return null;
+  };
+
+  const insight = getInsight();
+
+  return (
+    <section 
+      id={era.id}
+      className="scroll-mt-24 relative"
+    >
+      {/* Timeline marker */}
+      <div className="hidden lg:flex absolute -left-8 top-8 w-4 h-4 rounded-full bg-primary border-4 border-background shadow-lg z-10" />
+      
+      {/* Era Block - Archival Card */}
+      <div className="relative bg-muted/20 border border-border/30 rounded-xl overflow-hidden">
+        {/* Subtle gradient background */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${era.accentColor} opacity-50`} />
+        
+        {/* Left accent line */}
+        <div className="absolute left-0 top-8 bottom-8 w-1 bg-primary/40 rounded-full" />
+        
+        <div className="relative p-6 md:p-8 lg:p-10">
+          {/* Era Header */}
+          <header className="mb-8 pl-4">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-5">
+              <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary shrink-0">
+                {era.icon}
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
+                    {t(era.title)}
+                  </h2>
+                  <Badge variant="secondary" className="font-normal text-xs">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {t(era.period)}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-foreground/80 leading-[1.85] text-base md:text-lg max-w-prose">
+              {t(era.description)}
+            </p>
+          </header>
+
+          {/* Historical Insight Callout - Only for first era */}
+          {isFirst && insight && (
+            <div className="relative bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-l-4 border-primary/60 rounded-r-xl p-6 md:p-8 mb-8 ml-4">
+              <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/20" />
+              <p className="text-lg md:text-xl text-foreground/90 leading-relaxed italic font-serif">
+                "{insight}"
+              </p>
+              <p className="text-sm text-muted-foreground mt-4 font-medium">
+                — {language === "en" ? "Historical Insight" : "ऐतिहासिक अंतर्दृष्टि"}
+              </p>
+            </div>
+          )}
+
+          {/* Subsections as Accordion */}
+          <div className="pl-4 mb-8">
+            <Accordion type="single" collapsible className="space-y-3">
+              {era.subsections.map((sub, i) => (
+                <AccordionItem 
+                  key={i} 
+                  value={`${era.id}-${i}`} 
+                  className="bg-background/50 border border-border/30 rounded-lg overflow-hidden"
+                >
+                  <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/30 transition-colors">
+                    <span className="flex items-center gap-3 text-left">
+                      <Scroll className="h-4 w-4 text-primary shrink-0" />
+                      <span className="font-semibold text-foreground text-sm md:text-base">
+                        {t(sub.title)}
+                      </span>
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-5 pb-5">
+                    {sub.image && (
+                      <div className="mb-5 rounded-lg overflow-hidden border border-border/20">
+                        <img 
+                          src={sub.image} 
+                          alt={sub.imageAlt || ""} 
+                          className="w-full h-48 md:h-56 object-cover"
+                          loading="lazy"
+                        />
+                        {sub.imageAlt && (
+                          <p className="text-xs text-muted-foreground py-2 px-3 bg-muted/30 italic">
+                            {sub.imageAlt}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <div className="text-foreground/80 leading-[1.85] whitespace-pre-line text-sm md:text-base">
+                      {t(sub.content)}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+          
+          {/* Key Highlights */}
+          <div className="pl-4 mb-6">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Landmark className="h-4 w-4" />
+              {language === "en" ? "Key Highlights" : "मुख्य विशेषताएं"}
+            </h3>
+            <ul className="grid sm:grid-cols-2 gap-2">
+              {tArr(era.highlights).map((highlight, i) => (
+                <li 
+                  key={i}
+                  className="flex items-start gap-2.5 text-sm text-foreground/80"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                  {highlight}
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Related Links - Editorial Style */}
+          {era.relatedLinks && era.relatedLinks.length > 0 && (
+            <div className="pl-4 pt-6 border-t border-border/30">
+              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                {language === "en" ? "Explore Further" : "आगे जानें"}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {era.relatedLinks.map((link, i) => (
+                  <Link
+                    key={i}
+                    to={link.path}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-background/60 border border-border/30 text-foreground text-sm font-medium hover:bg-muted hover:border-border/50 transition-colors"
+                  >
+                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const HistoryPage = () => {
   const [language, setLanguage] = useState<Language>("en");
 
-  const t = (text: { en: React.ReactNode; hi: React.ReactNode }) => text[language];
-  const tArray = (arr: { en: string[]; hi: string[] }) => arr[language];
-
   return (
     <>
       <Helmet>
-        <title>{language === "en" ? "History of Uttarakhand | From Ancient Roots to Devbhoomi | Hum Pahadi Haii" : "उत्तराखंड का इतिहास | प्राचीन जड़ों से देवभूमि तक | हम पहाड़ी हैं"}</title>
+        <title>History of Uttarakhand | Devbhoomi Heritage | Hum Pahadi</title>
         <meta 
           name="description" 
-          content={language === "en" 
-            ? "Comprehensive history of Uttarakhand from Vedic times to modern statehood. Explore Lakhudyar rock art, Katyuri dynasty, Chand rulers, British era, 1994 statehood movement, and living cultural heritage."
-            : "वैदिक काल से आधुनिक राज्य तक उत्तराखंड का व्यापक इतिहास। लखुड्यार शैल चित्र, कत्यूरी राजवंश, चंद शासक, ब्रिटिश युग, 1994 राज्य आंदोलन और जीवंत सांस्कृतिक विरासत का अन्वेषण करें।"
-          }
+          content="Explore the rich history of Uttarakhand from ancient Vedic era to modern statehood. Discover the cultural heritage, royal dynasties, and freedom struggle of Devbhoomi." 
         />
-        <meta name="keywords" content="Uttarakhand history, Devbhoomi, Kedarkhand, Manaskhand, Katyuri dynasty, Chand dynasty, Garhwal kingdom, Uttarakhand statehood, Lakhudyar, Kuninda, Coolie Begar, Ramman UNESCO, उत्तराखंड इतिहास, देवभूमि" />
-        <link rel="canonical" href="https://humpahadihaii.in/history" />
+        <meta name="keywords" content="Uttarakhand history, Devbhoomi, Garhwal history, Kumaon history, Katyuri dynasty, Chand dynasty, Char Dham" />
+        <link rel="canonical" href="https://humpahadi.com/history" />
       </Helmet>
 
-      <main id="main-content" className="min-h-screen">
-        {/* Hero Section */}
-        <section className="relative py-16 md:py-24 bg-gradient-to-b from-primary/5 via-background to-background overflow-hidden">
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-10 left-10 w-64 h-64 bg-primary rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-48 h-48 bg-secondary rounded-full blur-3xl" />
-          </div>
+      <main className="min-h-screen bg-background">
+        {/* Archival Hero Section */}
+        <header className="relative bg-muted/30 overflow-hidden">
+          {/* Background with subtle pattern */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-20"
+            style={{ backgroundImage: `url(${kedarnathImg})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/85 to-background" />
           
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-              <nav className="flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-primary transition-colors">
-                  {language === "en" ? "Home" : "होम"}
-                </Link>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-foreground font-medium">
-                  {language === "en" ? "History" : "इतिहास"}
-                </span>
-              </nav>
+          {/* Content */}
+          <div className="relative container mx-auto px-4 py-16 md:py-20 lg:py-28">
+            {/* Back Link */}
+            <nav className="mb-8">
+              <Link 
+                to="/"
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Link>
+            </nav>
 
-              <div className="flex items-center gap-2">
-                <Languages className="h-4 w-4 text-muted-foreground" />
-                <div className="flex rounded-lg border border-border overflow-hidden">
-                  <Button
-                    variant={language === "en" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setLanguage("en")}
-                    className="rounded-none px-4"
-                  >
-                    English
-                  </Button>
-                  <Button
-                    variant={language === "hi" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setLanguage("hi")}
-                    className="rounded-none px-4"
-                  >
-                    हिंदी
-                  </Button>
+            {/* Meta Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
+              <Mountain className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {language === "en" ? "Devbhoomi Heritage" : "देवभूमि विरासत"}
+              </span>
+            </div>
+            
+            {/* Title - Authoritative Serif */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-foreground mb-5 max-w-4xl leading-[1.1] tracking-tight">
+              {language === "en" ? "History of Uttarakhand" : "उत्तराखंड का इतिहास"}
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mb-8">
+              {language === "en" 
+                ? <>From ancient roots to the identity of Devbhoomi — <span className="text-foreground font-medium">a journey through time</span></>
+                : <>प्राचीन जड़ों से देवभूमि की पहचान तक — <span className="text-foreground font-medium">समय की यात्रा</span></>
+              }
+            </p>
+
+            {/* Language Toggle */}
+            <div className="flex items-center gap-3">
+              <Button 
+                variant={language === "en" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setLanguage("en")}
+                className="gap-2"
+              >
+                <Languages className="h-4 w-4" />
+                English
+              </Button>
+              <Button 
+                variant={language === "hi" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setLanguage("hi")}
+                className="gap-2"
+              >
+                <Languages className="h-4 w-4" />
+                हिंदी
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Introduction Block - Cultural Insight */}
+        <section className="py-12 md:py-16 bg-muted/20 border-b border-border/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="relative bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-l-4 border-primary/60 rounded-r-xl p-6 md:p-8">
+                <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/20" />
+                <p className="text-foreground/90 leading-[1.85] text-base md:text-lg">
+                  {language === "en" 
+                    ? <>Nestled in the lap of the Himalayas, Uttarakhand's history is as majestic as its mountains. Known as <strong className="text-primary">Devbhoomi</strong> (Land of Gods), this sacred land has been a center of spirituality, culture, and resilience for millennia. From prehistoric Lakhudyar rock paintings to the 2000 statehood movement, discover the remarkable journey of a land where the metaphysical concept of Svarga Loka intersects with the rugged physical reality of the central Himalayas.</>
+                    : <>हिमालय की गोद में बसा उत्तराखंड का इतिहास उसके पहाड़ों जितना ही भव्य है। <strong className="text-primary">देवभूमि</strong> (देवताओं की भूमि) के रूप में जाना जाने वाला यह पवित्र भूमि सहस्राब्दियों से आध्यात्मिकता, संस्कृति और लचीलेपन का केंद्र रही है। प्रागैतिहासिक लखुड्यार शैल चित्रों से 2000 के राज्य आंदोलन तक, एक ऐसी भूमि की उल्लेखनीय यात्रा की खोज करें जहां स्वर्ग लोक की अवधारणा मध्य हिमालय की कठोर भौतिक वास्तविकता से मिलती है।</>
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Main Content - Timeline Layout */}
+        <section className="py-16 md:py-20 lg:py-24">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+              
+              {/* Main Timeline Content */}
+              <div className="lg:col-span-8">
+                <div className="relative">
+                  {/* Timeline vertical line - visible on lg */}
+                  <div className="hidden lg:block absolute -left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 via-primary/30 to-primary/10" />
+                  
+                  {/* Era Sections */}
+                  <div className="space-y-12 lg:space-y-16">
+                    {historyEras.map((era, index) => (
+                      <EraSection
+                        key={era.id}
+                        era={era}
+                        language={language}
+                        isFirst={index === 0}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-                <Mountain className="h-4 w-4" />
-                <span className="text-sm font-medium">
-                  {language === "en" ? "Devbhoomi Heritage" : "देवभूमि विरासत"}
-                </span>
-              </div>
-              
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
-                {language === "en" ? "History of Uttarakhand" : "उत्तराखंड का इतिहास"}
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                {language === "en" 
-                  ? <>From ancient roots to the identity of Devbhoomi — <span className="text-primary font-medium">a journey through time</span></>
-                  : <>प्राचीन जड़ों से देवभूमि की पहचान तक — <span className="text-primary font-medium">समय की यात्रा</span></>
-                }
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Introduction */}
-        <section className="py-12 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-foreground/80 leading-relaxed">
-                {language === "en" 
-                  ? <>Nestled in the lap of the Himalayas, Uttarakhand's history is as majestic as its mountains. Known as <strong className="text-primary">Devbhoomi</strong> (Land of Gods), this sacred land has been a center of spirituality, culture, and resilience for millennia. From prehistoric Lakhudyar rock paintings to the 2000 statehood movement, discover the remarkable journey of a land where the metaphysical concept of Svarga Loka intersects with the rugged physical reality of the central Himalayas.</>
-                  : <>हिमालय की गोद में बसा उत्तराखंड का इतिहास उसके पहाड़ों जितना ही भव्य है। <strong className="text-primary">देवभूमि</strong> (देवताओं की भूमि) के रूप में जाना जाने वाला यह पवित्र भूमि सहस्राब्दियों से आध्यात्मिकता, संस्कृति और लचीलेपन का केंद्र रही है। प्रागैतिहासिक लखुड्यार शैल चित्रों से 2000 के राज्य आंदोलन तक, एक ऐसी भूमि की उल्लेखनीय यात्रा की खोज करें जहां स्वर्ग लोक की अवधारणा मध्य हिमालय की कठोर भौतिक वास्तविकता से मिलती है।</>
-                }
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Timeline Section */}
-        <section className="py-16 md:py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="relative">
-                <div className="hidden md:block absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 via-primary/30 to-primary/10" />
-                
-                <div className="space-y-8 md:space-y-12">
-                  {historyEras.map((era) => (
-                    <article 
-                      key={era.id}
-                      className="relative"
-                      id={era.id}
-                    >
-                      <div className="hidden md:flex absolute left-8 -translate-x-1/2 w-4 h-4 rounded-full bg-primary border-4 border-background shadow-lg z-10" />
-                      
-                      <Card className={`md:ml-16 overflow-hidden transition-all duration-300 hover:shadow-lg border-l-4 border-l-primary/50`}>
-                        <div className={`absolute inset-0 bg-gradient-to-br ${era.accentColor} opacity-50`} />
-                        
-                        <CardContent className="relative p-6 md:p-8">
-                          <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
-                            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary shrink-0">
+              {/* Sidebar - Quick Reference */}
+              <aside className="lg:col-span-4 order-first lg:order-last">
+                <div className="lg:sticky lg:top-24 space-y-6">
+                  {/* Quick Jump Navigation */}
+                  <Card className="border-border/40 bg-muted/20">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+                        <Scroll className="h-4 w-4" />
+                        {language === "en" ? "Jump to Era" : "युग पर जाएं"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <nav className="flex flex-col gap-1">
+                        {historyEras.map((era) => (
+                          <a
+                            key={era.id}
+                            href={`#${era.id}`}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group"
+                          >
+                            <span className="text-muted-foreground group-hover:text-primary transition-colors">
                               {era.icon}
-                            </div>
-                            
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">
-                                  {t(era.title)}
-                                </h2>
-                                <Badge variant="secondary" className="font-normal">
-                                  <Calendar className="h-3 w-3 mr-1" />
-                                  {t(era.period)}
-                                </Badge>
-                              </div>
-                              
-                              <p className="text-foreground/80 leading-relaxed">
-                                {t(era.description)}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                                {t(era.title, language)}
+                              </p>
+                              <p className="text-xs text-muted-foreground line-clamp-1">
+                                {t(era.period, language)}
                               </p>
                             </div>
-                          </div>
+                          </a>
+                        ))}
+                      </nav>
+                    </CardContent>
+                  </Card>
 
-                          <Accordion type="single" collapsible className="mb-6">
-                            {era.subsections.map((sub, i) => (
-                              <AccordionItem key={i} value={`${era.id}-${i}`} className="border-border/50">
-                                <AccordionTrigger className="text-left hover:no-underline py-3">
-                                  <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    <Scroll className="h-4 w-4 text-primary" />
-                                    {t(sub.title)}
-                                  </span>
-                                </AccordionTrigger>
-                                <AccordionContent className="text-foreground/80 leading-relaxed pl-6">
-                                  {sub.image && (
-                                    <div className="mb-4 rounded-lg overflow-hidden">
-                                      <img 
-                                        src={sub.image} 
-                                        alt={sub.imageAlt || ""} 
-                                        className="w-full h-48 object-cover"
-                                        loading="lazy"
-                                      />
-                                    </div>
-                                  )}
-                                  <div className="whitespace-pre-line">{t(sub.content)}</div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            ))}
-                          </Accordion>
-                          
-                          <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                              {language === "en" ? "Key Highlights" : "मुख्य विशेषताएं"}
-                            </h3>
-                            <ul className="grid sm:grid-cols-2 gap-2">
-                              {tArray(era.highlights).map((highlight, i) => (
-                                <li 
-                                  key={i}
-                                  className="flex items-start gap-2 text-sm text-foreground/80"
-                                >
-                                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                                  {highlight}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          {era.relatedLinks && era.relatedLinks.length > 0 && (
-                            <div className="flex flex-wrap gap-2 pt-4 border-t border-border/50">
-                              {era.relatedLinks.map((link, i) => (
-                                <Link
-                                  key={i}
-                                  to={link.path}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
-                                >
-                                  <MapPin className="h-3.5 w-3.5" />
-                                  {link.label}
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </article>
-                  ))}
+                  {/* Related Content Links */}
+                  <Card className="border-border/40 bg-muted/20">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        {language === "en" ? "Related Content" : "संबंधित सामग्री"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 space-y-2">
+                      <Link
+                        to="/culture"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group"
+                      >
+                        <Heart className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+                          {language === "en" ? "Explore Culture" : "संस्कृति देखें"}
+                        </span>
+                      </Link>
+                      <Link
+                        to="/districts"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group"
+                      >
+                        <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+                          {language === "en" ? "Explore Districts" : "जिले देखें"}
+                        </span>
+                      </Link>
+                      <Link
+                        to="/gallery"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group"
+                      >
+                        <Mountain className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+                          {language === "en" ? "Photo Gallery" : "फोटो गैलरी"}
+                        </span>
+                      </Link>
+                    </CardContent>
+                  </Card>
                 </div>
-              </div>
+              </aside>
             </div>
           </div>
         </section>
 
-        {/* Call to Action */}
-        <section className="py-16 bg-gradient-to-b from-muted/50 to-background">
+        {/* Call to Action - Editorial Style */}
+        <section className="py-16 md:py-20 bg-muted/20 border-t border-border/30">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-4">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-4">
                 {language === "en" ? "Explore Uttarakhand's Living Heritage" : "उत्तराखंड की जीवंत विरासत का अन्वेषण करें"}
               </h2>
-              <p className="text-muted-foreground mb-8">
+              <p className="text-muted-foreground mb-8 leading-relaxed">
                 {language === "en" 
                   ? "Discover the culture, traditions, and beauty that make Uttarakhand truly special."
                   : "उस संस्कृति, परंपराओं और सुंदरता की खोज करें जो उत्तराखंड को वास्तव में विशेष बनाती है।"
@@ -661,42 +799,18 @@ const HistoryPage = () => {
               </p>
               
               <div className="flex flex-wrap justify-center gap-4">
-                <Link
-                  to="/culture"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-                >
-                  <Heart className="h-4 w-4" />
-                  {language === "en" ? "Explore Culture" : "संस्कृति देखें"}
-                </Link>
-                <Link
-                  to="/districts"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 transition-colors"
-                >
-                  <MapPin className="h-4 w-4" />
-                  {language === "en" ? "Explore Districts" : "जिले देखें"}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Quick Navigation */}
-        <section className="py-12 border-t border-border/50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 text-center">
-                {language === "en" ? "Jump to Era" : "युग पर जाएं"}
-              </h3>
-              <div className="flex flex-wrap justify-center gap-2">
-                {historyEras.map((era) => (
-                  <a
-                    key={era.id}
-                    href={`#${era.id}`}
-                    className="px-4 py-2 rounded-full bg-muted hover:bg-muted/80 text-sm font-medium text-foreground transition-colors"
-                  >
-                    {t(era.title)}
-                  </a>
-                ))}
+                <Button asChild>
+                  <Link to="/culture" className="gap-2">
+                    <Heart className="h-4 w-4" />
+                    {language === "en" ? "Explore Culture" : "संस्कृति देखें"}
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/districts" className="gap-2">
+                    <MapPin className="h-4 w-4" />
+                    {language === "en" ? "Explore Districts" : "जिले देखें"}
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
