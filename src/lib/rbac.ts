@@ -51,6 +51,8 @@ export type AdminSection =
   | "/admin/festivals"
   | "/admin/highlights"
   | "/admin/gallery"
+  | "/admin/media-library"
+  | "/admin/media-import"
   | "/admin/site-images"
   | "/admin/featured-highlights"
   | "/admin/community-submissions"
@@ -99,6 +101,8 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   "/admin/festivals",
   "/admin/highlights",
   "/admin/gallery",
+  "/admin/media-library",
+  "/admin/media-import",
   "/admin/site-images",
   "/admin/featured-highlights",
   "/admin/community-submissions",
@@ -152,6 +156,8 @@ export const ROLE_PERMISSIONS: Record<RBACRole, AdminSection[]> = {
     "/admin/festivals",
     "/admin/highlights",
     "/admin/gallery",
+    "/admin/media-library",
+    "/admin/media-import",
     "/admin/site-images",
     "/admin/featured-highlights",
     "/admin/ai-tools",
@@ -197,6 +203,8 @@ export const ROLE_PERMISSIONS: Record<RBACRole, AdminSection[]> = {
   // MEDIA_MANAGER: Gallery and images only
   media_manager: [
     "/admin/gallery",
+    "/admin/media-library",
+    "/admin/media-import",
     "/admin/site-images",
     "/admin/featured-highlights",
   ],
