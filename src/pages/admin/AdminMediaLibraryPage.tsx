@@ -826,14 +826,50 @@ export default function AdminMediaLibraryPage() {
               </div>
 
               {editingItem.usage.length > 0 && (
-                <div>
-                  <Label>Used In</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                <div className="space-y-2">
+                  <Label>Frontend Locations ({editingItem.usage.length})</Label>
+                  <div className="max-h-48 overflow-y-auto space-y-2 p-2 bg-muted/30 rounded-lg">
                     {editingItem.usage.map(u => (
-                      <Badge key={u.id} variant="secondary">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {u.content_type.replace(/_/g, ' ')} {u.page_slug && `• ${u.page_slug}`}
-                      </Badge>
+                      <div key={u.id} className="text-sm p-2 bg-background rounded border">
+                        {u.resolved_path ? (
+                          <div className="space-y-1">
+                            <code className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded block">
+                              {u.resolved_path}
+                            </code>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {u.district_slug && (
+                                <Badge variant="outline" className="text-xs">
+                                  {u.district_slug}
+                                </Badge>
+                              )}
+                              {u.category_slug && (
+                                <Badge variant="outline" className="text-xs">
+                                  {u.category_slug}
+                                </Badge>
+                              )}
+                              {u.subcategory_slug && (
+                                <Badge variant="outline" className="text-xs">
+                                  {u.subcategory_slug}
+                                </Badge>
+                              )}
+                              <Badge variant="secondary" className="text-xs">
+                                {u.content_type.replace(/_/g, ' ')}
+                              </Badge>
+                            </div>
+                            {u.content_title && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                {u.content_title}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-3 w-3" />
+                            <span>{u.content_type.replace(/_/g, ' ')}</span>
+                            {u.page_slug && <span className="text-muted-foreground">• {u.page_slug}</span>}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -898,6 +934,26 @@ export default function AdminMediaLibraryPage() {
                   </p>
                 </div>
               </div>
+              
+              {/* Frontend Paths */}
+              {previewItem.usage.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-sm text-muted-foreground">Frontend Paths</span>
+                  <div className="max-h-32 overflow-y-auto space-y-1">
+                    {previewItem.usage.map(u => (
+                      <div key={u.id} className="flex items-center gap-2 text-sm">
+                        <code className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded flex-1 truncate">
+                          {u.resolved_path || `/${u.content_type}/${u.page_slug || u.content_id}`}
+                        </code>
+                        <Badge variant="outline" className="text-xs shrink-0">
+                          {u.content_type.replace(/_/g, ' ')}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center gap-2">
                 <Input value={previewItem.file_url} readOnly className="flex-1" />
                 <Button variant="outline" onClick={() => copyUrl(previewItem.file_url)}>
