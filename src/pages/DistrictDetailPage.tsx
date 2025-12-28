@@ -49,6 +49,7 @@ import OtherDistrictsSection from "@/components/district/OtherDistrictsSection";
 import WeatherWidget from "@/components/weather/WeatherWidget";
 import FestivalSpotlight from "@/components/festivals/FestivalSpotlight";
 import EventCalendarWidget from "@/components/events/EventCalendarWidget";
+import { useSeasonalContent } from "@/hooks/useSeasonalContent";
 
 
 type DistrictContent = Database["public"]["Tables"]["district_content"]["Row"];
@@ -86,6 +87,30 @@ function ArchivalSection({
         {children}
       </div>
     </section>
+  );
+}
+
+// Seasonal District Section Component
+function SeasonalDistrictSection({ districtName }: { districtName: string }) {
+  const { getDistrictContent, seasonIcon, currentSeasonName } = useSeasonalContent();
+  const content = getDistrictContent(districtName);
+  
+  return (
+    <div className="relative bg-muted/20 border border-border/30 rounded-xl p-6 md:p-8">
+      <div className="absolute left-0 top-6 bottom-6 w-1 bg-primary/40 rounded-full" />
+      <div className="pl-4">
+        <div className="flex items-start gap-3 mb-3">
+          <span className="text-2xl" aria-hidden="true">{seasonIcon}</span>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">{content.title}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Current season: {currentSeasonName}</p>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {content.description}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -645,6 +670,9 @@ const DistrictDetailPage = () => {
                   </div>
                 </div>
               </ArchivalSection>
+
+              {/* Best Time to Experience - Seasonal Content */}
+              <SeasonalDistrictSection districtName={district.name} />
 
               {/* Experience This District - Travel Intent Block */}
               <div className="relative bg-gradient-to-br from-primary/5 via-muted/30 to-transparent border border-border/40 rounded-xl p-6 md:p-8">

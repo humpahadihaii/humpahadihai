@@ -18,6 +18,7 @@ import { FadeInSection } from "@/components/PageWrapper";
 import { LazySection } from "@/components/LazySection";
 import { SectionErrorBoundary } from "@/components/ErrorBoundary";
 import { RotatingStoryBlock } from "@/components/StoryBlock";
+import { useSeasonalContent } from "@/hooks/useSeasonalContent";
 
 
 // Import FeaturedCardSection directly for faster loading (above fold)
@@ -73,6 +74,7 @@ const HomePage = () => {
   const { data: settings } = useCMSSettings();
   const { data: welcomeSection } = useCMSContentSection("welcome");
   const { settings: sharePreview } = useSiteSharePreview();
+  const { getHomepageLine } = useSeasonalContent();
   
   // Prefetch featured content immediately on mount
   useEffect(() => {
@@ -230,6 +232,15 @@ const HomePage = () => {
               <HomepageVisits />
             </Suspense>
           </div>
+        </div>
+      </section>
+
+      {/* Seasonal Line - Subtle text under hero */}
+      <section className="bg-muted/30 border-b border-border/20">
+        <div className="container mx-auto px-4 py-3">
+          <p className="text-center text-sm text-muted-foreground italic">
+            {getHomepageLine()}
+          </p>
         </div>
       </section>
 
