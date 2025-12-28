@@ -4202,6 +4202,75 @@ export type Database = {
           },
         ]
       }
+      media_folder_assignments: {
+        Row: {
+          created_at: string
+          folder_id: string
+          id: string
+          media_id: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id: string
+          id?: string
+          media_id: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string
+          id?: string
+          media_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_folder_assignments_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "media_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_folder_assignments_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_folders: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_system: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_system?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_system?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       media_import_audit: {
         Row: {
           action: string
@@ -4371,10 +4440,13 @@ export type Database = {
           file_type: string
           file_url: string
           filename: string
+          height: number | null
           id: string
           tags: string[] | null
+          title: string | null
           updated_at: string | null
           uploaded_by: string | null
+          width: number | null
         }
         Insert: {
           alt_text?: string | null
@@ -4383,10 +4455,13 @@ export type Database = {
           file_type: string
           file_url: string
           filename: string
+          height?: number | null
           id?: string
           tags?: string[] | null
+          title?: string | null
           updated_at?: string | null
           uploaded_by?: string | null
+          width?: number | null
         }
         Update: {
           alt_text?: string | null
@@ -4395,12 +4470,56 @@ export type Database = {
           file_type?: string
           file_url?: string
           filename?: string
+          height?: number | null
           id?: string
           tags?: string[] | null
+          title?: string | null
           updated_at?: string | null
           uploaded_by?: string | null
+          width?: number | null
         }
         Relationships: []
+      }
+      media_usage: {
+        Row: {
+          content_id: string | null
+          content_type: string
+          created_at: string
+          field_name: string | null
+          id: string
+          media_id: string
+          page_slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_id?: string | null
+          content_type: string
+          created_at?: string
+          field_name?: string | null
+          id?: string
+          media_id: string
+          page_slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_id?: string | null
+          content_type?: string
+          created_at?: string
+          field_name?: string | null
+          id?: string
+          media_id?: string
+          page_slug?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_usage_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_library"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
