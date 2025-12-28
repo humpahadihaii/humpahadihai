@@ -152,6 +152,7 @@ const AdminNotifySettingsPage = lazyWithRetry(() => import("./pages/admin/AdminN
 const AdminFeaturedCardsPage = lazyWithRetry(() => import("./pages/admin/AdminFeaturedCardsPage"));
 const AdminMapPage = lazyWithRetry(() => import("./pages/admin/AdminMapPage"));
 const AdminMediaImportPage = lazyWithRetry(() => import("./pages/admin/AdminMediaImportPage"));
+const AdminMediaLibraryPage = lazyWithRetry(() => import("./pages/admin/AdminMediaLibraryPage"));
 const AdminShareSettingsPage = lazyWithRetry(() => import("./pages/admin/AdminShareSettingsPage"));
 const AdminSharePreviewPage = lazyWithRetry(() => import("./pages/admin/AdminSharePreviewPage"));
 const AdminDestinationGuidesPage = lazyWithRetry(() => import("./pages/admin/AdminDestinationGuidesPage"));
@@ -458,6 +459,7 @@ const AppContent = memo(() => {
               <Route path="/admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
               <Route path="/admin/notify-settings" element={<AdminRoute><AdminNotifySettingsPage /></AdminRoute>} />
               <Route path="/admin/media-import" element={<AdminRoute><AdminMediaImportPage /></AdminRoute>} />
+              <Route path="/admin/media-library" element={<AdminRoute><AdminMediaLibraryPage /></AdminRoute>} />
               <Route path="/admin/share-settings" element={<AdminRoute><AdminShareSettingsPage /></AdminRoute>} />
               <Route path="/admin/share-preview" element={<AdminRoute><AdminSharePreviewPage /></AdminRoute>} />
               {/* Destination Guides Admin */}

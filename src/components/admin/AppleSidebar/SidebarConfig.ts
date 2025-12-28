@@ -168,11 +168,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "highlights", label: "Highlights", icon: Star, route: "/admin/highlights", group: "places", order: 9, requiredRoles: ["super_admin", "admin", "content_manager", "editor"] },
   
   // Media
-  { id: "gallery", label: "Gallery", icon: Image, route: "/admin/gallery", group: "media", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "media_manager"] },
-  { id: "bulk-import", label: "Bulk Import", icon: Upload, route: "/admin/media-import", group: "media", order: 2, requiredRoles: ["super_admin", "admin", "media_manager"] },
-  { id: "site-images", label: "Site Images", icon: ImagePlus, route: "/admin/site-images", group: "media", order: 3, requiredRoles: ["super_admin", "admin", "media_manager"] },
-  { id: "featured-highlights", label: "Featured Highlights", icon: Award, route: "/admin/featured-highlights", group: "media", order: 4, requiredRoles: ["super_admin", "admin", "content_manager"] },
-  { id: "featured-cards", label: "Featured Cards", icon: LayoutGrid, route: "/admin/featured-cards", group: "media", order: 5, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "media-library", label: "Media Library", icon: Image, route: "/admin/media-library", group: "media", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "media_manager"] },
+  { id: "gallery", label: "Gallery", icon: ImagePlus, route: "/admin/gallery", group: "media", order: 2, requiredRoles: ["super_admin", "admin", "content_manager", "media_manager"] },
+  { id: "bulk-import", label: "Bulk Import", icon: Upload, route: "/admin/media-import", group: "media", order: 3, requiredRoles: ["super_admin", "admin", "media_manager"] },
+  { id: "site-images", label: "Site Images", icon: ImagePlus, route: "/admin/site-images", group: "media", order: 4, requiredRoles: ["super_admin", "admin", "media_manager"] },
+  { id: "featured-highlights", label: "Featured Highlights", icon: Award, route: "/admin/featured-highlights", group: "media", order: 5, requiredRoles: ["super_admin", "admin", "content_manager"] },
+  { id: "featured-cards", label: "Featured Cards", icon: LayoutGrid, route: "/admin/featured-cards", group: "media", order: 6, requiredRoles: ["super_admin", "admin", "content_manager"] },
   
   // Submissions
   { id: "thoughts-moderation", label: "Thoughts Moderation", icon: MessageCircle, route: "/admin/thoughts", group: "submissions", order: 1, requiredRoles: ["super_admin", "admin", "content_manager", "moderator", "reviewer"] },
