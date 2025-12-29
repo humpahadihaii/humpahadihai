@@ -181,20 +181,21 @@ const queryClient = new QueryClient({
   },
 });
 
-// Non-blocking circular progress indicator - positioned in corner, no overlay
+// Full-page centered circular progress indicator
 const CircularProgressLoader = memo(({ progress, isVisible }: { progress: number; isVisible: boolean }) => {
   // Hide completely once done
   if (!isVisible || progress >= 100) return null;
 
-  const radius = 18;
+  const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
     <div
       className={cn(
-        "fixed bottom-4 right-4 z-[100]",
-        "transition-opacity duration-300 ease-out",
+        "fixed inset-0 z-[9999] flex items-center justify-center",
+        "bg-background/70 backdrop-blur-sm",
+        "transition-opacity duration-500 ease-out",
         !isVisible && "opacity-0 pointer-events-none"
       )}
       role="progressbar"
@@ -203,24 +204,24 @@ const CircularProgressLoader = memo(({ progress, isVisible }: { progress: number
       aria-valuemax={100}
       aria-label="Loading page"
     >
-      <div className="relative w-12 h-12 bg-background/90 backdrop-blur-sm rounded-full shadow-lg border border-border/50">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={3} />
+      <div className="relative w-20 h-20">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={5} />
           <circle
-            cx="24"
-            cy="24"
+            cx="50"
+            cy="50"
             r={radius}
             fill="none"
             stroke="hsl(var(--primary))"
-            strokeWidth={3}
+            strokeWidth={5}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            className="transition-[stroke-dashoffset] duration-150 ease-out"
+            className="transition-[stroke-dashoffset] duration-200 ease-out"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[10px] font-semibold text-foreground tabular-nums">{progress}%</span>
+          <span className="text-base font-semibold text-foreground tabular-nums">{progress}%</span>
         </div>
       </div>
     </div>
